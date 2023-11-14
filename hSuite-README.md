@@ -2,7 +2,9 @@
 
 ## MYSQL configurations
 
-* On some mysqlversion when running the onlyoffice.sql file in the build/sql/ directory, line 2339, there can be an issue with the sql mode. If so, modify th my.ini file as follows :
+* On some mysql versions, when running the onlyoffice.sql file in the build/sql/ directory, there can be an issue with the sql mode. Due to a zero default value issue in the 'res_files' table.  
 
-[mysqld]
-sql_mode = NO_ENGINE_SUBSTITUTION
+* If so, you need tochange the sql-mode - modify th my.ini file as follows :
+
+* [mysqld]
+* sql_mode = NO_ENGINE_SUBSTITUTION
