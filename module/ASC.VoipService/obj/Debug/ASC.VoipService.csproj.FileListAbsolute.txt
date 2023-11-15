@@ -1,0 +1,9 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.VoipService.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.VoipService.xml
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.VoipService.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.VoipService.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.VoipService\obj\Debug\ASC.VoipService.csproj.AssemblyReference.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.VoipService\obj\Debug\ASC.VoipService.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.VoipService\obj\Debug\ASC.VoipService.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.VoipService\obj\Debug\ASC.VoipService.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.VoipService\obj\Debug\ASC.VoipService.pdb

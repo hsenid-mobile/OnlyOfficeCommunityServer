@@ -1,0 +1,10 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\callback.htm
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.FederatedLogin.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.FederatedLogin.xml
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.FederatedLogin.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.FederatedLogin.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Thrdparty\ASC.FederatedLogin\obj\Debug\ASC.FederatedLogin.csproj.AssemblyReference.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Thrdparty\ASC.FederatedLogin\obj\Debug\ASC.FederatedLogin.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Thrdparty\ASC.FederatedLogin\obj\Debug\ASC.FederatedLogin.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Thrdparty\ASC.FederatedLogin\obj\Debug\ASC.FederatedLogin.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Thrdparty\ASC.FederatedLogin\obj\Debug\ASC.FederatedLogin.pdb

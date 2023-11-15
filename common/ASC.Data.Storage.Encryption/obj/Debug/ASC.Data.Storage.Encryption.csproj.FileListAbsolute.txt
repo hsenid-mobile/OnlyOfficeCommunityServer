@@ -1,0 +1,10 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\callback.htm
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.Encryption.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.Encryption.xml
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.Encryption.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.Encryption.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage.Encryption\obj\Debug\ASC.Data.Storage.Encryption.csproj.AssemblyReference.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage.Encryption\obj\Debug\ASC.Data.Storage.Encryption.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage.Encryption\obj\Debug\ASC.Data.Storage.Encryption.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage.Encryption\obj\Debug\ASC.Data.Storage.Encryption.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage.Encryption\obj\Debug\ASC.Data.Storage.Encryption.pdb

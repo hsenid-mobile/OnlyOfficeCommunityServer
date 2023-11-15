@@ -1,0 +1,1829 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\People\\ASC.Web.People.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.ActiveDirectory\\ASC.ActiveDirectory.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.ActiveDirectory\\ASC.ActiveDirectory.csproj",
+        "projectName": "ASC.ActiveDirectory",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.ActiveDirectory\\ASC.ActiveDirectory.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.ActiveDirectory\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Autofac": {
+              "target": "Package",
+              "version": "[6.2.0, )"
+            },
+            "Mono.Security": {
+              "target": "Package",
+              "version": "[3.2.3, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "Novell.Directory.LDAP": {
+              "target": "Package",
+              "version": "[2.3.8.1, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj",
+        "projectName": "ASC.Common",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "ARSoft.Tools.Net": {
+              "target": "Package",
+              "version": "[2.2.9, )"
+            },
+            "Autofac": {
+              "target": "Package",
+              "version": "[6.2.0, )"
+            },
+            "HtmlAgilityPack": {
+              "target": "Package",
+              "version": "[1.6.0.1, )"
+            },
+            "Microsoft.AspNetCore.Cryptography.KeyDerivation": {
+              "target": "Package",
+              "version": "[3.1.4, )"
+            },
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[8.0.32.1, )"
+            },
+            "NLog": {
+              "target": "Package",
+              "version": "[5.1.2, )"
+            },
+            "NLog.Targets.Syslog": {
+              "target": "Package",
+              "version": "[7.0.0, )"
+            },
+            "NVelocity": {
+              "target": "Package",
+              "version": "[1.2.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "Polly": {
+              "target": "Package",
+              "version": "[7.2.3, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.2.88, )"
+            },
+            "StackExchange.Redis.Extensions.Core": {
+              "target": "Package",
+              "version": "[7.2.1, )"
+            },
+            "StackExchange.Redis.Extensions.LegacyConfiguration": {
+              "target": "Package",
+              "version": "[5.4.0, )"
+            },
+            "StackExchange.Redis.Extensions.Newtonsoft": {
+              "target": "Package",
+              "version": "[7.2.1, )"
+            },
+            "System.Buffers": {
+              "target": "Package",
+              "version": "[4.5.1, )"
+            },
+            "System.Memory": {
+              "target": "Package",
+              "version": "[4.5.4, )"
+            },
+            "log4net": {
+              "target": "Package",
+              "version": "[2.0.9, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj",
+        "projectName": "ASC.Core.Common",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "AWSSDK.CloudFront": {
+              "target": "Package",
+              "version": "[3.7.3.20, )"
+            },
+            "AWSSDK.S3": {
+              "target": "Package",
+              "version": "[3.7.1.29, )"
+            },
+            "AWSSDK.SimpleEmail": {
+              "target": "Package",
+              "version": "[3.7.0.57, )"
+            },
+            "Autofac": {
+              "target": "Package",
+              "version": "[6.2.0, )"
+            },
+            "FirebaseAdmin": {
+              "target": "Package",
+              "version": "[2.3.0, )"
+            },
+            "Google.Api.Gax": {
+              "target": "Package",
+              "version": "[3.5.0, )"
+            },
+            "Google.Api.Gax.Rest": {
+              "target": "Package",
+              "version": "[3.5.0, )"
+            },
+            "Google.Apis.Auth": {
+              "target": "Package",
+              "version": "[1.54.0, )"
+            },
+            "MailKit": {
+              "target": "Package",
+              "version": "[2.15.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "System.Security.Cryptography.X509Certificates": {
+              "target": "Package",
+              "version": "[4.3.2, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Encryption\\ASC.Data.Encryption.csproj": {
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Encryption\\ASC.Data.Encryption.csproj",
+        "projectName": "ASC.Data.Encryption",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Encryption\\ASC.Data.Encryption.csproj",
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {}
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage.Migration\\ASC.Data.Storage.Migration.csproj": {
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage.Migration\\ASC.Data.Storage.Migration.csproj",
+        "projectName": "ASC.Data.Storage.Migration",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage.Migration\\ASC.Data.Storage.Migration.csproj",
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {}
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj",
+        "projectName": "ASC.Data.Storage",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Encryption\\ASC.Data.Encryption.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Encryption\\ASC.Data.Encryption.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Amazon.Extensions.S3.Encryption": {
+              "target": "Package",
+              "version": "[2.0.3, )"
+            },
+            "Google.Api.Gax.Rest": {
+              "target": "Package",
+              "version": "[3.5.0, )"
+            },
+            "Google.Apis.Storage.v1": {
+              "target": "Package",
+              "version": "[1.54.0.2234, )"
+            },
+            "Google.Cloud.Storage.V1": {
+              "target": "Package",
+              "version": "[3.5.0, )"
+            },
+            "Microsoft.AspNet.Web.Optimization": {
+              "target": "Package",
+              "version": "[1.1.3, )"
+            },
+            "Rackspace": {
+              "target": "Package",
+              "version": "[1.0.0, )"
+            },
+            "SelectelSharp": {
+              "target": "Package",
+              "version": "[0.8.5, )"
+            },
+            "SharpZipLib": {
+              "target": "Package",
+              "version": "[1.4.2, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.IPSecurity\\ASC.IPSecurity.csproj": {
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.IPSecurity\\ASC.IPSecurity.csproj",
+        "projectName": "ASC.IPSecurity",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.IPSecurity\\ASC.IPSecurity.csproj",
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {}
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Notify.Textile\\ASC.Notify.Textile.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Notify.Textile\\ASC.Notify.Textile.csproj",
+        "projectName": "ASC.Notify.Textile",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Notify.Textile\\ASC.Notify.Textile.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Notify.Textile\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Textile": {
+              "target": "Package",
+              "version": "[1.3.0, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\ASC.Api.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\ASC.Api.Core.csproj",
+        "projectName": "ASC.Api",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\ASC.Api.Core.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Autofac": {
+              "target": "Package",
+              "version": "[6.2.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Specific\\ASC.Specific.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Specific\\ASC.Specific.csproj",
+        "projectName": "ASC.Specific",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Specific\\ASC.Specific.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Specific\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.ActiveDirectory\\ASC.ActiveDirectory.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.ActiveDirectory\\ASC.ActiveDirectory.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.IPSecurity\\ASC.IPSecurity.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.IPSecurity\\ASC.IPSecurity.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\ASC.Api.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\ASC.Api.Core.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.Thrdparty\\ASC.Thrdparty.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.Thrdparty\\ASC.Thrdparty.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "AntiXSS": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "GoogleAuthenticator": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.AuditTrail\\ASC.AuditTrail.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.AuditTrail\\ASC.AuditTrail.csproj",
+        "projectName": "ASC.AuditTrail",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.AuditTrail\\ASC.AuditTrail.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.AuditTrail\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "CsvHelper": {
+              "target": "Package",
+              "version": "[27.1.1, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj",
+        "projectName": "ASC.ElasticSearch",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Autofac": {
+              "target": "Package",
+              "version": "[6.2.0, )"
+            },
+            "NEST": {
+              "target": "Package",
+              "version": "[7.10.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Feed\\ASC.Feed.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Feed\\ASC.Feed.csproj",
+        "projectName": "ASC.Feed",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Feed\\ASC.Feed.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Feed\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail.Server\\ASC.Mail.Server\\ASC.Mail.Server.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail.Server\\ASC.Mail.Server\\ASC.Mail.Server.csproj",
+        "projectName": "ASC.Mail.Server",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail.Server\\ASC.Mail.Server\\ASC.Mail.Server.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail.Server\\ASC.Mail.Server\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail.Server\\NuGet.Config",
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "RestSharp": {
+              "target": "Package",
+              "version": "[106.12.0, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail\\ASC.Mail\\ASC.Mail.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail\\ASC.Mail\\ASC.Mail.csproj",
+        "projectName": "ASC.Mail",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail\\ASC.Mail\\ASC.Mail.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail\\ASC.Mail\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail\\NuGet.Config",
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\ASC.Api.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\ASC.Api.Core.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Specific\\ASC.Specific.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Specific\\ASC.Specific.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail.Server\\ASC.Mail.Server\\ASC.Mail.Server.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail.Server\\ASC.Mail.Server\\ASC.Mail.Server.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\CRM\\ASC.Web.CRM.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\CRM\\ASC.Web.CRM.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\Files\\ASC.Web.Files.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\Files\\ASC.Web.Files.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "AjaxPro.2": {
+              "target": "Package",
+              "version": "[21.12.22.2, )"
+            },
+            "Autofac": {
+              "target": "Package",
+              "version": "[6.2.0, )"
+            },
+            "HtmlAgilityPack": {
+              "target": "Package",
+              "version": "[1.6.0.1, )"
+            },
+            "Ical.Net": {
+              "target": "Package",
+              "version": "[4.1.11, )"
+            },
+            "MailKit": {
+              "target": "Package",
+              "version": "[2.15.0, )"
+            },
+            "Microsoft.AspNet.WebApi.WebHost": {
+              "target": "Package",
+              "version": "[4.0.20505, )"
+            },
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[8.0.32.1, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "RestSharp": {
+              "target": "Package",
+              "version": "[106.12.0, )"
+            },
+            "UDE.CSharp": {
+              "target": "Package",
+              "version": "[1.1.0, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj",
+        "projectName": "ASC.MessagingSystem",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "UAParser": {
+              "target": "Package",
+              "version": "[3.1.47, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj",
+        "projectName": "ASC.FederatedLogin",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "JWT": {
+              "target": "Package",
+              "version": "[8.2.3, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[6.12.2, )"
+            },
+            "TweetinviAPI": {
+              "target": "Package",
+              "version": "[5.0.4, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.Thrdparty\\ASC.Thrdparty.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.Thrdparty\\ASC.Thrdparty.csproj",
+        "projectName": "ASC.Thrdparty",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.Thrdparty\\ASC.Thrdparty.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.Thrdparty\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "TweetinviAPI": {
+              "target": "Package",
+              "version": "[5.0.4, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.VoipService\\ASC.VoipService.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.VoipService\\ASC.VoipService.csproj",
+        "projectName": "ASC.VoipService",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.VoipService\\ASC.VoipService.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.VoipService\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "Twilio": {
+              "target": "Package",
+              "version": "[5.69.0, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj",
+        "projectName": "ASC.Web.Core",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.VoipService\\ASC.VoipService.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.VoipService\\ASC.VoipService.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "AWSSDK.S3": {
+              "target": "Package",
+              "version": "[3.7.1.29, )"
+            },
+            "AjaxPro.2": {
+              "target": "Package",
+              "version": "[21.12.22.2, )"
+            },
+            "HtmlAgilityPack": {
+              "target": "Package",
+              "version": "[1.6.0.1, )"
+            },
+            "JWT": {
+              "target": "Package",
+              "version": "[8.2.3, )"
+            },
+            "NUglify": {
+              "target": "Package",
+              "version": "[1.16.4, )"
+            },
+            "SelectelSharp": {
+              "target": "Package",
+              "version": "[0.8.5, )"
+            },
+            "Twilio": {
+              "target": "Package",
+              "version": "[5.69.0, )"
+            },
+            "dotless": {
+              "target": "Package",
+              "version": "[1.6.7, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj",
+        "projectName": "ASC.Web.Studio",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.ActiveDirectory\\ASC.ActiveDirectory.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.ActiveDirectory\\ASC.ActiveDirectory.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage.Migration\\ASC.Data.Storage.Migration.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage.Migration\\ASC.Data.Storage.Migration.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.IPSecurity\\ASC.IPSecurity.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.IPSecurity\\ASC.IPSecurity.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Notify.Textile\\ASC.Notify.Textile.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Notify.Textile\\ASC.Notify.Textile.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.AuditTrail\\ASC.AuditTrail.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.AuditTrail\\ASC.AuditTrail.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Feed\\ASC.Feed.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Feed\\ASC.Feed.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.Thrdparty\\ASC.Thrdparty.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.Thrdparty\\ASC.Thrdparty.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.VoipService\\ASC.VoipService.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.VoipService\\ASC.VoipService.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "AWSSDK.SecurityToken": {
+              "target": "Package",
+              "version": "[3.7.1.47, )"
+            },
+            "AjaxPro.2": {
+              "target": "Package",
+              "version": "[21.12.22.2, )"
+            },
+            "GoogleAuthenticator": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "HtmlAgilityPack": {
+              "target": "Package",
+              "version": "[1.6.0.1, )"
+            },
+            "Microsoft.AspNet.WebApi.WebHost": {
+              "target": "Package",
+              "version": "[4.0.20505, )"
+            },
+            "NETStandard.Library": {
+              "target": "Package",
+              "version": "[2.0.3, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "RedisSessionProvider": {
+              "target": "Package",
+              "version": "[10.0.1, )"
+            },
+            "SharpZipLib": {
+              "target": "Package",
+              "version": "[1.4.2, )"
+            },
+            "StackExchange.Redis.Extensions.Core": {
+              "target": "Package",
+              "version": "[7.2.1, )"
+            },
+            "StackExchange.Redis.Extensions.LegacyConfiguration": {
+              "target": "Package",
+              "version": "[5.4.0, )"
+            },
+            "dotless": {
+              "target": "Package",
+              "version": "[1.6.7, )"
+            },
+            "dotless.AspNetHandler": {
+              "target": "Package",
+              "version": "[1.6.7, )"
+            },
+            "dotless.Core": {
+              "target": "Package",
+              "version": "[1.6.7, )"
+            },
+            "jQuery": {
+              "target": "Package",
+              "version": "[3.6.0, )"
+            },
+            "jQuery.BlockUI": {
+              "target": "Package",
+              "version": "[2.70.0, )"
+            },
+            "jQuery.FileUpload": {
+              "target": "Package",
+              "version": "[9.22.0, )"
+            },
+            "jQuery.UI.Combined": {
+              "target": "Package",
+              "version": "[1.12.1, )"
+            },
+            "jquery.mousewheel": {
+              "target": "Package",
+              "version": "[3.1.13, )"
+            },
+            "libphonenumber-csharp": {
+              "target": "Package",
+              "version": "[8.12.30, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\CRM\\ASC.Web.CRM.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\CRM\\ASC.Web.CRM.csproj",
+        "projectName": "ASC.Web.CRM",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\CRM\\ASC.Web.CRM.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\CRM\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\ASC.Api.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\ASC.Api.Core.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.Thrdparty\\ASC.Thrdparty.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.Thrdparty\\ASC.Thrdparty.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.VoipService\\ASC.VoipService.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.VoipService\\ASC.VoipService.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\Files\\ASC.Web.Files.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\Files\\ASC.Web.Files.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Autofac": {
+              "target": "Package",
+              "version": "[6.2.0, )"
+            },
+            "LumenWorksCsvReader": {
+              "target": "Package",
+              "version": "[4.0.0, )"
+            },
+            "MailKit": {
+              "target": "Package",
+              "version": "[2.15.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "Twilio": {
+              "target": "Package",
+              "version": "[5.69.0, )"
+            },
+            "Twilio.AspNet.Mvc": {
+              "target": "Package",
+              "version": "[5.68.3, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\Files\\ASC.Web.Files.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\Files\\ASC.Web.Files.csproj",
+        "projectName": "ASC.Web.Files",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\Files\\ASC.Web.Files.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\Files\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Data.Storage\\ASC.Data.Storage.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\ASC.Api.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Api\\ASC.Api\\ASC.Api.Core.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Thrdparty\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Autofac": {
+              "target": "Package",
+              "version": "[6.2.0, )"
+            },
+            "DocuSign.eSign.dll": {
+              "target": "Package",
+              "version": "[2.1.8.1, )"
+            },
+            "JWT": {
+              "target": "Package",
+              "version": "[8.2.3, )"
+            },
+            "Microsoft.AspNet.WebApi.WebHost": {
+              "target": "Package",
+              "version": "[4.0.20505, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "RestSharp": {
+              "target": "Package",
+              "version": "[106.12.0, )"
+            },
+            "SharpZipLib": {
+              "target": "Package",
+              "version": "[1.4.2, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    },
+    "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\People\\ASC.Web.People.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\People\\ASC.Web.People.csproj",
+        "projectName": "ASC.Web.People",
+        "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\People\\ASC.Web.People.csproj",
+        "packagesPath": "C:\\Users\\hSenid\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\Products\\People\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\NuGet.Config",
+          "C:\\Users\\hSenid\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\.nuget\\packages": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Common\\ASC.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\common\\ASC.Core.Common\\ASC.Core.Common.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail\\ASC.Mail\\ASC.Mail.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.Mail\\ASC.Mail\\ASC.Mail.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\module\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\core\\ASC.Web.Core\\ASC.Web.Core.csproj"
+              },
+              "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj": {
+                "projectPath": "C:\\Users\\hSenid\\Documents\\OnlyOfficeCommunityServer\\web\\studio\\ASC.Web.Studio\\ASC.Web.Studio.csproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "AjaxPro.2": {
+              "target": "Package",
+              "version": "[21.12.22.2, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    }
+  }
+}

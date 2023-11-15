@@ -1,0 +1,9 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Encryption.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Encryption.xml
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Encryption.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Encryption.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Encryption\obj\Debug\ASC.Data.Encryption.csproj.AssemblyReference.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Encryption\obj\Debug\ASC.Data.Encryption.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Encryption\obj\Debug\ASC.Data.Encryption.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Encryption\obj\Debug\ASC.Data.Encryption.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Encryption\obj\Debug\ASC.Data.Encryption.pdb
