@@ -1,0 +1,9 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Resource.Data.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Resource.Data.xml
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Resource.Data.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Resource.Data.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\TMResourceManager\ASC.Resource.Data\obj\Debug\ASC.Resource.Data.csproj.AssemblyReference.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\TMResourceManager\ASC.Resource.Data\obj\Debug\ASC.Resource.Data.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\TMResourceManager\ASC.Resource.Data\obj\Debug\ASC.Resource.Data.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\TMResourceManager\ASC.Resource.Data\obj\Debug\ASC.Resource.Data.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\TMResourceManager\ASC.Resource.Data\obj\Debug\ASC.Resource.Data.pdb

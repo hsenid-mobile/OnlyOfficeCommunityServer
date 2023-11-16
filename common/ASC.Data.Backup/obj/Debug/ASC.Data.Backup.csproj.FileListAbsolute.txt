@@ -1,0 +1,11 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\callback.htm
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Backup.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Backup.xml
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Backup.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Backup.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Backup\obj\Debug\ASC.Data.Backup.BackupResource.resources
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Backup\obj\Debug\ASC.Data.Backup.csproj.GenerateResource.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Backup\obj\Debug\ASC.Data.Backup.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Backup\obj\Debug\ASC.Data.Backup.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Backup\obj\Debug\ASC.Data.Backup.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Backup\obj\Debug\ASC.Data.Backup.pdb

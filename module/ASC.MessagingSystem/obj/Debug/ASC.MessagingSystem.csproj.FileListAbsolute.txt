@@ -1,0 +1,9 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.MessagingSystem.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.MessagingSystem.xml
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.MessagingSystem.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.MessagingSystem.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.MessagingSystem\obj\Debug\ASC.MessagingSystem.csproj.AssemblyReference.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.MessagingSystem\obj\Debug\ASC.MessagingSystem.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.MessagingSystem\obj\Debug\ASC.MessagingSystem.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.MessagingSystem\obj\Debug\ASC.MessagingSystem.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.MessagingSystem\obj\Debug\ASC.MessagingSystem.pdb

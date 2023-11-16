@@ -1,0 +1,10 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\callback.htm
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Api.Feed.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Api.Feed.XML
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Api.Feed.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Api.Feed.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Api\ASC.Api.Feed\obj\Debug\ASC.Api.Feed.csproj.AssemblyReference.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Api\ASC.Api.Feed\obj\Debug\ASC.Api.Feed.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Api\ASC.Api.Feed\obj\Debug\ASC.Api.Feed.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Api\ASC.Api.Feed\obj\Debug\ASC.Api.Feed.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Api\ASC.Api.Feed\obj\Debug\ASC.Api.Feed.pdb
