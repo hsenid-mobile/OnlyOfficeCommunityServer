@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,14 @@
 
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-
-using ASC.Common.Caching;
-using ASC.Common.Security.Authorizing;
 
 namespace ASC.Core
 {
     public class SubscriptionManager
     {
         private readonly ISubscriptionService service;
-        public static readonly ICache Cache;
-        public static readonly object CacheLocker;
-        public static readonly List<Guid> Groups;
 
-        static SubscriptionManager()
-        {
-            Cache = AscCache.Default;
-            CacheLocker = new object();
-            Groups = new List<Guid>
-            {
-                Constants.Admin.ID,
-                Constants.Everyone.ID,
-                Constants.User.ID
-            };
-        }
 
         public SubscriptionManager(ISubscriptionService service)
         {
@@ -90,31 +72,25 @@ namespace ASC.Core
 
         public string[] GetSubscriptionMethod(string sourceID, string actionID, string recipientID)
         {
-            IEnumerable<SubscriptionMethod> methods;
-
-            if (Groups.Any(r => r.ToString() == recipientID))
-            {
-                methods = GetDefaultSubscriptionMethodsFromCache(sourceID, actionID, recipientID);
-            }
-            else
-            {
-                methods = service.GetSubscriptionMethods(GetTenant(), sourceID, actionID, recipientID);
-            }
-
-            var m = methods
+            var m = service.GetSubscriptionMethods(GetTenant(), sourceID, actionID, recipientID)
                 .FirstOrDefault(x => x.ActionId.Equals(actionID, StringComparison.OrdinalIgnoreCase));
-
             if (m == null)
             {
-                m = methods.FirstOrDefault();
+                m = service.GetSubscriptionMethods(GetTenant(), sourceID, actionID, recipientID).FirstOrDefault();
             }
-
+            if (m == null)
+            {
+                m = service.GetSubscriptionMethods(GetTenant(), sourceID, actionID, Guid.Empty.ToString()).FirstOrDefault();
+            }
             return m != null ? m.Methods : new string[0];
         }
 
         public string[] GetRecipients(string sourceID, string actionID, string objectID)
         {
-            return service.GetRecipients(GetTenant(), sourceID, actionID, objectID);
+            return service.GetSubscriptions(GetTenant(), sourceID, actionID, null, objectID)
+                .Where(s => s.Subscribed)
+                .Select(s => s.RecipientId)
+                .ToArray();
         }
 
         public object GetSubscriptionRecord(string sourceID, string actionID, string recipientID, string objectID)
@@ -124,12 +100,20 @@ namespace ASC.Core
 
         public string[] GetSubscriptions(string sourceID, string actionID, string recipientID, bool checkSubscribe = true)
         {
-            return service.GetSubscriptions(GetTenant(), sourceID, actionID, recipientID, checkSubscribe);
+            return service.GetSubscriptions(GetTenant(), sourceID, actionID, recipientID, null)
+                .Where(s => !checkSubscribe || s.Subscribed)
+                .Select(s => s.ObjectId)
+                .ToArray();
         }
 
         public bool IsUnsubscribe(string sourceID, string recipientID, string actionID, string objectID)
         {
-            return service.IsUnsubscribe(GetTenant(), sourceID, actionID, recipientID, objectID);
+            var s = service.GetSubscription(GetTenant(), sourceID, actionID, recipientID, objectID);
+            if (s == null && !string.IsNullOrEmpty(objectID))
+            {
+                s = service.GetSubscription(GetTenant(), sourceID, actionID, recipientID, null);
+            }
+            return s != null && !s.Subscribed;
         }
 
         public void UpdateSubscriptionMethod(string sourceID, string actionID, string recipientID, string[] senderNames)
@@ -145,21 +129,6 @@ namespace ASC.Core
             service.SetSubscriptionMethod(m);
         }
 
-        private IEnumerable<SubscriptionMethod> GetDefaultSubscriptionMethodsFromCache(string sourceID, string actionID, string recepient)
-        {
-            lock (CacheLocker)
-            {
-                var key = $"subs|-1{sourceID}{actionID}{recepient}";
-                var result = Cache.Get<IEnumerable<SubscriptionMethod>>(key);
-                if (result == null)
-                {
-                    result = service.GetSubscriptionMethods(-1, sourceID, actionID, recepient);
-                    Cache.Insert(key, result, DateTime.UtcNow.AddDays(1));
-                }
-
-                return result;
-            }
-        }
 
         private int GetTenant()
         {

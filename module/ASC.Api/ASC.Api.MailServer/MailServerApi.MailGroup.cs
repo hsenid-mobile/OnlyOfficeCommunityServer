@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,9 @@
 */
 
 
-using System;
 using System.Collections.Generic;
-
 using ASC.Api.Attributes;
 using ASC.Mail.Data.Contracts;
-
-using ASC.Web.Studio.PublicResources;
 
 // ReSharper disable InconsistentNaming
 
@@ -30,90 +26,74 @@ namespace ASC.Api.MailServer
     public partial class MailServerApi
     {
         /// <summary>
-        /// Creates a mail group with the parameters specified in the request.
+        ///    Create group address
         /// </summary>
-        /// <param type="System.String, System" name="name">Sender name</param>
-        /// <param type="System.Int32, System" name="domain_id">Domain ID</param>
-        /// <param type="System.Collections.Generic.List{System.Int32}, System.Collections.Generic" name="address_ids">List of address IDs</param>
-        /// <returns type="ASC.Mail.Data.Contracts.ServerDomainGroupData, ASC.Mail">Mail group data associated with the tenant</returns>
-        /// <short>Create a mail group</short>
-        /// <category>Mail groups</category>
-        /// <path>api/2.0/mailserver/groupaddress/add</path>
-        /// <httpMethod>POST</httpMethod>
+        /// <param name="name"></param>
+        /// <param name="domain_id"></param>
+        /// <param name="address_ids"></param>
+        /// <returns>MailGroupData associated with tenant</returns>
+        /// <short>Create mail group address</short>
+        /// <category>MailGroup</category>
         [Create(@"groupaddress/add")]
         public ServerDomainGroupData CreateMailGroup(string name, int domain_id, List<int> address_ids)
         {
-            if (!IsEnableMailServer) throw new Exception(Resource.ErrorNotAllowedOption);
             var group = MailEngineFactory.ServerMailgroupEngine.CreateMailGroup(name, domain_id, address_ids);
             return group;
         }
 
         /// <summary>
-        /// Adds an address with the ID specified in the request to the mail group.
+        ///    Add addresses to group
         /// </summary>
-        /// <param type="System.Int32, System" name="mailgroup_id">Mail group ID</param>
-        /// <param type="System.Int32, System" name="address_id">Address ID</param>
-        /// <returns type="ASC.Mail.Data.Contracts.ServerDomainGroupData, ASC.Mail">Mail group data associated with the tenant</returns>
-        /// <short>Add an address to the mail group</short> 
-        /// <category>Mail groups</category>
-        /// <path>api/2.0/mailserver/groupaddress/address/add</path>
-        /// <httpMethod>PUT</httpMethod>
+        /// <param name="mailgroup_id">id of group address</param>
+        /// <param name="address_id"></param>
+        /// <returns>MailGroupData associated with tenant</returns>
+        /// <short>Add group's addresses</short> 
+        /// <category>MailGroup</category>
         [Update(@"groupaddress/address/add")]
         public ServerDomainGroupData AddMailGroupAddress(int mailgroup_id, int address_id)
         {
-            if (!IsEnableMailServer) throw new Exception(Resource.ErrorNotAllowedOption);
             var group = MailEngineFactory.ServerMailgroupEngine.AddMailGroupMember(mailgroup_id, address_id);
             return group;
         }
 
         /// <summary>
-        /// Removes an address with the ID specified in the request from the mail group.
+        ///    Remove address from group
         /// </summary>
-        /// <param type="System.Int32, System" name="mailgroup_id">Mail group ID</param>
-        /// <param type="System.Int32, System" name="address_id">Address ID</param>
-        /// <returns>Mail group ID</returns>
-        /// <short>Remove an address from the mail group</short>
-        /// <category>Mail groups</category>
-        /// <path>api/2.0/mailserver/groupaddress/addresses/remove</path>
-        /// <httpMethod>DELETE</httpMethod>
+        /// <param name="mailgroup_id">id of group address</param>
+        /// <param name="address_id"></param>
+        /// <returns>id of group address</returns>
+        /// <short>Remove group's address</short>
+        /// <category>MailGroup</category>
         [Delete(@"groupaddress/addresses/remove")]
         public int RemoveMailGroupAddress(int mailgroup_id, int address_id)
         {
-            if (!IsEnableMailServer) throw new Exception(Resource.ErrorNotAllowedOption);
             MailEngineFactory.ServerMailgroupEngine.RemoveMailGroupMember(mailgroup_id, address_id);
             return address_id;
         }
 
         /// <summary>
-        /// Returns a list of mail groups associated with the tenant.
+        ///    Returns list of group addresses associated with tenant
         /// </summary>
-        /// <returns type="ASC.Mail.Data.Contracts.ServerDomainGroupData, ASC.Mail">List of mail group data for the current tenant</returns>
-        /// <short>Get mail groups</short>
-        /// <category>Mail groups</category>
-        /// <path>api/2.0/mailserver/groupaddress/get</path>
-        /// <httpMethod>GET</httpMethod>
-        /// <collection>list</collection>
+        /// <returns>List of MailGroupData for current tenant</returns>
+        /// <short>Get mail group list</short>
+        /// <category>MailGroup</category>
         [Read(@"groupaddress/get")]
         public List<ServerDomainGroupData> GetMailGroups()
         {
-            if (!IsEnableMailServer) throw new Exception(Resource.ErrorNotAllowedOption);
             var groups = MailEngineFactory.ServerMailgroupEngine.GetMailGroups();
             return groups;
         }
 
         /// <summary>
-        /// Deletes a mail group with the ID specified in the request.
+        ///    Deletes the selected group address
         /// </summary>
-        /// <param type="System.Int32, System" method="url" name="id">Mail group ID</param>
-        /// <returns>Mail group ID</returns>
-        /// <short>Remove a mail group</short> 
-        /// <category>Mail groups</category>
-        /// <path>api/2.0/mailserver/groupaddress/remove/{id}</path>
-        /// <httpMethod>DELETE</httpMethod>
+        /// <param name="id">id of group address</param>
+        /// <returns>id of group address</returns>
+        /// <short>Remove group address from mail server</short> 
+        /// <category>MailGroup</category>
         [Delete(@"groupaddress/remove/{id}")]
         public int RemoveMailGroup(int id)
         {
-            if (!IsEnableMailServer) throw new Exception(Resource.ErrorNotAllowedOption);
             MailEngineFactory.ServerMailgroupEngine.RemoveMailGroup(id);
             return id;
         }

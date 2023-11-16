@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,16 @@
 */
 
 
+using ASC.Core;
+using ASC.Web.Studio.Core;
+using Amazon;
+using ASC.Core.Common.Contracts;
+using ASC.Web.Studio.Core.Backup;
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
-
-using Amazon;
-
-using ASC.Core;
-using ASC.Core.Common.Contracts;
-using ASC.Web.Studio.Core;
-using ASC.Web.Studio.Core.Backup;
 using ASC.Web.Studio.Utility;
 
 namespace ASC.Web.Studio.UserControls.Management
@@ -45,11 +43,12 @@ namespace ASC.Web.Studio.UserControls.Management
         {
             get { return RegionEndpoint.EnumerableAllRegions.ToList(); }
         }
-        protected bool isAvailable
+        protected bool isFree
         {
             get
             {
-                return CoreContext.Configuration.Standalone || TenantExtra.GetTenantQuota().Restore;
+                var quota = TenantExtra.GetTenantQuota();
+                return (quota.Trial || quota.Free);
             }
         }
 
@@ -57,7 +56,7 @@ namespace ASC.Web.Studio.UserControls.Management
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!SetupInfo.IsVisibleSettings("Restore"))
+            if (CoreContext.Configuration.Standalone || !SetupInfo.IsVisibleSettings("Restore"))
             {
                 Response.Redirect(CommonLinkUtility.GetDefault(), true);
                 return;

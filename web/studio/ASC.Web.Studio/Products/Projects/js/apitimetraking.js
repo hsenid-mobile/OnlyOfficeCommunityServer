@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ ASC.Projects.TimeTraking = (function($) {
         $inputDate,
         $errorPanel,
         $addLog,
-        ProjectsJSResource = ASC.Projects.Resources.ProjectsJSResource;
+        resources = ASC.Projects.Resources.ProjectsJSResource;
 
     var teamlab = Teamlab;
     var $hours, $minutes, $seconds, $startButton, $resetButton, $textareaTimeDesc, $openTasks, $closedTasks;
@@ -127,20 +127,20 @@ ASC.Projects.TimeTraking = (function($) {
         };
 
         unlockElements();
-        $inputHours.trigger("focus");
+        $inputHours.focus();
             
         if ($("#teamList option").length === 0 || $("#selectUserTasks option").length === 0) {
             lockStartAndAddButtons();
         }
 
         if (!$inputDate.hasClass('hasDatepicker')) {
-            $inputDate.datepicker({ selectDefaultDate: false, onSelect: function () { $inputDate.trigger("blur"); } });
+            $inputDate.datepicker({ selectDefaultDate: false, onSelect: function () { $inputDate.blur(); } });
         }
 
         $inputDate.mask(ASC.Resources.Master.DatePatternJQ);
         $inputDate.datepicker('setDate', teamlab.getDisplayDate(new Date()));
 
-        $('#timerTime #selectUserProjects').on('change', function() {
+        $('#timerTime #selectUserProjects').bind('change', function() {
             var prjid = parseInt($("#selectUserProjects option:selected").val());
 
             var onCompleteObj = function (cb) {
@@ -162,13 +162,13 @@ ASC.Projects.TimeTraking = (function($) {
             asyncMethods.push(function (cb) {
                 teamlab.getProjectTeamExcluded(prjid, {
                     before: function () {
-                        $("#teamList").prop(disabledAttr, true);
-                        $("#selectUserTasks").prop(disabledAttr, true);
+                        $("#teamList").attr(disabledAttr, disabledAttr);
+                        $("#selectUserTasks").attr(disabledAttr, disabledAttr);
                     },
                     success: onGetTeam,
                     after: function () {
-                        $("#teamList").prop(disabledAttr, false);
-                        $("#selectUserTasks").prop(disabledAttr, false);
+                        $("#teamList").removeAttr(disabledAttr);
+                        $("#selectUserTasks").removeAttr(disabledAttr);
                     }
                 });
             });
@@ -176,24 +176,24 @@ ASC.Projects.TimeTraking = (function($) {
             async.parallel(asyncMethods);
         });
 
-        $startButton.on(clickEvent, function () {
+        $startButton.bind(clickEvent, function () {
             if ($startButton.hasClass(disableClass)) return;
             playPauseTimer();
         });
 
-        $resetButton.on(clickEvent, function () {
+        $resetButton.bind(clickEvent, function () {
             if ($resetButton.hasClass(disableClass)) return;
             resetTimer();
         });
 
-        $addLog.on(clickEvent, function () {
+        $addLog.bind(clickEvent, function () {
             if ($addLog.hasClass(disableClass)) return;
             lockStartAndAddButtons();
             var h, m, s;
             var prjid = parseInt($("#selectUserProjects option:selected").attr("value"));
             var personid = $("#teamList option:selected").attr("value");
             var taskid = parseInt($("#selectUserTasks option:selected").attr("value"));
-            var description = $textareaTimeDesc.val().trim();
+            var description = $.trim($textareaTimeDesc.val());
             var invalidTime = false;
             var hours;
 
@@ -216,7 +216,7 @@ ASC.Projects.TimeTraking = (function($) {
             } else {
                 if ($inputHours.val() === "" && $inputMinutes.val() === "") {
                     $errorPanel.addClass(errorClass).removeClass(successClass);
-                    $errorPanel.text(ProjectsJSResource.TimerNoData);
+                    $errorPanel.text(resources.TimerNoData);
                     unlockStartAndAddButtons();
                     return;
                 }
@@ -235,7 +235,7 @@ ASC.Projects.TimeTraking = (function($) {
 
                 if (invalidTime) {
                     $errorPanel.addClass(errorClass).removeClass(successClass);
-                    $errorPanel.text(ProjectsJSResource.InvalidTime).show();
+                    $errorPanel.text(resources.InvalidTime).show();
                     unlockStartAndAddButtons();
                     return;
                 }
@@ -248,7 +248,7 @@ ASC.Projects.TimeTraking = (function($) {
 
             if (!$.isDateFormat($inputDate.val().trim())) {
                 $errorPanel.addClass(errorClass).removeClass(successClass);
-                $errorPanel.text(ProjectsJSResource.IncorrectDate).show();
+                $errorPanel.text(resources.IncorrectDate).show();
                 unlockStartAndAddButtons();
                 return;
             }
@@ -270,17 +270,14 @@ ASC.Projects.TimeTraking = (function($) {
         });
 
         function checkKey(e) {
-            if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 13) {
+            if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
                 e.stopPropagation();
                 return false;
             }
-            if (e.which == 13) {
-                $addLog.click();
-            }
         }
 
-        $inputMinutes.on("keypress", checkKey);
-        $inputHours.on("keypress", checkKey);
+        $inputMinutes.keypress(checkKey);
+        $inputHours.keypress(checkKey);
     };
 
     function isInt(input) {
@@ -376,23 +373,24 @@ ASC.Projects.TimeTraking = (function($) {
     };
 
     function lockElements(onlyManualInput) {
-        $inputHours.prop(disabledAttr, true);
-        $inputMinutes.prop(disabledAttr, true);
+        var trueStr = "true";
+        $inputHours.attr(disabledAttr, trueStr);
+        $inputMinutes.attr(disabledAttr, trueStr);
         if (!onlyManualInput) {
-            $inputDate.prop(disabledAttr, true);
-            $textareaTimeDesc.prop(disabledAttr, true);
+            $inputDate.attr(disabledAttr, trueStr);
+            $textareaTimeDesc.attr(disabledAttr, trueStr);
         }
     };
 
     function unlockElements() {
         var t = getCurrentTime();
         if (t.h === 0 && t.m === 0 && t.s === 0) {
-            $inputHours.prop(disabledAttr, false);
-            $inputMinutes.prop(disabledAttr, false);
+            $inputHours.removeAttr(disabledAttr);
+            $inputMinutes.removeAttr(disabledAttr);
         }
 
-        $inputDate.prop(disabledAttr, false);
-        $textareaTimeDesc.prop(disabledAttr, false);
+        $inputDate.removeAttr(disabledAttr);
+        $textareaTimeDesc.removeAttr(disabledAttr);
     };
 
     function lockStartAndAddButtons() {
@@ -423,7 +421,7 @@ ASC.Projects.TimeTraking = (function($) {
 
     function onAddTaskTime() {
         $errorPanel.removeClass(errorClass).addClass(successClass);
-        $errorPanel.text(ProjectsJSResource.SuccessfullyAdded);
+        $errorPanel.text(resources.SuccessfullyAdded);
         $textareaTimeDesc.val('');
         $inputHours.val('');
         $inputMinutes.val('');
@@ -496,7 +494,7 @@ ASC.Projects.TimeTrakingEdit = (function ($) {
         inputMinutes,
         inputHours,
         errorPanel,
-        ProjectsJSResource = ASC.Projects.Resources.ProjectsJSResource;
+        resources = ASC.Projects.Resources.ProjectsJSResource;
 
     var teamlab = Teamlab, prjTask;
 
@@ -514,7 +512,7 @@ ASC.Projects.TimeTrakingEdit = (function ($) {
                 IsPopup: true
             },
             header: {
-                data: { title: ASC.Projects.Resources.ProjectsCommonResource.TimeTracking },
+                data: { title: ASC.Projects.Resources.CommonResource.TimeTracking },
                 title: "projects_common_popup_header"
             },
             body: {
@@ -542,7 +540,7 @@ ASC.Projects.TimeTrakingEdit = (function ($) {
             }
         });
 
-        $('#timeTrakingPopup .middle-button-container a.button.blue.middle').on('click', function () {
+        $('#timeTrakingPopup .middle-button-container a.button.blue.middle').bind('click', function () {
             
             var h = parseInt(inputHours.val(), 10);
             var m = parseInt(inputMinutes.val(), 10);
@@ -578,19 +576,19 @@ ASC.Projects.TimeTrakingEdit = (function ($) {
         var error = false;
         
         if (parseInt(m, 10) > 59 || parseInt(m, 10) < 0 || !isInt(m)) {
-            errorPanel.text(ProjectsJSResource.InvalidTime);
-            inputMinutes.trigger("focus");
+            errorPanel.text(resources.InvalidTime);
+            inputMinutes.focus();
             error = true;
         }
         if (parseInt(h, 10) < 0 || !isInt(h)) {
-            errorPanel.text(ProjectsJSResource.InvalidTime);
-            inputHours.trigger("focus");
+            errorPanel.text(resources.InvalidTime);
+            inputHours.focus();
             error = true;
         }
         
-        if (d == null || d.trim() === "" || !$.isDateFormat(d)) {
-            errorPanel.text(ProjectsJSResource.IncorrectDate);
-            $('#timeTrakingPopup #timeTrakingDate').trigger("focus");
+        if ($.trim(d) === "" || d == null || !$.isDateFormat(d)) {
+            errorPanel.text(resources.IncorrectDate);
+            $('#timeTrakingPopup #timeTrakingDate').focus();
             error = true;
         }
 
@@ -640,7 +638,7 @@ ASC.Projects.TimeTrakingEdit = (function ($) {
         }
 
         StudioBlockUIManager.blockUI($popupContainer, 550);
-        inputHours.trigger("focus");
+        inputHours.focus();
     };
 
     function onGetTimeSpend(params, data) {

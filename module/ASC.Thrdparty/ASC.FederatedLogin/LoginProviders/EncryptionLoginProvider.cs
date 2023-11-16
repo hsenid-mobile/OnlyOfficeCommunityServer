@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,9 @@
 
 using System;
 using System.Linq;
-
-using ASC.Common.Logging;
 using ASC.FederatedLogin;
 using ASC.FederatedLogin.Profile;
 using ASC.Security.Cryptography;
-
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Web.Studio.Core
@@ -34,10 +31,10 @@ namespace ASC.Web.Studio.Core
             if (string.IsNullOrEmpty(keys)) return;
 
             var loginProfile = new LoginProfile
-            {
-                Provider = ProviderConstants.Encryption,
-                Name = InstanceCrypto.Encrypt(keys),
-            };
+                {
+                    Provider = ProviderConstants.Encryption,
+                    Name = InstanceCrypto.Encrypt(keys),
+                };
 
             var linker = new AccountLinker("webstudio");
             linker.AddLink(userId.ToString(), loginProfile);
@@ -55,17 +52,8 @@ namespace ASC.Web.Studio.Core
             var profile = linker.GetLinkedProfiles(userId.ToString(), ProviderConstants.Encryption).FirstOrDefault();
             if (profile == null) return null;
 
-            try
-            {
-                var keys = InstanceCrypto.Decrypt(profile.Name);
-                return keys;
-            }
-            catch (Exception ex)
-            {
-                var message = string.Format("Can not decrypt {0} keys for {1}", ProviderConstants.Encryption, userId);
-                LogManager.GetLogger("ASC").Error(message, ex);
-                return null;
-            }
+            var keys = InstanceCrypto.Decrypt(profile.Name);
+            return keys;
         }
     }
 }

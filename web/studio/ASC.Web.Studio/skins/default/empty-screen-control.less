@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 
 @import "../base.less";
-@import "params.less";
+
 
 .noContentBlock {
     padding: 100px;
@@ -84,7 +84,7 @@
         }
 
         .clearFilterButton {
-            color: @textColor;
+            color: #333;
             clear: both;
             cursor: pointer;
             margin-left: 18px;
@@ -108,7 +108,7 @@
             &:after {
                 cursor: pointer;
                 content: "×";
-                color: @body-color;
+                color: #fff;
                 display: block;
                 font-size: 15px;
                 font-weight: 600;

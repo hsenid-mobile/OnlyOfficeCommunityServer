@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 const winston = require('winston');
-const { format } = require('winston');
 require('winston-daily-rotate-file');
 
 const path = require('path');
@@ -46,12 +45,4 @@ const transports = [
 
 winston.exceptions.handle(fileTransport);
 
-module.exports = winston.createLogger({
-    transports: transports,
-    exitOnError: false,
-    format: format.combine(
-        format.timestamp({
-          format: 'YYYY-MM-DD HH:mm:ss'
-        }),
-        format.printf(info => `${info.timestamp} - ${info.level}: ${info.message}`)
-    )});
+module.exports = winston.createLogger({ transports: transports, exitOnError: false});

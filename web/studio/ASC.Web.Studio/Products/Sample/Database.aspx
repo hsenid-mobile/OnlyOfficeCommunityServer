@@ -28,7 +28,7 @@
                 <p>Create a DAO class with the CRUD methods</p>
 <pre><code>public static class SampleDao
 {
-    private const string DbId = "default";
+    private const string DbId = "core";
     private const string Table = "sample_table";
 
     private static DbManager GetDb()

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -355,6 +355,10 @@ if (typeof window.serviceManager === 'undefined') {
             window.Teamlab.getCrmContactsForMail(params, ids, options);
         });
 
+        var getTlGroups = wrapper(2, function(params, options) {
+            window.Teamlab.getGroups(params, options);
+        });
+
         var searchEmails = wrapper(3, function (params, term, options) {
             window.Teamlab.searchEmails(params, term, options);
         });
@@ -602,6 +606,7 @@ if (typeof window.serviceManager === 'undefined') {
             createMailContact: createMailContact,
             deleteMailContacts: deleteMailContacts,
             updateMailContact: updateMailContact,
+            getTLGroups: getTlGroups,
             linkChainToCrm: linkChainToCrm,
             markChainAsCrmLinked: markChainAsCrmLinked,
             unmarkChainAsCrmLinked: unmarkChainAsCrmLinked,

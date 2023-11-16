@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,7 +155,7 @@ namespace ASC.Web.Core.Files
                     _extsConvertible = new Dictionary<string, List<string>>();
                     if (string.IsNullOrEmpty(FilesLinkUtility.DocServiceConverterUrl)) return _extsConvertible;
 
-                    const string databaseId = "default";
+                    const string databaseId = "files";
                     const string tableTitle = "files_converts";
 
                     using (var dbManager = new DbManager(databaseId))
@@ -334,11 +334,10 @@ namespace ASC.Web.Core.Files
                 ".doc", ".docx", ".docm",
                 ".dot", ".dotx", ".dotm",
                 ".odt", ".fodt", ".ott", ".rtf", ".txt",
-                ".html", ".htm", ".mht", ".xml",
-                ".pdf", ".djvu", ".fb2", ".epub", ".xps", ".oxps",
+                ".html", ".htm", ".mht",
+                ".pdf", ".djvu", ".fb2", ".epub", ".xps",
                 ".doct", ".docy",
-                ".gdoc",
-                ".docxf", ".oform"
+                ".gdoc"
             };
 
         public static readonly List<string> ExtsTemplate = new List<string>
@@ -355,8 +354,6 @@ namespace ASC.Web.Core.Files
                 { FileType.Spreadsheet, ConfigurationManagerExtension.AppSettings["files.docservice.internal-xls"] ?? ".xlsx" },
                 { FileType.Presentation, ConfigurationManagerExtension.AppSettings["files.docservice.internal-ppt"] ?? ".pptx" }
             };
-
-        public static readonly string MasterFormExtension = ConfigurationManagerExtension.AppSettings["files.docservice.internal-form"] ?? ".docxf";
 
         public enum CsvDelimiter
         {

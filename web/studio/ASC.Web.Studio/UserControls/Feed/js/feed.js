@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ ASC.Feed = (function() {
         $managerEmptyScreen = $view.find('#manager-empty-screen'),
 
         $communityEmptyScreen = $view.find('#emptyListCommunity'),
-        $peopleEmptyScreen = $view.find('#emptyListPeople'),
         $crmEmptyScreen = $view.find('#emptyListCrm'),
         $projectsEmptyScreen = $view.find('#emptyListProjects'),
         $documentsEmptyScreen = $view.find('#emptyListDocuments'),
@@ -105,18 +104,6 @@ ASC.Feed = (function() {
         if (productsAccessRights[1]) {
             filters.push({
                 type: 'combobox',
-                id: 'people',
-                title: ASC.Resources.Master.FeedResource.PeopleProduct,
-                filtertitle: ASC.Resources.Master.FeedResource.Product,
-                group: ASC.Resources.Master.FeedResource.Product,
-                hashmask: 'product/{0}',
-                groupby: 'product',
-                options: getProductFilterOptions(productsAccessRights, 'people')
-            });
-        }
-        if (productsAccessRights[2]) {
-            filters.push({
-                type: 'combobox',
                 id: 'crm',
                 title: ASC.Resources.Master.FeedResource.CrmProduct,
                 filtertitle: ASC.Resources.Master.FeedResource.Product + ':',
@@ -126,7 +113,7 @@ ASC.Feed = (function() {
                 options: getProductFilterOptions(productsAccessRights, 'crm')
             });
         }
-        if (productsAccessRights[3]) {
+        if (productsAccessRights[2]) {
             filters.push({
                 type: 'combobox',
                 id: 'projects',
@@ -138,7 +125,7 @@ ASC.Feed = (function() {
                 options: getProductFilterOptions(productsAccessRights, 'projects')
             });
         }
-        if (productsAccessRights[4]) {
+        if (productsAccessRights[3]) {
             filters.push({
                 type: 'combobox',
                 id: 'documents',
@@ -154,7 +141,6 @@ ASC.Feed = (function() {
         $('#feed-filter').advansedFilter(
             {
                 store: false,
-                hintDefaultDisable: false,
                 anykey: true,
                 colcount: 2,
                 anykeytimeout: 1000,
@@ -164,7 +150,7 @@ ASC.Feed = (function() {
                         {
                             type: 'daterange',
                             id: 'today',
-                            title: ASC.Resources.Master.ResourceJS.Today,
+                            title: ASC.Resources.Master.FeedResource.Today,
                             filtertitle: ' ',
                             group: ASC.Resources.Master.FeedResource.TimeDistance,
                             hashmask: 'distance/{0}/{1}',
@@ -214,8 +200,8 @@ ASC.Feed = (function() {
                     ]),
                 sorters: []
             })
-            .on('setfilter', filter.onSetFilter)
-            .on('resetfilter', filter.onResetFilter)
+            .bind('setfilter', filter.onSetFilter)
+            .bind('resetfilter', filter.onResetFilter)
             .advansedFilter('sort', false);
 
         function getProductFilterOptions(productsRights, product) {
@@ -229,27 +215,20 @@ ASC.Feed = (function() {
                 options.push(elem);
             }
             if (productsRights[1]) {
-                elem = { value: 'people', title: ASC.Resources.Master.FeedResource.PeopleProduct };
-                if (product == 'people') {
-                    elem.def = true;
-                }
-                options.push(elem);
-            }
-            if (productsRights[2]) {
                 elem = { value: 'crm', title: ASC.Resources.Master.FeedResource.CrmProduct };
                 if (product == 'crm') {
                     elem.def = true;
                 }
                 options.push(elem);
             }
-            if (productsRights[3]) {
+            if (productsRights[2]) {
                 elem = { value: 'projects', title: ASC.Resources.Master.FeedResource.ProjectsProduct };
                 if (product == 'projects') {
                     elem.def = true;
                 }
                 options.push(elem);
             }
-            if (productsRights[4]) {
+            if (productsRights[3]) {
                 elem = { value: 'documents', title: ASC.Resources.Master.FeedResource.DocumentsProduct };
                 if (product == 'documents') {
                     elem.def = true;
@@ -370,8 +349,6 @@ ASC.Feed = (function() {
                 $emptyFilterScreen.show();
             } else if (~hash.indexOf('community')) {
                 $communityEmptyScreen.show();
-            } else if (~hash.indexOf('people')) {
-                $peopleEmptyScreen.show();
             } else if (~hash.indexOf('crm')) {
                 $crmEmptyScreen.show();
             } else if (~hash.indexOf('projects')) {
@@ -390,7 +367,6 @@ ASC.Feed = (function() {
         $emptyFilterScreen.hide();
         $managerEmptyScreen.hide();
         $communityEmptyScreen.hide();
-        $peopleEmptyScreen.hide();
         $crmEmptyScreen.hide();
         $projectsEmptyScreen.hide();
         $documentsEmptyScreen.hide();
@@ -415,24 +391,6 @@ ASC.Feed = (function() {
 
         resolveAdditionalFeedData(template);
         template.actionText = getFeedActionText(template);
-
-        if (!template.isGuest) {
-            template.userName = new URL(window.location.protocol + '//' + window.location.hostname + template.author.profileUrl).searchParams.get("user");
-        }
-
-        if (template.isAllDayEvent) {
-            template.title = "";
-            template.today = ASC.Resources.Master.ResourceJS.Today;
-            template.yesterday = ASC.Resources.Master.ResourceJS.Yesterday;
-            template.tomorrow = ASC.Resources.Master.FeedResource.Tomorrow;
-            template.displayCreatedTime = null;
-        }
-        else {
-            template.today = ASC.Resources.Master.FeedResource.TodayAt;
-            template.yesterday = ASC.Resources.Master.FeedResource.YesterdayAt;
-            template.tomorrow = ASC.Resources.Master.FeedResource.TomorrowAt;
-            template.actionText = template.actionText + '.';
-        }
 
         if (template.comments) {
             for (var j = 0; j < template.comments.length; j++) {
@@ -488,8 +446,6 @@ ASC.Feed = (function() {
                 return itemTexts.updatedText;
             case 2:
                 return itemTexts.commentedText;
-            case 3:
-                return template.author.displayName;
             default:
                 return itemTexts.createdText;
         }
@@ -522,7 +478,6 @@ ASC.Feed = (function() {
             case 'poll':
                 template.itemClass = 'events';
                 break;
-            case 'forum':
             case 'forumTopic':
             case 'forumPoll':
             case 'forumPost':
@@ -534,24 +489,6 @@ ASC.Feed = (function() {
             case 'company':
             case 'person':
                 template.itemClass = 'group';
-                break;
-            case 'birthday':
-                if (template.isToday) {
-                    template.itemClass = 'birthdaysToday';
-                }
-                else {
-                    template.itemClass = 'birthdays';
-                }
-                template.linkOnClickAttr = 'ASC.Controls.JabberClient.open(\'' + template.userName + '\')';
-                template.linkInnerText = ASC.Resources.Master.FeedResource.BirthdayCongratulateLinkTitle;
-                break;
-            case 'people':
-                template.itemClass = 'people';
-                break;
-            case 'newEmployee':
-                template.itemClass = 'people';
-                template.linkOnClickAttr = 'window.location.href=\'' + template.author.profileUrl + '\'';
-                template.linkInnerText = ASC.Resources.Master.FeedResource.ViewProfile;
                 break;
             case 'crmTask':
                 /*var crmTaskResponsible = getUser(template.additionalInfo);
@@ -626,13 +563,13 @@ ASC.Feed = (function() {
 
     function bindEvents() {
         $emptyFilterScreen.on('click', '.clearFilterButton', function() {
-            $('.advansed-filter .btn-reset-filter').trigger("click");
+            $('.advansed-filter .btn-reset-filter').click();
         });
 
         // #region page menu
 
         $pageMenu.on('click', '.filter', function() {
-            $(this).find('.menu-item-label').trigger("click");
+            $(this).find('.menu-item-label').click();
         });
 
         $pageMenu.on('click', '.filter .menu-item-label', function() {
@@ -646,13 +583,8 @@ ASC.Feed = (function() {
             return false;
         });
 
-        $pageMenu.on('click', '#feed-community-product-nav', function () {
+        $pageMenu.on('click', '#feed-community-product-nav', function() {
             filter.changeHash('product', 'community');
-            return false;
-        });
-
-        $pageMenu.on('click', '#feed-people-product-nav', function() {
-            filter.changeHash('product', 'people');
             return false;
         });
 
@@ -811,7 +743,7 @@ ASC.Feed = (function() {
             $this.hide();
 
             $commentForm.show();
-            $commentForm.find('textarea').trigger("focus");
+            $commentForm.find('textarea').focus();
 
             return false;
         });
@@ -821,7 +753,7 @@ ASC.Feed = (function() {
                 var $commentForm = $(this).closest('.comment-form');
                 var $publishBtn = $commentForm.find('.publish-comment-btn');
 
-                $publishBtn.trigger("click");
+                $publishBtn.click();
                 return;
             }
 
@@ -838,7 +770,7 @@ ASC.Feed = (function() {
 
             var commentText = $this.siblings('textarea').val().trim();
             if (!commentText) {
-                $this.siblings('textarea').addClass("error").trigger("focus");
+                $this.siblings('textarea').addClass("error").focus();
                 event.preventDefault();
                 return;
             }
@@ -1013,7 +945,7 @@ ASC.Feed = (function() {
             $this.addClass('closed');
 
             $commentForm.show();
-            $commentForm.find('textarea').trigger("focus");
+            $commentForm.find('textarea').focus();
 
             return false;
         });
@@ -1027,9 +959,9 @@ ASC.Feed = (function() {
             var showBtn = $(this).closest('.header').siblings('.show-grouped-feeds-btn');
 
             if (hideBtn.is(':visible')) {
-                hideBtn.trigger("click");
+                hideBtn.click();
             } else {
-                showBtn.trigger("click");
+                showBtn.click();
             }
         });
 
@@ -1076,7 +1008,7 @@ ASC.Feed = (function() {
     }
 
     function showErrorMessage() {
-        toastr.error(ASC.Resources.Master.ResourceJS.CommonJSErrorMsg);
+        toastr.error(ASC.Resources.Master.Resource.CommonJSErrorMsg);
     }
 
     return jq.extend({

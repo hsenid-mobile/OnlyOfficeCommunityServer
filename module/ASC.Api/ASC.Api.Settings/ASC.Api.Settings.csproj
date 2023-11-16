@@ -62,8 +62,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BuildVersion.cs" />
-    <Compile Include="TfaSettingsWrapper.cs" />
-    <Compile Include="RadicaleSettingsApi.cs" />
     <Compile Include="StatisticsWrapper.cs" />
     <Compile Include="Smtp\SmtpOperation.cs" />
     <Compile Include="Smtp\SmtpOperationStatus.cs" />
@@ -149,15 +147,11 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MailKit">
-      <Version>2.15.0</Version>
+      <Version>2.5.2</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.1</Version>
+      <Version>12.0.3</Version>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.ServiceModel" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

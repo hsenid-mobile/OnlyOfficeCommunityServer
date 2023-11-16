@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 */
 
 
-@import "params.less";
 @actionListWidth:           64px;
 @divHeight:                 40px;
 
@@ -31,7 +30,7 @@
 
     .taskList {
         .task {
-            border-bottom: @border-color 1px solid;
+            border-bottom: #d1d1d1 1px solid;
             height: @divHeight;
             clear: both;
 
@@ -45,8 +44,6 @@
 
                 input {
                     margin: 4px;
-                    color-scheme: @checkbox-color-scheme;
-                    accent-color: @checkbox-accent-color;
                 }
             }
 
@@ -102,7 +99,7 @@
             }
 
             span.timeLeft {
-                color: @text-color;
+                color: #333333;
                 font-size: 12px;
                 line-height: @divHeight;
                 cursor: default;
@@ -143,7 +140,7 @@
 
                 span.collaps,
                 span.add {
-                    color: @text-color;
+                    color: #333333;
                     font-size: 11px;
                     line-height: @divHeight;
                     cursor: pointer;
@@ -161,13 +158,13 @@
 
                 span.add {
                     padding: 0px;
-                    border-bottom: 1px dotted @text-color;
+                    border-bottom: 1px dotted #333;
                     display: none;
                 }
             }
 
             &:hover {
-                background-color: @body-color-hover-another;
+                background-color: #e5e5e5;
 
                 .taskName a {
                     text-decoration: underline;
@@ -179,7 +176,7 @@
 
                 .user {
                     span {
-                        border-bottom: 1px dotted @dark-text-color;
+                        border-bottom: 1px dotted #000000;
 
                         &.not-action {
                             border-bottom: 1px dotted transparent;
@@ -209,19 +206,11 @@
                 }
             }
 
-            &.can-move {
-                background: @drag-and-drop;
-
-                &.move-dest {
-                    background: @drag-and-drop-hover;
-                }
-            }
-
             .user {
                 white-space: nowrap;
                 float: right;
                 font-size: 12px;
-                color: @text-color;
+                color: #333333;
                 width: 160px;
                 overflow: hidden;
                 line-height: @divHeight;
@@ -230,11 +219,11 @@
                 margin-right: 15px;
 
                 span b {
-                    color: @grey-text;
+                    color: #666;
                 }
 
                 span:hover {
-                    border-bottom: 1px dotted @dark-text-color;
+                    border-bottom: 1px dotted #000000;
                 }
 
                 span.not-action:hover {
@@ -254,7 +243,7 @@
             }
 
             &:first-child {
-                border-top: 1px solid @border-color;
+                border-top: 1px solid #d1d1d1;
             }
         }
 
@@ -296,10 +285,10 @@
     overflow-x: hidden;
     overflow-y: auto;
     height: 200px;
-    border-top: 1px solid @border-color;
+    border-top: 1px solid #D1D1D1;
 
     .ms {
-        border-bottom: 1px solid @border-color;
+        border-bottom: 1px solid #D1D1D1;
         padding: 5px;
     }
 }
@@ -331,7 +320,7 @@
     margin: 0px;
 }
 .popupActionPanel {
-    background: @body-color;
+    background: #fff;
     border: 1px solid #8E908F;
     display: none;
     min-width: 140px;
@@ -361,7 +350,7 @@
         text-align: center;
 
         &.canEdit {
-            border: 1px solid @border-color;
+            border: 1px solid #d1d1d1;
             border-radius: 3px;
             -moz-border-radius: 3px;
             -webkit-border-radius: 3px;
@@ -425,7 +414,7 @@
 
         div.task:hover .changeStatusCombobox.canEdit,
         .changeStatusCombobox.canEdit.selected {
-            background-color: @changeStatusCombobox;
+            background-color: #eaeaea;
             border-color: #a8a8a8;
 
             span.arrow:after {
@@ -459,7 +448,7 @@ body.media-width-0-1100 #CommonListContainer .taskList .task .taskName {
 }
 
 .taskProcess {
-  background: url("../../../../../skins/default/images/@{loader-gif-16}") no-repeat;
+  background: url('../../../../../skins/default/images/loader_16.gif') no-repeat;
 }
 
 /*******************************************************************************
@@ -487,7 +476,7 @@ body.media-width-0-1100 #CommonListContainer .taskList .task .taskName {
 
     &:hover,
     &.menuopen {
-        background: @body-color-selected;
+        background: #f2f2f2;
     }
 
     &.last {
@@ -498,7 +487,6 @@ body.media-width-0-1100 #CommonListContainer .taskList .task .taskName {
         float: left;
         width: 13px;
         height: 29px;
-        margin: 0 8px;
 
         input {
             margin-top: 5px;
@@ -535,7 +523,7 @@ body.media-width-0-1100 #CommonListContainer .taskList .task .taskName {
         display: inline-block;
 
         b {
-            color: @grey-text;
+            color: #666;
         }
     }
 
@@ -550,32 +538,34 @@ body.media-width-0-1100 #CommonListContainer .taskList .task .taskName {
             font-size: 12px;
         }
     }
-
-    &.edited {
-        display: none;
-    }
 }
 
 .quickAddSubTaskLink {
-    margin: 8px 0 6px 8px;
-    border: @body-color 1px solid;
+    margin: 8px 0 6px 0;
+    border: #fff 1px solid;    
 }
 
 .subtask-loader {
     margin-top: 10px;
-    height: 12px;
+    height:12px;
     width: 12px;
-    background: url("../../../../../skins/default/images/@{loader-gif-12}") no-repeat 0 0;
+    background: url('../../../../../skins/default/images/loader_12.gif') no-repeat 0 0;
 }
 
 /*---subtasks---*/
 .add-subtask-field-wrapper {
+    position: relative;
     clear: both;
-    background-color: @body-color;
+    background-color: #fff;
     clear: both;
     border-collapse: collapse;
     width: 100%;
     table-layout: fixed;
+
+    &.absolute {
+        position: absolute;
+        top: 2px;
+    }
 
     td {
         padding: 4px 2px;
@@ -589,9 +579,7 @@ body.media-width-0-1100 #CommonListContainer .taskList .task .taskName {
 
     .subtask-name {
         border-right: none;
-        padding-left: 36px;
-        padding-right: 8px;
-        position: relative;
+        padding-left: 24px;
     }
 
     input.subtask-name-input,
@@ -636,12 +624,13 @@ body.media-width-0-1200 .subtask-responsible-selector
 }
 
 .subtasks { 
-  padding:8px 0;
+  position: relative;
+  margin:8px 0;
 }
 
 .taskList .subtasks { /*---for list tasks---*/
     display: none;
-    padding-left: @actionListWidth;
+    margin-left: @actionListWidth;
 }
 *:first-child+html .subtask .check input {
     margin-top:5px;
@@ -683,7 +672,7 @@ body.media-width-0-1200 .subtask .taskName {
 }
 .studio-action-panel .date  /*--fix color--*/
 {
-    color: @text-color;
+    color: #333;
 }
 
 /*------common info-----*/
@@ -712,7 +701,7 @@ body.media-width-0-1200 .subtask .taskName {
 .linked-tasks-buttons {
     .baseLinkAction,
     .icon-link a {
-        color: @text-color;
+        color: #333;
     }
 
         .baseLinkAction.disabled {
@@ -728,14 +717,14 @@ body.media-width-0-1200 .subtask .taskName {
 .task-links {
     margin-bottom: 8px;
     border-collapse: collapse;
-    color: @text-color;
+    color: #333333;
     font-size: 12px;
     table-layout: fixed;
     width: 100%;
 
     .title {
         .task-name {
-            color: @text-color;
+            color: #333;
             max-width: 98%;
             line-height: 14px;
             text-decoration: none;
@@ -756,7 +745,7 @@ body.media-width-0-1200 .subtask .taskName {
     }
 
     .linked-task td {
-        border-top: 1px solid @border-color;
+        border-top: 1px solid #D1D1D1;
         height: 32px;
         vertical-align: middle;
         padding: 0px 8px;
@@ -781,11 +770,11 @@ body.media-width-0-1200 .subtask .taskName {
     color: #83888D;
 }
 #relatedTasks {
-    border-bottom: 1px solid @border-color;
+    border-bottom: 1px solid #D1D1D1;
 
     .linked-task {
         &:hover {
-            background-color: @body-color-selected;
+            background-color: #F2F2F2;
         }
 
         &.invalid-link,
@@ -808,14 +797,14 @@ body.media-width-0-1200 .subtask .taskName {
     position:relative;
 }
 #editTable {
-    background-color: @body-color;
+    background-color: #fff;
 
     &.border-top .linked-task td {
-        border-top: 1px solid @border-color;
+        border-top: 1px solid #D1D1D1;
     }
 
     &.border-bottom .linked-task td {
-        border-bottom: 1px solid @border-color;
+        border-bottom: 1px solid #D1D1D1;
     }
 
     .actions {
@@ -841,3 +830,4 @@ body.media-width-0-1200 .subtask .taskName {
     clear: both;
 }
 .tabContent { display: none;}
+

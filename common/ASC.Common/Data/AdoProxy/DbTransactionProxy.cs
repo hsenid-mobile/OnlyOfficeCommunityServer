@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,23 +25,21 @@ namespace ASC.Common.Data.AdoProxy
     {
         private bool disposed;
         private readonly ProxyContext context;
-        private readonly int threadId;
         public readonly System.Data.Common.DbTransaction Transaction;
 
-        public DbTransactionProxy(System.Data.Common.DbTransaction transaction, ProxyContext ctx, int threadId)
+        public DbTransactionProxy(System.Data.Common.DbTransaction transaction, ProxyContext ctx)
         {
             if (transaction == null) throw new ArgumentNullException("transaction");
             if (ctx == null) throw new ArgumentNullException("ctx");
 
             Transaction = transaction;
             context = ctx;
-            this.threadId = threadId;
         }
 
 
         public override void Commit()
         {
-            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, "Commit", dur, threadId)))
+            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, "Commit", dur)))
             {
                 Transaction.Commit();
             }
@@ -49,7 +47,7 @@ namespace ASC.Common.Data.AdoProxy
 
         protected override DbConnection DbConnection
         {
-            get { return Transaction.Connection; }
+            get { return (DbConnection)Transaction.Connection; }
         }
 
         public override IsolationLevel IsolationLevel
@@ -59,7 +57,7 @@ namespace ASC.Common.Data.AdoProxy
 
         public override void Rollback()
         {
-            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, "Rollback", dur, threadId)))
+            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, "Rollback", dur)))
             {
                 Transaction.Rollback();
             }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.Files.Core;
 using ASC.Files.Core.Security;
 using ASC.Projects.Core.Domain;
 using ASC.Projects.Engine;
 using ASC.Web.Projects.Core;
-
 using Autofac;
 
 namespace ASC.Web.Projects.Classes
@@ -133,11 +131,6 @@ namespace ASC.Web.Projects.Classes
             {
                 return scope.Resolve<EngineFactory>().ProjectEngine.GetTeam(project.ID).Select(p => p.ID).ToList();
             }
-        }
-
-        public bool CanDownload(FileEntry entry, Guid userId)
-        {
-            return CanRead(entry, userId);
         }
 
         private enum SecurityAction

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-
 using ASC.Common.Caching;
 using ASC.Common.Logging;
 using ASC.Common.Threading;
@@ -177,7 +176,7 @@ namespace ASC.Data.Storage
             {
                 var tenant = CoreContext.TenantManager.GetTenant(tenantId);
                 CoreContext.TenantManager.SetCurrentTenant(tenant);
-                SecurityContext.CurrentUser = tenant.OwnerId;
+                SecurityContext.AuthenticateMe(tenant.OwnerId);
 
                 var dataStore = CdnStorageSettings.Load().DataStore;
 
@@ -192,7 +191,7 @@ namespace ASC.Data.Storage
                     }
 
                     Result = dataStore.GetInternalUri("", path, TimeSpan.Zero, null).AbsoluteUri.ToLower();
-                    Log.DebugFormat("UploadFile {0}", Result);
+                    LogManager.GetLogger("ASC").DebugFormat("UploadFile {0}", Result);
                     return Result;
                 }
             }

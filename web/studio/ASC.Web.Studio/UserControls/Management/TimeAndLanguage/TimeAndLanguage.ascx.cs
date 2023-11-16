@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.UI;
-
+using ASC.Web.Core.WhiteLabel;
+using ASC.Web.Studio.Utility;
 using ASC.Core;
 using ASC.Core.Tenants;
-using ASC.Web.Core.WhiteLabel;
 using ASC.Web.Studio.Core;
-using ASC.Web.Studio.PublicResources;
-using ASC.Web.Studio.Utility;
+using Resources;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -55,7 +54,7 @@ namespace ASC.Web.Studio.UserControls.Management
 
             HelpLink = CommonLinkUtility.GetHelpLink();
 
-            ShowHelper = !CoreContext.Configuration.CustomMode && CompanyWhiteLabelSettings.Instance.IsDefault;
+            ShowHelper = !(CoreContext.Configuration.Standalone && !CompanyWhiteLabelSettings.Instance.IsDefault);
         }
 
         protected string RenderLanguageSelector()
@@ -99,9 +98,9 @@ namespace ASC.Web.Studio.UserControls.Management
                     }
                 }
 
-                sb.AppendFormat("<option {0}value=\"{1}\">{2}</option>",
-                    _currentTenant.TimeZone != null && tz.Id.Equals(_currentTenant.TimeZone.Id) ? "selected " : string.Empty,
-                    tz.Id,
+                sb.AppendFormat("<option {0}value=\"{1}\">{2}</option>", 
+                    _currentTenant.TimeZone != null && tz.Id.Equals(_currentTenant.TimeZone.Id) ? "selected " : string.Empty, 
+                    tz.Id, 
                     displayName);
             }
             sb.Append("</select>");

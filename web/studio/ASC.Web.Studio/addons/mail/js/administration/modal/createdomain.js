@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ window.createDomainModal = (function($) {
             tplName: 'domainWizardStep' + (ASC.Resources.Master.Standalone && step !== firstStep ? step + 1 : step)
         });
 
-        $(html).find('.next').off('click').on('click', function() {
+        $(html).find('.next').unbind('click').bind('click', function() {
             if ($(this).hasClass('disable')) {
                 return false;
             }
@@ -58,7 +58,7 @@ window.createDomainModal = (function($) {
         });
 
         if (step != firstStep) {
-            $(html).find('.prev').off('click').on('click', function() {
+            $(html).find('.prev').unbind('click').bind('click', function() {
                 if ($(this).hasClass('disable')) {
                     return false;
                 }
@@ -74,7 +74,7 @@ window.createDomainModal = (function($) {
             });
         }
 
-        $(html).find('.cancel').off('click').on('click', function() {
+        $(html).find('.cancel').unbind('click').bind('click', function() {
             if ($(this).hasClass('disable')) {
                 return false;
             }
@@ -87,19 +87,19 @@ window.createDomainModal = (function($) {
             onBlock: function () {
                 if (step == firstStep) {
                     var domainInput = $('#mail_server_create_domain_wizard .web_domain');
-                    domainInput.off('textchange').on('textchange', function () {
+                    domainInput.unbind('textchange').bind('textchange', function () {
                         TMMail.setRequiredError('wizard_add_domain', false);
                     });
                 } else {
                     setTimeout(function () {
-                        $('#mail_server_create_domain_wizard:visible .next').trigger("focus");
+                        $('#mail_server_create_domain_wizard:visible .next').focus();
                     }, 100);
                 }
             }
         });
 
         PopupKeyUpActionProvider.ClearActions();
-        PopupKeyUpActionProvider.EnterAction = "jq('#mail_server_create_domain_wizard:visible .next').trigger('click');";
+        PopupKeyUpActionProvider.EnterAction = "jq('#mail_server_create_domain_wizard:visible .next').click();";
     }
 
     function checkDomainExistance() {
@@ -286,7 +286,7 @@ window.createDomainModal = (function($) {
     function getDnsSettingsBody(domainId, dnsInfo) {
         var body = $($.tmpl("domainDnsSettingsTmpl", { require_dns_info: dnsInfo }));
 
-        body.find(".buttons .verify").off('click').on('click', function() {
+        body.find(".buttons .verify").unbind('click').bind('click', function() {
             if ($(this).hasClass('disable')) {
                 return false;
             }
@@ -294,7 +294,7 @@ window.createDomainModal = (function($) {
             return false;
         });
 
-        body.find(".buttons .cancel").off('click').on('click', function() {
+        body.find(".buttons .cancel").unbind('click').bind('click', function() {
             if ($(this).hasClass('disable')) {
                 return false;
             }

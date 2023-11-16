@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Web;
@@ -27,7 +28,6 @@ using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
-using ASC.MessagingSystem;
 using ASC.Notify;
 using ASC.Notify.Model;
 using ASC.Notify.Patterns;
@@ -42,7 +42,6 @@ namespace ASC.Web.Studio.Core.Notify
     public class StudioNotifyService
     {
         private readonly INotifyClient client;
-        private ILog Log = LogManager.GetLogger("ASC.Notify");
 
         private static string EMailSenderName { get { return ASC.Core.Configuration.Constants.NotifyEMailSenderSysName; } }
 
@@ -83,10 +82,7 @@ namespace ASC.Web.Studio.Core.Notify
                 {
                     if (CoreContext.Configuration.Personal)
                     {
-                        if (!CoreContext.Configuration.CustomMode)
-                        {
-                            client.RegisterSendMethod(SendLettersPersonal, cron);
-                        }
+                        client.RegisterSendMethod(SendLettersPersonal, cron);
                     }
                     else
                     {
@@ -131,12 +127,12 @@ namespace ASC.Web.Studio.Core.Notify
 
         public void SendMsgToAdminAboutProfileUpdated()
         {
-            client.SendNoticeAsync(Actions.SelfProfileUpdated, null);
+            client.SendNoticeAsync(Actions.SelfProfileUpdated, null, null);
         }
 
         public void SendMsgToAdminFromNotAuthUser(string email, string message)
         {
-            client.SendNoticeAsync(Actions.UserMessageToAdmin, null,
+            client.SendNoticeAsync(Actions.UserMessageToAdmin, null, null,
                 new TagValue(Tags.Body, message), new TagValue(Tags.UserEmail, email));
         }
 
@@ -168,6 +164,7 @@ namespace ASC.Web.Studio.Core.Notify
                                      null,
                                      new[] { recipient },
                                      new[] { "email.sender" },
+                                     null,
                                      new TagValue(Tags.UserName, fname),
                                      new TagValue(Tags.UserLastName, lname),
                                      new TagValue(Tags.UserPosition, title),
@@ -183,44 +180,37 @@ namespace ASC.Web.Studio.Core.Notify
 
         public void SendToAdminVoipWarning(double balance)
         {
-            client.SendNoticeAsync(Actions.VoipWarning, null,
+            client.SendNoticeAsync(Actions.VoipWarning, null, null,
                 new TagValue(Tags.Body, balance));
         }
 
         public void SendToAdminVoipBlocked()
         {
-            client.SendNoticeAsync(Actions.VoipBlocked, null);
+            client.SendNoticeAsync(Actions.VoipBlocked, null, null);
         }
 
-
-
         #endregion
+
         #region User Password
 
         public void UserPasswordChange(UserInfo userInfo)
         {
-            var auditEventDate = DateTime.UtcNow;
-
-            String hash = auditEventDate.ToString("s");
-
+            var hash = CoreContext.Authentication.GetUserPasswordStamp(userInfo.ID).ToString("s");
             var confirmationUrl = CommonLinkUtility.GetConfirmationUrl(userInfo.Email, ConfirmType.PasswordChange, hash);
 
             Func<string> greenButtonText = () => WebstudioNotifyPatternResource.ButtonChangePassword;
 
             var action = CoreContext.Configuration.Personal
-                             ? (CoreContext.Configuration.CustomMode ? Actions.PersonalCustomModeEmailChangeV115 : Actions.PersonalPasswordChangeV115)
-                             : Actions.PasswordChangeV115;
+                             ? (CoreContext.Configuration.CustomMode ? Actions.PersonalCustomModePasswordChange : Actions.PersonalPasswordChange)
+                             : Actions.PasswordChange;
 
             client.SendNoticeToAsync(
                         action,
                         null,
                         StudioNotifyHelper.RecipientFromEmail(userInfo.Email, false),
                         new[] { EMailSenderName },
+                        null,
                         TagValues.GreenButton(greenButtonText, confirmationUrl));
-
-            var displayUserName = userInfo.DisplayUserName(false);
-
-            MessageService.Send(HttpContext.Current.Request, auditEventDate, MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.ID), displayUserName);
         }
 
         #endregion
@@ -234,14 +224,15 @@ namespace ASC.Web.Studio.Core.Notify
             Func<string> greenButtonText = () => WebstudioNotifyPatternResource.ButtonChangeEmail;
 
             var action = CoreContext.Configuration.Personal
-                             ? (CoreContext.Configuration.CustomMode ? Actions.PersonalCustomModeEmailChangeV115 : Actions.PersonalEmailChangeV115)
-                             : Actions.EmailChangeV115;
+                             ? (CoreContext.Configuration.CustomMode ? Actions.PersonalCustomModeEmailChange : Actions.PersonalEmailChange)
+                             : Actions.EmailChange;
 
             client.SendNoticeToAsync(
                         action,
                         null,
                         StudioNotifyHelper.RecipientFromEmail(email, false),
                         new[] { EMailSenderName },
+                        null,
                         TagValues.GreenButton(greenButtonText, confirmationUrl),
                         new TagValue(CommonTags.Culture, user.GetCulture().Name));
         }
@@ -257,6 +248,7 @@ namespace ASC.Web.Studio.Core.Notify
                         null,
                         StudioNotifyHelper.RecipientFromEmail(email, false),
                         new[] { EMailSenderName },
+                        null,
                         new TagValue(Tags.InviteLink, confirmationUrl),
                         TagValues.GreenButton(greenButtonText, confirmationUrl),
                         new TagValue(Tags.UserDisplayName, (user.DisplayUserName() ?? string.Empty).Trim()));
@@ -272,13 +264,15 @@ namespace ASC.Web.Studio.Core.Notify
         }
 
         public void SendMailboxCreated(List<string> toEmails, string username, string address, string server,
-            string encyption, int portImap, int portSmtp, string login, bool skipSettings = false)
+            string encyption, int portImap, int portSmtp, string login)
         {
             var tags = new List<ITagValue>
             {
                 new TagValue(Tags.UserName, username ?? string.Empty),
                 new TagValue(Tags.Address, address ?? string.Empty)
             };
+
+            var skipSettings = string.IsNullOrEmpty(server);
 
             if (!skipSettings)
             {
@@ -300,6 +294,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(toEmails, false),
                 new[] { EMailSenderName },
+                null,
                 tags.ToArray());
         }
 
@@ -310,6 +305,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(toEmails, false),
                 new[] { EMailSenderName },
+                null,
                 new TagValue(Tags.UserName, username ?? string.Empty),
                 new TagValue(Tags.Address, address ?? string.Empty));
         }
@@ -327,6 +323,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(userInfo.Email, false),
                 new[] { EMailSenderName },
+                null,
                 TagValues.GreenButton(greenButtonText, confirmationUrl));
         }
 
@@ -341,16 +338,14 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(userInfo.Email, false),
                 new[] { EMailSenderName },
+                null,
                 TagValues.GreenButton(greenButtonText, confirmationUrl));
         }
 
 
         public void UserHasJoin()
         {
-            if (!CoreContext.Configuration.Personal)
-            {
-                client.SendNoticeAsync(Actions.UserHasJoin, null);
-            }
+            client.SendNoticeAsync(Actions.UserHasJoin, null, null);
         }
 
         public void SendJoinMsg(string email, EmployeeType emplType)
@@ -365,6 +360,7 @@ namespace ASC.Web.Studio.Core.Notify
                         null,
                         StudioNotifyHelper.RecipientFromEmail(email, true),
                         new[] { EMailSenderName },
+                        null,
                         new TagValue(Tags.InviteLink, inviteUrl),
                         TagValues.GreenButton(greenButtonText, inviteUrl));
         }
@@ -375,6 +371,7 @@ namespace ASC.Web.Studio.Core.Notify
 
             INotifyAction notifyAction;
             var footer = "social";
+            var analytics = string.Empty;
 
             if (CoreContext.Configuration.Personal)
             {
@@ -406,7 +403,9 @@ namespace ASC.Web.Studio.Core.Notify
             }
             else
             {
-                notifyAction = Actions.SaasUserWelcomeV115;
+                notifyAction = Actions.SaasUserWelcomeV10;
+                var tenant = CoreContext.TenantManager.GetCurrentTenant();
+                analytics = StudioNotifyHelper.GetNotifyAnalytics(tenant.TenantId, notifyAction, false, false, true, false);
             }
 
             Func<string> greenButtonText = () => TenantExtra.Enterprise
@@ -418,11 +417,13 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(newUserInfo.Email, false),
                 new[] { EMailSenderName },
+                null,
                 new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
                 new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
                 TagValues.GreenButton(greenButtonText, CommonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
                 new TagValue(CommonTags.Footer, footer),
-                new TagValue(CommonTags.MasterTemplate, CoreContext.Configuration.Personal ? "HtmlMasterPersonal" : "HtmlMaster"));
+                new TagValue(CommonTags.MasterTemplate, CoreContext.Configuration.Personal ? "HtmlMasterPersonal" : "HtmlMaster"),
+                new TagValue(CommonTags.Analytics, analytics));
         }
 
         public void GuestInfoAddedAfterInvite(UserInfo newUserInfo)
@@ -430,6 +431,7 @@ namespace ASC.Web.Studio.Core.Notify
             if (!CoreContext.UserManager.UserExists(newUserInfo.ID)) return;
 
             INotifyAction notifyAction;
+            var analytics = string.Empty;
             var footer = "social";
 
             if (TenantExtra.Enterprise)
@@ -445,7 +447,9 @@ namespace ASC.Web.Studio.Core.Notify
             }
             else
             {
-                notifyAction = Actions.SaasGuestWelcomeV115;
+                notifyAction = Actions.SaasGuestWelcomeV10;
+                var tenant = CoreContext.TenantManager.GetCurrentTenant();
+                analytics = StudioNotifyHelper.GetNotifyAnalytics(tenant.TenantId, notifyAction, false, false, false, true);
             }
 
             Func<string> greenButtonText = () => TenantExtra.Enterprise
@@ -457,10 +461,12 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(newUserInfo.Email, false),
                 new[] { EMailSenderName },
+                null,
                 new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
                 new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
                 TagValues.GreenButton(greenButtonText, CommonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-                new TagValue(CommonTags.Footer, footer));
+                new TagValue(CommonTags.Footer, footer),
+                new TagValue(CommonTags.Analytics, analytics));
         }
 
         public void UserInfoActivation(UserInfo newUserInfo)
@@ -469,6 +475,7 @@ namespace ASC.Web.Studio.Core.Notify
                 throw new ArgumentException("User is already activated!");
 
             INotifyAction notifyAction;
+            var analytics = string.Empty;
             var footer = "social";
 
             if (TenantExtra.Enterprise)
@@ -484,7 +491,9 @@ namespace ASC.Web.Studio.Core.Notify
             }
             else
             {
-                notifyAction = Actions.SaasUserActivationV115;
+                notifyAction = Actions.SaasUserActivationV10;
+                var tenant = CoreContext.TenantManager.GetCurrentTenant();
+                analytics = StudioNotifyHelper.GetNotifyAnalytics(tenant.TenantId, notifyAction, false, false, true, false);
             }
 
             var confirmationUrl = GenerateActivationConfirmUrl(newUserInfo);
@@ -496,10 +505,12 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(newUserInfo.Email, false),
                 new[] { EMailSenderName },
+                null,
                 new TagValue(Tags.ActivateUrl, confirmationUrl),
                 TagValues.GreenButton(greenButtonText, confirmationUrl),
                 new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
-                new TagValue(CommonTags.Footer, footer));
+                new TagValue(CommonTags.Footer, footer),
+                new TagValue(CommonTags.Analytics, analytics));
         }
 
         public void GuestInfoActivation(UserInfo newUserInfo)
@@ -508,6 +519,7 @@ namespace ASC.Web.Studio.Core.Notify
                 throw new ArgumentException("User is already activated!");
 
             INotifyAction notifyAction;
+            var analytics = string.Empty;
             var footer = "social";
 
             if (TenantExtra.Enterprise)
@@ -523,7 +535,9 @@ namespace ASC.Web.Studio.Core.Notify
             }
             else
             {
-                notifyAction = Actions.SaasGuestActivationV115;
+                notifyAction = Actions.SaasGuestActivationV10;
+                var tenant = CoreContext.TenantManager.GetCurrentTenant();
+                analytics = StudioNotifyHelper.GetNotifyAnalytics(tenant.TenantId, notifyAction, false, false, false, true);
             }
 
             var confirmationUrl = GenerateActivationConfirmUrl(newUserInfo);
@@ -535,10 +549,12 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(newUserInfo.Email, false),
                 new[] { EMailSenderName },
+                null,
                 new TagValue(Tags.ActivateUrl, confirmationUrl),
                 TagValues.GreenButton(greenButtonText, confirmationUrl),
                 new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
-                new TagValue(CommonTags.Footer, footer));
+                new TagValue(CommonTags.Footer, footer),
+                new TagValue(CommonTags.Analytics, analytics));
         }
 
         public void SendMsgProfileDeletion(UserInfo user)
@@ -556,6 +572,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(user.Email, false),
                 new[] { EMailSenderName },
+                null,
                 TagValues.GreenButton(greenButtonText, confirmationUrl),
                 new TagValue(CommonTags.Culture, user.GetCulture().Name));
         }
@@ -583,13 +600,14 @@ namespace ASC.Web.Studio.Core.Notify
                             null,
                             new IRecipient[] { admin },
                             new[] { EMailSenderName },
+                            null,
                             new TagValue(Tags.FromUserName, user.DisplayUserName()),
                             new TagValue(Tags.FromUserLink, GetUserProfileLink(user.ID)));
                     }
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex);
+                    LogManager.GetLogger("ASC.Notify").Error(ex);
                 }
             });
 
@@ -602,6 +620,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 new[] { StudioNotifyHelper.ToRecipient(recipientId) },
                 new[] { EMailSenderName },
+                null,
                 new TagValue(Tags.UserName, DisplayUserSettings.GetFullUserName(recipientId)),
                 new TagValue(Tags.FromUserName, fromUser.DisplayUserName()),
                 new TagValue(Tags.FromUserLink, GetUserProfileLink(fromUser.ID)),
@@ -616,6 +635,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 new[] { StudioNotifyHelper.ToRecipient(recipientId) },
                 new[] { EMailSenderName },
+                null,
                 new TagValue(Tags.UserName, DisplayUserSettings.GetFullUserName(recipientId)),
                 new TagValue(Tags.FromUserName, fromUser.DisplayUserName()),
                 new TagValue(Tags.FromUserLink, GetUserProfileLink(fromUser.ID)),
@@ -631,6 +651,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 new[] { StudioNotifyHelper.ToRecipient(recipientId) },
                 new[] { EMailSenderName },
+                null,
                 new TagValue(Tags.UserName, DisplayUserSettings.GetFullUserName(recipientId)),
                 new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
                 new TagValue(Tags.FromUserLink, GetUserProfileLink(fromUserId)),
@@ -647,6 +668,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 new[] { StudioNotifyHelper.ToRecipient(recipientId) },
                 new[] { EMailSenderName },
+                null,
                 new TagValue(Tags.UserName, DisplayUserSettings.GetFullUserName(recipientId)),
                 new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
                 new TagValue(Tags.FromUserLink, GetUserProfileLink(fromUserId)),
@@ -669,7 +691,6 @@ namespace ASC.Web.Studio.Core.Notify
                 notifyAction = defaultRebranding ? Actions.EnterpriseAdminWelcomeV10 : Actions.EnterpriseWhitelabelAdminWelcomeV10;
 
                 tagValues.Add(TagValues.GreenButton(() => WebstudioNotifyPatternResource.ButtonAccessControlPanel, CommonLinkUtility.GetFullAbsolutePath(SetupInfo.ControlPanelUrl)));
-                tagValues.Add(new TagValue(Tags.ControlPanelUrl, CommonLinkUtility.GetFullAbsolutePath(SetupInfo.ControlPanelUrl).TrimEnd('/')));
             }
             else if (TenantExtra.Opensource)
             {
@@ -679,10 +700,25 @@ namespace ASC.Web.Studio.Core.Notify
             }
             else
             {
-                notifyAction = Actions.SaasAdminWelcomeV115;
-                //tagValues.Add(TagValues.GreenButton(() => WebstudioNotifyPatternResource.ButtonConfigureRightNow, CommonLinkUtility.GetFullAbsolutePath(CommonLinkUtility.GetAdministration(ManagementType.General))));
+                notifyAction = Actions.SaasAdminWelcomeV10;
+
+                tagValues.Add(TagValues.GreenButton(() => WebstudioNotifyPatternResource.ButtonConfigureRightNow, CommonLinkUtility.GetFullAbsolutePath(CommonLinkUtility.GetAdministration(ManagementType.General))));
+
+                var tenant = CoreContext.TenantManager.GetCurrentTenant();
+                var analytics = StudioNotifyHelper.GetNotifyAnalytics(tenant.TenantId, notifyAction, false, true, false, false);
+                tagValues.Add(new TagValue(CommonTags.Analytics, analytics));
+
+                tagValues.Add(TagValues.TableTop());
+                tagValues.Add(TagValues.TableItem(1, null, null, StudioNotifyHelper.GetNotificationImageUrl("tips-welcome-regional-50.png"), () => WebstudioNotifyPatternResource.pattern_saas_admin_welcome_v10_item_regional, null, null));
+                tagValues.Add(TagValues.TableItem(2, null, null, StudioNotifyHelper.GetNotificationImageUrl("tips-welcome-brand-50.png"), () => WebstudioNotifyPatternResource.pattern_saas_admin_welcome_v10_item_brand, null, null));
+                tagValues.Add(TagValues.TableItem(3, null, null, StudioNotifyHelper.GetNotificationImageUrl("tips-welcome-customize-50.png"), () => WebstudioNotifyPatternResource.pattern_saas_admin_welcome_v10_item_customize, null, null));
+                tagValues.Add(TagValues.TableItem(4, null, null, StudioNotifyHelper.GetNotificationImageUrl("tips-welcome-security-50.png"), () => WebstudioNotifyPatternResource.pattern_saas_admin_welcome_v10_item_security, null, null));
+                tagValues.Add(TagValues.TableItem(5, null, null, StudioNotifyHelper.GetNotificationImageUrl("tips-welcome-usertrack-50.png"), () => WebstudioNotifyPatternResource.pattern_saas_admin_welcome_v10_item_usertrack, null, null));
+                tagValues.Add(TagValues.TableItem(6, null, null, StudioNotifyHelper.GetNotificationImageUrl("tips-welcome-backup-50.png"), () => WebstudioNotifyPatternResource.pattern_saas_admin_welcome_v10_item_backup, null, null));
+                tagValues.Add(TagValues.TableItem(7, null, null, StudioNotifyHelper.GetNotificationImageUrl("tips-welcome-telephony-50.png"), () => WebstudioNotifyPatternResource.pattern_saas_admin_welcome_v10_item_telephony, null, null));
+                tagValues.Add(TagValues.TableBottom());
+
                 tagValues.Add(new TagValue(CommonTags.Footer, "common"));
-                tagValues.Add(new TagValue(Tags.PricingPage, CommonLinkUtility.GetFullAbsolutePath("~/Tariffs.aspx")));
             }
 
             tagValues.Add(new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()));
@@ -692,6 +728,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(newUserInfo.Email, false),
                 new[] { EMailSenderName },
+                null,
                 tagValues.ToArray());
         }
 
@@ -704,6 +741,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 new[] { StudioNotifyHelper.ToRecipient(userId) },
                 new[] { EMailSenderName },
+                null,
                 new TagValue(Tags.OwnerName, CoreContext.UserManager.GetUsers(userId).DisplayUserName()));
         }
 
@@ -719,29 +757,26 @@ namespace ASC.Web.Studio.Core.Notify
                 Actions.RestoreStarted,
                 null,
                 users,
-                new[] { EMailSenderName });
+                new[] { EMailSenderName },
+                null);
         }
 
         public void SendMsgRestoreCompleted(bool notifyAllUsers)
         {
-            var users = notifyAllUsers
-                    ? CoreContext.UserManager.GetUsers(EmployeeStatus.Active)
-                    : new[] { CoreContext.UserManager.GetUsers(CoreContext.TenantManager.GetCurrentTenant().OwnerId) };
+            var owner = CoreContext.UserManager.GetUsers(CoreContext.TenantManager.GetCurrentTenant().OwnerId);
 
-            foreach (var user in users)
-            {
-                var hash = CoreContext.Authentication.GetUserPasswordStamp(user.ID).ToString("s");
-                var confirmationUrl = CommonLinkUtility.GetConfirmationUrl(user.Email, ConfirmType.PasswordChange, hash);
+            var users =
+                notifyAllUsers
+                    ? CoreContext.UserManager.GetUsers(EmployeeStatus.Active).Select(u => StudioNotifyHelper.ToRecipient(u.ID)).ToArray()
+                    : new[] { StudioNotifyHelper.ToRecipient(owner.ID) };
 
-                Func<string> greenButtonText = () => WebstudioNotifyPatternResource.ButtonSetPassword;
-
-                client.SendNoticeToAsync(
-                    Actions.RestoreCompletedV115,
-                    null,
-                    new IRecipient[] { user },
-                    new[] { EMailSenderName },
-                    TagValues.GreenButton(greenButtonText, confirmationUrl));
-            }
+            client.SendNoticeToAsync(
+                Actions.RestoreCompleted,
+                null,
+                users,
+                new[] { EMailSenderName },
+                null,
+                new TagValue(Tags.OwnerName, owner.DisplayUserName()));
         }
 
         #endregion
@@ -759,6 +794,7 @@ namespace ASC.Web.Studio.Core.Notify
                         null,
                         new IRecipient[] { u },
                         new[] { EMailSenderName },
+                        null,
                         new TagValue(Tags.ActivateUrl, activateUrl),
                         TagValues.GreenButton(greenButtonText, deactivateUrl),
                         new TagValue(Tags.OwnerName, u.DisplayUserName()));
@@ -775,6 +811,7 @@ namespace ASC.Web.Studio.Core.Notify
                         null,
                         new IRecipient[] { u },
                         new[] { EMailSenderName },
+                        null,
                         TagValues.GreenButton(greenButtonText, url),
                         new TagValue(Tags.AutoRenew, showAutoRenewText.ToString()),
                         new TagValue(Tags.OwnerName, u.DisplayUserName()));
@@ -785,10 +822,11 @@ namespace ASC.Web.Studio.Core.Notify
             Func<string> greenButtonText = () => WebstudioNotifyPatternResource.ButtonLeaveFeedback;
 
             client.SendNoticeToAsync(
-                        Actions.PortalDeleteSuccessV115,
+                        Actions.PortalDeleteSuccessV10,
                         null,
                         new IRecipient[] { owner },
                         new[] { EMailSenderName },
+                        null,
                         TagValues.GreenButton(greenButtonText, url),
                         new TagValue(Tags.OwnerName, owner.DisplayUserName()));
         }
@@ -806,6 +844,7 @@ namespace ASC.Web.Studio.Core.Notify
                         null,
                         new IRecipient[] { u },
                         new[] { EMailSenderName },
+                        null,
                         new TagValue("ConfirmDnsUpdate", confirmDnsUpdateUrl),//TODO: Tag is deprecated and replaced by TagGreenButton
                         TagValues.GreenButton(greenButtonText, confirmDnsUpdateUrl),
                         new TagValue("PortalAddress", AddHttpToUrl(portalAddress)),
@@ -823,6 +862,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 new IRecipient[] { owner },
                 new[] { EMailSenderName },
+                null,
                 TagValues.GreenButton(greenButtonText, confirmOwnerUpdateUrl),
                 new TagValue(Tags.UserName, newOwner.DisplayUserName()),
                 new TagValue(Tags.OwnerName, owner.DisplayUserName()));
@@ -835,6 +875,7 @@ namespace ASC.Web.Studio.Core.Notify
             {
                 INotifyAction notifyAction;
                 var footer = "common";
+                var analytics = string.Empty;
 
                 if (TenantExtra.Enterprise)
                 {
@@ -849,7 +890,9 @@ namespace ASC.Web.Studio.Core.Notify
                 }
                 else
                 {
-                    notifyAction = Actions.SaasAdminActivationV115;
+                    notifyAction = Actions.SaasAdminActivationV10;
+                    var tenant = CoreContext.TenantManager.GetCurrentTenant();
+                    analytics = StudioNotifyHelper.GetNotifyAnalytics(tenant.TenantId, notifyAction, false, true, false, false);
                 }
 
                 var confirmationUrl = CommonLinkUtility.GetConfirmationUrl(u.Email, ConfirmType.EmailActivation);
@@ -862,34 +905,35 @@ namespace ASC.Web.Studio.Core.Notify
                     null,
                     StudioNotifyHelper.RecipientFromEmail(u.Email, false),
                     new[] { EMailSenderName },
+                    null,
                     new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
                     new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
                     new TagValue(Tags.ActivateUrl, confirmationUrl),
                     TagValues.GreenButton(greenButtonText, confirmationUrl),
-                    new TagValue(CommonTags.Footer, footer));
+                    new TagValue(CommonTags.Footer, footer),
+                    new TagValue(CommonTags.Analytics, analytics));
             }
             catch (Exception error)
             {
-                Log.Error(error);
+                LogManager.GetLogger("ASC.Notify").Error(error);
             }
         }
 
         #region Personal
 
-        public void SendInvitePersonal(string email, string additionalMember = "")
+        public void SendInvitePersonal(string email, string additionalMember = "", bool analytics = true)
         {
             var newUserInfo = CoreContext.UserManager.GetUserByEmail(email);
             if (CoreContext.UserManager.UserExists(newUserInfo.ID)) return;
 
             var lang = CoreContext.Configuration.CustomMode
                            ? "ru-RU"
-                           : Thread.CurrentThread.CurrentUICulture.Name;
-
-            var culture = SetupInfo.GetPersonalCulture(lang);
+                           : Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName;
 
             var confirmUrl = CommonLinkUtility.GetConfirmationUrl(email, ConfirmType.EmpInvite, (int)EmployeeType.User)
                              + "&emplType=" + (int)EmployeeType.User
-                             + "&lang=" + culture.Key
+                             + "&analytics=" + analytics
+                             + "&lang=" + lang
                              + additionalMember;
 
             client.SendNoticeToAsync(
@@ -897,6 +941,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(email, false),
                 new[] { EMailSenderName },
+                null,
                 new TagValue(Tags.InviteLink, confirmUrl),
                 new TagValue(CommonTags.Footer, CoreContext.Configuration.CustomMode ? "personalCustomMode" : "personal"),
                 new TagValue(CommonTags.Culture, Thread.CurrentThread.CurrentUICulture.Name));
@@ -909,6 +954,7 @@ namespace ASC.Web.Studio.Core.Notify
                 null,
                 StudioNotifyHelper.RecipientFromEmail(newUserInfo.Email, true),
                 new[] { EMailSenderName },
+                null,
                 new TagValue(CommonTags.Footer, CoreContext.Configuration.CustomMode ? "personalCustomMode" : "personal"),
                 new TagValue(CommonTags.MasterTemplate, "HtmlMasterPersonal"));
         }
@@ -922,9 +968,9 @@ namespace ASC.Web.Studio.Core.Notify
             MigrationNotify(Actions.MigrationPortalStart, region, string.Empty, notify);
         }
 
-        public void MigrationPortalSuccess(string region, string url, bool notify, int toTenantId)
+        public void MigrationPortalSuccess(string region, string url, bool notify)
         {
-            MigrationNotify(Actions.MigrationPortalSuccessV115, region, url, notify, toTenantId);
+            MigrationNotify(Actions.MigrationPortalSuccess, region, url, notify);
         }
 
         public void MigrationPortalError(string region, string url, bool notify)
@@ -932,61 +978,24 @@ namespace ASC.Web.Studio.Core.Notify
             MigrationNotify(!string.IsNullOrEmpty(region) ? Actions.MigrationPortalError : Actions.MigrationPortalServerFailure, region, url, notify);
         }
 
-        private void MigrationNotify(INotifyAction action, string region, string url, bool notify, int? toTenantId = null)
+        private void MigrationNotify(INotifyAction action, string region, string url, bool notify)
         {
             var users = CoreContext.UserManager.GetUsers()
-               .Where(u => notify ? u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated) : u.IsOwner());
+                .Where(u => notify ? u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated) : u.IsOwner())
+                .Select(u => StudioNotifyHelper.ToRecipient(u.ID))
+                .ToArray();
 
             if (users.Any())
             {
-                var args = CreateArgs(region, url);
-                if (action == Actions.MigrationPortalSuccessV115)
-                {
-                    foreach (var user in users)
-                    {
-                        var currentArgs = new List<ITagValue>(args);
-
-                        var newTenantId = toTenantId.HasValue ? toTenantId.Value : CoreContext.TenantManager.GetCurrentTenant().TenantId;
-                        var hash = CoreContext.Authentication.GetUserPasswordStamp(user.ID).ToString("s");
-                        var confirmationUrl = url + "/" + CommonLinkUtility.GetConfirmationUrlRelative(newTenantId, user.Email, ConfirmType.PasswordChange, hash);
-
-                        Func<string> greenButtonText = () => WebstudioNotifyPatternResource.ButtonSetPassword;
-                        currentArgs.Add(TagValues.GreenButton(greenButtonText, confirmationUrl));
-
-                        client.SendNoticeToAsync(
-                            action,
-                            null,
-                            new IRecipient[] { user },
-                            new[] { EMailSenderName },
-                            currentArgs.ToArray());
-                    }
-                }
-                else
-                {
-                    client.SendNoticeToAsync(
-                        action,
-                        null,
-                        users.Select(u => StudioNotifyHelper.ToRecipient(u.ID)).ToArray(),
-                        new[] { EMailSenderName },
-                        args.ToArray());
-                }
+                client.SendNoticeToAsync(
+                    action,
+                    null,
+                    users,
+                    new[] { EMailSenderName },
+                    null,
+                    new TagValue(Tags.RegionName, TransferResourceHelper.GetRegionDescription(region)),
+                    new TagValue(Tags.PortalUrl, url));
             }
-        }
-        private List<ITagValue> CreateArgs(string region, string url)
-        {
-            var args = new List<ITagValue>()
-                    {
-                        new TagValue(Tags.RegionName, TransferResourceHelper.GetRegionDescription(region)),
-                        new TagValue(Tags.PortalUrl, url)
-                    };
-
-            if (!string.IsNullOrEmpty(url))
-            {
-                args.Add(new TagValue(CommonTags.VirtualRootPath, url));
-                args.Add(new TagValue(CommonTags.ProfileUrl, url + CommonLinkUtility.GetMyStaff()));
-                args.Add(new TagValue(CommonTags.LetterLogo, TenantLogoManager.GetLogoDark(true)));
-            }
-            return args;
         }
 
         public void PortalRenameNotify(String oldVirtualRootPath)
@@ -1013,13 +1022,14 @@ namespace ASC.Web.Studio.Core.Notify
                             null,
                             new[] { StudioNotifyHelper.ToRecipient(u.ID) },
                             new[] { EMailSenderName },
+                            null,
                             new TagValue(Tags.PortalUrl, oldVirtualRootPath),
                             new TagValue(Tags.UserDisplayName, u.DisplayUserName()));
                     }
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex);
+                    LogManager.GetLogger("ASC.Notify").Error(ex);
                 }
             });
         }
@@ -1048,49 +1058,10 @@ namespace ASC.Web.Studio.Core.Notify
         {
             var confirmUrl = CommonLinkUtility.GetConfirmationUrl(user.Email, ConfirmType.Activation);
 
-            if (HttpContext.Current == null)
-            {
-                confirmUrl = CorrectUrlScheme(confirmUrl);
-            }
-
             return confirmUrl + String.Format("&uid={0}&firstname={1}&lastname={2}",
                                               SecurityContext.CurrentAccount.ID,
                                               HttpUtility.UrlEncode(user.FirstName),
                                               HttpUtility.UrlEncode(user.LastName));
-        }
-
-        private static string CorrectUrlScheme(string url)
-        {
-            try
-            {
-                var tenantId = CoreContext.TenantManager.GetCurrentTenant().TenantId;
-                var cachedRewriteUrlStr = Common.Caching.AscCache.Default.Get<string>("REWRITE_URL" + tenantId);
-
-                if (string.IsNullOrEmpty(cachedRewriteUrlStr))
-                {
-                    return url;
-                }
-
-                var cachedRewriteUriScheme = new Uri(cachedRewriteUrlStr).Scheme;
-                var uriBuilder = new UriBuilder(url);
-
-                if (uriBuilder.Scheme == cachedRewriteUriScheme)
-                {
-                    return url;
-                }
-
-                var hadDefaultPort = uriBuilder.Uri.IsDefaultPort;
-
-                uriBuilder.Scheme = cachedRewriteUriScheme;
-                uriBuilder.Port = hadDefaultPort ? -1 : uriBuilder.Port;
-
-                return uriBuilder.ToString();
-            }
-            catch (Exception ex)
-            {
-                LogManager.GetLogger("ASC.Notify").Error(ex);
-                return url;
-            }
         }
 
         #endregion
@@ -1112,6 +1083,7 @@ namespace ASC.Web.Studio.Core.Notify
                     null,
                     new IRecipient[] { recipient },
                     new[] { EMailSenderName },
+                    null,
                     new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
                     new TagValue(Tags.UserLastName, u.LastName.HtmlEncode()),
                     new TagValue(Tags.UserEmail, u.Email.HtmlEncode()),
@@ -1122,7 +1094,7 @@ namespace ASC.Web.Studio.Core.Notify
             }
             catch (Exception error)
             {
-                Log.Error(error);
+                LogManager.GetLogger("ASC.Notify").Error(error);
             }
         }
 
@@ -1171,6 +1143,7 @@ namespace ASC.Web.Studio.Core.Notify
                     null,
                     new[] { StudioNotifyHelper.ToRecipient(u.ID) },
                     new[] { EMailSenderName },
+                    null,
                     new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
                     new TagValue(Tags.PortalUrl, serverRootPath),
                     new TagValue(Tags.ControlPanelUrl, GetControlPanelUrl(serverRootPath)));

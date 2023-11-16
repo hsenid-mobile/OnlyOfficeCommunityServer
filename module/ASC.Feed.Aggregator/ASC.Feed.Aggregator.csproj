@@ -43,8 +43,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <DocumentationFile>..\..\web\studio\ASC.Web.Studio\bin\ASC.Feed.Aggregator.xml</DocumentationFile>
-    <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -58,7 +56,6 @@
     <Compile Include="Config\FeedConfigurationSection.cs" />
     <Compile Include="FeedAggregatorService.cs" />
     <Compile Include="FeedAggregatorLauncher.cs" />
-    <Compile Include="HealthCheckService.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Modules\Community\BlogsModule.cs" />
     <Compile Include="Modules\Community\BookmarksModule.cs" />
@@ -74,8 +71,6 @@
     <Compile Include="Modules\Documents\FilesModule.cs" />
     <Compile Include="Modules\Documents\FoldersModule.cs" />
     <Compile Include="Modules\ModulesHelper.cs" />
-    <Compile Include="Modules\People\BirthdaysModule.cs" />
-    <Compile Include="Modules\People\NewEmployeeModule.cs" />
     <Compile Include="Modules\Projects\DiscussionsModule.cs" />
     <Compile Include="Modules\Projects\MilestonesModule.cs" />
     <Compile Include="Modules\Projects\TasksModule.cs" />
@@ -139,11 +134,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Autofac">
-      <Version>6.2.0</Version>
+      <Version>5.1.2</Version>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.ServiceModel" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

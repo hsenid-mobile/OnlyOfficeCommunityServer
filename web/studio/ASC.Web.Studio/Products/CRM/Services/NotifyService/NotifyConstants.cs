@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,18 @@
 
 #region Import
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using ASC.Core;
+using ASC.Core.Users;
+using ASC.Notify;
 using ASC.Notify.Model;
+using ASC.Notify.Patterns;
+using ASC.Notify.Recipients;
+using ASC.Core.Tenants;
 
 #endregion
 
@@ -33,7 +44,7 @@ namespace ASC.Web.CRM.Services.NotifyService
         public static readonly INotifyAction Event_TaskReminder = new NotifyAction("TaskReminder", "auto reminder about task");
 
         public static readonly INotifyAction Event_ResponsibleForOpportunity = new NotifyAction("ResponsibleForOpportunity", "responsible for opportunity");
-
+       
         public static readonly INotifyAction Event_AddRelationshipEvent = new NotifyAction("AddRelationshipEvent", "add relationship event");
 
         public static readonly INotifyAction Event_ExportCompleted = new NotifyAction("ExportCompleted", "export is completed");

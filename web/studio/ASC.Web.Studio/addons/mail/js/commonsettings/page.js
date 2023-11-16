@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ window.commonSettingsPage = (function($) {
                             mailBox.markFolderAsChanged(TMMail.sysfolders.trash.id);
                             mailBox.markFolderAsChanged(TMMail.sysfolders.spam.id);
                             mailCache.clear();
-                            serviceManager.updateFolders({}, {}, ASC.Resources.Master.ResourceJS.LoadingProcessing);
+                            serviceManager.updateFolders({}, {}, ASC.Resources.Master.Resource.LoadingProcessing);
                             window.userFoldersPanel.refresh();
                         },
                         error: function (e, error) {

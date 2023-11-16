@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,94 +16,86 @@
 
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using ASC.Common.Logging;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core;
-using StackExchange.Redis.Extensions.Core.Abstractions;
-using StackExchange.Redis.Extensions.Core.Implementations;
+using StackExchange.Redis.Extensions.Core.Extensions;
 using StackExchange.Redis.Extensions.LegacyConfiguration;
-using StackExchange.Redis.Extensions.Newtonsoft;
-
-using LogManager = ASC.Common.Logging.BaseLogManager;
 
 namespace ASC.Common.Caching
 {
     public class RedisCache : ICache, ICacheNotify
     {
-        private readonly IRedisDatabase _redis;
+        private readonly string CacheId = Guid.NewGuid().ToString();
+        private readonly StackExchangeRedisCacheClient redis;
+        private readonly ConcurrentDictionary<Type, ConcurrentBag<Action<object, CacheNotifyAction>>> actions = new ConcurrentDictionary<Type, ConcurrentBag<Action<object, CacheNotifyAction>>>();
+
 
         public RedisCache()
         {
             var configuration = ConfigurationManagerExtension.GetSection("redisCacheClient") as RedisCachingSectionHandler;
-
             if (configuration == null)
                 throw new ConfigurationErrorsException("Unable to locate <redisCacheClient> section into your configuration file. Take a look https://github.com/imperugo/StackExchange.Redis.Extensions");
 
-            var redisConfiguration = RedisCachingSectionHandler.GetConfig();
-
-            var connectionPoolManager = new RedisCacheConnectionPoolManager(redisConfiguration);
-         
-            _redis = new RedisCacheClient(connectionPoolManager, new NewtonsoftSerializer(), redisConfiguration).GetDbFromConfiguration();
+            var stringBuilder = new StringBuilder();
+            using (var stream = new StringWriter(stringBuilder))
+            {
+                var opts = RedisCachingSectionHandler.GetConfig().ConfigurationOptions;
+                opts.SyncTimeout = 60000;
+                var connectionMultiplexer = (IConnectionMultiplexer)ConnectionMultiplexer.Connect(opts, stream);
+                redis = new StackExchangeRedisCacheClient(connectionMultiplexer, new Serializer());
+                LogManager.GetLogger("ASC").Debug(stringBuilder.ToString());
+            }
         }
+
 
         public T Get<T>(string key) where T : class
         {
-            return Task.Run(() => _redis.GetAsync<T>(key))
-                       .GetAwaiter()
-                       .GetResult();
+            return redis.Get<T>(key);
         }
 
         public void Insert(string key, object value, TimeSpan sligingExpiration)
         {
-            Task.Run(() => _redis.ReplaceAsync(key, value, sligingExpiration))
-                .GetAwaiter()
-                .GetResult();
+            redis.Replace(key, value, sligingExpiration);
         }
 
         public void Insert(string key, object value, DateTime absolutExpiration)
         {
-            Task.Run(() => _redis.ReplaceAsync(key, value, absolutExpiration == DateTime.MaxValue ? DateTimeOffset.MaxValue : new DateTimeOffset(absolutExpiration)))
-                       .GetAwaiter()
-                       .GetResult();
+            redis.Replace(key, value, absolutExpiration == DateTime.MaxValue ? DateTimeOffset.MaxValue : new DateTimeOffset(absolutExpiration));
         }
 
         public void Remove(string key)
         {
-            Task.Run(() => _redis.RemoveAsync(key))
-                       .GetAwaiter()
-                       .GetResult();
+            redis.Remove(key);
         }
 
         public void Remove(Regex pattern)
         {
             var glob = pattern.ToString().Replace(".*", "*").Replace(".", "?");
-            var keys = Task.Run(() => _redis.SearchKeysAsync(glob))
-                           .GetAwaiter()
-                           .GetResult();
-
+            var keys = redis.SearchKeys(glob);
             if (keys.Any())
             {
-                Task.Run(() => _redis.RemoveAllAsync(keys))
-                    .GetAwaiter()
-                    .GetResult();
+                redis.RemoveAll(keys);
             }
-
         }
 
         public IDictionary<string, T> HashGetAll<T>(string key)
         {
-            var dic = _redis.Database.HashGetAll(key);
-
+            var dic = redis.Database.HashGetAll(key);
             return dic
                 .Select(e =>
                     {
@@ -114,12 +106,7 @@ namespace ASC.Common.Caching
                         }
                         catch (Exception ex)
                         {
-                            if (!e.Value.IsNullOrEmpty)
-                            {
-                                LogManager.GetLogger("ASC").ErrorFormat("RedisCache HashGetAll value: {0}", e.Value);
-                            }
-
-                            LogManager.GetLogger("ASC").Error(string.Format("RedisCache HashGetAll key: {0}", key), ex);
+                            LogManager.GetLogger("ASC").Error("RedisCache HashGetAll", ex);
                         }
 
                         return new { Key = (string)e.Name, Value = val };
@@ -130,16 +117,14 @@ namespace ASC.Common.Caching
 
         public T HashGet<T>(string key, string field)
         {
-            var value = (string)(_redis.Database.HashGet(key, field));
-
+            var value = (string)redis.Database.HashGet(key, field);
             try
             {
                 return value != null ? JsonConvert.DeserializeObject<T>(value) : default(T);
             }
             catch (Exception ex)
             {
-                LogManager.GetLogger("ASC").Error(string.Format("RedisCache HashGet key: {0}, field: {1}", key, field), ex);
-
+                LogManager.GetLogger("ASC").Error("RedisCache HashGet", ex);
                 return default(T);
             }
         }
@@ -148,54 +133,149 @@ namespace ASC.Common.Caching
         {
             if (value != null)
             {
-                _redis.Database.HashSet(key, field, JsonConvert.SerializeObject(value));
+                redis.Database.HashSet(key, field, JsonConvert.SerializeObject(value));
             }
             else
             {
-                _redis.Database.HashDelete(key, field);
+                redis.Database.HashDelete(key, field);
             }
         }
 
-        public void Publish<T>(T obj, CacheNotifyAction cacheNotifyAction)
+        public void Publish<T>(T obj, CacheNotifyAction action)
         {
-            var channelName = $"asc:channel:{cacheNotifyAction}:{typeof(T).FullName}".ToLowerInvariant();
+            redis.Publish("asc:channel:" + typeof(T).FullName, new RedisCachePubSubItem<T>() { CacheId = CacheId, Object = obj, Action = action });
 
-            Task.Run(() => _redis.PublishAsync(channelName, new RedisCachePubSubItem<T>() { Object = obj, Action = cacheNotifyAction }))
-                .GetAwaiter()
-                .GetResult();
+            ConcurrentBag<Action<object, CacheNotifyAction>> onchange;
+            actions.TryGetValue(typeof(T), out onchange);
+            if (onchange != null)
+            {
+                onchange.ToArray().ForEach(r => r(obj, action));
+            }
         }
 
         public void Subscribe<T>(Action<T, CacheNotifyAction> onchange)
         {
-            foreach (var cacheNotifyAction in Enum.GetNames(typeof(CacheNotifyAction)))
+            redis.Subscribe<RedisCachePubSubItem<T>>("asc:channel:" + typeof(T).FullName, (i) =>
             {
-                var channelName = $"asc:channel:{cacheNotifyAction}:{typeof(T).FullName}".ToLowerInvariant();
-
-                Task.Run(() => _redis.SubscribeAsync<RedisCachePubSubItem<T>>(channelName, (i) =>
+                if (i.CacheId != CacheId)
                 {
                     onchange(i.Object, i.Action);
+                }
+            });
 
-                    return Task.FromResult(true);
-                })).GetAwaiter()
-                   .GetResult();
-            }
-        }
-
-        public void PushMailAction<T>(string QueueName, T value) where T : class
-        {
-            if (value != null)
+            if (onchange != null)
             {
-                Task.Run(() => _redis.ListAddToLeftAsync<T>(QueueName, value))
-                    .GetAwaiter()
-                    .GetResult();
+                Action<object, CacheNotifyAction> action = (o, a) => onchange((T)o, a);
+                actions.AddOrUpdate(typeof(T),
+                    new ConcurrentBag<Action<object, CacheNotifyAction>> { action },
+                    (type, bag) =>
+                    {
+                        bag.Add(action);
+                        return bag;
+                    });
+            }
+            else
+            {
+                ConcurrentBag<Action<object, CacheNotifyAction>> removed;
+                actions.TryRemove(typeof(T), out removed);
             }
         }
 
+
+        [Serializable]
         class RedisCachePubSubItem<T>
         {
+            public string CacheId { get; set; }
+
             public T Object { get; set; }
 
             public CacheNotifyAction Action { get; set; }
+        }
+
+        class Serializer : ISerializer
+        {
+            private readonly Encoding enc = Encoding.UTF8;
+
+
+            public byte[] Serialize(object item)
+            {
+                try
+                {
+                    var s = JsonConvert.SerializeObject(item);
+                    return enc.GetBytes(s);
+                }
+                catch (Exception e)
+                {
+                    LogManager.GetLogger("ASC").Error("Redis Serialize", e);
+                    throw;
+                }
+            }
+
+            public object Deserialize(byte[] obj)
+            {
+                try
+                {
+                    var resolver = new ContractResolver();
+                    var settings = new JsonSerializerSettings { ContractResolver = resolver };
+                    var s = enc.GetString(obj);
+                    return JsonConvert.DeserializeObject(s, typeof(object), settings);
+                }
+                catch (Exception e)
+                {
+                    LogManager.GetLogger("ASC").Error("Redis Deserialize", e);
+                    throw;
+                }
+            }
+
+            public T Deserialize<T>(byte[] obj)
+            {
+                try
+                {
+                    var resolver = new ContractResolver();
+                    var settings = new JsonSerializerSettings { ContractResolver = resolver };
+                    var s = enc.GetString(obj);
+                    return JsonConvert.DeserializeObject<T>(s, settings);
+                }
+                catch (Exception e)
+                {
+                    LogManager.GetLogger("ASC").Error("Redis Deserialize<T>", e);
+                    throw;
+                }
+            }
+
+            public async Task<byte[]> SerializeAsync(object item)
+            {
+                return await Task.Factory.StartNew(() => Serialize(item));
+            }
+
+            public Task<object> DeserializeAsync(byte[] obj)
+            {
+                return Task.Factory.StartNew(() => Deserialize(obj));
+            }
+
+            public Task<T> DeserializeAsync<T>(byte[] obj)
+            {
+                return Task.Factory.StartNew(() => Deserialize<T>(obj));
+            }
+
+
+            class ContractResolver : DefaultContractResolver
+            {
+                protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+                {
+                    var prop = base.CreateProperty(member, memberSerialization);
+                    if (!prop.Writable)
+                    {
+                        var property = member as PropertyInfo;
+                        if (property != null)
+                        {
+                            var hasPrivateSetter = property.GetSetMethod(true) != null;
+                            prop.Writable = hasPrivateSetter;
+                        }
+                    }
+                    return prop;
+                }
+            }
         }
     }
 }

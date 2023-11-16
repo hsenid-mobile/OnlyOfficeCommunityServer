@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System.Collections.Generic;
-
 using ASC.Feed.Data;
 using ASC.Specific;
 
@@ -32,7 +31,6 @@ namespace ASC.Api.Feed
             GroupId = item.GroupId;
             IsToday = item.IsToday;
             IsYesterday = item.IsYesterday;
-            IsTomorrow = item.IsTomorrow;
             CreatedDate = (ApiDateTime)item.CreatedDate;
             ModifiedDate = (ApiDateTime)item.ModifiedDate;
             AggregatedDate = (ApiDateTime)item.AggregatedDate;
@@ -45,8 +43,6 @@ namespace ASC.Api.Feed
         public bool IsToday { get; private set; }
 
         public bool IsYesterday { get; private set; }
-
-        public bool IsTomorrow { get; private set; }
 
         public ApiDateTime CreatedDate { get; private set; }
 

@@ -123,8 +123,7 @@ function TempFileLoaded(file, response)
 	response.WebPath = unescape(response.WebPath).replace(/&amp;/g, "&").replace(/\+/g, "%2b");
 	prevResponse.value = response.WebPath;
 	UpdatePreviewFromAjax(prevResponse);
-	GetE('hfTempFileLocation').value = response.LocalPath;
-	GetE('hfTempFileUrl').value = response.WebPath;
+	GetE('hfTempFileLocation').value = response.LocalPath; 
 	GetE('txtUrl').disabled = true;
 }
 
@@ -221,7 +220,6 @@ function TempFileUpdates(response)
 	}
 	GetE('txtUrl').value = fName;
 	GetE('hfTempFileLocation').value = '';
-	GetE('hfTempFileUrl').value = '';
 	window.parent.Ok();
 }
 	
@@ -591,15 +589,7 @@ function UpdatePreviewFromAjax( response )
 
 function UpdatePreview()
 {
-	var tmp = GetE('hfTempFileUrl').value;
-	if (tmp) {
-		UpdatePreviewFromAjax({ value: tmp });
-	} else {
-		var value = GetE('txtUrl').value;
-		if (value) {
-			oEditor.window.parent.FCK_dlg_ajax('wfAjaxFCKeditorGetImageUrl', value, UpdatePreviewFromAjax);
-		}
-	}
+	oEditor.window.parent.FCK_dlg_ajax( 'wfAjaxFCKeditorGetImageUrl', GetE('txtUrl').value, UpdatePreviewFromAjax ) ;
 }
 
 function MoveSelected(toUp) {
@@ -805,7 +795,6 @@ document.onkeydown = function(e)
 							<a fcklang="DlgImgUpload" id="wikiFileUploadBtn" class="dummyButton" href="javascript:;" style="cursor:default">Upload</a>
 							<input type="hidden" id="hfUserID" name="hfUserID"/>
 							<input type="hidden" id="hfTempFileLocation" name="hfTempFileLocation"/>
-							<input type="hidden" id="hfTempFileUrl" name="hfTempFileUrl" />
 						</div>
 					</div>
 					<div  id="fileSearchHelp" class="fileHelpPanel" style="display: none;">

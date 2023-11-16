@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,21 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Reflection;
 
 namespace ASC.Forum
 {
     public enum QuestionType
     {
-        SeveralAnswer = 0,
+        SeveralAnswer =0,
 
-        OneAnswer = 1
+        OneAnswer=1
     }
 
-    public class Question
+	public class Question
     {
-        public virtual int ID { get; set; }
+        public virtual int ID { get; set; } 
 
         public virtual string Name { get; set; }
 
@@ -44,8 +46,8 @@ namespace ASC.Forum
         public virtual int TenantID { get; set; }
 
         public Question()
-        {
+        {   
             AnswerVariants = new List<AnswerVariant>(0);
         }
-    }
+    }   
 }

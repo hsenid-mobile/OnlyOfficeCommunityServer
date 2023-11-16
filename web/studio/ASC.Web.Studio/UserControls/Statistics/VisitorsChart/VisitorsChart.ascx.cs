@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@
 
 using System;
 using System.Text;
-using System.Web;
 using System.Web.UI;
-
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
+using System.Web;
+using Resources;
 
 namespace ASC.Web.Studio.UserControls.Statistics
 {

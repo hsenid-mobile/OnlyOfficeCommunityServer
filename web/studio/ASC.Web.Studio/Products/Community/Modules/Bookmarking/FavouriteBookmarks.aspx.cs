@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
 */
 
 
-using ASC.Bookmarking;
-using ASC.Bookmarking.Common;
+using System;
 using ASC.Web.Community.Bookmarking.Util;
-using ASC.Web.Community.Modules.Bookmarking.UserControls.Resources;
-using ASC.Web.Studio.Utility;
 using ASC.Web.UserControls.Bookmarking.Common;
+using ASC.Web.Studio.Utility;
+using ASC.Web.UserControls.Bookmarking.Common.Presentation;
+using ASC.Web.UserControls.Bookmarking.Resources;
+using ASC.Bookmarking.Common;
+using ASC.Bookmarking;
 
 namespace ASC.Web.Community.Bookmarking
 {

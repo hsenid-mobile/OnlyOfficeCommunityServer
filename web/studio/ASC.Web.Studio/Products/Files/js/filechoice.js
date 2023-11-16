@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@
 
 window.ASC.Files.FileChoice = (function () {
     var isInit = false;
-    var isTriggered = false;
 
-    var init = function (folderId, onlyFolder, thirdParty, fromEditor, originForPost, displayPrivacy) {
+    var init = function (folderId, onlyFolder, thirdParty, fromEditor, originForPost) {
         if (fromEditor) {
             thirdParty = undefined;
         }
@@ -35,10 +34,9 @@ window.ASC.Files.FileChoice = (function () {
             }
 
             jq("#fileSelectorTree").css("visibility", "visible");
-            jq("#mainContent").addClass("webkit-scrollbar");
 
             var callback = function () {
-                ASC.Files.FileSelector.openDialog({ folderId: folderId, onlyFolder: onlyFolder, thirdParty: thirdParty, displayPrivacy: displayPrivacy, scrolled: true });
+                ASC.Files.FileSelector.openDialog(folderId, onlyFolder, thirdParty);
                 if (onlyFolder) {
                     ASC.Files.FileChoice.eventAfter();
                 }
@@ -124,12 +122,6 @@ window.ASC.Files.FileChoice = (function () {
                 window.parent.postMessage(message, originForPost);
             };
 
-            jq(document).on("keyup", function (event) {
-                if (event.keyCode == 27) {
-                    ASC.Files.FileSelector.onCancel();
-                }
-            });
-
             if (!thirdParty) {
                 callback();
             }
@@ -137,18 +129,11 @@ window.ASC.Files.FileChoice = (function () {
     };
 
     var eventAfter = function () {
-        console.log("ASC.Files.FileChoice.eventAfter");
-        isTriggered = true;
-    };
-
-    var isEventAfterTriggered = function () {
-        return isTriggered;
     };
 
     return {
         init: init,
-        eventAfter: eventAfter,
-        isEventAfterTriggered: isEventAfterTriggered
+        eventAfter:eventAfter
     };
 })();
 

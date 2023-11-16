@@ -24,7 +24,7 @@
   }
 
   function onBodyClick (evt) {
-    $(document.body).off('click', onBodyClick);
+    $(document.body).unbind('click', onBodyClick);
     jQuery('span.tl-combobox').addClass('un-showed').removeClass('showed-options').find('div.combobox-container:first').hide();
     setTimeout(function () {
       jQuery('span.tl-combobox').removeClass('un-showed');
@@ -131,36 +131,6 @@
     }
   //  $helper.trigger('focus', [false]);
 
-    var parent = $combobox.data('parent');
-    if (parent) {
-        var $parent = jQuery(parent);
-        var $container = $combobox.find('div.combobox-container:first').css({ top: 0 });
-        var $title = $combobox.find('div.combobox-title:first');
-
-        var padding = 8;
-
-        var parentTop = $parent.offset().top;
-        var parentHeight = $parent.outerHeight();
-        var parentBottom = parentTop + parentHeight;
-
-        var containerTop = $container.offset().top;
-        var containerHeight = $container.outerHeight();
-        var containerBottom = containerTop + containerHeight;
-
-        var titleTop = $title.offset().top;
-        var titleHeight = $title.outerHeight();
-
-        var expectedContainerTop = titleTop - padding - containerHeight;
-
-        if (parentBottom < containerBottom) {
-            if (parentTop < expectedContainerTop) {
-                $container.css({ top: (-padding - containerHeight - titleHeight) })
-            } else {
-                $container.css({ top: (parentBottom - containerBottom) })
-            }
-        }
-    }
-
     setTimeout(bindBodyEvents, 1);
   }
 
@@ -181,7 +151,7 @@
       $target = jQuery(evt.target),
       value = $target.attr('data-value');
 
-    $select.val(value).trigger("change");
+    $select.val(value).change();
   }
 
   function setFocusedOption (helper) {
@@ -198,7 +168,7 @@
       value = $target.attr('data-value');
 
     if (value) {
-      $select.val(value).trigger("change");
+      $select.val(value).change();
     }
   }
 
@@ -264,7 +234,7 @@
             option.disabled === true ? ' display-none' : '',
           '"',
           ' data-value="' + datavalue + '"',
-          ' title="' + (Encoder.htmlEncode(option.title.trim()) || '&nbsp;') + '"',
+          ' title="' + (Encoder.htmlEncode(jQuery.trim(option.title))  || '&nbsp;') + '"',
         '>',
         option.title || '&nbsp;',
         '</li>'
@@ -290,7 +260,7 @@
 
     html = [
       '<div class="combobox-title">',
-        '<div class="inner-text combobox-title-inner-text" title="' + (Encoder.htmlEncode(selectoption.title.trim()) || '&nbsp;') + '">',
+        '<div class="inner-text combobox-title-inner-text" title="' + (Encoder.htmlEncode(jQuery.trim(selectoption.title)) || '&nbsp;') + '">',
           selectoption.title || '&nbsp;',
         '</div>',
       '</div>',
@@ -435,23 +405,23 @@
   function bindComboboxEvents ($select, $combobox) {
     //setTimeout((function ($select) {
     //  return function () {
-    //    $select.off('focus', onSelectFocus).on('focus', onSelectFocus);
+    //    $select.unbind('focus', onSelectFocus).bind('focus', onSelectFocus);
     //  };
     //})($select), 500);
     $select
-      //.on("blur", onSelectBlur)
-      //.on("focus", onSelectFocus)
-      .off('change', onSelectChange).on('change', onSelectChange);
+      //.blur(onSelectBlur)
+      //.focus(onSelectFocus)
+      .unbind('change', onSelectChange).bind('change', onSelectChange);
     $combobox.find('input')
-      .off('focus', onHelperFocus).on('focus', onHelperFocus)
-      .off('keydown', onHelperKeypress).on('keydown', onHelperKeypress)
-      .off('keyup', onHelperKeyup).on('keyup', onHelperKeyup);
+      .unbind('focus', onHelperFocus).bind('focus', onHelperFocus)
+      .unbind('keydown', onHelperKeypress).bind('keydown', onHelperKeypress)
+      .unbind('keyup', onHelperKeyup).bind('keyup', onHelperKeyup);
     $combobox.find('ul.combobox-options:first')
-      .off('click', onComboboxOptionClick).on('click', onComboboxOptionClick)
+      .unbind('click', onComboboxOptionClick).bind('click', onComboboxOptionClick)
       .find('li.option-item')
-        .off('hover', onComboboxOptionHover).on('hover', onComboboxOptionHover);
+        .unbind('hover', onComboboxOptionHover).bind('hover', onComboboxOptionHover);
     $combobox.find('div.combobox-title:first')
-      .off('click', onComboboxTitleClick).on('click', onComboboxTitleClick);
+      .unbind('click', onComboboxTitleClick).bind('click', onComboboxTitleClick);
   }
 
   $.fn.tlCombobox = $.fn.tlcombobox = function (params) {
@@ -467,9 +437,9 @@
       selectsInd = $selects.length;
       while (selectsInd--) {
         if (params === true) {
-          $($selects[selectsInd]).prop("disabled", false).parents('span.tl-combobox:first').removeClass('disabled');
+          $($selects[selectsInd]).attr('disabled', false).parents('span.tl-combobox:first').removeClass('disabled');
         } else {
-          $($selects[selectsInd]).prop("disabled", true).parents('span.tl-combobox:first').addClass('disabled');
+          $($selects[selectsInd]).attr('disabled', true).parents('span.tl-combobox:first').addClass('disabled');
         }
       }
       return $selects;
@@ -506,10 +476,6 @@
           } else {
               $select.parents('span.tl-combobox:first').removeClass('left-align');
           }
-      }
-
-      if (params && params.hasOwnProperty('parent')) {
-          $select.parents('span.tl-combobox:first').data('parent', params['parent']);
       }
 
       //wasupdated = true;

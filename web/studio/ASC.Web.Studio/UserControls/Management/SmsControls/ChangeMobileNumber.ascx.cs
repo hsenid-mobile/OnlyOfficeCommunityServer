@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,12 @@ using System;
 using System.ServiceModel.Security;
 using System.Web;
 using System.Web.UI;
-
-using AjaxPro;
-
-using ASC.Core;
 using ASC.Core.Users;
-using ASC.Web.Studio.Core.Notify;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
+using AjaxPro;
+using ASC.Core;
+using ASC.Web.Studio.Core.Notify;
+using Resources;
 
 namespace ASC.Web.Studio.UserControls.Management
 {

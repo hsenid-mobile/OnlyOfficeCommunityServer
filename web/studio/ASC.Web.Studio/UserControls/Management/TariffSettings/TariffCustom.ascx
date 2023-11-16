@@ -5,7 +5,7 @@
 <%@ Import Namespace="ASC.Core.Users" %>
 <%@ Import Namespace="ASC.Web.Studio.Core" %>
 <%@ Import Namespace="ASC.Web.Studio.Utility" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 
 <style>
@@ -38,9 +38,6 @@
                            ? "<a class=\"link-black-14 bold\" href=\"" + CommonLinkUtility.GetAdministration(ManagementType.Statistic) + "\">" + FileSizeComment.FilesSizeToString(UsedSize) + "</a>"
                            : "<span class=\"bold\">" + FileSizeComment.FilesSizeToString(UsedSize) + "</span>")
                       + "/" + FileSizeComment.FilesSizeToString(CurrentQuota.MaxTotalSize)) %>
-
-    <input id="monthPrice" type="hidden" value="<%= MonthPrice %>" />
-    <input id="yearPrice" type="hidden" value="<%= YearPrice %>" />
 </div>
 
 <div class="tariff-header clearFix">
@@ -73,7 +70,7 @@
 
             <div class="tariff-user-warn-min">
                 <%= UserControlsCommonResource.TariffUserWarnDescr %>
-                <span class="baseLinkAction"><%= UserControlsCommonResource.TariffUserWarnRead %></span>
+                <span class="tariff-user-warn-link baseLinkAction"><%= UserControlsCommonResource.TariffUserWarnRead %></span>
             </div>
 
             <div class="tariff-user-warn-max">

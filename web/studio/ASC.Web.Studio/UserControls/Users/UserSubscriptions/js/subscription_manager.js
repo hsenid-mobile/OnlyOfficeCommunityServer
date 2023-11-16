@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,6 @@
  *
 */
 
-
-jq(document).ready(function () {
-    jq('#switcherSubscriptionButton').one('click', function () {
-        if (!jq('#subscriptionBlockContainer').hasClass('subsLoaded') &&
-            typeof (window.CommonSubscriptionManager) != 'undefined' &&
-            typeof (window.CommonSubscriptionManager.LoadSubscriptions) === 'function') {
-            window.CommonSubscriptionManager.LoadSubscriptions();
-            jq('#subscriptionBlockContainer').addClass('subsLoaded');
-        }
-    });
-});
 
 var CommonSubscriptionManager = new function() {
     this.currentModuleSubsTab;
@@ -141,7 +130,7 @@ var CommonSubscriptionManager = new function() {
     };
 
     this.UnsubscribeProduct = function (productID, productName) {
-        var mes = (ASC.Resources.Master.ResourceJS.UnsubscribeProductMessage).format(productName);
+        var mes = (ASC.Resources.Master.Resource.UnsubscribeProductMessage).format(productName);
         if (!confirm(mes))
             return;
 
@@ -151,7 +140,7 @@ var CommonSubscriptionManager = new function() {
     this.SubscribeType = function (productID, moduleID, subscribeType) {
         var subscribe = jq('#studio_subscribeType_' + productID + '_' + moduleID + '_' + subscribeType).find("a.on_off_button").hasClass("on");
         
-        if (subscribe && !confirm(ASC.Resources.Master.ResourceJS.ConfirmMessage))
+        if (subscribe && !confirm(ASC.Resources.Master.Resource.ConfirmMessage))
             return;
 
         CommonSubscriptionManager.RememberCurrentModuleSubtab(productID);
@@ -201,7 +190,7 @@ var CommonSubscriptionManager = new function() {
                 var num = jq("#content_" + id + " .selected-item").attr("data-value");
                 module = jq(option[num]).attr("data-id");
 
-                jq("#content_" + id + " .subs-subtab select").on("change", function() {
+                jq("#content_" + id + " .subs-subtab select").change(function() {
                     var elem = jq("#content_" + id + " .subs-subtab option")[jq(this).val()];
                     var selected = jq(elem).attr("data-id");
                     CommonSubscriptionManager.ClickModuleTag(productID, selected);
@@ -262,7 +251,7 @@ var CommonSubscriptionManager = new function() {
 
             el.html(jq("#subsSelectorTemplate").tmpl({ type: notify }));
 
-            el.find("input[type=\"checkbox\"]").on("change", f);
+            el.find("input[type=\"checkbox\"]").change(f);
 
             var connector = el.find(".baseLinkAction");
             if (connector.hasClass("tgConnector")) {
@@ -274,7 +263,7 @@ var CommonSubscriptionManager = new function() {
     this.InitListTabsComboboxes = function() {
         jq('select[id^="ListTabsCombobox_"]').each(
             function() {
-                jq(this).tlcombobox({ align: "left" });
+                jq(this).tlcombobox();
             }
 		);
     };
@@ -351,7 +340,7 @@ var CommonSubscriptionManager = new function() {
 
                 clipboard = ASC.Clipboard.create(response, "tgCopy", {
                     onComplete: function () {
-                        toastr.success(ASC.Resources.Master.ResourceJS.LinkCopySuccess);
+                        toastr.success(ASC.Resources.Master.Resource.LinkCopySuccess);
                     }
                 });
             }
@@ -397,7 +386,7 @@ var CommonSubscriptionManager = new function() {
         };
 
         function onClose() {
-            body.off("click.tgConnect");
+            body.unbind("click.tgConnect");
             tgDisconnect.off("click");
 
             if (timeout) {
@@ -408,7 +397,7 @@ var CommonSubscriptionManager = new function() {
         function init(element) {
             elements.push(element);
             element.removeAttr("data-value");
-            element.on("click", function (e) {
+            element.click(function (e) {
                 e.stopPropagation(true);
 
                 var height = jq(window).height();
@@ -427,7 +416,7 @@ var CommonSubscriptionManager = new function() {
                     LoadingBanner.displayLoading();
                     isConnected();
 
-                    body.on("click.tgConnect", function (e) {
+                    body.bind("click.tgConnect", function (e) {
                         if (jq(e.target).parents("#telegramConnect").length) return;
 
                         helper.addClass("display-none");

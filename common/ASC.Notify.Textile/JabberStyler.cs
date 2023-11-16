@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Text.RegularExpressions;
 using System.Web;
-
 using ASC.Common.Notify.Patterns;
 using ASC.Notify.Messages;
 using ASC.Notify.Patterns;
@@ -44,7 +43,7 @@ namespace ASC.Notify.Textile
                 message.Subject = string.Empty;
             }
             if (string.IsNullOrEmpty(message.Body)) return;
-            var lines = message.Body.Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
+            var lines = message.Body.Split(new[] {Environment.NewLine, "\n"}, StringSplitOptions.None);
             for (var i = 0; i < lines.Length - 1; i++)
             {
                 if (string.IsNullOrEmpty(lines[i])) { body += Environment.NewLine; continue; }
@@ -67,7 +66,7 @@ namespace ASC.Notify.Textile
             {
                 if (match.Groups["text"].Success && match.Groups["link"].Success)
                 {
-                    if (match.Groups["text"].Value.Equals(match.Groups["link"].Value, StringComparison.OrdinalIgnoreCase))
+                    if (match.Groups["text"].Value.Equals(match.Groups["link"].Value,StringComparison.OrdinalIgnoreCase))
                     {
                         return " " + match.Groups["text"].Value + " ";
                     }

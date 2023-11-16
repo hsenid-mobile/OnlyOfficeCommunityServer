@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 
 using System.Text;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-
-using ASC.Core;
 using ASC.Core.Users;
+using ASC.Web.Core.Utility.Skins;
+using System.Web;
+using ASC.Core;
 using ASC.Web.Core.WhiteLabel;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
 
 namespace ASC.Web.Studio.Controls.Users
@@ -32,7 +31,7 @@ namespace ASC.Web.Studio.Controls.Users
     public class EmployeeUserCard : Control
     {
 
-        private readonly string _CssClass = string.Empty;
+        private string _CssClass = string.Empty;
         public string CssClass
         {
             get
@@ -116,7 +115,7 @@ namespace ASC.Web.Studio.Controls.Users
                 sb.Append("<img align=\"center\" alt=\"\" style='display:block;margin:0; position:relative;width:48px;' border=0 src=\"" + (isRetina ? EmployeeInfo.GetBigPhotoURL() : EmployeeInfo.GetMediumPhotoURL()) + "\"/>");
                 if (EmployeeInfo.ActivationStatus == EmployeeActivationStatus.Pending)
                 {
-                    sb.Append("<div class=\"pendingInfo borderBase tintMedium\"><div>" + Resource.PendingTitle + "</div></div>");
+                    sb.Append("<div class=\"pendingInfo borderBase tintMedium\"><div>" + Resources.Resource.PendingTitle + "</div></div>");
                 }
                 sb.Append("</a>");
                 sb.Append("</td>");

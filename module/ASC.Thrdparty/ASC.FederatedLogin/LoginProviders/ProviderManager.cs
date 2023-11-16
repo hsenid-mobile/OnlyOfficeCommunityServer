@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Web;
-
 using ASC.Core.Common.Configuration;
 using ASC.FederatedLogin.Profile;
 
@@ -28,7 +27,9 @@ namespace ASC.FederatedLogin.LoginProviders
     {
         public static ILoginProvider GetLoginProvider(string providerType)
         {
-            return ConsumerFactory.GetByName(providerType) as ILoginProvider;
+            return providerType == ProviderConstants.OpenId
+                ? new OpenIdLoginProvider()
+                : ConsumerFactory.GetByName(providerType) as ILoginProvider;
         }
 
         public static LoginProfile Process(string providerType, HttpContext context, IDictionary<string, string> @params)
@@ -36,18 +37,13 @@ namespace ASC.FederatedLogin.LoginProviders
             return GetLoginProvider(providerType).ProcessAuthoriztion(context, @params);
         }
 
-        public static LoginProfile GetLoginProfile(string providerType, string accessToken = null, string codeOAuth = null)
+        public static LoginProfile GetLoginProfile(string providerType, string accessToken)
         {
             var consumer = GetLoginProvider(providerType);
             if (consumer == null) throw new ArgumentException("Unknown provider type", "providerType");
 
             try
             {
-                if(accessToken == null && codeOAuth != null)
-                {
-                    return consumer.GetLoginProfile(consumer.GetToken(codeOAuth));
-                }
-
                 return consumer.GetLoginProfile(accessToken);
             }
             catch (Exception ex)

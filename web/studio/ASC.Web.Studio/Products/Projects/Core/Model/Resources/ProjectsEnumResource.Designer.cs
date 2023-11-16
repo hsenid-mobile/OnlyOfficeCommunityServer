@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Projects.Core.Model.Resources {
+namespace ASC.Projects.Core.Resources {
     using System;
     
     

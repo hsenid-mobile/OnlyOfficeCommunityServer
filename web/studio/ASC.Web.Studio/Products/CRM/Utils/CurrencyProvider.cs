@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,15 @@ using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Threading.Tasks;
+using System.Net;
+using System.Text.RegularExpressions;
 
 using ASC.Common.Logging;
-using ASC.Common.Web;
 using ASC.CRM.Core;
 using ASC.CRM.Core.Dao;
 using ASC.Web.CRM.Core;
 
 using Autofac;
-
-using HtmlAgilityPack;
 
 namespace ASC.Web.CRM.Classes
 {
@@ -49,7 +45,6 @@ namespace ASC.Web.CRM.Classes
         private static Dictionary<String, Decimal> _exchangeRates;
         private static DateTime _publisherDate;
         private const String _formatDate = "yyyy-MM-ddTHH:mm:ss.fffffffK";
-        private static HttpClient httpClient;
 
         #endregion
 
@@ -72,17 +67,6 @@ namespace ASC.Web.CRM.Classes
 
                 _currencies = currencies.ToDictionary(c => c.Abbreviation);
             }
-
-            var httpHandler = new HttpClientHandler
-            {
-                AllowAutoRedirect = true,
-                UseDefaultCredentials = true,
-                MaxAutomaticRedirections = 2,
-
-            };
-
-            httpClient = HttpClientFactory.CreateClient(nameof(CurrencyProvider), httpHandler);
-            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0");
         }
 
         #endregion
@@ -192,10 +176,10 @@ namespace ASC.Web.CRM.Classes
 
         private static string GetExchangesTempPath()
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            var companyAttribute = assembly?.GetCustomAttribute<AssemblyCompanyAttribute>();
-            return Path.Combine(TempPath.GetTempPath(), companyAttribute?.Company ?? string.Empty, "exchanges");
+            return Path.Combine(Path.GetTempPath(), Path.Combine("onlyoffice", "exchanges"));
         }
+
+        private static Regex CurRateRegex = new Regex("<td id=\"(?<Currency>[a-zA-Z]{3})\">(?<Rate>[\\d\\.]+)</td>");
 
         private static Dictionary<String, Decimal> GetExchangeRates()
         {
@@ -209,22 +193,19 @@ namespace ASC.Web.CRM.Classes
                         {
                             _exchangeRates = new Dictionary<string, decimal>();
 
-                            if (ConfigurationManagerExtension.AppSettings["crm.update.currency.info.enable"] == "false")
-                            {
-                                return _exchangeRates;
-                            }
-
                             var tmppath = GetExchangesTempPath();
 
                             TryToReadPublisherDate(tmppath);
 
+
+                            var updateEnable = ConfigurationManagerExtension.AppSettings["crm.update.currency.info.enable"] != "false";
                             var ratesUpdatedFlag = false;
 
                             foreach (var ci in _currencies.Values.Where(c => c.IsConvertable))
                             {
                                 var filepath = Path.Combine(tmppath, ci.Abbreviation + ".html");
 
-                                if (0 < (DateTime.UtcNow.Date - _publisherDate.Date).TotalDays || !File.Exists(filepath))
+                                if (updateEnable && 0 < (DateTime.UtcNow.Date - _publisherDate.Date).TotalDays || !File.Exists(filepath))
                                 {
                                     var filepath_temp = Path.Combine(tmppath, ci.Abbreviation + "_temp.html");
 
@@ -253,10 +234,7 @@ namespace ASC.Web.CRM.Classes
                                 _publisherDate = DateTime.UtcNow;
                                 WritePublisherDate(tmppath);
                             }
-                            else
-                            {
-                                throw new Exception("Сurrency rates are not updated");
-                            }
+
                         }
                         catch (Exception error)
                         {
@@ -273,43 +251,25 @@ namespace ASC.Web.CRM.Classes
         private static bool TryGetRatesFromFile(string filepath, CurrencyInfo curCI)
         {
             var success = false;
-
-            var doc = new HtmlDocument();
-            doc.Load(filepath);
-
-            var targets = new[] { "major-currency-table", "minor-currency-table", "exotic-currency-table" };
-            var tables = doc.DocumentNode.SelectNodes("//table");
-
-            foreach (var table in tables)
+            var currencyLines = File.ReadAllLines(filepath);
+            for (var i = 0; i < currencyLines.Length; i++)
             {
-                var idAttr = table.Attributes["id"];
-                if (idAttr == null || !targets.Contains(idAttr.Value))
+                var line = currencyLines[i];
+
+                if (line.Contains("id=\"major-currency-table\"") || line.Contains("id=\"minor-currency-table\"") || line.Contains("id=\"exotic-currency-table\""))
                 {
-                    continue;
-                }
+                    var currencyInfos = CurRateRegex.Matches(line);
 
-                string abbreviation = null;
-                decimal rate = 0;
-
-                var tds = table.SelectNodes(".//td");
-                foreach (var td in tds)
-                {
-                    var em = td.SelectSingleNode(".//em");
-                    if (em != null)
+                    if (currencyInfos.Count > 0)
                     {
-                        var classAttr = em.Attributes["class"];
-                        abbreviation = classAttr != null ? classAttr.Value : null;
-                    }
-
-                    var dataValueAttr = td.Attributes["data-value"];
-                    if (dataValueAttr != null)
-                    {
-                        if (decimal.TryParse(dataValueAttr.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out rate) && !string.IsNullOrEmpty(abbreviation))
+                        foreach (var curInfo in currencyInfos)
                         {
-                            _exchangeRates.Add(string.Format("{0}/{1}", abbreviation, curCI.Abbreviation), rate);
+                            _exchangeRates.Add(
+                                String.Format("{0}/{1}", (curInfo as Match).Groups["Currency"].Value.Trim(), curCI.Abbreviation),
+                                Convert.ToDecimal((curInfo as Match).Groups["Rate"].Value.Trim(), CultureInfo.InvariantCulture.NumberFormat));
+
                             success = true;
                         }
-                        abbreviation = null;
                     }
                 }
             }
@@ -363,22 +323,27 @@ namespace ASC.Web.CRM.Classes
                     Directory.CreateDirectory(dir);
                 }
 
-                var destinationURI = new Uri(string.Format("https://themoneyconverter.com/{0}/{0}", currency));
+                var destinationURI = new Uri(String.Format("https://themoneyconverter.com/{0}/{0}.aspx", currency));
 
-                Func<Task<string>> requestFunc = async () =>
+                var request = (HttpWebRequest)WebRequest.Create(destinationURI);
+                request.Method = "GET";
+                request.AllowAutoRedirect = true;
+                request.MaximumAutomaticRedirections = 2;
+                request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0";
+                request.UseDefaultCredentials = true;
+
+                using (var response = (HttpWebResponse)request.GetResponse())
+                using (var responseStream = new StreamReader(response.GetResponseStream()))
                 {
-                    return await httpClient.GetStringAsync(destinationURI);
-                };
+                    var data = responseStream.ReadToEnd();
 
-                var data = Task.Run(() => ResiliencePolicyManager.GetStringWithPoliciesAsync("DownloadCurrencyPage", requestFunc)).Result;
-                File.WriteAllText(filepath, data);
+                    File.WriteAllText(filepath, data);
 
-                System.Threading.Thread.Sleep(100);// limit 10 requests per second
-
+                }
             }
             catch (Exception error)
             {
-                _log.Error("DownloadCurrencyPage failed for currency: " + currency, error);
+                _log.Error(error);
             }
         }
 

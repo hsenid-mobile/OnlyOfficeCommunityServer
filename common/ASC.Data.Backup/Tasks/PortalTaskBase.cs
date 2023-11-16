@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 
 using ASC.Common.Data;
 using ASC.Common.Logging;
-using ASC.Data.Backup.Storage;
 using ASC.Data.Backup.Tasks.Modules;
 using ASC.Data.Storage;
-using ASC.Data.Storage.ZipOperators;
 
 namespace ASC.Data.Backup.Tasks
 {
@@ -58,7 +54,6 @@ namespace ASC.Data.Backup.Tasks
         public string ConfigPath { get; private set; }
 
         public bool ProcessStorage { get; set; }
-        public IDataWriteOperator WriteOperator { get; set; }
 
         protected PortalTaskBase(ILog logger, int tenantId, string configPath)
         {
@@ -66,20 +61,6 @@ namespace ASC.Data.Backup.Tasks
             TenantId = tenantId;
             ConfigPath = configPath;
             ProcessStorage = true;
-        }
-
-        protected string RegisterDatabase(int id, string connectionString)
-        {
-            connectionString = connectionString + ";convert zero datetime=True";
-            var connectionSettings = new ConnectionStringSettings("mailservice-" + id, connectionString, "MySql.Data.MySqlClient");
-
-            if (DbRegistry.IsDatabaseRegistered(connectionSettings.Name))
-            {
-                DbRegistry.UnRegisterDatabase(connectionSettings.Name);
-            }
-
-            DbRegistry.RegisterDatabase(connectionSettings.Name, connectionSettings);
-            return connectionSettings.Name;
         }
 
         public void IgnoreModule(ModuleName moduleName)
@@ -239,15 +220,14 @@ namespace ASC.Data.Backup.Tasks
             return result;
         }
 
-        protected async Task RunMysqlFile(Stream stream, string db, string delimiter = ";")
+        protected async Task RunMysqlFile(Stream stream, string delimiter = ";")
         {
-            using (var dbManager = new DbManager(db, 100000))
+            using (var dbManager = new DbManager("default", 100000))
             using (var tr = dbManager.BeginTransaction())
             {
-                await dbManager.ExecuteNonQueryAsync("SET FOREIGN_KEY_CHECKS=0;");
                 if (stream == null) return;
 
-                using (var reader = new StreamReader(stream))
+                using (var reader = new StreamReader(stream, Encoding.UTF8))
                 {
                     string commandText;
 
@@ -255,7 +235,6 @@ namespace ASC.Data.Backup.Tasks
                     {
                         while ((commandText = await reader.ReadLineAsync()) != null)
                         {
-                            var firstText = commandText;
                             while (!commandText.EndsWith(delimiter))
                             {
                                 var newline = await reader.ReadLineAsync();
@@ -270,17 +249,9 @@ namespace ASC.Data.Backup.Tasks
                             {
                                 await dbManager.ExecuteNonQueryAsync(commandText, null);
                             }
-                            catch (Exception)
+                            catch (Exception e)
                             {
-                                try
-                                {
-                                    Thread.Sleep(2000);//avoiding deadlock
-                                    await dbManager.ExecuteNonQueryAsync(commandText, null);
-                                }
-                                catch (Exception ex)
-                                {
-                                    Logger.Error("Restore", ex);
-                                }
+                                Logger.Error("Restore", e);
                             }
                         }
                     }

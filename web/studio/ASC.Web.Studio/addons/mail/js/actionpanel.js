@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@
 
             var $this = $(this);
 
-            if ($this.prop("disabled")) {
+            if ($this.attr('disabled')) {
                 return;
             }
 
@@ -105,7 +105,7 @@
             $.each(apData.options.buttons, function(index, value) {
                 var $add = $.tmpl("actionPanelItemTmpl", value);
                 if (!value.disabled) {
-                    $add.on("click", function(e) {
+                    $add.click(function(e) {
                         apData['hide']();
                         return value.handler(e, value);
                     });
@@ -126,7 +126,7 @@
             var x = offset.left;
 
             $html.css({ left: x, top: methods._getY(apData.options.horizontal_target ? $this.find(apData.options.horizontal_target) : $this, $html) });
-            $html.on("click", menuClick);
+            $html.click(menuClick);
 
             apData['$html'] = $html;
             $html.css({ opacity: 1 });

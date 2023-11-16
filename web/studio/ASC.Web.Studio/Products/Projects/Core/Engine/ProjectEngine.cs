@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -98,45 +99,9 @@ namespace ASC.Projects.Engine
             return DaoFactory.ProjectDao.GetByFilter(filter, ProjectSecurity.CurrentUserAdministrator, ProjectSecurity.IsPrivateDisabled);
         }
 
-        public IEnumerable<Project> GetByFilterForReport(TaskFilter filter)
-        {
-            return DaoFactory.ProjectDao.GetByFilterForReport(filter, ProjectSecurity.CurrentUserAdministrator, ProjectSecurity.IsPrivateDisabled);
-        }
-
-        public object[] GetByFilterCountForReport(TaskFilter filter)
-        {
-            var cloneFilter = (TaskFilter)filter.Clone();
-            var open = 0;
-            var paused = 0;
-            var closed = 0;
-
-            if (!filter.ProjectStatuses.Any() || filter.ProjectStatuses.Contains(ProjectStatus.Open)) 
-            {
-                cloneFilter.ProjectStatuses = new List<ProjectStatus> { ProjectStatus.Open };
-                open = DaoFactory.ProjectDao.GetByFilterCountForReport(cloneFilter, ProjectSecurity.CurrentUserAdministrator, ProjectSecurity.IsPrivateDisabled);
-            }
-            if (!filter.ProjectStatuses.Any() || filter.ProjectStatuses.Contains(ProjectStatus.Paused))
-            {
-                cloneFilter.ProjectStatuses = new List<ProjectStatus> { ProjectStatus.Paused };
-                paused = DaoFactory.ProjectDao.GetByFilterCountForReport(cloneFilter, ProjectSecurity.CurrentUserAdministrator, ProjectSecurity.IsPrivateDisabled);
-            }
-            if (!filter.ProjectStatuses.Any() || filter.ProjectStatuses.Contains(ProjectStatus.Closed))
-            {
-                cloneFilter.ProjectStatuses = new List<ProjectStatus> { ProjectStatus.Closed };
-                closed = DaoFactory.ProjectDao.GetByFilterCountForReport(cloneFilter, ProjectSecurity.CurrentUserAdministrator, ProjectSecurity.IsPrivateDisabled);
-            }
-
-             return new object[3] { open, paused, closed };
-        }
-
         public int GetByFilterCount(TaskFilter filter)
         {
             return DaoFactory.ProjectDao.GetByFilterCount(filter, ProjectSecurity.CurrentUserAdministrator, ProjectSecurity.IsPrivateDisabled);
-        }
-
-        public List<Tuple<Guid, int>> GetByFilterAverageTime(TaskFilter filter)
-        {
-            return DaoFactory.ProjectDao.GetByFilterAverageTime(filter, ProjectSecurity.CurrentUserAdministrator, ProjectSecurity.IsPrivateDisabled);
         }
 
         public IEnumerable<Project> GetFollowing(Guid participant)
@@ -182,7 +147,7 @@ namespace ASC.Projects.Engine
                 var folderId = FileEngine.GetRoot(projectID);
                 project.DocumentsCount = folderDao.GetItemsCount(folderId);
             }
-
+            
             project.TimeTrackingTotal = TimeTrackingEngine.GetTotalByProject(projectID);
             project.ParticipantCount = GetTeam(projectID).Count();
 
@@ -190,7 +155,7 @@ namespace ASC.Projects.Engine
             return project;
         }
 
-        public IEnumerable<Project> GetByID(List<int> projectIDs, bool checkSecurity = true)
+        public IEnumerable<Project> GetByID(ICollection projectIDs, bool checkSecurity = true)
         {
             var projects = DaoFactory.ProjectDao.GetById(projectIDs);
             if (checkSecurity)
@@ -244,7 +209,7 @@ namespace ASC.Projects.Engine
 
             if (status.HasValue)
             {
-                filter.ProjectStatuses = new List<ProjectStatus> { status.Value };
+                filter.ProjectStatuses = new List<ProjectStatus> {status.Value};
             }
 
             return GetByFilterCount(filter);
@@ -305,7 +270,7 @@ namespace ASC.Projects.Engine
             }
             else
             {
-                var oldProject = DaoFactory.ProjectDao.GetById(new List<int>{project.ID }).FirstOrDefault();
+                var oldProject = DaoFactory.ProjectDao.GetById(new[] { project.ID }).FirstOrDefault();
                 ProjectSecurity.DemandEdit(oldProject);
 
                 DaoFactory.ProjectDao.Update(project);
@@ -328,7 +293,7 @@ namespace ASC.Projects.Engine
 
             project.LastModifiedBy = SecurityContext.CurrentAccount.ID;
             project.LastModifiedOn = TenantUtil.DateTimeNow();
-            project.StatusChangedOn = TenantUtil.DateTimeNow();
+            project.StatusChangedOn = DateTime.Now;
             project.Status = status;
 
             DaoFactory.ProjectDao.Update(project);
@@ -350,8 +315,8 @@ namespace ASC.Projects.Engine
 
             NotifyClient.Instance.SendAboutProjectDeleting(new HashSet<Guid> { project.Responsible }, project);
 
-            MessageEngine.UnSubscribeAll(messages.Select(r => new Message { Project = project, ID = r }).ToList());
-            TaskEngine.UnSubscribeAll(tasks.Select(r => new Task { Project = project, ID = r }).ToList());
+            MessageEngine.UnSubscribeAll(messages.Select(r => new Message {Project = project, ID = r}).ToList());
+            TaskEngine.UnSubscribeAll(tasks.Select(r => new Task {Project = project, ID = r}).ToList());
 
             FactoryIndexer<ProjectsWrapper>.DeleteAsync(project);
         }

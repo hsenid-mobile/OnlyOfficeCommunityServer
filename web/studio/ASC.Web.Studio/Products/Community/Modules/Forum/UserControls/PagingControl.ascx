@@ -1,7 +1,7 @@
 ﻿<%@ Assembly Name="ASC.Web.Community"%>
 <%@ Control Language="C#" AutoEventWireup="true" CodeBehind="PagingControl.ascx.cs" Inherits="ASC.Web.UserControls.Forum.PagingControl" %>
 
-<%@ Import Namespace="ASC.Web.Community.Modules.Forum.UserControls.Resources" %>
+<%@ Import Namespace="ASC.Web.UserControls.Forum.Resources" %>
 
 
 <%if (Count > 0) { %>

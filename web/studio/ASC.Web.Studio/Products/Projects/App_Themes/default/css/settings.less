@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,9 @@
 */
 
 
-@import "params.less";
-
 #settings {
     @border-width: 1px;
-    @border: @border-width solid @border-color;
+    @border: @border-width solid #d1d1d1;
 
     .settings-box {
         margin-top: 16px;
@@ -55,11 +53,11 @@
                 }
 
                 &:first-child {
-                    background-color: @body-color;
+                    background-color: #fff;
                     background-image: url("/Products/CRM/App_Themes/default/images/drag.png");
                     background-position: center center;
                     background-repeat: no-repeat;
-                    border-left: 1px solid @border-color;
+                    border-left: 1px solid #D1D1D1;
                     border-bottom-left-radius: 3px;
                     border-top-left-radius: 3px;
                     -moz-border-radius-bottomleft: 3px;
@@ -112,7 +110,7 @@
             }
 
             &:hover {
-                background-color: @body-color-selected;
+                background-color: #f2f2f2;
 
                 & > div:first-child {
                     visibility: visible;
@@ -128,12 +126,6 @@
             vertical-align: middle;
             width: 400px;
         }
-    }
-}
-
-@media (min-width: 1200px) {
-    #settings .settings-box .grid-page {
-        margin-left: 0;
     }
 }
 

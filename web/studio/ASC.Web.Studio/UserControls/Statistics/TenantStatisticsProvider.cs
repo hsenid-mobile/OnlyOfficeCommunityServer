@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Tenants;
@@ -32,7 +31,7 @@ namespace ASC.Web.Studio.UserControls.Statistics
         public static bool IsNotPaid()
         {
             Tariff tariff;
-            return TenantExtra.EnableTariffSettings
+            return TenantExtra.EnableTarrifSettings
                    && ((tariff = TenantExtra.GetCurrentTariff()).State >= TariffState.NotPaid
                        || TenantExtra.Enterprise && !TenantExtra.EnterprisePaid && tariff.LicenseDate == DateTime.MaxValue);
         }
@@ -40,16 +39,6 @@ namespace ASC.Web.Studio.UserControls.Statistics
         public static int GetUsersCount()
         {
             return CoreContext.UserManager.GetUsersByGroup(Constants.GroupUser.ID).Length;
-        }
-
-        public static int GetVisitorsCount()
-        {
-            return CoreContext.UserManager.GetUsersByGroup(Constants.GroupVisitor.ID).Length;
-        }
-
-        public static int GetAdminsCount()
-        {
-            return CoreContext.UserManager.GetUsersByGroup(Constants.GroupAdmin.ID).Length;
         }
 
         public static long GetUsedSize()
@@ -69,7 +58,7 @@ namespace ASC.Web.Studio.UserControls.Statistics
 
         public static IEnumerable<TenantQuotaRow> GetQuotaRows(int tenant)
         {
-            return CoreContext.TenantManager.FindTenantQuotaRows(tenant)
+            return CoreContext.TenantManager.FindTenantQuotaRows(new TenantQuotaRowQuery(tenant))
                 .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty);
         }
     }

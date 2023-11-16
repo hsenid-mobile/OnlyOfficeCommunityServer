@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Runtime.Serialization;
-
 using ASC.Core.Tenants;
 
 namespace ASC.Core.Common.Settings
@@ -30,7 +29,7 @@ namespace ASC.Core.Common.Settings
 
     [Serializable]
     [DataContract]
-    public abstract class BaseSettings<T> : ISettings where T : class, ISettings
+    public abstract class BaseSettings<T> : ISettings where T: class, ISettings
     {
         private static int TenantID
         {

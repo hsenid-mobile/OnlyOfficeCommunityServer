@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@
 using System;
 using System.Globalization;
 using System.Web;
-
 using ASC.Common.Logging;
-using ASC.Core.Tenants;
-using ASC.MessagingSystem;
 using ASC.Security.Cryptography;
+using ASC.Core.Tenants;
 
 namespace ASC.Core.Security.Authentication
 {
@@ -30,14 +28,13 @@ namespace ASC.Core.Security.Authentication
     {
         private const string DateTimeFormat = "yyyy-MM-dd HH:mm:ss,fff";
 
-        public static bool DecryptCookie(string cookie, out int tenant, out Guid userid, out int indexTenant, out DateTime expire, out int indexUser, out int loginEventId)
+        public static bool DecryptCookie(string cookie, out int tenant, out Guid userid, out int indexTenant, out DateTime expire, out int indexUser)
         {
             tenant = Tenant.DEFAULT_TENANT;
             userid = Guid.Empty;
             indexTenant = 0;
             expire = DateTime.MaxValue;
             indexUser = 0;
-            loginEventId = 0;
 
             if (string.IsNullOrEmpty(cookie))
             {
@@ -54,57 +51,29 @@ namespace ASC.Core.Security.Authentication
                 if (5 < s.Length) indexTenant = int.Parse(s[5]);
                 if (6 < s.Length) expire = DateTime.ParseExact(s[6], DateTimeFormat, CultureInfo.InvariantCulture);
                 if (7 < s.Length) indexUser = int.Parse(s[7]);
-                if (8 < s.Length)
-                {
-                    loginEventId = !string.IsNullOrEmpty(s[8]) ? int.Parse(s[8]) : 0;
-                }
 
                 return true;
             }
-            catch (Exception err)
+            catch(Exception err)
             {
-                LogManager.GetLogger("ASC.Core").ErrorFormat("Authenticate error: cookie {0}, tenant {1}, userid {2}, indexTenant {3}, expire {4}, loginEvent {5}: {6}",
-                    cookie, tenant, userid, indexTenant, expire.ToString(DateTimeFormat), loginEventId, err);
+                LogManager.GetLogger("ASC.Core").ErrorFormat("Authenticate error: cookie {0}, tenant {1}, userid {2}, indexTenant {3}, expire {4}: {5}",
+                    cookie, tenant, userid, indexTenant, expire.ToString(DateTimeFormat), err);
             }
             return false;
         }
 
-        public static int GetLoginEventIdFromCookie(string cookie)
-        {
-            int loginEventId = 0;
-            if (string.IsNullOrEmpty(cookie))
-            {
-                return loginEventId;
-            }
 
-            try
-            {
-                cookie = (HttpUtility.UrlDecode(cookie) ?? "").Replace(' ', '+');
-                var s = InstanceCrypto.Decrypt(cookie).Split('$');
-                if (8 < s.Length)
-                {
-                    loginEventId = !string.IsNullOrEmpty(s[8]) ? int.Parse(s[8]) : 0;
-                }
-            }
-            catch (Exception err)
-            {
-                LogManager.GetLogger("ASC.Core").ErrorFormat("Failed to get login event ID from cookie: cookie {0}, loginEvent {1}: {2}",
-                    cookie, loginEventId, err);
-            }
-            return loginEventId;
-        }
-
-        public static string EncryptCookie(int tenant, Guid userid, int loginEventId)
+        public static string EncryptCookie(int tenant, Guid userid)
         {
             var settingsTenant = TenantCookieSettings.GetForTenant(tenant);
             var expires = TenantCookieSettings.GetExpiresTime(tenant);
             var settingsUser = TenantCookieSettings.GetForUser(tenant, userid);
-            return EncryptCookie(tenant, userid, settingsTenant.Index, expires, settingsUser.Index, loginEventId);
+            return EncryptCookie(tenant, userid, settingsTenant.Index, expires, settingsUser.Index);
         }
 
-        public static string EncryptCookie(int tenant, Guid userid, int indexTenant, DateTime expires, int indexUser, int loginEventId)
+        public static string EncryptCookie(int tenant, Guid userid, int indexTenant, DateTime expires, int indexUser)
         {
-            var s = string.Format("{0}${1}${2}${3}${4}${5}${6}${7}${8}",
+            var s = string.Format("{0}${1}${2}${3}${4}${5}${6}${7}",
                 string.Empty, //login
                 tenant,
                 string.Empty, // password
@@ -112,8 +81,7 @@ namespace ASC.Core.Security.Authentication
                 userid.ToString("N"),
                 indexTenant,
                 expires.ToString(DateTimeFormat, CultureInfo.InvariantCulture),
-                indexUser,
-                loginEventId != 0 ? loginEventId.ToString() : null);
+                indexUser);
 
             return InstanceCrypto.Encrypt(s);
         }

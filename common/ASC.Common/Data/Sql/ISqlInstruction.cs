@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,11 @@
 */
 
 
-using System.Collections.Generic;
-
 namespace ASC.Common.Data.Sql
 {
     public interface ISqlInstruction
     {
         string ToString(ISqlDialect dialect);
-        IEnumerable<object> GetParameters();
+        object[] GetParameters();
     }
 }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using ASC.Core.Tenants;
-using ASC.Core;
 using ASC.Files.Core;
 using ASC.MessagingSystem;
 using ASC.Web.Files.Helpers;
 using ASC.Web.Files.Resources;
 using ASC.Web.Files.Utils;
-
-using ASC.Web.Core;
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations
 {
@@ -36,7 +31,6 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
         private object _trashId;
         private readonly bool _ignoreException;
         private readonly bool _immediately;
-        private readonly bool _isEmptyTrash;
         private readonly Dictionary<string, string> _headers;
 
         public override FileOperationType OperationType
@@ -45,13 +39,12 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
         }
 
 
-        public FileDeleteOperation(List<object> folders, List<object> files, bool ignoreException = false, bool holdResult = true, bool immediately = false, Dictionary<string, string> headers = null, bool isEmptyTrash = false)
+        public FileDeleteOperation(List<object> folders, List<object> files, bool ignoreException = false, bool holdResult = true, bool immediately = false, Dictionary<string, string> headers = null)
             : base(folders, files, holdResult)
         {
             _ignoreException = ignoreException;
             _immediately = immediately;
             _headers = headers;
-            _isEmptyTrash = isEmptyTrash;
         }
 
 
@@ -71,20 +64,12 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
             {
                 Status += string.Format("folder_{0}{1}", root.ID, SPLIT_CHAR);
             }
-            if (_isEmptyTrash)
-            {
-                DeleteFiles(Files);
-                DeleteFolders(Folders);
-                MessageService.Send(_headers, MessageAction.TrashEmptied);
-            }
-            else
-            {
-                DeleteFiles(Files, true);
-                DeleteFolders(Folders, true);
-            }
+
+            DeleteFiles(Files);
+            DeleteFolders(Folders);
         }
 
-        private void DeleteFolders(IEnumerable<object> folderIds, bool isNeedSendActions = false)
+        private void DeleteFolders(IEnumerable<object> folderIds)
         {
             foreach (var folderId in folderIds)
             {
@@ -116,10 +101,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                         if (ProviderDao != null)
                         {
                             ProviderDao.RemoveProviderInfo(folder.ProviderId);
-                            if (isNeedSendActions)
-                            {
-                                FilesMessageService.Send(folder, _headers, MessageAction.ThirdPartyDeleted, folder.ID.ToString(), folder.ProviderKey);
-                            }
+                            FilesMessageService.Send(folder, _headers, MessageAction.ThirdPartyDeleted, folder.ID.ToString(), folder.ProviderKey);
                         }
 
                         ProcessedFolder(folderId);
@@ -153,18 +135,12 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                                 if (immediately)
                                 {
                                     FolderDao.DeleteFolder(folder.ID);
-                                    if (isNeedSendActions)
-                                    {
-                                        FilesMessageService.Send(folder, _headers, MessageAction.FolderDeleted, folder.Title);
-                                    }
+                                    FilesMessageService.Send(folder, _headers, MessageAction.FolderDeleted, folder.Title);
                                 }
                                 else
                                 {
                                     FolderDao.MoveFolder(folder.ID, _trashId, CancellationToken);
-                                    if (isNeedSendActions)
-                                    {
-                                        FilesMessageService.Send(folder, _headers, MessageAction.FolderMovedToTrash, folder.Title);
-                                    }
+                                    FilesMessageService.Send(folder, _headers, MessageAction.FolderMovedToTrash, folder.Title);
                                 }
 
                                 ProcessedFolder(folderId);
@@ -176,7 +152,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
             }
         }
 
-        private void DeleteFiles(IEnumerable<object> fileIds, bool isNeedSendActions = false)
+        private void DeleteFiles(IEnumerable<object> fileIds)
         {
             foreach (var fileId in fileIds)
             {
@@ -198,78 +174,20 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                     if (!_immediately && FileDao.UseTrashForRemove(file))
                     {
                         FileDao.MoveFile(file.ID, _trashId);
-                        if (file.RootFolderType == FolderType.COMMON)
-                        {
-                            CoreContext.TenantManager.SetTenantQuotaRow(
-                                new TenantQuotaRow
-                                {
-                                    Tenant = CoreContext.TenantManager.GetCurrentTenant().TenantId,
-                                    Path = string.Format("/{0}/{1}", FileConstant.ModuleId, ""),
-                                    Counter = file.ContentLength,
-                                    Tag = WebItemManager.DocumentsProductID.ToString(),
-                                    UserId = SecurityContext.CurrentAccount.ID
-                                },
-                                true);
-                        }
-                        if (file.RootFolderType == FolderType.USER && SecurityContext.CurrentAccount.ID != file.RootFolderCreator)
-                        {
-                            CoreContext.TenantManager.SetTenantQuotaRow(
-                                new TenantQuotaRow
-                                {
-                                    Tenant = CoreContext.TenantManager.GetCurrentTenant().TenantId,
-                                    Path = string.Format("/{0}/{1}", FileConstant.ModuleId, ""),
-                                    Counter = -1 * file.ContentLength,
-                                    Tag = WebItemManager.DocumentsProductID.ToString(),
-                                    UserId = file.RootFolderCreator
-                                },
-                                true);
-                            CoreContext.TenantManager.SetTenantQuotaRow(
-                                new TenantQuotaRow
-                                {
-                                    Tenant = CoreContext.TenantManager.GetCurrentTenant().TenantId,
-                                    Path = string.Format("/{0}/{1}", FileConstant.ModuleId, ""),
-                                    Counter = file.ContentLength,
-                                    Tag = WebItemManager.DocumentsProductID.ToString(),
-                                    UserId = SecurityContext.CurrentAccount.ID
-                                },
-                                true);
-                        }
-
-                        if (isNeedSendActions)
-                        {
-                            FilesMessageService.Send(file, _headers, MessageAction.FileMovedToTrash, file.Title);
-                        }
-                        if (file.ThumbnailStatus == Thumbnail.Waiting)
-                        {
-                            file.ThumbnailStatus = Thumbnail.NotRequired;
-                            FileDao.SaveThumbnail(file, null);
-                        }
+                        FilesMessageService.Send(file, _headers, MessageAction.FileMovedToTrash, file.Title);
                     }
                     else
                     {
                         try
                         {
-                            FileDao.DeleteFile(file.ID, file.GetFileQuotaOwner());
-
-                            if (_headers != null)
-                            {
-                                if (isNeedSendActions)
-                                {
-                                    FilesMessageService.Send(file, _headers, MessageAction.FileDeleted, file.Title);
-                                }
-                            }
-                            else
-                            {
-                                FilesMessageService.Send(file, MessageInitiator.AutoCleanUp, MessageAction.FileDeleted, file.Title);
-                            }
+                            FileDao.DeleteFile(file.ID);
+                            FilesMessageService.Send(file, _headers, MessageAction.FileDeleted, file.Title);
                         }
                         catch (Exception ex)
                         {
                             Error = ex.Message;
                             Logger.Error(Error, ex);
                         }
-
-                        LinkDao.DeleteAllLink(file.ID);
                     }
                     ProcessedFile(fileId);
                 }
@@ -300,6 +218,5 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
             }
             return false;
         }
-
     }
 }

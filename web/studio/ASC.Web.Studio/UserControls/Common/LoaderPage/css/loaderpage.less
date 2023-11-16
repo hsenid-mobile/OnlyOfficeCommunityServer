@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 */
 
 
-@import "../../../../skins/default/params.less";
 /*******************************************************************************
     Page loader
 *******************************************************************************/
@@ -44,7 +43,7 @@
         font-size: 14px;
         margin-left: 80px;
         margin-top: 125px;
-        color: @loader-page-text-color;
+        color: #888;
         white-space: nowrap;
     }
 
@@ -72,7 +71,7 @@
     position: absolute;
 }
     .romb.blue {
-        background: @loader-romb-blue-col;
+        background: #55bce6;
         z-index: 3;
         -webkit-animation-name: blue;
         -moz-animation-name: blue;
@@ -81,7 +80,7 @@
         animation-name: blue;
     }
 .romb.red {
-    background: @loader-romb-red-col;
+    background: #de7a59;
     z-index:1;
     -webkit-animation-name: red;
         -moz-animation-name: red;
@@ -90,7 +89,7 @@
         animation-name: red;
 }
     .romb.green {
-        background: @loader-romb-green-col;
+        background: #a1cb5c;
         z-index: 2;
         -webkit-animation-name: green;
         -moz-animation-name: green;
@@ -100,72 +99,72 @@
     }
 
 @-webkit-keyframes red {
-    0%   {top:120px; background: @loader-romb-red-col;}
-    10%   {top:120px; background: @loader-romb-red-col10;}
-    14%   { background: @body-color;  top:120px;}  
-    15%   { background: @body-color;  top:0;}  
-    20%  {background: @loader-romb-red-col20; }
-    30%  {background: @loader-romb-red-col30;}
+    0%   {top:120px; background: #de7a59;}
+    10%   {top:120px; background: #F2CBBF;}
+    14%   { background: #fff;  top:120px;}  
+    15%   { background: #fff;  top:0;}  
+    20%  {background: #E6E4E4; }
+    30%  {background: #D2D2D2;}
     40% { top:120px; }  
-    100% { top:120px; background: @loader-romb-red-col;}    
+    100% { top:120px; background: #de7a59;}    
 }
 
 @keyframes red {
-   0%   {top:120px; background: @loader-romb-red-col;}
-    10%   {top:120px; background: @loader-romb-red-col10;}
-    14%   { background: @body-color;  top:120px;}  
-    15%   { background: @body-color;  top:0;}  
-    20%  {background: @loader-romb-red-col20; }
-    30%  {background: @loader-romb-red-col30;}
+   0%   {top:120px; background: #de7a59;}
+    10%   {top:120px; background: #F2CBBF;}
+    14%   { background: #fff;  top:120px;}  
+    15%   { background: #fff;  top:0;}  
+    20%  {background: #E6E4E4; }
+    30%  {background: #D2D2D2;}
     40% { top:120px; }  
-    100% { top:120px; background: @loader-romb-red-col;}    
+    100% { top:120px; background: #de7a59;}    
 }
 
 
 
 @-webkit-keyframes green {    
-     0%   {top:110px; background: @loader-romb-green-col;opacity:1;}
-    10%   {top:110px; background: @loader-romb-green-col10; opacity:1;}
-    14%   { background: @body-color;  top:110px; opacity:1;} 
-    15%   { background: @body-color;  top:0;opacity:1;}   
-    20%   {background: @body-color; top:0; opacity:0;}
-    25%  {background: @loader-romb-green-col25; top:0; opacity:1; }
-    30%  {background:@loader-romb-green-col30; }
+     0%   {top:110px; background: #a1cb5c;opacity:1;}
+    10%   {top:110px; background: #CBE0AC; opacity:1;}
+    14%   { background: #fff;  top:110px; opacity:1;} 
+    15%   { background: #fff;  top:0;opacity:1;}   
+    20%   {background: #ffffff; top:0; opacity:0;}
+    25%  {background: #EFEFEF; top:0; opacity:1; }
+    30%  {background:#E6E4E4; }
     70% { top:110px;}
-    100% { top:110px; background: @loader-romb-green-col;}    
+    100% { top:110px; background: #a1cb5c;}    
 }
 
 @keyframes green {
-     0%   {top:110px; background: @loader-romb-green-col;opacity:1;}
-    10%   {top:110px; background: @loader-romb-green-col10; opacity:1;}
-    14%   { background: @body-color;  top:110px; opacity:1;} 
-    15%   { background: @body-color;  top:0;opacity:1;}   
-    20%   {background: @body-color; top:0; opacity:0;}
-    25%  {background: @loader-romb-green-col25; top:0; opacity:1; }
-    30%  {background:@loader-romb-green-col30; }
+     0%   {top:110px; background: #a1cb5c;opacity:1;}
+    10%   {top:110px; background: #CBE0AC; opacity:1;}
+    14%   { background: #fff;  top:110px; opacity:1;} 
+    15%   { background: #fff;  top:0;opacity:1;}   
+    20%   {background: #ffffff; top:0; opacity:0;}
+    25%  {background: #EFEFEF; top:0; opacity:1; }
+    30%  {background:#E6E4E4; }
     70% { top:110px;}
-    100% { top:110px; background: @loader-romb-green-col;}      
+    100% { top:110px; background: #a1cb5c;}      
 }
 @-webkit-keyframes blue {
-     0%   {top:100px; background: @loader-romb-blue-col;opacity:1;}
-    10%   {top:100px; background: @loader-romb-blue-col10; opacity:1;}
-    14%   { background: @body-color;  top:100px; opacity:1;} 
-    15%   { background: @body-color;  top:0;opacity:1;}  
-    20%   {background: @body-color; top:0; opacity:0;}
-    25%  {background: @body-color; top:0; opacity:0;}
-    45%  {background: @loader-romb-blue-col45; top:0;opacity:0,2;}
-    100% { top:100px;background: @loader-romb-blue-col;}  
+     0%   {top:100px; background: #55bce6;opacity:1;}
+    10%   {top:100px; background: #BFE8F8; opacity:1;}
+    14%   { background: #fff;  top:100px; opacity:1;} 
+    15%   { background: #fff;  top:0;opacity:1;}  
+    20%   {background: #ffffff; top:0; opacity:0;}
+    25%  {background: #ffffff; top:0; opacity:0;}
+    45%  {background: #EFEFEF; top:0;opacity:0,2;}
+    100% { top:100px;background: #55bce6;}  
 }
 
 @keyframes blue {
-     0%   {top:100px; background: @loader-romb-blue-col;opacity:1;}
-    10%   {top:100px; background: @loader-romb-blue-col10; opacity:1;}
-    14%   { background: @body-color;  top:100px; opacity:1;} 
-    15%   { background: @body-color;  top:0;opacity:1;}  
-    20%   {background: @body-color; top:0; opacity:0;}
-    25%  {background: @body-color; top:0; opacity:0;}
-    45%  {background: @loader-romb-blue-col45; top:0;opacity:0,2;}
-    100% { top:100px;background: @loader-romb-blue-col;} 
+     0%   {top:100px; background: #55bce6;opacity:1;}
+    10%   {top:100px; background: #BFE8F8; opacity:1;}
+    14%   { background: #fff;  top:100px; opacity:1;} 
+    15%   { background: #fff;  top:0;opacity:1;}  
+    20%   {background: #ffffff; top:0; opacity:0;}
+    25%  {background: #ffffff; top:0; opacity:0;}
+    45%  {background: #EFEFEF; top:0;opacity:0,2;}
+    100% { top:100px;background: #55bce6;} 
 }
 
 .loader-page.static .romb {
@@ -183,15 +182,15 @@
 
 .loader-page.static .romb.blue {
     top: 100px;
-    background: @loader-romb-blue-col;
+    background: #55bce6;
 }
 
 .loader-page.static .romb.red {
     top: 120px;
-    background: @loader-romb-red-col;
+    background: #de7a59;
 }
 
 .loader-page.static .romb.green {
     top: 110px;
-    background: @loader-romb-green-col;
+    background: #a1cb5c;
 }

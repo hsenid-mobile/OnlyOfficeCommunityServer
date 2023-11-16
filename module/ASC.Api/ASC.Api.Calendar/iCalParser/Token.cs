@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 
 using System;
 using System.Collections;
-using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
+using System.Globalization;
 
 namespace ASC.Api.Calendar.iCalParser
 {
@@ -62,12 +63,12 @@ namespace ASC.Api.Calendar.iCalParser
     /// </summary>
     public class Token
     {
-        private readonly string tokenText;
-        private readonly TokenValue tokenVal;
-        private readonly ScannerState state;
-        private readonly string errorMessage;
+        private string tokenText;
+        private TokenValue tokenVal;
+        private ScannerState state;
+        private string errorMessage;
 
-        private static readonly Hashtable reservedWords;
+        private static Hashtable reservedWords;
 
         static Token()
         {
@@ -155,10 +156,10 @@ namespace ASC.Api.Calendar.iCalParser
             var _dateTimeFormats = new[]
                                                        {
                                                            "o",
-                                                           "yyyyMMdd'T'HHmmssK",
+                                                           "yyyyMMdd'T'HHmmssK",                                                            
                                                            "yyyyMMdd",
-                                                           "yyyy'-'MM'-'dd'T'HH'-'mm'-'ss'.'fffffffK",
-                                                           "yyyy'-'MM'-'dd'T'HH'-'mm'-'ss'.'fffK",
+                                                           "yyyy'-'MM'-'dd'T'HH'-'mm'-'ss'.'fffffffK", 
+                                                           "yyyy'-'MM'-'dd'T'HH'-'mm'-'ss'.'fffK", 
                                                            "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK",
                                                            "yyyy'-'MM'-'dd'T'HH'-'mm'-'ssK",
                                                            "yyyy'-'MM'-'dd'T'HH':'mm':'ssK",
@@ -168,14 +169,14 @@ namespace ASC.Api.Calendar.iCalParser
 
 
 
-
-
-            isUTC = icalDate.ToLowerInvariant().EndsWith("z");
+            
+            
+            isUTC= icalDate.ToLowerInvariant().EndsWith("z");
             isDate = !icalDate.ToLowerInvariant().Contains("t");
 
 
-            DateTime dateTime;
-            if (DateTime.TryParseExact(icalDate.ToUpper(), _dateTimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out dateTime))
+            DateTime dateTime ;
+            if(DateTime.TryParseExact(icalDate.ToUpper(), _dateTimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out dateTime))
                 return dateTime;
 
             return DateTime.MaxValue;

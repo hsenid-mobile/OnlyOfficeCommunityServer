@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,9 @@
 
 using System;
 using System.Text;
-
 using AjaxPro;
-
 using ASC.Core;
 using ASC.Forum;
-using ASC.Web.Community.Modules.Forum.Resources;
 using ASC.Web.Studio.Utility;
 
 namespace ASC.Web.Community.Forum
@@ -65,7 +62,7 @@ namespace ASC.Web.Community.Forum
             else
             {
                 resp.rs1 = "0";
-                resp.rs2 = ForumResource.ErrorSubscription;
+                resp.rs2 = Resources.ForumResource.ErrorSubscription;
             }
             return resp;
         }
@@ -76,7 +73,7 @@ namespace ASC.Web.Community.Forum
 
             sb.Append("<a id=\"statusSubscribe\"  class=\"" +
                       "follow-status " + (IsTopicSubscribe(topicID) ? "subscribed" : "unsubscribed") +
-                      "\" title=\"" + (!isSubscribe ? ForumResource.UnSubscribeOnTopic : ForumResource.SubscribeOnTopic) +
+                      "\" title=\"" + (!isSubscribe ? Resources.ForumResource.UnSubscribeOnTopic : Resources.ForumResource.SubscribeOnTopic) +
                       "\" href=\"#\"onclick=\"ForumSubscriber.SubscribeOnTopic('" + topicID + "', " + (isSubscribe ? 1 : 0) + "); return false;\"></a>");
 
             return sb.ToString();
@@ -102,7 +99,7 @@ namespace ASC.Web.Community.Forum
 
             sb.Append("<a id=\"statusSubscribe\"  class=\"" +
                       "follow-status " + (IsThreadSubscribe(threadID) ? "subscribed" : "unsubscribed") +
-                      "\" title=\"" + (!isSubscribe ? ForumResource.UnSubscribeOnThread : ForumResource.SubscribeOnThread) +
+                      "\" title=\"" + (!isSubscribe ? Resources.ForumResource.UnSubscribeOnThread : Resources.ForumResource.SubscribeOnThread) +
                       "\" href=\"#\" onclick=\"ForumSubscriber.SubscribeOnThread('" + threadID + "', " + (isSubscribe ? 1 : 0) + "); return false;\"></a>");
 
             return sb.ToString();
@@ -145,7 +142,7 @@ namespace ASC.Web.Community.Forum
             else
             {
                 resp.rs1 = "0";
-                resp.rs2 = ForumResource.ErrorSubscription;
+                resp.rs2 = Resources.ForumResource.ErrorSubscription;
             }
             return resp;
         }
@@ -159,7 +156,7 @@ namespace ASC.Web.Community.Forum
             var sb = new StringBuilder();
 
             sb.Append("<div id=\"forum_subcribeOnNewTopicBox\">");
-            sb.Append("<a class='linkAction' href=\"#\" onclick=\"ForumSubscriber.SubscribeOnNewTopics(" + (isSubscribe ? 1 : 0) + "); return false;\">" + (!isSubscribe ? ForumResource.UnsubscribeOnNewTopicInForum : ForumResource.SubscribeOnNewTopicInForum) + "</a>");
+            sb.Append("<a class='linkAction' href=\"#\" onclick=\"ForumSubscriber.SubscribeOnNewTopics(" + (isSubscribe ? 1 : 0) + "); return false;\">" + (!isSubscribe ? Resources.ForumResource.UnsubscribeOnNewTopicInForum : Resources.ForumResource.SubscribeOnNewTopicInForum) + "</a>");
             sb.Append("</div>");
 
             return sb.ToString();
@@ -200,7 +197,7 @@ namespace ASC.Web.Community.Forum
             else
             {
                 resp.rs1 = "0";
-                resp.rs2 = ForumResource.ErrorSubscription;
+                resp.rs2 = Resources.ForumResource.ErrorSubscription;
             }
             return resp;
         }

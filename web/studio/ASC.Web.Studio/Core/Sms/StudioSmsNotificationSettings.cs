@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,16 @@
 
 using System;
 using System.Runtime.Serialization;
-
 using ASC.Core;
 using ASC.Core.Common.Settings;
 using ASC.Web.Core.Sms;
-using ASC.Web.Studio.Core.TFA;
 using ASC.Web.Studio.Utility;
 
 namespace ASC.Web.Studio.Core.SMS
 {
     [Serializable]
     [DataContract]
-    public class StudioSmsNotificationSettings : TfaSettingsBase<StudioSmsNotificationSettings>
+    public class StudioSmsNotificationSettings : BaseSettings<StudioSmsNotificationSettings>
     {
         public override Guid ID
         {
@@ -37,45 +35,25 @@ namespace ASC.Web.Studio.Core.SMS
 
         public override ISettings GetDefault()
         {
-            return new StudioSmsNotificationSettings();
+            return new StudioSmsNotificationSettings { EnableSetting = false, };
         }
+
+        [DataMember(Name = "Enable")]
+        public bool EnableSetting { get; set; }
+
 
         public static bool Enable
         {
             get { return Load().EnableSetting && SmsProviderManager.Enabled(); }
             set
             {
-                StudioSmsNotificationSettings settings;
-                if (value)
-                {
-                    settings = Load();
-                    settings.EnableSetting = value;
-                }
-                else
-                {
-                    settings = new StudioSmsNotificationSettings();
-                }
+                var settings = Load();
+                settings.EnableSetting = value;
                 settings.Save();
             }
         }
 
-        public static bool IsVisibleAndAvailableSettings
-        {
-            get
-            {
-                return IsVisibleSettings && IsAvailableSettings;
-            }
-        }
-
         public static bool IsVisibleSettings
-        {
-            get
-            {
-                return SetupInfo.IsVisibleSettings<StudioSmsNotificationSettings>();
-            }
-        }
-
-        public static bool IsAvailableSettings
         {
             get
             {
@@ -86,13 +64,6 @@ namespace ASC.Web.Studio.Core.SMS
                            && !quota.Free
                            && !quota.Open);
             }
-        }
-
-        public static bool TfaEnabledForUser(Guid userGuid)
-        {
-            var settings = Load();
-
-            return settings.TfaEnabledForUserBase(settings, userGuid);
         }
     }
 }

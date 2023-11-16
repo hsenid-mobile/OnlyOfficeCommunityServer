@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,7 @@
 using System;
 using System.Text;
 using System.Web;
-
 using ASC.Core.Common;
-
 using Uri = System.Uri;
 
 namespace ASC.VoipService.Twilio
@@ -29,7 +27,7 @@ namespace ASC.VoipService.Twilio
     {
         public TwilioVoipSettings() { }
 
-        public TwilioVoipSettings(Uri voiceUrl)
+        public TwilioVoipSettings(Uri voiceUrl) 
         {
             if (string.IsNullOrEmpty(voiceUrl.Query)) return;
 
@@ -42,7 +40,7 @@ namespace ASC.VoipService.Twilio
 
         public override string Connect(bool user = true, string contactId = null)
         {
-            var result = GetEcho("", user);
+            var result =  GetEcho("", user);
             if (!string.IsNullOrEmpty(contactId))
             {
                 result += "&ContactId=" + contactId;

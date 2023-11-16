@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ using System;
 
 namespace ASC.Blogs.Core.Domain
 {
-    public class TagStat
-    {
+    public class TagStat {
         public string Name;
         public int Count;
     }
-    public class Tag
+	public class Tag
     {
         private Guid _ID;
         //private Guid _UserID;
@@ -46,7 +45,7 @@ namespace ASC.Blogs.Core.Domain
         {
             get { return _ID; }
             set { _ID = value; }
-        }
+        }        
         public virtual Post Post
         {
             get { return _Post; }

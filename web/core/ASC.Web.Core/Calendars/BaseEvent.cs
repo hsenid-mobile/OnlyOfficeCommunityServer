@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ namespace ASC.Web.Core.Calendars
 {
     public abstract class BaseEvent : IEvent, ICloneable
     {
+        internal TimeZoneInfo TimeZone { get; set; }
+
         public BaseEvent()
         {
             this.Context = new EventContext();
@@ -53,7 +55,7 @@ namespace ASC.Web.Core.Calendars
         public virtual DateTime UtcEndDate { get; set; }
 
         public virtual DateTime UtcStartDate { get; set; }
-
+        
         public virtual DateTime UtcUpdateDate { get; set; }
 
         public virtual EventContext Context { get; set; }
@@ -61,10 +63,6 @@ namespace ASC.Web.Core.Calendars
         public virtual RecurrenceRule RecurrenceRule { get; set; }
 
         public virtual EventStatus Status { get; set; }
-
-        public virtual TimeZoneInfo TimeZone { get; set; }
-
-        public virtual bool HasAttachments { get; set; }
 
         #endregion
 
@@ -93,7 +91,7 @@ namespace ASC.Web.Core.Calendars
             sb.AppendLine(String.Format("SUMMARY:{0}", this.Name));
 
             if (!string.IsNullOrEmpty(this.Description))
-                sb.AppendLine(String.Format("DESCRIPTION:{0}", this.Description.Replace("\n", "\\n")));
+                sb.AppendLine(String.Format("DESCRIPTION:{0}", this.Description.Replace("\n","\\n")));
 
             if (this.AllDayLong)
             {
@@ -121,7 +119,7 @@ namespace ASC.Web.Core.Calendars
                 if (this.UtcEndDate != DateTime.MinValue)
                     sb.AppendLine(String.Format("DTEND:{0}", this.UtcEndDate.ToString("yyyyMMdd'T'HHmmss'Z'")));
             }
-
+            
 
             if (this.RecurrenceRule != null)
                 sb.AppendLine(this.RecurrenceRule.ToiCalFormat());
@@ -130,7 +128,7 @@ namespace ASC.Web.Core.Calendars
             return sb.ToString();
         }
 
-        #endregion
-
+        #endregion     
+        
     }
 }

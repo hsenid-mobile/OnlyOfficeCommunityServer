@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
-
-using ASC.Core.ChunkedUploader;
 using ASC.Data.Storage.Configuration;
-using ASC.Data.Storage.ZipOperators;
 
 namespace ASC.Data.Storage
 {
@@ -31,10 +27,6 @@ namespace ASC.Data.Storage
     ///</summary>
     public interface IDataStore
     {
-        IDataWriteOperator CreateDataWriteOperator(
-            CommonChunkedUploadSession chunkedUploadSession,
-            CommonChunkedUploadSessionHolder sessionHolder);
-
         IQuotaController QuotaController { get; set; }
 
         TimeSpan GetExpire(string domain);
@@ -95,19 +87,16 @@ namespace ASC.Data.Storage
         ///</summary>
         ///<param name="domain"></param>
         ///<param name="path"></param>
-        ///<param name="offset"></param>
         ///<returns></returns>
-        Stream GetReadStream(string domain, string path, long offset);
-
-        Task<Stream> GetReadStreamAsync(string domain, string path, long offset);
+        Stream GetReadStream(string domain, string path, int offset);
 
         ///<summary>
         /// Saves the contents of the stream in the repository.
-        ///</summary>
+        ///</ Summary>
         /// <param Name="domain"> </param>
         /// <param Name="path"> </param>
         /// <param Name="stream"> flow. Is read from the current position! Desirable to set to 0 when the transmission MemoryStream instance </param>
-        /// <returns></returns>
+        /// <returns> </Returns>
         Uri Save(string domain, string path, Stream stream);
 
         /// <summary>
@@ -135,17 +124,6 @@ namespace ASC.Data.Storage
         /// </summary>
         /// <param name="domain"></param>
         /// <param name="path"></param>
-        /// <param name="ownerId"></param>
-        /// <param name="stream"></param>
-        /// <param name="attachmentFileName"></param>
-        /// <returns></returns>
-        Uri Save(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName);
-
-        /// <summary>
-        /// Saves the contents of the stream in the repository.
-        /// </summary>
-        /// <param name="domain"></param>
-        /// <param name="path"></param>
         /// <param name="stream"></param>
         /// <param name="contentType"></param>
         /// <param name="contentDisposition"></param>
@@ -161,13 +139,11 @@ namespace ASC.Data.Storage
         /// <param name="contentEncoding"></param>
         /// <param name="cacheDays"></param>
         /// <returns></returns>
-        Uri Save(string domain, string path, Stream stream, string contentEncoding, int cacheDays);
+         Uri Save(string domain, string path, Stream stream, string contentEncoding, int cacheDays);
 
         string InitiateChunkedUpload(string domain, string path);
 
         string UploadChunk(string domain, string path, string uploadId, Stream stream, long defaultChunkSize, int chunkNumber, long chunkLength);
-
-        Task<string> UploadChunkAsync(string domain, string path, string uploadId, Stream stream, long defaultChunkSize, int chunkNumber, long chunkLength);
 
         Uri FinalizeChunkedUpload(string domain, string path, string uploadId, Dictionary<int, string> eTags);
 
@@ -197,7 +173,7 @@ namespace ASC.Data.Storage
         /// Deletes files
         ///</summary>
         ///<param name="domain"></param>
-        ///<param name="paths"></param>
+        ///<param name="listPaths"></param>
         void DeleteFiles(string domain, List<string> paths);
 
         ///<summary>
@@ -225,9 +201,8 @@ namespace ASC.Data.Storage
         ///<param name="srcpath"></param>
         ///<param name="newdomain"></param>
         ///<param name="newpath"></param>
-        ///<param name="quotaCheckFileSize"></param>
         ///<returns></returns>
-        Uri Move(string srcdomain, string srcpath, string newdomain, string newpath, bool quotaCheckFileSize = true);
+        Uri Move(string srcdomain, string srcpath, string newdomain, string newpath);
 
         ///<summary>
         /// Saves the file in the temp. In fact, almost no different from the usual Save except that generates the file name itself. An inconvenient thing.
@@ -275,8 +250,6 @@ namespace ASC.Data.Storage
         ///<returns></returns>
         bool IsFile(string domain, string path);
 
-        Task<bool> IsFileAsync(string domain, string path);
-
         ///<summary>
         /// Checks whether a directory exists. On s3 it took long time.
         ///</summary>
@@ -288,7 +261,6 @@ namespace ASC.Data.Storage
         void DeleteDirectory(string domain, string path);
 
         long GetFileSize(string domain, string path);
-        Task<long> GetFileSizeAsync(string domain, string path);
 
         long GetDirectorySize(string domain, string path);
 
@@ -314,7 +286,6 @@ namespace ASC.Data.Storage
         bool IsFile(string path);
         bool IsDirectory(string path);
         void DeleteDirectory(string path);
-        void DeleteDirectory(Guid ownerId, string path);
         long GetFileSize(string path);
         long GetDirectorySize(string path);
         Uri Copy(string path, string newdomain, string newpath);
@@ -331,11 +302,10 @@ namespace ASC.Data.Storage
         string GetUploadForm(string domain, string directoryPath, string redirectTo, long maxUploadSize,
                              string contentType, string contentDisposition, string submitLabel);
 
+        string GetUploadedUrl(string domain, string directoryPath);
         string GetUploadUrl();
 
         string GetPostParams(string domain, string directoryPath, long maxUploadSize, string contentType,
                              string contentDisposition);
-
-        bool TryGetFileEtag(string domain, string path, out string etag);
     }
 }

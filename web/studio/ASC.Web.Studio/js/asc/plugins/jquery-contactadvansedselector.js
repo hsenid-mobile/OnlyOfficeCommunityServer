@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 
 (function ($) {
-    var ResourceJS = ASC.Resources.Master.ResourceJS, teamlab = Teamlab;
+    var resources = ASC.Resources.Master.Resource, teamlab = Teamlab;
     var contactadvancedSelector = function (element, options) {
         this.$element = $(element);
         this.options = $.extend({}, $.fn.contactadvancedSelector.defaults, options);
@@ -34,17 +34,17 @@
 
             opts.newoptions = [
                          {
-                             title: ResourceJS.SelectorContactType, type: "choice", tag: "type", items: [
-                                      { type: "person", title: ResourceJS.SelectorPerson },
-                                      { type: "company", title: ResourceJS.SelectorCompany }
+                             title: resources.SelectorContactType, type: "choice", tag: "type", items: [
+                                      { type: "person", title: resources.SelectorPerson },
+                                      { type: "company", title: resources.SelectorCompany }
                              ]
                          },
-                         { title: ResourceJS.SelectorFirstName, type: "input", tag: "first-name" },
-                         { title: ResourceJS.SelectorLastName, type: "input", tag: "last-name" },
-                         { title: ResourceJS.SelectorCompany, type: "select", tag: "company" },
-                         { title: ResourceJS.SelectorCompanyName, type: "input", tag: "title" }
+                         { title: resources.SelectorFirstName, type: "input", tag: "first-name" },
+                         { title: resources.SelectorLastName, type: "input", tag: "last-name" },
+                         { title: resources.SelectorCompany, type: "select", tag: "company" },
+                         { title: resources.SelectorCompanyName, type: "input", tag: "title" }
             ];
-            opts.newbtn = ResourceJS.CreateButton;
+            opts.newbtn = resources.CreateButton;
 
             that.displayAddItemBlock.call(that, opts);
 
@@ -361,28 +361,28 @@
                 newContact.companyId = $addPanel.find(".company input").attr("data-id");
             }
             if (isCompany && !newContact.companyName) {
-                that.showErrorField.call(that, { field: $addPanel.find(".title"), error: ResourceJS.ContactSelectorEmptyNameError });
+                that.showErrorField.call(that, { field: $addPanel.find(".title"), error: resources.ContactSelectorEmptyNameError });
                 isError = true;
             }
             if (!isCompany && !newContact.firstName) {
-                that.showErrorField.call(that, { field: $addPanel.find(".first-name"), error: ResourceJS.ErrorEmptyUserFirstName });
+                that.showErrorField.call(that, { field: $addPanel.find(".first-name"), error: resources.ErrorEmptyUserFirstName });
                 isError = true;
             }
             if (!isCompany && !newContact.lastName) {
-                that.showErrorField.call(that, { field: $addPanel.find(".last-name"), error: ResourceJS.ErrorEmptyUserLastName });
+                that.showErrorField.call(that, { field: $addPanel.find(".last-name"), error: resources.ErrorEmptyUserLastName });
                 isError = true;
             }
             if (!isCompany && !newContact.companyId && $addPanel.find(".company input").val()) {
-                that.showErrorField.call(that, { field: $addPanel.find(".company"), error: ResourceJS.ContactSelectorNotFoundError });
+                that.showErrorField.call(that, { field: $addPanel.find(".company"), error: resources.ContactSelectorNotFoundError });
                 isError = true;
             }
             if (isError) {
-                $addPanel.find(".error input").first().trigger("focus");
+                $addPanel.find(".error input").first().focus();
                 return;
             }
             teamlab.addCrmContact({}, isCompany, newContact, {
                 before:function(){
-                    that.displayLoadingBtn.call(that, { btn: $btn, text: ResourceJS.LoadingProcessing });
+                    that.displayLoadingBtn.call(that, { btn: $btn, text: resources.LoadingProcessing });
                 },
                 error: function (params, errors) {
                     that.showServerError.call(that, { field: $btn, error: errors });
@@ -448,10 +448,10 @@
     }
     $.fn.contactadvancedSelector.defaults = $.extend({}, $.fn.advancedSelector.defaults, {
         showme: true,
-        addtext: ResourceJS.ContactSelectorAddText,
-        noresults: ResourceJS.ContactSelectorNoResult,
-        noitems: ResourceJS.ContactSelectorNoItems,
-        emptylist: ResourceJS.ContactSelectorEmptyList,
+        addtext: resources.ContactSelectorAddText,
+        noresults: resources.ContactSelectorNoResult,
+        noitems: resources.ContactSelectorNoItems,
+        emptylist: resources.ContactSelectorEmptyList,
         withPhoneOnly: false
         
     });

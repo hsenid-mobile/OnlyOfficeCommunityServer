@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-
 using ASC.Notify.Engine;
 using ASC.Notify.Messages;
 
@@ -30,7 +29,7 @@ namespace ASC.Notify.Sinks
         public DispatchSink(string senderName, DispatchEngine dispatcher)
         {
             if (dispatcher == null) throw new ArgumentNullException("dispatcher");
-
+            
             this.dispatcher = dispatcher;
             this.senderName = senderName;
         }

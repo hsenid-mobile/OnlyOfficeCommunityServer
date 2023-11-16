@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Web;
+using System.Collections.Generic; 
 using System.Web.UI;
-
 using ASC.Core;
 using ASC.Core.Users;
-using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Core.Notify;
 using ASC.Web.Studio.Core.Users;
 using ASC.Web.Studio.PublicResources;
-using ASC.Web.Studio.UserControls.Management.ImpersonateUser;
 using ASC.Web.Studio.UserControls.Users.UserProfile;
+using System.Web;
+using Resources;
 
 using LdapMapping = ASC.ActiveDirectory.Base.Settings.LdapSettings.MappingFields;
 
@@ -50,7 +48,6 @@ namespace ASC.Web.Studio.UserControls.Users
         protected bool HasActions;
         protected bool IsAdmin;
         protected string SubscribeBtnText;
-        protected bool CanImpersonateUser;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -78,13 +75,6 @@ namespace ASC.Web.Studio.UserControls.Users
                     : "ProfileAction.aspx?action=edit&user=" + HttpUtility.UrlEncode(ProfileHelper.UserInfo.UserName);
 
             ReassignDataLink = "Reassigns.aspx?user=" + HttpUtility.UrlEncode(ProfileHelper.UserInfo.UserName);
-
-            CanImpersonateUser = ImpersonationSettings.CanImpersonateUser(ProfileHelper.UserInfo.ID);
-
-            if (CanImpersonateUser)
-            {
-                _confirmationImpersonateUser.Controls.Add(LoadControl(ImpersonateUserConfirmationPanel.Location));
-            }
 
             LdapFields = ASC.ActiveDirectory.Base.Settings.LdapSettings.GetImportedFields;
 

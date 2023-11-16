@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,10 @@
 using System;
 using System.Linq;
 using System.Web;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Common.Logging;
-
-using LogManager = ASC.Common.Logging.BaseLogManager;
 
 namespace ASC.Geolocation
 {
@@ -40,21 +37,6 @@ namespace ASC.Geolocation
             this.dbid = dbid;
         }
 
-        public bool HasData()
-        {
-            try
-            {
-                using (var db = new DbManager(dbid))
-                {
-                    return db.ExecuteScalar<bool>("select exists(select 1 from dbip_location)");
-                }
-            }
-            catch (Exception error)
-            {
-                log.Error(error);
-                return false;
-            }
-        }
 
         public IPGeolocationInfo GetIPGeolocation(string ip)
         {

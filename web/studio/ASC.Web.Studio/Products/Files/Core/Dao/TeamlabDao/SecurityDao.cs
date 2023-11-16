@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Files.Core.Security;
@@ -35,7 +33,6 @@ namespace ASC.Files.Core.Data
 
         public void DeleteShareRecords(IEnumerable<FileShareRecord> records)
         {
-            using (var dbManager = new DbManager(FileConstant.DatabaseId))
             using (var tx = dbManager.BeginTransaction())
             {
                 foreach (var record in records)
@@ -58,13 +55,9 @@ namespace ASC.Files.Core.Data
             var q = Query("files_security s")
                 .SelectCount()
                 .Where(Exp.Eq("s.entry_id", MappingID(entryId).ToString()))
-                .Where("s.entry_type", (int)type)
-                .Where(!Exp.Eq("s.subject_type", SubjectType.Restriction));
+                .Where("s.entry_type", (int)type);
 
-            using (var dbManager = new DbManager(FileConstant.DatabaseId))
-            {
-                return dbManager.ExecuteScalar<int>(q) > 0;
-            }
+            return dbManager.ExecuteScalar<int>(q) > 0;
         }
 
         public void SetShare(FileShareRecord r)
@@ -74,7 +67,6 @@ namespace ASC.Files.Core.Data
                 var entryId = (MappingID(r.EntryId) ?? "").ToString();
                 if (string.IsNullOrEmpty(entryId)) return;
 
-                using (var dbManager = new DbManager(FileConstant.DatabaseId))
                 using (var tx = dbManager.BeginTransaction())
                 {
                     var files = new List<string>();
@@ -130,35 +122,18 @@ namespace ASC.Files.Core.Data
                     .InColumnValue("entry_id", MappingID(r.EntryId, true).ToString())
                     .InColumnValue("entry_type", (int)r.EntryType)
                     .InColumnValue("subject", r.Subject.ToString())
-                    .InColumnValue("subject_type", (int)r.SubjectType)
                     .InColumnValue("owner", r.Owner.ToString())
                     .InColumnValue("security", (int)r.Share)
-                    .InColumnValue("timestamp", DateTime.UtcNow)
-                    .InColumnValue("options", FileShareOptions.Serialize(r.Options));
+                    .InColumnValue("timestamp", DateTime.UtcNow);
 
-                using (var dbManager = new DbManager(FileConstant.DatabaseId))
-                {
-                    dbManager.ExecuteNonQuery(i);
-                }
+                dbManager.ExecuteNonQuery(i);
             }
         }
 
         public IEnumerable<FileShareRecord> GetShares(IEnumerable<Guid> subjects)
         {
             var q = GetQuery(Exp.In("subject", subjects.Select(s => s.ToString()).ToList()));
-
-            List<object[]> fromDb;
-
-            using (var dbManager = new DbManager(FileConstant.DatabaseId))
-            {
-                fromDb = dbManager.ExecuteList(q);
-            }
-
-            var result = fromDb.ConvertAll(ToFileShareRecord);
-
-            ClearExpired(result);
-
-            return result;
+            return dbManager.ExecuteList(q).ConvertAll(ToFileShareRecord);
         }
 
         public IEnumerable<FileShareRecord> GetPureShareRecords(IEnumerable<FileEntry> entries)
@@ -190,21 +165,14 @@ namespace ASC.Files.Core.Data
 
         private IEnumerable<FileShareRecord> GetPureShareRecordsDb(List<string> files, List<string> folders)
         {
+            var result = new List<FileShareRecord>();
+
             var q = GetQuery(Exp.In("s.entry_id", folders) & Exp.Eq("s.entry_type", (int)FileEntryType.Folder));
 
             if (files.Any())
                 q.Union(GetQuery(Exp.In("s.entry_id", files) & Exp.Eq("s.entry_type", (int)FileEntryType.File)));
 
-            List<object[]> fromDb;
-
-            using (var dbManager = new DbManager(FileConstant.DatabaseId))
-            {
-                fromDb = dbManager.ExecuteList(q);
-            }
-
-            var result = fromDb.ConvertAll(ToFileShareRecord);
-
-            ClearExpired(result);
+            result.AddRange(dbManager.ExecuteList(q).ConvertAll(ToFileShareRecord));
 
             return result;
         }
@@ -268,7 +236,7 @@ namespace ASC.Files.Core.Data
         private IEnumerable<FileShareRecord> SaveFilesAndFoldersForShare(List<string> files, List<int> folders)
         {
             var q = Query("files_security s")
-                .Select("s.tenant_id", "cast(t.folder_id as char)", "s.entry_type", "s.subject", "s.subject_type", "s.owner", "s.security", "s.options", "t.level")
+                .Select("s.tenant_id", "cast(t.folder_id as char)", "s.entry_type", "s.subject", "s.owner", "s.security", "t.level")
                 .InnerJoin("files_folder_tree t", Exp.EqColumns("s.entry_id", "cast(t.parent_id as char)"))
                 .Where(Exp.In("t.folder_id", folders))
                 .Where("s.entry_type", (int)FileEntryType.Folder);
@@ -278,75 +246,44 @@ namespace ASC.Files.Core.Data
                 q.Union(GetQuery(Exp.In("s.entry_id", files) & Exp.Eq("s.entry_type", (int)FileEntryType.File)).Select("-1"));
             }
 
-            List<object[]> fromDb;
-
-            using (var dbManager = new DbManager(FileConstant.DatabaseId))
-            {
-                fromDb = dbManager.ExecuteList(q);
-            }
-
-            var result = fromDb
+            return dbManager
+                .ExecuteList(q)
                 .Select(ToFileShareRecord)
                 .OrderBy(r => r.Level)
                 .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
                 .ToList();
-
-            ClearExpired(result);
-
-            return result;
         }
 
-        public void RemoveSubjects(IEnumerable<Guid> subjects)
+        public void RemoveSubject(Guid subject)
         {
-            var q = Delete("files_security").Where(Exp.Or(Exp.In("subject", subjects), Exp.In("owner", subjects)));
+            var batch = new List<ISqlInstruction>
+                {
+                    Delete("files_security").Where("subject", subject.ToString()),
+                    Delete("files_security").Where("owner", subject.ToString()),
+                };
 
-            using (var dbManager = new DbManager(FileConstant.DatabaseId))
-            {
-                dbManager.ExecuteNonQuery(q);
-            }
+            dbManager.ExecuteBatch(batch);
         }
 
         private SqlQuery GetQuery(Exp where)
         {
             return Query("files_security s")
-                .Select("s.tenant_id", "s.entry_id", "s.entry_type", "s.subject", "s.subject_type", "s.owner", "s.security", "s.options")
+                .Select("s.tenant_id", "s.entry_id", "s.entry_type", "s.subject", "s.owner", "s.security")
                 .Where(where);
-        }
-
-        private void ClearExpired(List<FileShareRecord> records)
-        {
-            var expired = new List<FileShareRecord>();
-
-            for (var i = 0; i < records.Count; i++)
-            {
-                var r = records[i];
-                if (r.SubjectType == SubjectType.ExternalLink && r.Options != null && r.Options.IsExpired() && r.Options.AutoDelete)
-                {
-                    expired.Add(r);
-                    records.RemoveAt(i);
-                }
-            }
-
-            if (expired.Any())
-            {
-                DeleteShareRecords(expired);
-            }
         }
 
         private FileShareRecord ToFileShareRecord(object[] r)
         {
             var result = new FileShareRecord
-            {
-                Tenant = Convert.ToInt32(r[0]),
-                EntryId = MappingID(r[1]),
-                EntryType = (FileEntryType)Convert.ToInt32(r[2]),
-                Subject = new Guid((string)r[3]),
-                SubjectType = (SubjectType)Convert.ToInt32(r[4]),
-                Owner = new Guid((string)r[5]),
-                Share = (FileShare)Convert.ToInt32(r[6]),
-                Options = FileShareOptions.Deserialize((string)r[7]),
-                Level = 8 < r.Length ? Convert.ToInt32(r[8]) : 0,
-            };
+                {
+                    Tenant = Convert.ToInt32(r[0]),
+                    EntryId = MappingID(r[1]),
+                    EntryType = (FileEntryType)Convert.ToInt32(r[2]),
+                    Subject = new Guid((string)r[3]),
+                    Owner = new Guid((string)r[4]),
+                    Share = (FileShare)Convert.ToInt32(r[5]),
+                    Level = 6 < r.Length ? Convert.ToInt32(r[6]) : 0,
+                };
 
 
             return result;

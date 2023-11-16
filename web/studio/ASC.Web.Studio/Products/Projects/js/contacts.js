@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 ASC.Projects.Contacts = (function($) {
     var baseObject = ASC.Projects,
         currentProjectId,
-        ProjectsJSResource = baseObject.Resources.ProjectsJSResource,
+        resources = baseObject.Resources.ProjectsJSResource,
         displayNoneClass = "display-none";
 
     var teamlab;
@@ -38,13 +38,13 @@ ASC.Projects.Contacts = (function($) {
             EntityID: 0,
 
             ShowOnlySelectorContent: true,
-            DescriptionText: ProjectsJSResource.CRMDescrForSelector,
+            DescriptionText: resources.CRMDescrForSelector,
             DeleteContactText: "",
             AddContactText: "",
             IsInPopup: false,
-            NewCompanyTitleWatermark: ProjectsJSResource.CRMCompanyName,
-            NewContactFirstNameWatermark: ProjectsJSResource.CRMFirstName,
-            NewContactLastNameWatermark: ProjectsJSResource.CRMLastName,
+            NewCompanyTitleWatermark: resources.CRMCompanyName,
+            NewContactFirstNameWatermark: resources.CRMFirstName,
+            NewContactLastNameWatermark: resources.CRMLastName,
 
             ShowChangeButton: false,
             ShowAddButton: false,
@@ -89,7 +89,7 @@ ASC.Projects.Contacts = (function($) {
             teamlab.getCrmContactsForProject(makeParams(), currentProjectId);
         }, 0);
 
-        jq("#escNoContacts .emptyScrBttnPnl>a").on("click", function() {
+        jq("#escNoContacts .emptyScrBttnPnl>a").bind("click", function() {
             $escNoContacts.addClass(displayNoneClass);
             $contactsForProjectPanel.show();
         });

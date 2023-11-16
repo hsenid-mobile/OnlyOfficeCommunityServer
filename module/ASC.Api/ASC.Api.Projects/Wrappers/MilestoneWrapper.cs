@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 
 using System;
 using System.Runtime.Serialization;
-
 using ASC.Api.Employee;
 using ASC.Projects.Core.Domain;
+using ASC.Projects.Engine;
 using ASC.Specific;
 
 namespace ASC.Api.Projects.Wrappers
@@ -27,41 +27,27 @@ namespace ASC.Api.Projects.Wrappers
     [DataContract(Name = "milestone", Namespace = "")]
     public class MilestoneWrapper : ObjectWrapperFullBase
     {
-        ///<type>ASC.Api.Projects.Wrappers.SimpleProjectWrapper, ASC.Api.Projects</type>
-        ///<order>14</order>
         [DataMember(Order = 14)]
         public SimpleProjectWrapper ProjectOwner { get; set; }
 
-        ///<example>2020-12-22T04:11:56.4458522Z</example>
-        ///<order>20</order>
         [DataMember(Order = 20)]
         public ApiDateTime Deadline { get; set; }
 
-        ///<example>false</example>
-        ///<order>20</order>
         [DataMember(Order = 20)]
         public bool IsKey { get; set; }
 
-        ///<example>false</example>
-        ///<order>20</order>
         [DataMember(Order = 20)]
         public bool IsNotify { get; set; }
 
-        ///<example>false</example>
         [DataMember]
         public bool CanEdit { get; set; }
 
-        ///<example>false</example>
         [DataMember]
         public bool CanDelete { get; set; }
 
-        ///<example type="int">15</example>
-        ///<order>20</order>
         [DataMember(Order = 20)]
         public int ActiveTaskCount { get; set; }
 
-        ///<example type="int">5</example>
-        ///<order>20</order>
         [DataMember(Order = 20)]
         public int ClosedTaskCount { get; set; }
 
@@ -113,24 +99,24 @@ namespace ASC.Api.Projects.Wrappers
         public static MilestoneWrapper GetSample()
         {
             return new MilestoneWrapper
-            {
-                Id = 10,
-                ProjectOwner = SimpleProjectWrapper.GetSample(),
-                Title = "Sample Title",
-                Description = "Sample description",
-                Created = ApiDateTime.GetSample(),
-                CreatedBy = EmployeeWraper.GetSample(),
-                Updated = ApiDateTime.GetSample(),
-                UpdatedBy = EmployeeWraper.GetSample(),
-                Responsible = EmployeeWraper.GetSample(),
-                Status = (int)MilestoneStatus.Open,
-                Deadline = ApiDateTime.GetSample(),
-                IsKey = false,
-                IsNotify = false,
-                CanEdit = true,
-                ActiveTaskCount = 15,
-                ClosedTaskCount = 5
-            };
+                {
+                    Id = 10,
+                    ProjectOwner = SimpleProjectWrapper.GetSample(),
+                    Title = "Sample Title",
+                    Description = "Sample description",
+                    Created = ApiDateTime.GetSample(),
+                    CreatedBy = EmployeeWraper.GetSample(),
+                    Updated = ApiDateTime.GetSample(),
+                    UpdatedBy = EmployeeWraper.GetSample(),
+                    Responsible = EmployeeWraper.GetSample(),
+                    Status = (int)MilestoneStatus.Open,
+                    Deadline = ApiDateTime.GetSample(),
+                    IsKey = false,
+                    IsNotify = false,
+                    CanEdit = true,
+                    ActiveTaskCount = 15,
+                    ClosedTaskCount = 5
+                };
         }
     }
 }

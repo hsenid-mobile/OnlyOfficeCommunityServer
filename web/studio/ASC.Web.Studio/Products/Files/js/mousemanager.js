@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,14 +69,16 @@ window.ASC.Files.Mouse = (function () {
         }
 
         if (!jq(target).is(
-             "main,\
+            "nav,\
+             .nav-content,\
+             .page-menu,\
+             main,\
              .filter-content,\
+             .mainPageTableSidePanel,\
              .mainPageContent,\
              .files-content-panel,\
              #mainContentHeader,\
              #mainContent,\
-             .mainPageContent .layout-bottom-spacer,\
-             #filesMainContent.thumbnails,\
              .file-row:not(.row-rename):not(.row-selected),\
              .file-row:not(.row-rename):not(.row-selected) *")) {
             return true;
@@ -107,12 +109,6 @@ window.ASC.Files.Mouse = (function () {
         mainContentArea.bottom = mainContentArea.top + jq("#filesMainContent")[0].offsetHeight;
         mainContentArea.documentWidth = jq(document).width();
         mainContentArea.documentHeight = jq(document).height();
-
-        var mainOffset = jq("main").offset();
-        mainContentArea.minX = mainOffset.left;
-        mainContentArea.minY = mainOffset.top;
-
-        mainContentArea.minVisibleY = jq(".mainPageContent").offset().top;
     };
 
     var intersectionLines = function (line1, line2) {
@@ -148,9 +144,6 @@ window.ASC.Files.Mouse = (function () {
         if (jq(target)
             .is(".folder-row:not(.error-entry) .thumb-folder," +
                 ".file-row:not(.error-entry) .thumb-file," +
-                ".file-row:not(.error-entry) .thumb-img," +
-                ".file-row:not(.error-entry) .thumb-img img," +
-                ".file-row.min:not(.error-entry) .entry-title .name," +
                 ".file-row:not(.error-entry) .entry-title .name a," +
                 ".file-row:not(.error-entry) .entry-title .name span")) {
             if (ASC.Files.Folders.folderContainer !== "trash") {
@@ -168,9 +161,9 @@ window.ASC.Files.Mouse = (function () {
 
         var windowFix = (jq.browser.msie && jq.browser.version < 9 ? jq("body") : jq(window));
         windowFix
-            .off("mousemove.MouseSelect mouseup.MouseSelect")
-            .on("mousemove.MouseSelect", ASC.Files.Mouse.continueSelecting)
-            .on("mouseup.MouseSelect", ASC.Files.Mouse.finishSelecting);
+            .unbind("mousemove.MouseSelect mouseup.MouseSelect")
+            .bind("mousemove.MouseSelect", ASC.Files.Mouse.continueSelecting)
+            .bind("mouseup.MouseSelect", ASC.Files.Mouse.finishSelecting);
 
         if (typeof SmallChat != "undefined" && SmallChat.minimizeAllWindowsIfLoseFocus) {
             SmallChat.minimizeAllWindowsIfLoseFocus(e, target);
@@ -188,8 +181,8 @@ window.ASC.Files.Mouse = (function () {
         }
 
         var selectDelta = 2;
-        var posXnew = Math.max(Math.min(e.pageX, mainContentArea.documentWidth - selectDelta), mainContentArea.minX);
-        var posYnew = Math.max(Math.min(e.pageY, mainContentArea.documentHeight - selectDelta), mainContentArea.minY);
+        var posXnew = Math.min(e.pageX, mainContentArea.documentWidth - selectDelta);
+        var posYnew = Math.min(e.pageY, mainContentArea.documentHeight - selectDelta);
 
         var width = Math.abs(posXnew - ASC.Files.Mouse.mouseSelector.startX);
         var height = Math.abs(posYnew - ASC.Files.Mouse.mouseSelector.startY);
@@ -232,9 +225,7 @@ window.ASC.Files.Mouse = (function () {
             for (var i = itemsCount; i; i--) {
                 itemObj = ASC.Files.Mouse.mouseSelector.entryItems[itemsCount - i];
                 if (intersectionRectangles(itemObj, selectObj)) {
-                    if (posYnew >= mainContentArea.minVisibleY && itemObj.bottom >= mainContentArea.minVisibleY) {
-                        selectionChanged = ASC.Files.UI.selectRow(itemObj.entryObj, true) || selectionChanged;
-                    }
+                    selectionChanged = ASC.Files.UI.selectRow(itemObj.entryObj, true) || selectionChanged;
                 } else {
                     if (!e.ctrlKey) {
                         selectionChanged = ASC.Files.UI.selectRow(itemObj.entryObj, false) || selectionChanged;
@@ -273,20 +264,19 @@ window.ASC.Files.Mouse = (function () {
         ASC.Files.Mouse.disableHover = false;
 
         var windowFix = (jq.browser.msie && jq.browser.version < 9 ? jq("body") : jq(window));
-        windowFix.off("mousemove.MouseSelect mouseup.MouseSelect");
+        windowFix.unbind("mousemove.MouseSelect mouseup.MouseSelect");
 
         jq("body").removeClass("select-action");
     };
 
     var highlightFolderTo = function (cssClass, withoutTrash) {
-        var listArea = ["#treeViewContainer li:not(.access-read) > a"];
-
-        if (ASC.Files.Folders.folderContainer != "privacy") {
-            listArea.push(".to-parent-folder");
-
-            if (ASC.Files.Folders.currentFolder.id != ASC.Files.Constants.FOLDER_ID_TRASH) {
-                listArea.push("#filesMainContent .folder-row:not(.checkloading):not(.new-folder):not(.error-entry):not(.row-selected)");
-            }
+        var listArea =
+            [
+                "#treeViewContainer li:not(.access-read) > a",
+                ".to-parent-folder"
+            ];
+        if (ASC.Files.Folders.currentFolder.id != ASC.Files.Constants.FOLDER_ID_TRASH) {
+            listArea.push("#filesMainContent .folder-row:not(.checkloading):not(.new-folder):not(.error-entry):not(.row-selected)");
         }
 
         var searchArea = listArea.join(",");
@@ -370,36 +360,17 @@ window.ASC.Files.Mouse = (function () {
         ASC.Files.Mouse.moveToY = e.pageY;
 
         jq("body")
-            .off("mouseout.MouseMove mousemove.MouseMove keyup.MouseMove keydown.MouseMove")
-            .on("mouseout.MouseMove mousemove.MouseMove", ASC.Files.Mouse.beginMoveTo);
+            .unbind("mouseout.MouseMove mousemove.MouseMove keyup.MouseMove keydown.MouseMove")
+            .bind("mouseout.MouseMove mousemove.MouseMove", ASC.Files.Mouse.beginMoveTo);
         return true;
     };
-
-    var movingData = null;
-
-    var initMovingData = function () {
-        movingData = {
-            entries: jq("#filesMainContent .file-row:has(.checkbox input:checked)"),
-            isCopyTo: !ASC.Files.UI.accessEdit() || !ASC.Files.UI.accessDelete()
-        };
-
-        if (!movingData.isCopyTo && ASC.Files.ThirdParty && !ASC.Files.ThirdParty.isThirdParty()) {
-            movingData.entries.each(function () {
-                var entryData = ASC.Files.UI.getObjectData(this);
-                if (ASC.Files.ThirdParty.isThirdParty(entryData)) {
-                    movingData.isCopyTo = true;
-                    return false;
-                }
-            });
-        }
-    }
 
     var beginMoveTo = function (e) {
         e = jq.fixEvent(e);
 
         if (!(e.button == 0 || (jq.browser.msie && e.button == 1))
             || ASC.Files.Mouse.mouseBtn == false) {
-            jq("body").off("mouseout.MouseMove mousemove.MouseMove keyup.MouseMove keydown.MouseMove");
+            jq("body").unbind("mouseout.MouseMove mousemove.MouseMove keyup.MouseMove keydown.MouseMove");
             return false;
         }
 
@@ -410,8 +381,6 @@ window.ASC.Files.Mouse = (function () {
 
         ASC.Files.Actions.hideAllActionPanels();
 
-        initMovingData();
-
         jq("#contentVersions").removeClass("version-highlight");
         jq("#filesMainContent .row-hover").removeClass("row-hover");
         jq(".may-row-to").removeClass("may-row-to");
@@ -421,10 +390,10 @@ window.ASC.Files.Mouse = (function () {
         ASC.Files.Mouse.highlightFolderTo("may-row-to");
 
         jq("body")
-            .off("mouseout.MouseMove mousemove.MouseMove mouseup.MouseMove keyup.MouseMove keydown.MouseMove")
-            .on("mouseout.MouseMove mousemove.MouseMove", ASC.Files.Mouse.continueMoveTo)
-            .on("mouseup.MouseMove", ASC.Files.Mouse.finishMoveTo)
-            .on("keyup.MouseMove keydown.MouseMove", function (ev) {
+            .unbind("mouseout.MouseMove mousemove.MouseMove mouseup.MouseMove keyup.MouseMove keydown.MouseMove")
+            .bind("mouseout.MouseMove mousemove.MouseMove", ASC.Files.Mouse.continueMoveTo)
+            .bind("mouseup.MouseMove", ASC.Files.Mouse.finishMoveTo)
+            .bind("keyup.MouseMove keydown.MouseMove", function (ev) {
                 ev = jq.fixEvent(ev);
                 var code = ev.keyCode || ev.which;
                 if (code == ASC.Files.Common.keyCode.ctrl) {
@@ -444,11 +413,11 @@ window.ASC.Files.Mouse = (function () {
             return true;
         }
 
-        if (movingData.isCopyTo || e.ctrlKey) {
-            var textFormat = ASC.Files.FilesJSResource.InfoCopyDescribe;
+        if (!ASC.Files.UI.accessEdit() || !ASC.Files.UI.accessDelete() || e.ctrlKey) {
+            var textFormat = ASC.Files.FilesJSResources.InfoCopyDescribe;
             jq("body").addClass("file-mouse-copy");
         } else {
-            textFormat = ASC.Files.FilesJSResource.InfoMoveDescribe;
+            textFormat = ASC.Files.FilesJSResources.InfoMoveDescribe;
             jq("body").removeClass("file-mouse-copy");
         }
 
@@ -457,10 +426,11 @@ window.ASC.Files.Mouse = (function () {
         }
 
         var textInfo;
-        if (movingData.entries.length == 1) {
-            textInfo = ASC.Files.UI.getObjectTitle(movingData.entries[0]);
+        var list = jq("#filesMainContent .file-row:has(.checkbox input:checked)");
+        if (list.length == 1) {
+            textInfo = ASC.Files.UI.getObjectTitle(list[0]);
         } else {
-            textInfo = ASC.Files.FilesJSResource.InfoCountDescribe.format(movingData.entries.length);
+            textInfo = ASC.Files.FilesJSResources.InfoCountDescribe.format(list.length);
         }
         textInfo = textFormat.format(textInfo, "<b>", "</b>", "<br/>");
         jq("#filesMovingTooltip").html(textInfo);
@@ -493,10 +463,10 @@ window.ASC.Files.Mouse = (function () {
             }
 
             try {
-                el.trigger("focus");
+                el.focus();
             } catch (e) {
                 el.disabled = false;
-                el.trigger("focus");
+                el.focus();
                 el.disabled = true;
             }
         }
@@ -524,7 +494,7 @@ window.ASC.Files.Mouse = (function () {
             if (folderToId == ASC.Files.Constants.FOLDER_ID_TRASH) {
                 ASC.Files.Folders.deleteItem();
             } else {
-                ASC.Files.Folders.isCopyTo = movingData.isCopyTo || e.ctrlKey;
+                ASC.Files.Folders.isCopyTo = !ASC.Files.UI.accessEdit() || !ASC.Files.UI.accessDelete() || e && e.ctrlKey === true;
 
                 var folderToTitle = ASC.Files.UI.getEntryTitle("folder", folderToId);
 
@@ -533,11 +503,9 @@ window.ASC.Files.Mouse = (function () {
         }
 
         ASC.Files.Folders.isCopyTo = false;
-        jq("body").off("mouseout.MouseMove mousemove.MouseMove mouseup.MouseMove mouseenter.MouseMove mouseleave.MouseMove keyup.MouseMove keydown.MouseMove");
+        jq("body").unbind("mouseout.MouseMove mousemove.MouseMove mouseup.MouseMove mouseenter.MouseMove mouseleave.MouseMove keyup.MouseMove keydown.MouseMove");
 
         jq("#filesMovingTooltip").remove();
-
-        movingData = null;
     };
 
     var overCompactTitle = function () {
@@ -597,10 +565,11 @@ window.ASC.Files.Mouse = (function () {
     $(function () {
         jq("#filesMainContent").on("mousedown", ".file-row:not(.checkloading):not(.new-folder):not(.new-file):not(.error-entry):has(.checkbox input:checked)", ASC.Files.Mouse.preparingMoveTo);
 
-        jq("#mainContent").on("mouseover", "#filesMainContent.compact .file-row:not(.checkloading):not(.new-folder):not(.new-file) .entry-title .name a, #filesMainContent.thumbnails .file-row:not(.checkloading):not(.new-folder):not(.new-file) .name a", ASC.Files.Mouse.overCompactTitle);
+        jq("#mainContent").on("mouseover", "#filesMainContent.compact .file-row:not(.checkloading):not(.new-folder):not(.new-file) .entry-title .name a", ASC.Files.Mouse.overCompactTitle);
+
         jq(document).on("mousedown.MouseSelect", "#studioPageContent:has(#filesMainContent .file-row:visible:not(.checkloading):not(.new-folder):not(.new-file))", ASC.Files.Mouse.beginSelecting);
 
-        jq(document).on("mouseup.Mouse", function () {
+        jq(document).bind("mouseup.Mouse", function () {
             ASC.Files.Mouse.mouseBtn = false;
         });
 

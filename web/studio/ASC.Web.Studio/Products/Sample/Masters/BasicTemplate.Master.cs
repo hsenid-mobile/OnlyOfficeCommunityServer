@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@
 
 using System;
 using System.Web.UI;
-
 using ASC.Core;
 using ASC.Web.Core;
 using ASC.Web.Core.Client.Bundling;
-using ASC.Web.Core.Utility;
 using ASC.Web.Sample.Classes;
 using ASC.Web.Sample.Configuration;
 using ASC.Web.Sample.Controls;
@@ -39,7 +37,7 @@ namespace ASC.Web.Sample.Masters
             Page.EnableViewState = false;
 
             Master
-                .AddClientScript(((Product)WebItemManager.Instance[ProductEntryPoint.Id]).ClientScriptLocalization);
+                .AddClientScript(((Product) WebItemManager.Instance[ProductEntryPoint.Id]).ClientScriptLocalization);
         }
 
         protected void InitControls()
@@ -48,7 +46,7 @@ namespace ASC.Web.Sample.Masters
             SideNavigation.Controls.Add(LoadControl(NavigationSidePanel.Location));
 
             Master
-                .AddStaticStyles(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark ? GetStaticDarkStyleSheet() : GetStaticStyleSheet())
+                .AddStaticStyles(GetStaticStyleSheet())
                 .AddStaticBodyScripts(GetStaticJavaScript())
                 .RegisterInlineScript(string.Format("ASC.Sample.PageScript.init('{0}');", SecurityContext.CurrentAccount.ID));
         }
@@ -70,13 +68,6 @@ namespace ASC.Web.Sample.Masters
                    new StyleBundleData("sample", "sample")
                        .AddSource(PathProvider.GetFileStaticRelativePath,
                                   "style.less");
-        }
-        public StyleBundleData GetStaticDarkStyleSheet()
-        {
-            return (StyleBundleData)
-                   new StyleBundleData("dark-sample", "sample")
-                   .AddSource(ResolveUrl,
-                        "~/Products/Sample/App_Themes/dark/dark-style.less");
         }
     }
 }

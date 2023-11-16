@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web;
-
 using ASC.Bookmarking.Pojo;
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
@@ -122,17 +121,17 @@ namespace ASC.Feed.Aggregator.Modules.Community
         private static Comment ToComment(object[] r)
         {
             var comment = new Comment
-            {
-                Bookmark = new Bookmark
                 {
-                    ID = Convert.ToInt64(r[0]),
-                    URL = Convert.ToString(r[1]),
-                    Name = Convert.ToString(r[2]),
-                    Description = Convert.ToString(r[3]),
-                    UserCreatorID = new Guid(Convert.ToString(r[4])),
-                    Date = Convert.ToDateTime(Convert.ToString(r[5]))
-                }
-            };
+                    Bookmark = new Bookmark
+                        {
+                            ID = Convert.ToInt64(r[0]),
+                            URL = Convert.ToString(r[1]),
+                            Name = Convert.ToString(r[2]),
+                            Description = Convert.ToString(r[3]),
+                            UserCreatorID = new Guid(Convert.ToString(r[4])),
+                            Date = Convert.ToDateTime(Convert.ToString(r[5]))
+                        }
+                };
 
             if (r[6] != null)
             {
@@ -156,23 +155,23 @@ namespace ASC.Feed.Aggregator.Modules.Community
             var feedAuthor = comments.Any() ? comments.Last().UserID : bookmark.UserCreatorID;
 
             var feed = new Feed(bookmark.UserCreatorID, bookmark.Date)
-            {
-                Item = item,
-                ItemId = bookmark.ID.ToString(CultureInfo.InvariantCulture),
-                ItemUrl = CommonLinkUtility.ToAbsolute(itemUrl),
-                ModifiedBy = feedAuthor,
-                ModifiedDate = feedDate,
-                Product = Product,
-                Module = Name,
-                Action = comments.Any() ? FeedAction.Commented : FeedAction.Created,
-                Title = bookmark.Name,
-                Description = bookmark.Description,
-                HasPreview = false,
-                CanComment = true,
-                CommentApiUrl = CommonLinkUtility.ToAbsolute(commentApiUrl),
-                Comments = comments.Select(ToFeedComment),
-                GroupId = string.Format("{0}_{1}", item, bookmark.ID)
-            };
+                {
+                    Item = item,
+                    ItemId = bookmark.ID.ToString(CultureInfo.InvariantCulture),
+                    ItemUrl = CommonLinkUtility.ToAbsolute(itemUrl),
+                    ModifiedBy = feedAuthor,
+                    ModifiedDate = feedDate,
+                    Product = Product,
+                    Module = Name,
+                    Action = comments.Any() ? FeedAction.Commented : FeedAction.Created,
+                    Title = bookmark.Name,
+                    Description = bookmark.Description,
+                    HasPreview = false,
+                    CanComment = true,
+                    CommentApiUrl = CommonLinkUtility.ToAbsolute(commentApiUrl),
+                    Comments = comments.Select(ToFeedComment),
+                    GroupId = string.Format("{0}_{1}", item, bookmark.ID)
+                };
             feed.Keywords = string.Format("{0} {1} {2} {3}",
                                           bookmark.Name,
                                           bookmark.URL,
@@ -185,11 +184,11 @@ namespace ASC.Feed.Aggregator.Modules.Community
         private static FeedComment ToFeedComment(Comment comment)
         {
             return new FeedComment(comment.UserID)
-            {
-                Id = comment.ID.ToString(),
-                Description = HtmlUtility.GetFull(comment.Content),
-                Date = comment.Datetime
-            };
+                {
+                    Id = comment.ID.ToString(),
+                    Description = HtmlUtility.GetFull(comment.Content),
+                    Date = comment.Datetime
+                };
         }
     }
 }

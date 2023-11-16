@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,33 +17,34 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-
 using ASC.MessagingSystem;
+using System.Linq;
 
 namespace ASC.AuditTrail.Mappers
 {
-    public static class AuditActionMapper
+    public class AuditActionMapper
     {
-        public static List<IProductActionMapper> Mappers { get; }
+        private static readonly Dictionary<MessageAction, MessageMaps> actions;
 
         static AuditActionMapper()
         {
-            Mappers = new List<IProductActionMapper>()
-            {
-                new CrmActionMapper(),
-                new DocumentsActionMapper(),
-                new LoginActionsMapper(),
-                new OthersActionsMapper(),
-                new PeopleActionMapper(),
-                new ProjectsActionsMapper(),
-                new SettingsActionsMapper()
-            };
+            actions = new Dictionary<MessageAction, MessageMaps>();
+
+            actions = actions
+                .Union(LoginActionsMapper.GetMaps())
+                .Union(ProjectsActionsMapper.GetMaps())
+                .Union(CrmActionMapper.GetMaps())
+                .Union(PeopleActionMapper.GetMaps())
+                .Union(DocumentsActionMapper.GetMaps())
+                .Union(SettingsActionsMapper.GetMaps())
+                .Union(OthersActionsMapper.GetMaps())
+                .ToDictionary(x => x.Key, x => x.Value);
         }
 
-        public static string GetActionText(this MessageMaps action, AuditEvent evt)
+        public static string GetActionText(AuditEvent evt)
         {
-            if (action == null)
+            var action = (MessageAction)evt.Action;
+            if (!actions.ContainsKey(action))
             {
                 //log.Error(string.Format("There is no action text for \"{0}\" type of event", action));
                 return string.Empty;
@@ -51,12 +52,12 @@ namespace ASC.AuditTrail.Mappers
 
             try
             {
-                var actionText = action.GetActionText();
+                var actionText = actions[(MessageAction)evt.Action].GetActionText();
 
                 if (evt.Description == null || !evt.Description.Any()) return actionText;
 
                 var description = evt.Description
-                                     .Select(t => t.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                                     .Select(t => t.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries))
                                      .Select(split => string.Join(", ", split.Select(ToLimitedText))).ToArray();
 
 
@@ -69,9 +70,10 @@ namespace ASC.AuditTrail.Mappers
             }
         }
 
-        public static string GetActionText(this MessageMaps action, LoginEvent evt)
+        public static string GetActionText(LoginEvent evt)
         {
-            if (action == null)
+            var action = (MessageAction)evt.Action;
+            if (!actions.ContainsKey(action))
             {
                 //log.Error(string.Format("There is no action text for \"{0}\" type of event", action));
                 return string.Empty;
@@ -79,7 +81,7 @@ namespace ASC.AuditTrail.Mappers
 
             try
             {
-                var actionText = action.GetActionText();
+                var actionText = actions[(MessageAction)evt.Action].GetActionText();
 
                 if (evt.Description == null || !evt.Description.Any()) return actionText;
 
@@ -96,42 +98,34 @@ namespace ASC.AuditTrail.Mappers
             }
         }
 
-        public static string GetActionTypeText(this MessageMaps action)
+        public static string GetActionTypeText(AuditEvent evt)
         {
-            return action == null
+            var action = (MessageAction)evt.Action;
+            return !actions.ContainsKey(action)
                        ? string.Empty
-                       : action.GetActionTypeText();
+                       : actions[(MessageAction)evt.Action].GetActionTypeText();
         }
 
-        public static string GetProductText(this MessageMaps action)
+        public static string GetProductText(AuditEvent evt)
         {
-            return action == null
+            var action = (MessageAction)evt.Action;
+            return !actions.ContainsKey(action)
                        ? string.Empty
-                       : action.GetProductText();
+                       : actions[(MessageAction)evt.Action].GetProduct();
         }
 
-        public static string GetModuleText(this MessageMaps action)
+        public static string GetModuleText(AuditEvent evt)
         {
-            return action == null
+            var action = (MessageAction)evt.Action;
+            return !actions.ContainsKey(action)
                        ? string.Empty
-                       : action.GetModuleText();
+                       : actions[(MessageAction)evt.Action].GetModule();
         }
 
         private static string ToLimitedText(string text)
         {
             if (text == null) return null;
             return text.Length < 50 ? text : string.Format("{0}...", text.Substring(0, 47));
-        }
-
-        public static MessageMaps GetMessageMaps(int actionInt)
-        {
-            var action = (MessageAction)actionInt;
-            var mapper = Mappers.SelectMany(m => m.Mappers).FirstOrDefault(m => m.Actions.ContainsKey(action));
-            if (mapper != null)
-            {
-                return mapper.Actions[action];
-            }
-            return null;
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using ASC.Files.Core;
+using ASC.Web.Core;
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
-using ASC.Files.Core;
-using ASC.Web.Core;
 using ASC.Web.Projects.Classes;
 using ASC.Web.Studio.Utility;
 
@@ -33,7 +32,8 @@ namespace ASC.Web.Projects.Configuration
     {
         public override List<UsageSpaceStatItem> GetStatData()
         {
-            using (var db = new DbManager(Global.DbID))
+            using (var filedb = new DbManager(FileConstant.DatabaseId))
+            using (var projdb = new DbManager(Global.DbID))
             {
                 var q = new SqlQuery("files_file f")
                     .Select("b.right_node")
@@ -44,23 +44,23 @@ namespace ASC.Web.Projects.Configuration
                     .Where(Exp.Like("b.right_node", "projects/project/", SqlLike.StartWith))
                     .GroupBy(1);
 
-                var sizes = db.ExecuteList(q)
-                    .Select(r => new { ProjectId = Convert.ToInt32(((string)r[0]).Substring(17)), Size = Convert.ToInt64(r[1]) })
+                var sizes = filedb.ExecuteList(q)
+                    .Select(r => new {ProjectId = Convert.ToInt32(((string) r[0]).Substring(17)), Size = Convert.ToInt64(r[1])})
                     .GroupBy(r => r.ProjectId)
                     .ToDictionary(g => g.Key, g => g.Sum(a => a.Size));
 
                 q = new SqlQuery("projects_projects")
                     .Select("id", "title")
                     .Where("tenant_id", TenantProvider.CurrentTenantID)
-                    .Where(Exp.In("id", sizes.Keys.ToList()));
+                    .Where(Exp.In("id", sizes.Keys));
 
-                return db.ExecuteList(q)
+                return projdb.ExecuteList(q)
                     .Select(r => new UsageSpaceStatItem
-                    {
-                        Name = Convert.ToString(r[1]),
-                        SpaceUsage = sizes[Convert.ToInt32(r[0])],
-                        Url = String.Concat(PathProvider.BaseAbsolutePath, "Projects.aspx?prjID=" + Convert.ToInt32(r[0]))
-                    })
+                        {
+                            Name = Convert.ToString(r[1]),
+                            SpaceUsage = sizes[Convert.ToInt32(r[0])],
+                            Url = String.Concat(PathProvider.BaseAbsolutePath, "Projects.aspx?prjID=" + Convert.ToInt32(r[0]))
+                        })
                     .OrderByDescending(i => i.SpaceUsage)
                     .ToList();
             }

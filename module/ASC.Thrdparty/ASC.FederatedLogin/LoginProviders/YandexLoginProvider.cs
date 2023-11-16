@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Web;
-
-using ASC.Core.Common.Configuration;
 using ASC.FederatedLogin.Helpers;
 using ASC.FederatedLogin.Profile;
-
 using Newtonsoft.Json.Linq;
 
 namespace ASC.FederatedLogin.LoginProviders
@@ -62,7 +59,7 @@ namespace ASC.FederatedLogin.LoginProviders
         {
         }
 
-        public YandexLoginProvider(string name, int order, Dictionary<string, Prop> props, Dictionary<string, Prop> additional = null)
+        public YandexLoginProvider(string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
             : base(name, order, props, additional)
         {
         }
@@ -112,16 +109,16 @@ namespace ASC.FederatedLogin.LoginProviders
             if (jProfile == null) throw new Exception("Failed to correctly process the response");
 
             var profile = new LoginProfile
-            {
-                EMail = jProfile.Value<string>("default_email"),
-                Id = jProfile.Value<string>("id"),
-                FirstName = jProfile.Value<string>("first_name"),
-                LastName = jProfile.Value<string>("last_name"),
-                DisplayName = jProfile.Value<string>("display_name"),
-                Gender = jProfile.Value<string>("sex"),
+                {
+                    EMail = jProfile.Value<string>("default_email"),
+                    Id = jProfile.Value<string>("id"),
+                    FirstName = jProfile.Value<string>("first_name"),
+                    LastName = jProfile.Value<string>("last_name"),
+                    DisplayName = jProfile.Value<string>("display_name"),
+                    Gender = jProfile.Value<string>("sex"),
 
-                Provider = ProviderConstants.Yandex,
-            };
+                    Provider = ProviderConstants.Yandex,
+                };
 
             return profile;
         }

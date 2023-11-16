@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net.Mail;
 using System.Text;
-
 using ASC.Common.Logging;
 using ASC.Mail.Core.Dao.Expressions.Mailbox;
 using ASC.Mail.Core.Entities;
@@ -28,7 +28,6 @@ using ASC.Mail.Data.Contracts;
 using ASC.Mail.Data.Storage;
 using ASC.Mail.Enums;
 using ASC.Mail.Utils;
-
 using MailMessage = ASC.Mail.Data.Contracts.MailMessageData;
 
 namespace ASC.Mail.Core.Engine
@@ -313,7 +312,7 @@ namespace ASC.Mail.Core.Engine
                     AutoreplyDaysInterval);
             }
 
-            if (!emails.Any())
+            if (!emails.Any()) 
                 return false;
 
             account.MailAutoreplyHistory.Add(email);
@@ -376,9 +375,9 @@ namespace ASC.Mail.Core.Engine
             }
 
             var result = (from address in list
-                          from alias in account.Aliases
-                          where string.Equals(address.Address, alias.Email, StringComparison.InvariantCultureIgnoreCase)
-                          select alias.Email)
+                from alias in account.Aliases
+                where string.Equals(address.Address, alias.Email, StringComparison.InvariantCultureIgnoreCase)
+                select alias.Email)
                 .FirstOrDefault();
 
             return result;

@@ -196,7 +196,7 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Discussions are used to find the right solution with your project team to any sort of problems which may occur once the project is underway. Discuss all the issues with your colleagues..
+        ///   Looks up a localized string similar to Discussions are used to find the right solution with your project team to any sort of problems which may occur once the project is underway. Discuss all the issues with your colleagues, invite users from other projects to join your discussion..
         /// </summary>
         public static string DiscussionNotFound_DescribeVisitor {
             get {
@@ -250,6 +250,15 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Author.
+        /// </summary>
+        public static string From {
+            get {
+                return ResourceManager.GetString("From", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Discussion.
         /// </summary>
         public static string Message {
@@ -286,6 +295,15 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New Discussion.
+        /// </summary>
+        public static string NewMessage {
+            get {
+                return ResourceManager.GetString("NewMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Open.
         /// </summary>
         public static string OpenDiscussion {
@@ -304,6 +322,15 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Saving message....
+        /// </summary>
+        public static string SavingMessage {
+            get {
+                return ResourceManager.GetString("SavingMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select the project.
         /// </summary>
         public static string SelectProject {
@@ -318,6 +345,15 @@ namespace ASC.Web.Projects.Resources {
         public static string StartFirstDiscussion {
             get {
                 return ResourceManager.GetString("StartFirstDiscussion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invite project participants to discussion.
+        /// </summary>
+        public static string SubscribePeopleInfo {
+            get {
+                return ResourceManager.GetString("SubscribePeopleInfo", resourceCulture);
             }
         }
         

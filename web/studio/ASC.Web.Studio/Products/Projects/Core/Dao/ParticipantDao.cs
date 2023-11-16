@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 
 using System;
-using System.Collections.Generic;
-
 using ASC.Common.Data.Sql;
 using ASC.Projects.Core.DataInterfaces;
+using System.Collections.Generic;
 
 namespace ASC.Projects.Data.DAO
 {
@@ -52,7 +51,7 @@ namespace ASC.Projects.Data.DAO
                                                             .Union(
                                                             new SqlQuery(ParticipantTable)
                                                             .Select("project_id")
-                                                            .Where("participant_id", participant.ToString()));
+                                                            .Where("participant_id",participant.ToString()));
 
             return Db.ExecuteList(unionQ).ConvertAll(r => Convert.ToInt32(r[0]));
         }

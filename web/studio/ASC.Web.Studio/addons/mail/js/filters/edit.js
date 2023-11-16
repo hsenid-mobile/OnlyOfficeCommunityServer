@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,7 +254,7 @@ window.editFilterPage = (function($) {
             });
 
         container.find("#conditionsContainer .add-new-field")
-            .on("click",
+            .bind("click",
                 function() {
                     addNewField(this);
                     toggleMultiConditions();
@@ -337,7 +337,7 @@ window.editFilterPage = (function($) {
                     siblings
                         .find("label, input, a")
                         .toggleClass("disable", e.target.checked)
-                        .prop("disabled", e.target.checked);
+                        .attr("disabled", e.target.checked);
 
                     if (e.target.checked) {
                         siblings
@@ -363,6 +363,7 @@ window.editFilterPage = (function($) {
             .on("click",
                 function() {
                     window.filtersManager.remove(filterId);
+                    closeEdit();
                 });
 
         container.find("#filterApplyToMailiboxes")
@@ -414,7 +415,7 @@ window.editFilterPage = (function($) {
                 function() {
                     enterlinkText.hide();
                     filterNameEnterContainer.show();
-                    filterNameInput.trigger("focus");
+                    filterNameInput.focus();
                 });
 
         linkDeleteFilterName
@@ -442,7 +443,7 @@ window.editFilterPage = (function($) {
         }
 
         var foldersCbxs = container.find("#advancedContainer .applyToFolders input");
-        foldersCbxs.on("change", function() {
+        foldersCbxs.change(function() {
             if (this.checked) {
                 var labels = container.find("#advancedContainer .applyToFolders label");
                 if (labels.hasClass("error")) {
@@ -452,7 +453,7 @@ window.editFilterPage = (function($) {
         });
 
         var mailboxesCbxs = container.find("#advancedContainer #filterApplyToMailiboxesContainer input");
-        mailboxesCbxs.on("change", function () {
+        mailboxesCbxs.change(function () {
             if (this.checked) {
                 var labels = container.find("#advancedContainer #filterApplyToMailiboxesContainer label");
                 if (labels.hasClass("error")) {
@@ -462,7 +463,7 @@ window.editFilterPage = (function($) {
         });
 
         var actionsCbxs = container.find("#actionsContainer input");
-        actionsCbxs.on("change", function () {
+        actionsCbxs.change(function () {
             if (this.checked) {
                 var labels = container.find("#actionsContainer label");
                 if (labels.hasClass("error")) {
@@ -700,7 +701,7 @@ window.editFilterPage = (function($) {
             var condition = $(conditions[i]);
 
             if (condition.val() === '') {
-                condition.trigger("focus");
+                condition.focus();
                 return;
             }
         }
@@ -891,9 +892,8 @@ window.editFilterPage = (function($) {
             window.filtersManager.applyFilter(filter.id);
             needApply = false;
         }
-        else {
-            closeEdit();
-        }
+
+        closeEdit();
     }
 
     function closeEdit() {

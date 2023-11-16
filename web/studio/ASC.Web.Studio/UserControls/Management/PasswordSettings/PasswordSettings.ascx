@@ -1,6 +1,6 @@
 <%@ Control Language="C#" AutoEventWireup="true" CodeBehind="PasswordSettings.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Management.PasswordSettings" %>
 <%@ Import Namespace="ASC.Web.Core.Utility" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <% if (Enabled)
    { %>
@@ -12,12 +12,13 @@
 
         <div class="clearFix slider">
             <div class="header-base-small">
-                <%= Resource.PasswordLengthRange %></div>
+                <%= Resource.PasswordMinLength %></div>
             <div class="clearFix passwordLengthBox">
                 <div class="sliderPassword">
-                    <div id="slider"></div>
+                    <div id="slider" data-min="<%= ((PasswordSettings)new PasswordSettings().GetDefault()).MinLength %>" data-max="<%= PasswordSettings.MaxLength %>"></div>
                 </div>
-                <div class="float-left" id="count">&nbsp;</div>
+                <div class="float-left" id="count">
+                </div>
                 <div class="countLabel float-left">
                 <%= Resource.PasswordSymbolsCountLabel %>
                 </div>
@@ -44,7 +45,7 @@
         </div>
     </div>
     <div class="settings-help-block">
-        <p><%= String.Format(Resource.HelpAnswerPasswordStrengthSettings.HtmlEncode(), "<br />", "<b>", "</b>") %></p>
+        <p><%= String.Format(Resource.HelpAnswerPasswordSettings.HtmlEncode(), "<br />", "<b>", "</b>") %></p>
         <% if (!string.IsNullOrEmpty(HelpLink))
            { %>
             <a href="<%= HelpLink + "/gettingstarted/configuration.aspx#ChangingSecuritySettings_block" %>" target="_blank"><%= Resource.LearnMore %></a>

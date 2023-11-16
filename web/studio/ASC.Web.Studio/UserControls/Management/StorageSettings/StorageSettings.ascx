@@ -1,7 +1,5 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="StorageSettings.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Management.StorageSettings.StorageSettings" %>
 
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
-
 <script id="storageSettingsBlockTemplate" type="text/x-jquery-tmpl">
     <div id="${id}">
         <div class="auth-service display-none">
@@ -15,18 +13,21 @@
 
 <script id="storageSettingsTemplate" type="text/x-jquery-tmpl">
 <div class="storageItem">
-
-    {{if id == "S3"}}
-    {{tmpl($data) "consumerItemS3Tmpl"}}
-    {{else}}
-    {{tmpl($data) "consumerItemBaseTmpl"}}
-    {{/if}}
-
+    <div id="prop${title}">
+        {{each(i, prop) properties}} 
+            <div class="bold headerPanelSmall">${prop.title}:</div>
+            {{if !isSet || current}}
+                <input id="${prop.name}" type="text" class="storageKey disabled textEdit" value="${prop.value}" />
+            {{else}}
+                <input id="${prop.name}" type="text" class="storageKey textEdit" value="${prop.value}" />
+            {{/if}} 
+        {{/each}}
+    </div>
     <div class="small-button-container">
         {{if !current}}
-            <a id="saveBtn${id}" class="button blue {{if !isSet}} disable {{/if}} middle saveButton">${ASC.Resources.Master.ResourceJS.StorageButtonEnable}</a>
+            <a id="saveBtn${title}" class="button blue {{if !isSet}} disable {{/if}} middle saveButton">${ASC.Resources.Master.Resource.StorageButtonEnable}</a>
         {{else}}
-            <a id="setDefault${id}" class="button blue middle saveButton">${ASC.Resources.Master.ResourceJS.StorageButtonResetToDefault}</a>
+            <a id="setDefault${title}" class="button blue middle saveButton">${ASC.Resources.Master.Resource.StorageButtonResetToDefault}</a>
         {{/if}}
     </div>
 </div>
@@ -34,10 +35,10 @@
 </script>
 
 <div id="storageContainer">
-    <div class="header-base"><%= Resource.StorageTitle %></div>
+    <div class="header-base"><%= Resources.Resource.StorageTitle %></div>
 
     <p class="auth-service-text">
-        <%: Resource.StorageText %>
+        <%: Resources.Resource.StorageText %>
         <br />
     </p>
     <div class="storageBlock clearFix">

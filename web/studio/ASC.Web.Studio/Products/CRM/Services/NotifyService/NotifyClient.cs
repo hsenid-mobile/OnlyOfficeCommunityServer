@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,27 +20,25 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Web;
-
-using ASC.Common.Logging;
-using ASC.Core;
-using ASC.Core.Billing;
-using ASC.Core.Tenants;
-using ASC.Core.Users;
-using ASC.CRM.Core;
 using ASC.CRM.Core.Dao;
 using ASC.CRM.Core.Entities;
+using ASC.Core;
+using ASC.Core.Billing;
+using ASC.Core.Users;
 using ASC.Notify;
 using ASC.Notify.Model;
 using ASC.Notify.Patterns;
 using ASC.Notify.Recipients;
+using ASC.Core.Tenants;
+using ASC.CRM.Core;
+using System.Collections.Specialized;
+using ASC.Common.Logging;
 using ASC.Web.CRM.Core;
 using ASC.Web.CRM.Resources;
-
 using Autofac;
 
 #endregion
@@ -76,7 +74,7 @@ namespace ASC.Web.CRM.Services.NotifyService
             client.SendNoticeToAsync(
                 NotifyConstants.Event_CreateNewContact,
                 null,
-                recipientID.ConvertAll(item => ToRecipient(item)).Where(recipient => recipient != null).ToArray(),
+                recipientID.ConvertAll(item => ToRecipient(item)).ToArray(),
                 true,
                 new TagValue(NotifyConstants.Tag_AdditionalData, fields),
                 new TagValue(NotifyConstants.Tag_EntityTitle, contactTitle),
@@ -190,7 +188,7 @@ namespace ASC.Web.CRM.Services.NotifyService
                       new TagValue(NotifyConstants.Tag_EntityID, baseEntityData["id"]),
                       new TagValue(NotifyConstants.Tag_EntityRelativeURL, baseEntityData["entityRelativeURL"]),
                       new TagValue(NotifyConstants.Tag_AdditionalData,
-                      new Hashtable {
+                      new Hashtable { 
                       { "Files", fileListInfoHashtable },
                       {"EventContent", entity.Content}}));
 
@@ -295,13 +293,13 @@ namespace ASC.Web.CRM.Services.NotifyService
                     try
                     {
                         CoreContext.TenantManager.SetCurrentTenant(tenant);
-                        SecurityContext.CurrentAccount = ASC.Core.Configuration.Constants.CoreSystem;
+                        SecurityContext.AuthenticateMe(ASC.Core.Configuration.Constants.CoreSystem);
 
                         var user = CoreContext.UserManager.GetUsers(responsibleID);
 
                         if (!(!Constants.LostUser.Equals(user) && user.Status == EmployeeStatus.Active)) continue;
 
-                        SecurityContext.CurrentUser = user.ID;
+                        SecurityContext.AuthenticateMe(user.ID);
 
                         Thread.CurrentThread.CurrentCulture = user.GetCulture();
                         Thread.CurrentThread.CurrentUICulture = user.GetCulture();
@@ -355,11 +353,13 @@ namespace ASC.Web.CRM.Services.NotifyService
 
         public void SendTaskReminder(Task task, String taskCategoryTitle, Contact taskContact, ASC.CRM.Core.Entities.Cases taskCase, ASC.CRM.Core.Entities.Deal taskDeal)
         {
-            var recipient = CoreContext.UserManager.GetUsers(task.ResponsibleID);
+            var recipient = ToRecipient(task.ResponsibleID);
 
-            if (recipient.ID == Constants.LostUser.ID) return;
+            if (recipient == null) return;
 
-            var deadLineString = DateToStringInUserCulture(task.DeadLine, recipient);
+            var deadLineString = task.DeadLine.Hour == 0 && task.DeadLine.Minute == 0
+                ? task.DeadLine.ToShortDateString()
+                : task.DeadLine.ToString(CultureInfo.InvariantCulture);
 
             string taskContactRelativeUrl = null;
             string taskContactTitle = null;
@@ -396,7 +396,7 @@ namespace ASC.Web.CRM.Services.NotifyService
               true,
               new TagValue(NotifyConstants.Tag_EntityTitle, task.Title),
               new TagValue(NotifyConstants.Tag_AdditionalData,
-                 new Hashtable {
+                 new Hashtable { 
                       { "TaskDescription", HttpUtility.HtmlEncode(task.Description) },
                       { "TaskCategory", taskCategoryTitle },
 
@@ -416,13 +416,15 @@ namespace ASC.Web.CRM.Services.NotifyService
 
         public void SendAboutResponsibleByTask(Task task, String taskCategoryTitle, Contact taskContact, ASC.CRM.Core.Entities.Cases taskCase, ASC.CRM.Core.Entities.Deal taskDeal, Hashtable fileListInfoHashtable)
         {
-            var recipient = CoreContext.UserManager.GetUsers(task.ResponsibleID);
+            var recipient = ToRecipient(task.ResponsibleID);
 
-            if (recipient.ID == Constants.LostUser.ID) return;
+            if (recipient == null) return;
 
             task.DeadLine = TenantUtil.DateTimeFromUtc(task.DeadLine);
+            var deadLineString = task.DeadLine.Hour == 0 && task.DeadLine.Minute == 0
+                ? task.DeadLine.ToShortDateString()
+                : task.DeadLine.ToString();
 
-            var deadLineString = DateToStringInUserCulture(task.DeadLine, recipient);
 
             string taskContactRelativeUrl = null;
             string taskContactTitle = null;
@@ -450,7 +452,7 @@ namespace ASC.Web.CRM.Services.NotifyService
                 taskDealRelativeUrl = String.Format("Products/CRM/Deals.aspx?id={0}", taskDeal.ID);
                 taskDealTitle = taskDeal.Title.HtmlEncode();
             }
-
+           
             client.SendNoticeToAsync(
                NotifyConstants.Event_ResponsibleForTask,
                null,
@@ -458,7 +460,7 @@ namespace ASC.Web.CRM.Services.NotifyService
                true,
                new TagValue(NotifyConstants.Tag_EntityTitle, task.Title),
                new TagValue(NotifyConstants.Tag_AdditionalData,
-                 new Hashtable {
+                 new Hashtable { 
                       { "TaskDescription", HttpUtility.HtmlEncode(task.Description) },
                       { "Files", fileListInfoHashtable },
                       { "TaskCategory", taskCategoryTitle },
@@ -491,7 +493,7 @@ namespace ASC.Web.CRM.Services.NotifyService
             new TagValue(NotifyConstants.Tag_EntityTitle, deal.Title),
             new TagValue(NotifyConstants.Tag_EntityID, deal.ID),
             new TagValue(NotifyConstants.Tag_AdditionalData,
-            new Hashtable {
+            new Hashtable { 
                       { "OpportunityDescription", HttpUtility.HtmlEncode(deal.Description) }
                  })
             );
@@ -500,20 +502,6 @@ namespace ASC.Web.CRM.Services.NotifyService
         private IRecipient ToRecipient(Guid userID)
         {
             return source.GetRecipientsProvider().GetRecipient(userID.ToString());
-        }
-
-        private string DateToStringInUserCulture(DateTime date, UserInfo user)
-        {
-            var culture = string.IsNullOrEmpty(user.CultureName) ? CoreContext.TenantManager.GetCurrentTenant().GetCulture() : user.GetCulture();
-
-            var format = culture.DateTimeFormat.ShortDatePattern;
-
-            if (date.Hour != 0 || date.Minute != 0)
-            {
-                format += " " + culture.DateTimeFormat.ShortTimePattern;
-            }
-
-            return date.ToString(format, CultureInfo.InvariantCulture);
         }
 
         public INotifyClient Client

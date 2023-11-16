@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,18 @@
 using System;
 using System.Security;
 using System.Web;
-
 using ASC.Common.Logging;
 using ASC.Core.Billing;
 using ASC.Web.Core.Utility;
 using ASC.Web.Core.Utility.Settings;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
-
+using Resources;
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Web.Studio.HttpHandlers
 {
     internal class LicenseUploader : IFileUploadHandler
     {
-        private ILog Log = LogManager.GetLogger("ASC");
-
         public FileUploadResult ProcessUpload(HttpContext context)
         {
             var result = new FileUploadResult();
@@ -58,22 +54,22 @@ namespace ASC.Web.Studio.HttpHandlers
             }
             catch (LicenseExpiredException ex)
             {
-                Log.Error("License upload", ex);
+                LogManager.GetLogger("ASC").Error("License upload", ex);
                 result.Message = Resource.LicenseErrorExpired;
             }
             catch (LicenseQuotaException ex)
             {
-                Log.Error("License upload", ex);
+                LogManager.GetLogger("ASC").Error("License upload", ex);
                 result.Message = Resource.LicenseErrorQuota;
             }
             catch (LicensePortalException ex)
             {
-                Log.Error("License upload", ex);
+                LogManager.GetLogger("ASC").Error("License upload", ex);
                 result.Message = Resource.LicenseErrorPortal;
             }
             catch (Exception ex)
             {
-                Log.Error("License upload", ex);
+                LogManager.GetLogger("ASC").Error("License upload", ex);
                 result.Message = Resource.LicenseError;
             }
 

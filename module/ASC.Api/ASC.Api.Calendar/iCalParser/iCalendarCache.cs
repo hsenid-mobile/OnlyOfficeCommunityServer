@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.IO;
 
 namespace ASC.Api.Calendar.iCalParser
@@ -33,8 +36,7 @@ namespace ASC.Api.Calendar.iCalParser
 
         public static iCalendarCacheParams Default
         {
-            get
-            {
+            get {
                 var path = Environment.CurrentDirectory.TrimEnd('\\') + "\\addons\\calendar\\ical_cache";
                 return new iCalendarCacheParams(path, 2);
             }
@@ -43,9 +45,9 @@ namespace ASC.Api.Calendar.iCalParser
 
     internal class iCalendarCache
     {
-        private readonly iCalendarCacheParams _cacheParams;
+        private iCalendarCacheParams _cacheParams;
 
-        public iCalendarCache() : this(iCalendarCacheParams.Default) { }
+        public iCalendarCache() : this(iCalendarCacheParams.Default){}
         public iCalendarCache(iCalendarCacheParams cacheParams)
         {
             _cacheParams = cacheParams;
@@ -55,10 +57,10 @@ namespace ASC.Api.Calendar.iCalParser
         {
             var curDate = DateTime.UtcNow;
 
-            string fileName = calendarId + ".ics";
+            string fileName = calendarId+".ics";
             ClearCache(calendarId);
 
-            var buffer = new char[1024 * 1024];
+            var buffer = new char[1024*1024];
             try
             {
                 if (!Directory.Exists(_cacheParams.FolderCachePath))
@@ -79,16 +81,16 @@ namespace ASC.Api.Calendar.iCalParser
             catch
             {
                 return false;
-            }
+            }            
 
             return true;
         }
 
         public iCalendar GetCalendarFromCache(string calendarId)
         {
-            var filePath = _cacheParams.FolderCachePath + calendarId + ".ics";
-            if (File.Exists(filePath))
-            {
+            var filePath = _cacheParams.FolderCachePath + calendarId+".ics";
+            if (File.Exists(filePath))            
+            {                
                 var fi = new FileInfo(filePath);
                 if ((DateTime.UtcNow - fi.LastWriteTimeUtc).TotalMinutes > _cacheParams.ExpiredPeriod)
                     return null;

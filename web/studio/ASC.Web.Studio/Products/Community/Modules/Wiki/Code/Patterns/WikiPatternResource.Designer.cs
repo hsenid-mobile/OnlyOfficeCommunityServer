@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Community.Modules.Wiki.Code.Patterns {
+namespace ASC.Web.Community.Wiki.Code.Patterns {
     using System;
     
     
@@ -67,9 +67,7 @@ namespace ASC.Web.Community.Modules.Wiki.Code.Patterns {
         ///
         ///$PagePreview
         ///
-        ///&quot;Read More&quot;:&quot;$URL&quot;
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notifications about new Wiki pages created, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
+        ///&quot;Read More&quot;:&quot;$URL&quot;.
         /// </summary>
         public static string pattern_1 {
             get {
@@ -84,9 +82,7 @@ namespace ASC.Web.Community.Modules.Wiki.Code.Patterns {
         ///
         ///$PagePreview
         ///
-        ///&quot;Read More&quot;:&quot;$URL&quot;
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notifications about the changes of this Wiki page, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
+        ///&quot;Read More&quot;:&quot;$URL&quot;.
         /// </summary>
         public static string pattern_2 {
             get {
@@ -101,30 +97,11 @@ namespace ASC.Web.Community.Modules.Wiki.Code.Patterns {
         ///
         ///$CommentBody
         ///
-        ///&quot;Read More&quot;:&quot;$URL&quot;
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notifications about new comments added to this Wiki page, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^ .
+        ///&quot;Read More&quot;:&quot;$URL&quot;.
         /// </summary>
         public static string pattern_3 {
             get {
                 return ResourceManager.GetString("pattern_3", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1.You were mentioned in comment to Wiki Page &quot;$PageName&quot;:&quot;$URL&quot;
-        ///
-        ///$Date &quot;$UserName&quot;:&quot;$UserURL&quot; mentioned you in the comment to the &quot;$PageName&quot;:&quot;$URL&quot; Wiki page:
-        ///
-        ///$CommentBody
-        ///
-        ///&quot;Read More&quot;:&quot;$URL&quot;
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notifications about new comments added to this Wiki page, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
-        /// </summary>
-        public static string pattern_MentionForWikiComment {
-            get {
-                return ResourceManager.GetString("pattern_MentionForWikiComment", resourceCulture);
             }
         }
         
@@ -179,24 +156,6 @@ namespace ASC.Web.Community.Modules.Wiki.Code.Patterns {
         public static string subject_3_tg {
             get {
                 return ResourceManager.GetString("subject_3_tg", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Community. Mention in comment to Wiki page: $PageName.
-        /// </summary>
-        public static string subject_MentionForWikiComment {
-            get {
-                return ResourceManager.GetString("subject_MentionForWikiComment", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Community. Mention in comment to Wiki page: [$PageName]($URL).
-        /// </summary>
-        public static string subject_MentionForWikiComment_tg {
-            get {
-                return ResourceManager.GetString("subject_MentionForWikiComment_tg", resourceCulture);
             }
         }
     }

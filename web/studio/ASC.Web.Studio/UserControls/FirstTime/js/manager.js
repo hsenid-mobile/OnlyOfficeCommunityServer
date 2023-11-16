@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,9 @@ ASC.Controls.EmailAndPasswordManager = new function() {
 
     var uploadInit = function () {
 
-        jq("#licenseKey").on("click", function (e) {
+        jq("#licenseKey").click(function (e) {
             e.preventDefault();
-            jq("#uploadButton").trigger("click");
+            jq("#uploadButton").click();
         });
 
         var upload = jq("#uploadButton")
@@ -67,7 +67,7 @@ ASC.Controls.EmailAndPasswordManager = new function() {
             .bind("fileuploaddone", function (e, data) {
                 LoadingBanner.hideLoaderBtn(".step");
                 try {
-                    var result = JSON.parse(data.result);
+                    var result = jq.parseJSON(data.result);
                 } catch (e) {
                     result = {Success: false};
                 }
@@ -80,7 +80,7 @@ ASC.Controls.EmailAndPasswordManager = new function() {
     };
 
     this.ShowChangeEmailAddress = function() {
-        var email = jq('.emailAddress').html().trim();
+        var email = jQuery.trim(jq('.emailAddress').html());
         jq('.emailAddress').html('');
         jq('.emailAddress').append('<input type="textbox" id="newEmailAddress" maxlength="64" class="textEdit newEmail">');
         jq('.emailAddress #newEmailAddress').val(email);
@@ -103,8 +103,9 @@ ASC.Controls.EmailAndPasswordManager = new function() {
             return;
         }
 
-        var input = jq('#requiredStep .emailBlock .email .emailAddress #newEmailAddress');
-        var email = input.length ? input.val().trim() : jq('#requiredStep .emailBlock .email .emailAddress').html().trim();
+        var email = jQuery.trim(jq('#requiredStep .emailBlock .email .emailAddress #newEmailAddress').val()); //
+        if (email == '' || email == null)
+            email = jQuery.trim(jq('#requiredStep .emailBlock .email .emailAddress').html());
         var pwd = jq('.passwordBlock .pwd #newPwd').val();
         var cpwd = jq('.passwordBlock .pwd #confPwd').val();
         var promocode = jq('.passwordBlock .promocode #promocode_input').val();
@@ -126,7 +127,7 @@ ASC.Controls.EmailAndPasswordManager = new function() {
             return;
         }
 
-        if (!(new RegExp(jq(".passwordBlock .pwd #newPwd").data("regex"), "g")).test(pwd)) {
+        if (!(new XRegExp(jq(".passwordBlock .pwd #newPwd").data("regex"), "ig")).test(pwd)) {
             jq(".passwordBlock .pwd #newPwd").css("border-color", "#DF1B1B");
 
             res = { "Status": 0, "Message": jq(".passwordBlock .pwd #newPwd").data("help") };
@@ -145,17 +146,18 @@ ASC.Controls.EmailAndPasswordManager = new function() {
         }
 
         if (jq("#licenseKeyText").length && jq("#licenseKeyText").hasClass("error")) {
-            res = { "Status": 0, "Message": ASC.Resources.Master.ResourceJS.LicenseKeyError };
+            res = { "Status": 0, "Message": ASC.Resources.Master.Resource.LicenseKeyError };
             if (parentCallback != null)
                 parentCallback(res);
             return;
         }
 
         if (jq(".license-accept").length && !jq(".license-accept input[type=checkbox]").is(":checked")) {
-            toastr.error(ASC.Resources.Master.ResourceJS.LicenseAgreementsError);
+            toastr.error(ASC.Resources.Master.Resource.LicenseAgreementsError);
             return;
         }
 
+        var analytics = jq("#analyticsAcceptedOpenSource").is(":checked");
         var subscribeFromSite = jq("#subscribeFromSite").is(":checked");
 
         window.hashPassword(pwd, function (passwordHash) {
@@ -167,6 +169,7 @@ ASC.Controls.EmailAndPasswordManager = new function() {
                 jq('#studio_lng').val() || jq('#studio_lng').data('default'),
                 promocode,
                 amiid,
+                analytics,
                 subscribeFromSite,
                 function (result) {
                     if (parentCallback != null)
@@ -177,7 +180,7 @@ ASC.Controls.EmailAndPasswordManager = new function() {
 };
 
 jq(function() {
-    if (jq('.emailAddress').html().trim() == '') {
+    if (jQuery.trim(jq('.emailAddress').html()) == '') {
         ASC.Controls.EmailAndPasswordManager.ShowChangeEmailAddress();
     }
 });

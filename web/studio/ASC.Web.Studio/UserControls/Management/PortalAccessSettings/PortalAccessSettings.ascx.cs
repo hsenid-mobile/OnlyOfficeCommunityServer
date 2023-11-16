@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,7 @@
 */
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security;
-using System.Web;
-using System.Web.UI;
-
 using AjaxPro;
-
 using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Tenants;
@@ -32,10 +24,15 @@ using ASC.MessagingSystem;
 using ASC.Web.Core;
 using ASC.Web.Core.Utility.Settings;
 using ASC.Web.Studio.Core;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Statistics;
 using ASC.Web.Studio.Utility;
-
+using Resources;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security;
+using System.Web;
+using System.Web.UI;
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Web.Studio.UserControls.Management
@@ -109,7 +106,7 @@ namespace ASC.Web.Studio.UserControls.Management
                         new StudioTrustedDomainSettings { InviteUsersAsVisitors = false }.Save();
                         new StudioAdminMessageSettings { Enable = true }.Save();
 
-                        IPRestrictionsService.Save(new List<IPRestrictionBase>(), TenantProvider.CurrentTenantID);
+                        IPRestrictionsService.Save(new List<string>(), TenantProvider.CurrentTenantID);
 
                         tenant.TrustedDomainsType = registerUsers ? TenantTrustedDomainsType.All : TenantTrustedDomainsType.None;
                         CoreContext.TenantManager.SaveTenant(tenant);
@@ -142,18 +139,18 @@ namespace ASC.Web.Studio.UserControls.Management
                 }
 
                 return new
-                {
-                    Status = 1,
-                    Message = Resource.SuccessfullySaveSettingsMessage
-                };
+                    {
+                        Status = 1,
+                        Message = Resource.SuccessfullySaveSettingsMessage
+                    };
             }
             catch (Exception e)
             {
                 return new
-                {
-                    Status = 0,
-                    Message = e.Message.HtmlEncode()
-                };
+                    {
+                        Status = 0,
+                        Message = e.Message.HtmlEncode()
+                    };
             }
         }
 
@@ -168,10 +165,10 @@ namespace ASC.Web.Studio.UserControls.Management
                 throw new Exception(string.Format(Resource.PortalAccessSettingsDiscSpaceLimitException, FileSizeComment.FilesSizeToString(quota.MaxTotalSize)));
 
             CoreContext.PaymentManager.SetTariff(TenantProvider.CurrentTenantID, new Tariff
-            {
-                QuotaId = quota.Id,
-                DueDate = DateTime.MaxValue
-            });
+                {
+                    QuotaId = quota.Id,
+                    DueDate = DateTime.MaxValue
+                });
         }
     }
 }

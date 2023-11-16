@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,20 +38,14 @@ ProgressManager = new function () {
                     if (response.error) {
                         showError(response.error.Message);
                         return;
-                    }
-
-                    if (response.value) {
-                        if (response.value.Error) {
-                            showError(response.value.Error);
-                            return;
-                        }
+                    } else if (response.value) {
                         showProgress(response.value.Progress);
                         if (response.value.IsCompleted) {
                             window.location.href = response.value.Link;
                         }
                     }
                     setTimeout(function () {
-                        getProgress();
+                        AjaxPro.Backup.GetTransferProgress(getProgress);
                     }, 1000);
                     
                 });
@@ -59,46 +53,31 @@ ProgressManager = new function () {
             case "1":
                 AjaxPro.Backup.GetRestoreProgress(function (response) {
                     if (response.error) {
-                        onError(response.error.Message);
+                        showError(response.error.Message);
                         return;
                     }
                     if (response.value) {
-                        if (response.value.Error) {
-                            onError(response.value.Error);
-                            return;
-                        }
-
                         showProgress(response.value.Progress);
                         if (response.value.IsCompleted) {
-                            goToDefault(5000);
-                            return;
+                            setTimeout(function() {
+                                    window.location.href = "./";
+                                }, 5000);
 
                         }
                     } else {
                         showProgress(100);
-                        goToDefault(5000);
-                        return;
+                        setTimeout(function () {
+                            window.location.href = "./";
+                        }, 5000);
                     }
-
                     setTimeout(function () {
-                        getProgress();
+                        AjaxPro.Backup.GetRestoreProgress(getProgress);
                     }, 1000);
                 });
                 break;
                 
         }
     };
-
-    function onError(mes) {
-        showError(mes);
-        goToDefault(10000);
-    }
-
-    function goToDefault(t) {
-        setTimeout(function () {
-            window.location.href = "./";
-        }, t);
-    }
 
     function showError(er) {
         $("#progress-line").hide();

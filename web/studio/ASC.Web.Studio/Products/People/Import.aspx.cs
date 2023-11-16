@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 
 using System;
-
-using ASC.Web.People.UserControls;
 using ASC.Web.Studio;
+using ASC.Web.People.UserControls;
 using ASC.Web.Studio.Core.Users;
-using ASC.Web.Studio.PublicResources;
+using Resources;
 
 
 namespace ASC.Web.People
@@ -34,6 +33,6 @@ namespace ASC.Web.People
             PageTitle = CustomNamingPeople.Substitute<Resource>("ImportContactsHeader");
             importUsers.Controls.Add(LoadControl(ImportUsers.Location));
         }
-
+        
     }
 }

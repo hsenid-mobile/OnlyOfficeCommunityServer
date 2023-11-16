@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ using ASC.Common.Utils;
 using ASC.Notify.Messages;
 using ASC.Notify.Patterns;
 
+using MailKit;
 using MailKit.Security;
 
 using MimeKit;
@@ -44,74 +45,49 @@ namespace ASC.Core.Notify.Senders
 </html>";
 
         protected ILog Log { get; private set; }
-        private IDictionary<string, string> _initProperties;
 
         private string _host;
         private int _port;
         private bool _ssl;
         private ICredentials _credentials;
-        private SaslMechanism _saslMechanism;
+        protected bool _useCoreSettings;
         const int NETWORK_TIMEOUT = 30000;
 
         public SmtpSender()
         {
-            _initProperties = new Dictionary<string, string>();
-
             Log = LogManager.GetLogger("ASC.Notify");
         }
 
         public virtual void Init(IDictionary<string, string> properties)
         {
-            _initProperties = properties;
-        }
-
-        private void BuildSmtpSettings()
-        {
-            if (CoreContext.Configuration.SmtpSettings.IsDefaultSettings && _initProperties.ContainsKey("host") && !String.IsNullOrEmpty(_initProperties["host"]))
+            if (properties.ContainsKey("useCoreSettings") && bool.Parse(properties["useCoreSettings"]))
             {
-                _host = _initProperties["host"];
-
-                if (_initProperties.ContainsKey("port") && !string.IsNullOrEmpty(_initProperties["port"]))
-                {
-                    _port = int.Parse(_initProperties["port"]);
-                }
-                else
-                {
-                    _port = 25;
-                }
-
-                if (_initProperties.ContainsKey("enableSsl") && !string.IsNullOrEmpty(_initProperties["enableSsl"]))
-                {
-                    _ssl = bool.Parse(_initProperties["enableSsl"]);
-                }
-                else
-                {
-                    _ssl = false;
-                }
-
-                if (_initProperties.ContainsKey("userName"))
-                {
-                    var useNtlm = _initProperties.ContainsKey("useNtlm") && bool.Parse(_initProperties["useNtlm"]);
-                    _credentials = !useNtlm ? new NetworkCredential(_initProperties["userName"], _initProperties["password"]) : null;
-                    _saslMechanism = useNtlm ? new SaslMechanismNtlm(_initProperties["userName"], _initProperties["password"]) : null;
-                }
+                _useCoreSettings = true;
             }
             else
             {
-                var s = CoreContext.Configuration.SmtpSettings;
-
-                _host = s.Host;
-                _port = s.Port;
-                _ssl = s.EnableSSL; 
-
-                if (!string.IsNullOrEmpty(s.CredentialsUserName))
+                _host = properties["host"];
+                _port = properties.ContainsKey("port") ? int.Parse(properties["port"]) : 25;
+                _ssl = properties.ContainsKey("enableSsl") && bool.Parse(properties["enableSsl"]);
+                if (properties.ContainsKey("userName"))
                 {
-                    _credentials = !s.UseNtlm ? new NetworkCredential(s.CredentialsUserName, s.CredentialsUserPassword) : null;
-                    _saslMechanism = s.UseNtlm ? new SaslMechanismNtlm(s.CredentialsUserName, s.CredentialsUserPassword) : null;
+                    _credentials = new NetworkCredential(
+                         properties["userName"],
+                         properties["password"]);
                 }
             }
         }
 
+        private void InitUseCoreSettings()
+        {
+            var s = CoreContext.Configuration.SmtpSettings;
+            _host = s.Host;
+            _port = s.Port;
+            _ssl = s.EnableSSL;
+            _credentials = !string.IsNullOrEmpty(s.CredentialsUserName)
+                ? new NetworkCredential(s.CredentialsUserName, s.CredentialsUserPassword)
+                : null;
+        }
 
         public virtual NoticeSendResult Send(NotifyMessage m)
         {
@@ -122,7 +98,8 @@ namespace ASC.Core.Notify.Senders
             {
                 try
                 {
-                    BuildSmtpSettings();
+                    if (_useCoreSettings)
+                        InitUseCoreSettings();
 
                     var mail = BuildMailMessage(m);
 
@@ -134,10 +111,6 @@ namespace ASC.Core.Notify.Senders
                     if (_credentials != null)
                     {
                         smtpClient.Authenticate(_credentials);
-                    }
-                    else if (_saslMechanism != null)
-                    {
-                        smtpClient.Authenticate(_saslMechanism);
                     }
 
                     smtpClient.Send(mail);
@@ -289,11 +262,10 @@ namespace ASC.Core.Notify.Senders
 
             var smtpClient = new MailKit.Net.Smtp.SmtpClient
             {
+                ServerCertificateValidationCallback = (sender, certificate, chain, errors) =>
+                    sslCertificatePermit || MailService.DefaultServerCertificateValidationCallback(sender, certificate, chain, errors),
                 Timeout = NETWORK_TIMEOUT
             };
-
-            if (sslCertificatePermit)
-                smtpClient.ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true;
 
             return smtpClient;
         }

@@ -115,6 +115,15 @@ namespace ASC.Api.Calendar.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Date format is incorrect.
+        /// </summary>
+        public static string ErrorIncorrectDateFormat {
+            get {
+                return ResourceManager.GetString("ErrorIncorrectDateFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item not found.
         /// </summary>
         public static string ErrorItemNotFound {

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
 using System.Threading;
-
 using ASC.Common.Logging;
 using ASC.FederatedLogin.Helpers;
 using ASC.FederatedLogin.LoginProviders;
@@ -286,7 +285,6 @@ namespace ASC.Mail.Core.Engine
                 : newMailBoxData.SmtpPassword;
 
             newMailBoxData.Imap = mbox.Imap;
-            newMailBoxData.Enabled = mbox.Enabled;
 
             return CreateAccount(newMailBoxData, out loginResult);
         }
@@ -528,11 +526,7 @@ namespace ASC.Mail.Core.Engine
                             !string.IsNullOrEmpty(account.MailboxOAuthToken),
                             account.MailboxEmailInFolder,
                             account.MailboxIsTeamlabMailbox,
-                            account.ServerDomainTenant == Defines.SHARED_TENANT_ID
-                            )
-                        {
-                            DateCreated = account.DateCreated.HasValue ? account.DateCreated.Value : (DateTime?)null
-                        };
+                            account.ServerDomainTenant == Defines.SHARED_TENANT_ID);
 
                         if (group != null) accountInfo.Groups.Add(group);
 

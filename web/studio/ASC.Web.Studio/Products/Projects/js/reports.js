@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,16 +60,16 @@ ASC.Projects.GeneratedReport = (function () {
                 attachments.bind("deleteFile", function (ev, fileId) {
                     loadingBanner.displayLoading();
                     teamlab.removeProjectsReport(fileId,
-                        {
-                            success: function() {
-                                attachments.deleteFileFromLayout(fileId);
-                                loadingBanner.hideLoading();
-                            },
-                            error: function() {
-                                toastr.error(ASC.Resources.Master.ResourceJS.CommonJSErrorMsg);
-                                loadingBanner.hideLoading();
-                            }
-                        });
+                    {
+                        success: function() {
+                            attachments.deleteFileFromLayout(fileId);
+                            loadingBanner.hideLoading();
+                        },
+                        error: function () {
+                            toastr.error(ASC.Resources.Master.Resource.CommonJSErrorMsg);
+                            loadingBanner.hideLoading();
+                        }
+                    });
                 });
 
                 loadingBanner.hideLoading();
@@ -80,9 +80,9 @@ ASC.Projects.GeneratedReport = (function () {
     return { init: init };
 }());
 
-ASC.Projects.ReportView = (function () {
+ASC.Projects.ReportView = (function() {
     var tmplId = null,
-        ProjectsJSResource = ASC.Projects.Resources.ProjectsJSResource,
+        resources = ASC.Projects.Resources.ProjectsJSResource,
         teamlab,
         reports,
         progressDialog,
@@ -96,11 +96,11 @@ ASC.Projects.ReportView = (function () {
         loadingBanner = LoadingBanner;
 
         if (location.hash.indexOf("elementNotFound") > 0) {
-            ASC.Projects.Common.displayInfoPanel(ProjectsJSResource.ReportTmplNotFound, true);
+            ASC.Projects.Common.displayInfoPanel(resources.ReportTmplNotFound, true);
         }
-
+        
         $generateBtn = jq("#generateReport");
-
+        
         tmplId = jq.getURLParam("tmplId");
 
 
@@ -108,7 +108,7 @@ ASC.Projects.ReportView = (function () {
             teamlab.getPrjReportTemplate({},
                 tmplId,
                 {
-                    success: function (params, tmpl) {
+                    success: function(params, tmpl) {
                         reports.initComboboxes(tmpl);
                         reports.initFilterEvents();
                     }
@@ -119,46 +119,46 @@ ASC.Projects.ReportView = (function () {
             reports.initFilterEvents();
         }
 
-        $generateBtn.on("click", function () {
+        $generateBtn.click(function () {
             if (jq(this).hasClass("disable")) return;
             generateReport();
             return false;
         });
 
-        jq("#removeReport").on("click", function () {
-            teamlab.deletePrjReportTemplate({}, tmplId, { success: function () {
-                    location.href = "Reports.aspx?reportType=0";
-                }
+        jq("#removeReport").click(function() {
+            teamlab.deletePrjReportTemplate({}, tmplId, { success: function() {
+                location.href = "Reports.aspx?reportType=0";
+            }
             });
             return false;
         });
-        jq("#updateTemplate").on("click", function () {
+        jq("#updateTemplate").click(function() {
             if (jq(this).hasClass("disable")) return false;
             updateReportTemplate();
             return false;
         });
-        jq(".report-filter-container, .template-params").on("change", "input, select", function () {
+        jq(".report-filter-container, .template-params").on("change", "input, select", function() {
             jq("#updateTemplate").removeClass("disable");
         });
-        jq("#autoGeneration").on("change", function () {
+        jq("#autoGeneration").change(function() {
             jq("#updateTemplate").removeClass("disable");
         });
-        jq("#templateTitle").on("keydown", function () {
+        jq("#templateTitle").keydown(function() {
             jq("#updateTemplate").removeClass("disable");
         });
         //-----popup events----//
-        jq("#createTemplate").on("click", function () {
+        jq("#createTemplate").click(function() {
             showTemplatePopup();
             return false;
         });
-        jq("#autoGeneration").on("change", function () {
+        jq("#autoGeneration").change(function() {
             if (jq(this).is(":checked")) {
-                jq(".template-params .comboBox").prop("disabled", false);
+                jq(".template-params .comboBox").removeAttr("disabled");
             } else {
-                jq(".template-params .comboBox").prop("disabled", true);
+                jq(".template-params .comboBox").attr("disabled", "disabled");
             }
         });
-        jq("#generatedPeriods").on("change", function () {
+        jq("#generatedPeriods").change(function() {
             var val = jq(this).val();
             switch (val) {
                 case "week":
@@ -180,16 +180,16 @@ ASC.Projects.ReportView = (function () {
                     }
             }
         });
-        jq("#reportTemplatePopup .button.gray").on("click", function () {
+        jq("#reportTemplatePopup .button.gray").click(function() {
             jq.unblockUI();
             return false;
         });
-        jq("#saveTemplate").on("click", function () {
+        jq("#saveTemplate").click(function () {
             if (jq(this).hasClass("disable")) return;
-            var name = jq("#templateTitle").val().trim();
+            var name = jq.trim(jq("#templateTitle").val());
             if (!name.length) {
                 jq("#reportTemplatePopup .requiredField").addClass("requiredFieldError");
-                jq("#templateTitle").trigger("focus");
+                jq("#templateTitle").focus();
                 return false;
             }
             jq("#reportTemplatePopup .requiredField").removeClass("requiredFieldError");
@@ -208,17 +208,17 @@ ASC.Projects.ReportView = (function () {
         progressDialog.generate(url);
     };
 
-    var yellowFade = function (elem) {
+    var yellowFade = function(elem) {
         elem.css({ backgroundColor: '#F7F7F7' });
         elem.animate({ backgroundColor: '#F2F2F2' }, { queue: false, duration: 1000 });
-        var resetStyle = function (self) { jq(self).removeAttr('style'); };
+        var resetStyle = function(self) { jq(self).removeAttr('style'); };
         setTimeout(resetStyle, 1100, this);
     };
 
-    var onSaveTemplate = function (params, template) {
+    var onSaveTemplate = function(params, template) {
         var tmplContainer = jq("#reportsTemplates");
         var newTempl = "<li id='" + template.id + "'><a title='" + template.title + "' class='menu-report-name' href ='Reports.aspx?tmplId="
-            + template.id + "&reportType=" + template.reportType + "'>" + template.title + "</a></li>";
+                    + template.id + "&reportType=" + template.reportType + "'>" + template.title + "</a></li>";
         tmplContainer.prepend(newTempl);
         yellowFade(tmplContainer.find("li:first"));
 
@@ -229,7 +229,7 @@ ASC.Projects.ReportView = (function () {
     };
 
     var onUpdateTemplate = function (params, tmpl) {
-        ASC.Projects.Common.displayInfoPanel(ProjectsJSResource.TemplateSaved);
+        ASC.Projects.Common.displayInfoPanel(resources.TemplateSaved);
         jq("#updateTemplate").addClass("disable");
 
         jq("#reportsTemplates .active").text(Encoder.htmlDecode(tmpl.title));
@@ -240,7 +240,7 @@ ASC.Projects.ReportView = (function () {
         if (jq("#autoGeneration").is(":checked")) {
             var select = jq("#generatedPeriods");
             var period = select.attr("data-period");
-            select.find("option[value='" + period + "']").prop("selected", true);
+            select.find("option[value='" + period + "']").attr("selected", "selected");
             switch (period) {
                 case "week":
                     jq("#week").val(jq("#week").attr("data-value")).show();
@@ -255,10 +255,10 @@ ASC.Projects.ReportView = (function () {
 
     function updateReportTemplate() {
         var id = jq.getURLParam("tmplId");
-        var name = jq("#templateTitle").val().trim();
+        var name = jq.trim(jq("#templateTitle").val());
         if (!name.length) {
             jq(".input-name-container").addClass("requiredFieldError");
-            jq("#templateTitle").trigger("focus");
+            jq("#templateTitle").focus();
         } else {
             jq(".input-name-container").removeClass("requiredFieldError");
         }
@@ -268,9 +268,9 @@ ASC.Projects.ReportView = (function () {
 
     function showTemplatePopup() {
         jq("#templateTitle").val(jq(".report-name").text());
-        jq("#autoGeneration").prop("checked", false);
-        jq("#reportTemplatePopup .template-params .comboBox").prop("disabled", true);
-
+        jq("#autoGeneration").removeAttr("checked");
+        jq("#reportTemplatePopup .template-params .comboBox").attr("disabled", "disabled");
+        
         StudioBlockUIManager.blockUI(jq('#reportTemplatePopup'), 400);
     };
 
@@ -302,10 +302,7 @@ ASC.Projects.Reports = (function () {
         userFilter,
         paymentFilter,
         taskStatusFilter,
-        periodFilterId,
-        projectAverageTime,
-        projectAverageTimeAddList,
-        projectAverageCompletingTasks;
+        periodFilterId;
 
     var FilterCombo = function (id, type, describe, filterItem, hidden) {
         this.id = id;
@@ -320,11 +317,6 @@ ASC.Projects.Reports = (function () {
 
         this.isVisible = function () {
             return jq("#" + id).length > 0;
-        }
-
-        this.isDisplayed = function () {
-            var obj = jq("#" + id);
-            return obj.length > 0 && obj.is(":visible");
         }
 
         this.init = function (items, defIndex, onShowList) {
@@ -354,19 +346,19 @@ ASC.Projects.Reports = (function () {
             this.selectDefault();
         }
 
-        this.show = function () {
+        this.show = function() {
             getFilterContainer().show();
         }
 
-        this.selectDefault = function () {
+        this.selectDefault = function() {
             $filter.advancedSelector("selectBeforeShow", this.defaultFilter);
         }
 
-        this.disable = function (items) {
+        this.disable = function(items) {
             $filter.advancedSelector("disable", items);
         }
 
-        this.undisable = function (items) {
+        this.undisable = function(items) {
             $filter.advancedSelector("undisable", items);
         }
 
@@ -403,44 +395,33 @@ ASC.Projects.Reports = (function () {
 
         function getDefaultFilter(filterType) {
             switch (filterType) {
-                case 0:
-                    return defaultFilter;
-                case 1:
-                    return defaultFilterDate;
-                case 2:
-                    return defaultFilterInterval;
-                default:
-                    return defaultFilter;
+            case 0:
+                return defaultFilter;
+            case 1:
+                return defaultFilterDate;
+            case 2:
+                return defaultFilterInterval;
+            default:
+                return defaultFilter;
             }
         }
     },
-        FilterRadio = function (id, name, describe, value, checked) {
-            this.id = id;
-            this.name = name;
-            this.describe = describe;
-            this.value = value;
-            this.checked = checked;
-        },
-        FilterCheck = function (id, describe, checked, hidden, withcombo) {
-            this.id = id;
-            this.describe = describe;
-            this.checked = checked;
-            this.hidden = hidden;
-            this.withcombo = withcombo;
-
-
-            this.hide = function () {
-                jq("#" + this.id).closest(".filter-item-container").hide();
-            }
-
-            this.show = function () {
-                jq("#" + this.id).closest(".filter-item-container").show();
-            }
-        },
-        AdvancedSelectorItem = function (id, title) {
-            this.id = id.toString();
-            this.title = title;
-        }
+    FilterRadio = function (id, name, describe, value, checked) {
+        this.id = id;
+        this.name = name;
+        this.describe = describe;
+        this.value = value;
+        this.checked = checked;
+    },
+    FilterCheck = function (id, describe, checked) {
+        this.id = id;
+        this.describe = describe;
+        this.checked = checked;
+    },
+    AdvancedSelectorItem = function(id, title) {
+        this.id = id.toString();
+        this.title = title;
+    }
 
     var mapAdvancedSelectorItem = function (item) { return item.id.toString(); };
 
@@ -454,7 +435,7 @@ ASC.Projects.Reports = (function () {
         var projectsIds = projects.map(mapAdvancedSelectorItem),
             allProjectListIds = allProjectList.map(mapAdvancedSelectorItem);
 
-        projectsFilter.disable(allProjectListIds.filter(function (item) {
+        projectsFilter.disable(allProjectListIds.filter(function(item) {
             return projectsIds.indexOf(item) < 0;
         }));
         projectsFilter.undisable(projectsIds);
@@ -473,14 +454,14 @@ ASC.Projects.Reports = (function () {
 
     var initComboboxes = function (template) {
         var reportType = jq.getURLParam("reportType"),
-            filters = { combo: [], radio: [], check: [], checkcombo: [] },
+            filters = { combo: [], radio: [], check: [] },
             resources = ASC.Projects.Resources,
             projectResource = resources.ProjectResource,
-            ProjectsCommonResource = resources.ProjectsCommonResource,
+            commonResource = resources.CommonResource,
             reportResource = resources.ReportResource;
 
-        defaultFilter = new AdvancedSelectorItem("default", ProjectsCommonResource.All);
-        defaultFilterDate = new AdvancedSelectorItem(0, reportResource.AnyDate);
+        defaultFilter = new AdvancedSelectorItem("default", commonResource.All);
+        defaultFilterDate = new AdvancedSelectorItem(-1, reportResource.AnyDate);
         defaultFilterInterval = new AdvancedSelectorItem(-1, reportResource.AnyInterval);
 
         if (template) {
@@ -489,26 +470,21 @@ ASC.Projects.Reports = (function () {
 
         tagsFilter = new FilterCombo("Tags", 0, projectResource.Tags, { id: "tag", param: "fpt" });
         projectsFilter = new FilterCombo("Projects", 0, projectResource.Project, { id: "project", param: "fpid" }),
-            periodFilter = new FilterCombo("UpcomingIntervals", 1, reportResource.ChooseNearestMilestonesTimePeriod, { id: "timeid", param: "ftimeid" }),
-            timeFilter = new FilterCombo("TimeIntervals", 2, reportResource.ChooseTimeInterval, { id: "reportTimeInterval", param: "ftime" }),
-            departmentFilter = new FilterCombo("Departments", 0, resources.ViewByDepartments, { id: "departament", param: "fd" }),
-            userFilter = new FilterCombo("Users", 0, resources.ViewByUsers, { id: "userId", param: "fu" }),
-            paymentFilter = new FilterCombo("PaymentsStatuses", 0, reportResource.PaymentStatuses, { id: "paymentStatus", param: "fpays" }),
-            taskStatusFilter = new FilterCombo("TaskStatuses", 0, reportResource.ShowTasks, { id: "status", param: "ftss" });
-
-        projectAverageTime = new FilterCheck("ProjectsAverageTime", reportResource.ViewProjectsAverageTime, false, false, true);
-        projectAverageTimeAddList = new FilterCombo("ProjectsAverageTimeAddList", 0, "", { id: "typeOfShowAverageTime", param: "atstat" });
-        projectAverageCompletingTasks = new FilterCheck("ProjectsAverageTimeCompletingTasks", reportResource.ViewProjectsAverageTimeCompletingTasks, false, true);
+        periodFilter = new FilterCombo("UpcomingIntervals", 1, reportResource.ChooseNearestMilestonesTimePeriod, { id: "timeid", param: "ftimeid" }),
+        timeFilter = new FilterCombo("TimeIntervals", 2, reportResource.ChooseTimeInterval, { id: "reportTimeInterval", param: "ftime" }),
+        departmentFilter = new FilterCombo("Departments", 0, resources.ViewByDepartments, { id: "departament", param: "fd" }),
+        userFilter = new FilterCombo("Users", 0, resources.ViewByUsers, { id: "userId", param: "fu" }),
+        paymentFilter = new FilterCombo("PaymentsStatuses", 0, reportResource.PaymentStatuses, { id: "paymentStatus", param: "fpays" }),
+        taskStatusFilter = new FilterCombo("TaskStatuses", 0, reportResource.ShowTasks, { id: "status", param: "ftss" });
 
         var departmentRadio = new FilterRadio("departmentReport", "reportType", resources.ViewByDepartments, 0),
-            userRadio = new FilterRadio("byUsers", "type_rbl", resources.ViewByUsers, 0),
-            taskRadio = new FilterRadio("byTasks", "type_rbl", reportResource.ViewByUserTasks, 1),
-            projectRadioVt = new FilterRadio("byProject", "type_rbl", reportResource.ViewByProjects, 2),
-            projectRadio = new FilterRadio("projectReport", "reportType", reportResource.ViewByProjects, 1),
-            projectClosedCheck = new FilterCheck("cbxViewClosedProjects", reportResource.ViewClosedProjects),
-            taskRespCheck = new FilterCheck("cbxShowTasksWithoutResponsible", resources.TaskResource.ShowTasksWithoutResponsible);
+        userRadio = new FilterRadio("byUsers", "type_rbl", resources.ViewByUsers, 0),
+        taskRadio = new FilterRadio("byTasks", "type_rbl", reportResource.ViewByUserTasks, 1),
+        projectRadioVt = new FilterRadio("byProject", "type_rbl", reportResource.ViewByProjects, 2),
+        projectRadio = new FilterRadio("projectReport", "reportType", reportResource.ViewByProjects, 1),
+        projectClosedCheck = new FilterCheck("cbxViewClosedProjects", reportResource.ViewClosedProjects),
+        taskRespCheck = new FilterCheck("cbxShowTasksWithoutResponsible", resources.TasksResource.ShowTasksWithoutResponsible);
 
-        var filterUrl = template && template.hasOwnProperty("filter") ? "?" + template.filter : undefined;
 
         switch (reportType) {
             case "0":
@@ -519,7 +495,7 @@ ASC.Projects.Reports = (function () {
                 filters.combo = [tagsFilter, projectsFilter, periodFilter];
                 break;
             case "2":
-                if (jq.getURLParam("fv", filterUrl) == null) {
+                if (jq.getURLParam("fv") == null) {
                     tagsFilter.hidden = projectsFilter.hidden = true;
                     departmentRadio.checked = 1;
                 } else {
@@ -534,25 +510,19 @@ ASC.Projects.Reports = (function () {
                 filters.combo = [departmentFilter, userFilter];
                 break;
             case "5":
-                if (jq.getURLParam("fv", filterUrl) == null) {
+                if (jq.getURLParam("fv") == null) {
                     tagsFilter.hidden = projectsFilter.hidden = true;
                     departmentRadio.checked = 1;
                 } else {
-                    departmentFilter.hidden = projectAverageTimeAddList.hidden = projectAverageTime.hidden = true;
-                    projectAverageCompletingTasks.hidden = false;
+                    departmentFilter.hidden = true;
                     projectRadio.checked = 1;
-                    filter.viewType = 1;
                 }
 
-                projectAverageTime.checked = jq.getURLParam("atchecked", filterUrl);
-                projectAverageCompletingTasks.checked = jq.getURLParam("ctasks", filterUrl);
-                filters.radio = [departmentRadio, projectRadio];
                 filters.combo = [departmentFilter, tagsFilter, projectsFilter, userFilter, timeFilter];
-                filters.check = [projectAverageTime, projectAverageCompletingTasks];
-                filters.checkcombo = [projectAverageTimeAddList];
+                filters.radio = [departmentRadio, projectRadio];
                 break;
             case "6":
-                if (jq.getURLParam("fv", filterUrl) == null) {
+                if (jq.getURLParam("fv") == null) {
                     tagsFilter.hidden = projectsFilter.hidden = true;
                     departmentRadio.checked = 1;
                 } else {
@@ -565,11 +535,11 @@ ASC.Projects.Reports = (function () {
                 break;
             case "7":
                 projectClosedCheck.checked = jq.getURLParam("fpschecked");
-                filters.combo = [departmentFilter, userFilter, timeFilter];
+                filters.combo = [departmentFilter, userFilter];
                 filters.check = [projectClosedCheck];
                 break;
             case "8":
-                userRadio.checked = jq.getURLParam("fv", filterUrl) == null;
+                userRadio.checked = jq.getURLParam("fv") == null;
                 taskRadio.checked = !userRadio.checked;
                 filters.combo = [departmentFilter, userFilter, paymentFilter, timeFilter];
                 filters.radio = [userRadio, taskRadio, projectRadioVt];
@@ -591,7 +561,7 @@ ASC.Projects.Reports = (function () {
         }
 
         $departmentReport = jq("#departmentReport"),
-            $projectReport = jq("#projectReport");
+        $projectReport = jq("#projectReport");
 
         if (projectsFilter.isVisible()) {
             Teamlab.getPrjProjects({}, {
@@ -601,7 +571,7 @@ ASC.Projects.Reports = (function () {
                     }).sort();
 
                     projectsFilter.init(allProjectList, 0, function () {
-                        if (userFilter.isVisible() && projectsFilter.isDisplayed()) {
+                        if (userFilter.isVisible()) {
                             changeProject(filter.tag, filter.project, filter.userId);
                         }
                     });
@@ -614,7 +584,7 @@ ASC.Projects.Reports = (function () {
         }
 
         if (tagsFilter.isVisible()) {
-            var mappedTags = ASC.Projects.Master.Tags.map(function (item) {
+            var mappedTags = ASC.Projects.Master.Tags.map(function(item) {
                 return new AdvancedSelectorItem(item.value, item.title);
             });
 
@@ -623,16 +593,6 @@ ASC.Projects.Reports = (function () {
                     changeTag(filter.tag, filter.project, filter.userId);
                     projectsFilter.selectDefault();
                 }
-            });
-        }
-
-        if (projectAverageTimeAddList.isVisible()) {
-            var periods = [
-                new AdvancedSelectorItem(1, reportResource.ClosingProjects),
-                new AdvancedSelectorItem(2, reportResource.CompletingTasks),
-            ];
-            projectAverageTimeAddList.init(periods, 0, function () {
-
             });
         }
 
@@ -646,10 +606,9 @@ ASC.Projects.Reports = (function () {
             ];
 
             periodFilter.init(periods, 0, function (item) {
-                if (item.id === "0") {
+                if (item.id === "-1") {
                     delete filter.fromDate;
                     delete filter.toDate;
-                    filter.reportTimeInterval = 0;
                 } else {
                     filter.reportTimeInterval = 1;
 
@@ -664,7 +623,7 @@ ASC.Projects.Reports = (function () {
 
         if (departmentFilter.isVisible()) {
             var firstDep = true,
-                deps = window.GroupManager.getGroupsArray(function (item) {
+                deps = window.GroupManager.getAllGroups().map(function (item) {
                     return new AdvancedSelectorItem(item.id, item.name);
                 });
             departmentFilter.init(deps, 0, function () {
@@ -680,7 +639,7 @@ ASC.Projects.Reports = (function () {
         }
 
         if ($departmentReport.length) {
-            $departmentReport.on("change", function () {
+            $departmentReport.change(function() {
                 changeReportType(0);
                 filter.viewType = $departmentReport.is(':checked') ? 0 : 1;
                 if (filter.viewType == 0) {
@@ -692,7 +651,7 @@ ASC.Projects.Reports = (function () {
         }
 
         if ($projectReport.length) {
-            $projectReport.on("change", function () {
+            $projectReport.change(function() {
                 changeReportType(1);
                 filter.viewType = $departmentReport.is(':checked') ? 0 : 1;
             });
@@ -703,24 +662,17 @@ ASC.Projects.Reports = (function () {
             var users = window.UserManager.getAllUsers(true);
 
             for (var userId in users) {
-                if (!users.hasOwnProperty(userId)) continue;
+                if(!users.hasOwnProperty(userId)) continue;
                 var item = users[userId];
                 allusers.push(new AdvancedSelectorItem(item.id, item.displayName));
             }
 
-            allusers.sort(function (a, b) {
-                return (a.title > b.title) ? 1 : -1;
-            });
-
-            if (reportType === "5" && !template) {
-                defaultFilterUser = allusers.findIndex(function (r) { return r.id === Teamlab.profile.id; }) + 1;
+            if (reportType === "5") {
+                defaultFilterUser = allusers.findIndex(function(r) { return r.id === Teamlab.profile.id; }) + 1;
             }
 
             userFilter.init(allusers, defaultFilterUser, function () {
                 changeResponsible(filter.userId);
-                if (filter.departament && departmentFilter.isDisplayed()) {
-                    changeDepartment(filter.departament, filter.userId);
-                }
             });
         }
 
@@ -743,11 +695,11 @@ ASC.Projects.Reports = (function () {
                 new AdvancedSelectorItem(9, reportResource.LastMonth),
                 new AdvancedSelectorItem(11, reportResource.ThisYear),
                 new AdvancedSelectorItem(12, reportResource.LastYear),
-                new AdvancedSelectorItem(1, reportResource.Other)
+                new AdvancedSelectorItem(0, reportResource.Other)
             ];
 
-            timeFilter.init(timeIntervals, 0, function (item) {
-                if (item.id == '1')
+            timeFilter.init(timeIntervals, 4, function(item) {
+                if (item.id == '0')
                     jq('#otherInterval').show();
                 else
                     jq('#otherInterval').hide();
@@ -775,7 +727,7 @@ ASC.Projects.Reports = (function () {
                     if (openSub.length === 1) {
                         filterStatuses.push(openSub[0]);
                     } else if (openSub.length > 1) {
-                        filterStatuses = [{ id: "all-1", val: -1, title: resources.ProjectsFilterResource.StatusAllOpenTask }].concat(openSub);
+                        filterStatuses = [{ id: "all-1", val: -1,  title: resources.ProjectsFilterResource.StatusAllOpenTask }].concat(openSub);
                     }
                 } else {
                     filterStatuses.push(
@@ -818,15 +770,15 @@ ASC.Projects.Reports = (function () {
         jq("[id$=fromDate],[id$=toDate]").datepicker({ selectDefaultDate: true, showAnim: '' });
     };
 
-    var initFilterEvents = function () {
+    var initFilterEvents = function() {
         jq(".view-task-block input")
-            .on("change", function () {
+            .change(function() {
                 var id = jq(this).attr("id");
                 if (id == "closedTasks") {
-                    jq("#UpcomingIntervals").prop("disabled", true);
+                    jq("#UpcomingIntervals").attr("disabled", "disabled");
                     jq('#UpcomingIntervals').hide();
                 } else {
-                    jq("#UpcomingIntervals").prop("disabled", false);
+                    jq("#UpcomingIntervals").removeAttr("disabled");
                     jq('#UpcomingIntervals').show();
                 }
             });
@@ -859,7 +811,7 @@ ASC.Projects.Reports = (function () {
         if (userFilter.isVisible()) {
             if (typeof dep !== "undefined") {
                 Teamlab.getProfiles({ user: user },
-                    { filter: { sortBy: "displayname", filterby: "group", filtervalue: dep }, success: onGetUsers });
+                { filter: { sortBy: "displayname", filterby: "group", filtervalue: dep }, success: onGetUsers });
             } else {
                 Teamlab.getProfiles({ user: user }, { filter: { sortBy: "displayname" }, success: onGetUsers });
             }
@@ -870,9 +822,9 @@ ASC.Projects.Reports = (function () {
 
     function changeResponsible(userId) {
         if (typeof userId !== "undefined") {
-            jq("#cbxShowTasksWithoutResponsible").prop("disabled", true).prop("checked", false);
+            jq("#cbxShowTasksWithoutResponsible").attr("disabled", "disabled").removeAttr("checked");
         } else {
-            jq("#cbxShowTasksWithoutResponsible").prop("disabled", false);
+            jq("#cbxShowTasksWithoutResponsible").removeAttr("disabled");
         }
     };
 
@@ -901,22 +853,8 @@ ASC.Projects.Reports = (function () {
             }
 
             departmentFilter.show();
-            projectAverageTime.show();
-
-            if (projectAverageTimeAddList.isVisible()) {
-                projectAverageTimeAddList.show();
-            }
-
-            projectAverageCompletingTasks.hide();
         } else {
             departmentFilter.hide();
-            projectAverageTime.hide();
-
-            if (projectAverageTimeAddList.isVisible()) {
-                projectAverageTimeAddList.hide();
-            }
-
-            projectAverageCompletingTasks.show();
 
             if (userFilter.isVisible()) {
                 userFilter.selectDefault();
@@ -928,24 +866,16 @@ ASC.Projects.Reports = (function () {
         }
     };
 
-    var printReport = function () {
+    var printReport = function() {
         window.print();
     };
 
-    var generateReportFilters = function () {
-
+    var generateReportFilters = function() {
+        
         filter.reportType = jq.getURLParam("reportType") != null ? parseInt(jq.getURLParam("reportType")) : 0;
 
         if (jq("#cbxViewClosedProjects").length != 0) {
             filter.projectStatuses = jq("#cbxViewClosedProjects").is(':checked');
-        }
-
-        if (jq("#ProjectsAverageTime").length != 0) {
-            filter.isShowAverageTime = jq("#ProjectsAverageTime").is(':checked');
-        }
-
-        if (jq("#ProjectsAverageTimeCompletingTasks").length != 0) {
-            filter.projectAverageCompletingTasks = jq("#ProjectsAverageTimeCompletingTasks").is(':checked');
         }
 
         if (filter.reportType == 6 || filter.reportType == 2) {
@@ -960,7 +890,7 @@ ASC.Projects.Reports = (function () {
             filter.viewType = jq("#byUsers").is(':checked') ? 0 : jq("#byTasks").is(':checked') ? 1 : 2;
         }
 
-        if ((filter.reportType == 5 || filter.reportType == 8 || filter.reportType == 7) && filter.reportTimeInterval == '1') {
+        if ((filter.reportType == 5 || filter.reportType == 8) && filter.reportTimeInterval == '0') {
             var fromDate1 = jq("[id$=fromDate]").datepicker('getDate');
             var toDate1 = jq("[id$=toDate]").datepicker('getDate');
 
@@ -989,7 +919,7 @@ ASC.Projects.Reports = (function () {
             filter.noResponsible = jq("#cbxShowTasksWithoutResponsible").is(':checked');
         }
 
-        filter.name = jq("#templateTitle").val().trim();
+        filter.name = jq.trim(jq("#templateTitle").val());
         filter.autoGenerated = jq("#autoGeneration").is(":checked");
 
         if (filter.autoGenerated) {
@@ -1003,18 +933,11 @@ ASC.Projects.Reports = (function () {
         return filter;
     };
 
-    var generateReportUrl = function () {
+    var generateReportUrl = function() {
         var reportUrl = "generatedreport.aspx?reportType=" + filter.reportType;
 
         if (filter.reportTimeInterval) {
             reportUrl += "&ftime=" + filter.reportTimeInterval;
-            if (filter.fromDate) {
-                reportUrl += "&ffrom=" + filter.fromDate.split('T')[0].split('-').join('');
-            }
-
-            if (filter.toDate) {
-                reportUrl += "&fto=" + filter.toDate.split('T')[0].split('-').join('');
-            }
         }
 
         if (!filter.projectStatuses && filter.reportType == 7) {
@@ -1025,15 +948,7 @@ ASC.Projects.Reports = (function () {
             reportUrl += "&fpschecked=true";
         }
 
-        if (!filter.viewType && filter.isShowAverageTime && filter.reportType == 5) {
-            reportUrl += "&atchecked=true";
-        }
-
-        if (filter.viewType && filter.projectAverageCompletingTasks && filter.reportType == 5) {
-            reportUrl += "&ctasks=true";
-        }
-
-        [projectsFilter, departmentFilter, userFilter, tagsFilter, taskStatusFilter, paymentFilter, periodFilter, projectAverageTimeAddList].forEach(function (item) {
+        [projectsFilter, departmentFilter, userFilter, tagsFilter, taskStatusFilter, paymentFilter, periodFilter].forEach(function (item) {
             reportUrl = addFilterToUrl(reportUrl, item.filterItem);
         });
 
@@ -1043,6 +958,14 @@ ASC.Projects.Reports = (function () {
 
         if (filter.noResponsible) {
             reportUrl += "&nores=" + filter.noResponsible;
+        }
+
+        if (filter.fromDate) {
+            reportUrl += "&ffrom=" + filter.fromDate.split('T')[0].split('-').join('');
+        }
+
+        if (filter.toDate) {
+            reportUrl += "&fto=" + filter.toDate.split('T')[0].split('-').join('');
         }
 
         return reportUrl;
@@ -1059,19 +982,19 @@ ASC.Projects.Reports = (function () {
         window.open(url);
     };
 
-    var exportToCsv = function () {
+    var exportToCsv = function() {
         window.location.href = window.location.href + "&format=csv";
     };
 
-    var exportToHTML = function () {
+    var exportToHTML = function() {
         window.location.href = window.location.href + "&format=html";
     };
 
-    var exportToXml = function () {
+    var exportToXml = function() {
         window.location.href = window.location.href + "&format=xml";
     };
 
-    var generateReportByUrl = function (url) {
+    var generateReportByUrl = function(url) {
         open(url, "displayReportWindow", "status=yes,toolbar=yes,menubar=yes,scrollbars=yes");
     };
 

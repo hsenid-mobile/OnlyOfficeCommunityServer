@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Community.Modules.Wiki.Resources {
+namespace ASC.Web.UserControls.Wiki.Resources {
     using System;
     
     

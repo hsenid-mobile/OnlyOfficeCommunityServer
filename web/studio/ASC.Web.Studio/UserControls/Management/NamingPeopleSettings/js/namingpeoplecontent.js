@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ NamingPeopleContentManager = function() {
                                                        jq('#grpcaption').val().substring(0, 30), jq('#grpscaption').val().substring(0, 30),
                                                        jq('#usrstatuscaption').val().substring(0, 30), jq('#regdatecaption').val().substring(0, 30),
                                                        jq('#grpheadcaption').val().substring(0, 30),
-                                                       jq('#usrleadcaption').val().substring(0,30),
                                                        jq('#guestcaption').val().substring(0, 30), jq('#guestscaption').val().substring(0, 30),
                                                        function(result) { if (parentCallback != null) parentCallback(result.value); });
         }
@@ -49,7 +48,6 @@ NamingPeopleContentManager = function() {
             jq('#usrstatuscaption').val(names.UserPostCaption);
             jq('#regdatecaption').val(names.RegDateCaption);
             jq('#grpheadcaption').val(names.GroupHeadCaption);
-            jq('#usrleadcaption').val(names.UserLeadCaption);
             jq('#guestcaption').val(names.GuestCaption);
             jq('#guestscaption').val(names.GuestsCaption);
 
@@ -67,10 +65,10 @@ NamingPeopleContentViewer = new function() {
 
 jq(document).ready(function() {
     jq('.namingPeopleBox input[type="text"]').each(function(i, el) {
-        jq(el).on("keypress", function(event) { NamingPeopleContentViewer.ChangeValue(); });
+        jq(el).keypress(function(event) { NamingPeopleContentViewer.ChangeValue(); });
     });
     var manager = new NamingPeopleContentManager();
-	jq('#namingPeopleSchema').on("change", function () {
+	jq('#namingPeopleSchema').change(function () {
 		manager.LoadSchemaNames(null);
 	});
     manager.LoadSchemaNames(null);

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-
 using ASC.Common.Logging;
 using ASC.Common.Notify.Patterns;
 using ASC.Notify.Channels;
@@ -27,8 +26,6 @@ using ASC.Notify.Cron;
 using ASC.Notify.Messages;
 using ASC.Notify.Patterns;
 using ASC.Notify.Recipients;
-
-using LogManager = ASC.Common.Logging.BaseLogManager;
 
 namespace ASC.Notify.Engine
 {
@@ -504,7 +501,7 @@ namespace ASC.Notify.Engine
 
                 var senderNames = new List<string>();
                 senderNames.AddRange(subscriptionProvider.GetSubscriptionMethod(request.NotifyAction, request.Recipient) ?? new string[0]);
-                senderNames.AddRange(request.Arguments.OfType<AdditionalSenderTag>().Select(tag => (string)tag.Value));
+                senderNames.AddRange(request.Arguments.OfType<AdditionalSenderTag>().Select(tag => (string) tag.Value));
 
                 request.SenderNames = senderNames.ToArray();
             }

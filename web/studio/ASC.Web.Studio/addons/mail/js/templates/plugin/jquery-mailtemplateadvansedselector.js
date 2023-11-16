@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 
 (function ($) {
-    var ResourceJS = ASC.Resources.Master.ResourceJS,
+    var resources = ASC.Resources.Master.Resource,
         teamlab = Teamlab,
         defaultItemsCount = 10,
         minimalItemHeight = 26,
@@ -174,7 +174,7 @@
             that.items = data.map(function (item) {
                 return {
                     id: item.id,
-                    title: item.subject ? item.subject : item.introduction ? item.introduction : item.title ? item.title : ResourceJS.MailNoSubject
+                    title: item.subject ? item.subject : item.introduction ? item.introduction : item.title ? item.title : resources.MailNoSubject
                 };
             });
 
@@ -283,8 +283,8 @@
         searchDelay: 500,
         searchFolder: 7,
         searchPageLimit: 1000,
-        noresults: ResourceJS.TemplateNotFound,
-        emptylist: ResourceJS.NotAddedAnyTemplates,
+        noresults: resources.TemplateNotFound,
+        emptylist: resources.NotAddedAnyTemplates,
         templates: {
             selectorContainer: 'mail-template-selector-container',
             itemList: 'mail-template-selector-items-list'

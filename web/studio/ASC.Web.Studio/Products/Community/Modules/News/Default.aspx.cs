@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Web;
-
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.Notify.Model;
 using ASC.Notify.Recipients;
-using ASC.Web.Community.Modules.News.Resources;
 using ASC.Web.Community.News.Code;
 using ASC.Web.Community.News.Code.DAO;
 using ASC.Web.Community.News.Code.Module;
+using ASC.Web.Community.News.Resources;
 using ASC.Web.Community.Product;
 using ASC.Web.Core.Users;
 using ASC.Web.Core.Utility.Skins;
@@ -37,7 +36,6 @@ using ASC.Web.Studio.Controls.Common;
 using ASC.Web.Studio.UserControls.Common.Comments;
 using ASC.Web.Studio.Utility;
 using ASC.Web.Studio.Utility.HtmlUtility;
-
 using FeedNS = ASC.Web.Community.News.Code;
 
 namespace ASC.Web.Community.News
@@ -77,7 +75,7 @@ namespace ASC.Web.Community.News
         }
 
         protected void Page_Load(object sender, EventArgs e)
-        {
+        {            
             commentList.Visible = CommunitySecurity.CheckPermissions(NewsConst.Action_Comment);
 
             pgNavigator.EntryCount = 1;
@@ -147,7 +145,7 @@ namespace ASC.Web.Community.News
         private void InitScripts()
         {
             var jsResource = new StringBuilder();
-            jsResource.Append("jq('#tableForNavigation select').val(" + PageSize + ").on('change', function(evt) {changeCountOfRows(this.value);}).tlCombobox();");
+            jsResource.Append("jq('#tableForNavigation select').val(" + PageSize + ").change(function(evt) {changeCountOfRows(this.value);}).tlCombobox();");
             Page.RegisterInlineScript(jsResource.ToString(), true);
         }
 
@@ -186,21 +184,21 @@ namespace ASC.Web.Community.News
         private static CommentInfo GetCommentInfo(FeedComment comment)
         {
             var info = new CommentInfo
-            {
-                CommentID = comment.Id.ToString(CultureInfo.CurrentCulture),
-                UserID = new Guid(comment.Creator),
-                TimeStamp = comment.Date,
-                TimeStampStr = comment.Date.Ago(),
-                IsRead = true,
-                Inactive = comment.Inactive,
-                CommentBody = HtmlUtility.GetFull(comment.Comment),
-                UserFullName = DisplayUserSettings.GetFullUserName(new Guid(comment.Creator)),
-                UserProfileLink = CommonLinkUtility.GetUserProfile(comment.Creator),
-                UserAvatarPath = UserPhotoManager.GetBigPhotoURL(new Guid(comment.Creator)),
-                IsEditPermissions = CommunitySecurity.CheckPermissions(comment, NewsConst.Action_Edit),
-                IsResponsePermissions = CommunitySecurity.CheckPermissions(NewsConst.Action_Comment),
-                UserPost = CoreContext.UserManager.GetUsers((new Guid(comment.Creator))).Title
-            };
+                {
+                    CommentID = comment.Id.ToString(CultureInfo.CurrentCulture),
+                    UserID = new Guid(comment.Creator),
+                    TimeStamp = comment.Date,
+                    TimeStampStr = comment.Date.Ago(),
+                    IsRead = true,
+                    Inactive = comment.Inactive,
+                    CommentBody = HtmlUtility.GetFull(comment.Comment),
+                    UserFullName = DisplayUserSettings.GetFullUserName(new Guid(comment.Creator)),
+                    UserProfileLink = CommonLinkUtility.GetUserProfile(comment.Creator),
+                    UserAvatarPath = UserPhotoManager.GetBigPhotoURL(new Guid(comment.Creator)),
+                    IsEditPermissions = CommunitySecurity.CheckPermissions(comment, NewsConst.Action_Edit),
+                    IsResponsePermissions = CommunitySecurity.CheckPermissions(NewsConst.Action_Comment),
+                    UserPost = CoreContext.UserManager.GetUsers((new Guid(comment.Creator))).Title
+                };
 
             return info;
         }
@@ -257,31 +255,31 @@ namespace ASC.Web.Community.News
                 switch (feedType)
                 {
                     case FeedType.News:
-                        emptyScreenControl.ImgSrc = WebImageSupplier.GetAbsoluteWebPath("150x_news.svg", NewsModule.ModuleId);
+                        emptyScreenControl.ImgSrc = WebImageSupplier.GetAbsoluteWebPath("150x_news.png", NewsConst.ModuleId);
                         emptyScreenControl.Header = NewsResource.EmptyScreenNewsCaption;
                         buttonLink = FeedUrls.EditNewsUrl;
                         buttonName = NewsResource.EmptyScreenNewsLink;
                         break;
                     case FeedType.Order:
-                        emptyScreenControl.ImgSrc = WebImageSupplier.GetAbsoluteWebPath("150x_order.svg", NewsModule.ModuleId);
+                        emptyScreenControl.ImgSrc = WebImageSupplier.GetAbsoluteWebPath("150x_order.png", NewsConst.ModuleId);
                         emptyScreenControl.Header = NewsResource.EmptyScreenOrdersCaption;
                         buttonLink = FeedUrls.EditOrderUrl;
                         buttonName = NewsResource.EmptyScreenOrderLink;
                         break;
                     case FeedType.Advert:
-                        emptyScreenControl.ImgSrc = WebImageSupplier.GetAbsoluteWebPath("150x_advert.svg", NewsModule.ModuleId);
+                        emptyScreenControl.ImgSrc = WebImageSupplier.GetAbsoluteWebPath("150x_advert.png", NewsConst.ModuleId);
                         emptyScreenControl.Header = NewsResource.EmptyScreenAdvertsCaption;
                         buttonLink = FeedUrls.EditAdvertUrl;
                         buttonName = NewsResource.EmptyScreenAdvertLink;
                         break;
                     case FeedType.Poll:
-                        emptyScreenControl.ImgSrc = WebImageSupplier.GetAbsoluteWebPath("150x_poll.svg", NewsModule.ModuleId);
+                        emptyScreenControl.ImgSrc = WebImageSupplier.GetAbsoluteWebPath("150x_poll.png", NewsConst.ModuleId);
                         emptyScreenControl.Header = NewsResource.EmptyScreenPollsCaption;
                         buttonLink = FeedUrls.EditPollUrl;
                         buttonName = NewsResource.EmptyScreenPollLink;
                         break;
                     default:
-                        emptyScreenControl.ImgSrc = WebImageSupplier.GetAbsoluteWebPath("150x_newslogo.svg", NewsModule.ModuleId);
+                        emptyScreenControl.ImgSrc = WebImageSupplier.GetAbsoluteWebPath("150x_newslogo.png", NewsConst.ModuleId);
                         emptyScreenControl.Header = NewsResource.EmptyScreenEventsCaption;
                         buttonLink = FeedUrls.EditNewsUrl;
                         buttonName = NewsResource.EmptyScreenEventLink;
@@ -297,12 +295,12 @@ namespace ASC.Web.Community.News
             else
             {
                 var pageSize = PageSize;
-                var pageCount = (int)(feedsCount / pageSize + 1);
+                var pageCount = (int)(feedsCount/pageSize + 1);
                 if (pageCount < PageNumber) PageNumber = pageCount;
 
                 var feeds = !string.IsNullOrEmpty(Request["search"]) ?
-                                storage.SearchFeeds(Request["search"], feedType, Info.UserId, pageSize, (PageNumber - 1) * pageSize) :
-                                storage.GetFeeds(feedType, Info.UserId, pageSize, (PageNumber - 1) * pageSize);
+                                storage.SearchFeeds(Request["search"], feedType, Info.UserId, pageSize, (PageNumber - 1)*pageSize) :
+                                storage.GetFeeds(feedType, Info.UserId, pageSize, (PageNumber - 1)*pageSize);
 
                 pgNavigator.EntryCountOnPage = pageSize;
                 pgNavigator.EntryCount = 0 < pageCount ? (int)feedsCount : pageSize;

@@ -19,7 +19,7 @@ namespace ASC.Web.Projects.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class ReportResource {
@@ -61,11 +61,29 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Actions.
+        /// </summary>
+        public static string Actions {
+            get {
+                return ResourceManager.GetString("Actions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Active Tasks.
         /// </summary>
         public static string ActiveTasks {
             get {
                 return ResourceManager.GetString("ActiveTasks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open.
+        /// </summary>
+        public static string ActiveTaskStatus {
+            get {
+                return ResourceManager.GetString("ActiveTaskStatus", resourceCulture);
             }
         }
         
@@ -84,6 +102,15 @@ namespace ASC.Web.Projects.Resources {
         public static string AnyInterval {
             get {
                 return ResourceManager.GetString("AnyInterval", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to at.
+        /// </summary>
+        public static string At {
+            get {
+                return ResourceManager.GetString("At", resourceCulture);
             }
         }
         
@@ -111,6 +138,42 @@ namespace ASC.Web.Projects.Resources {
         public static string Billed {
             get {
                 return ResourceManager.GetString("Billed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Creating report....
+        /// </summary>
+        public static string BuildingReport {
+            get {
+                return ResourceManager.GetString("BuildingReport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Category.
+        /// </summary>
+        public static string Category {
+            get {
+                return ResourceManager.GetString("Category", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Change the report filter.
+        /// </summary>
+        public static string ChangeFilterData {
+            get {
+                return ResourceManager.GetString("ChangeFilterData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to change the report settings.
+        /// </summary>
+        public static string ChangeSettings {
+            get {
+                return ResourceManager.GetString("ChangeSettings", resourceCulture);
             }
         }
         
@@ -151,20 +214,20 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Closing projects.
+        ///   Looks up a localized string similar to Closed.
         /// </summary>
-        public static string ClosingProjects {
+        public static string ClosedTaskStatus {
             get {
-                return ResourceManager.GetString("ClosingProjects", resourceCulture);
+                return ResourceManager.GetString("ClosedTaskStatus", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Completing tasks.
+        ///   Looks up a localized string similar to Create new report.
         /// </summary>
-        public static string CompletingTasks {
+        public static string CreateNewReport {
             get {
-                return ResourceManager.GetString("CompletingTasks", resourceCulture);
+                return ResourceManager.GetString("CreateNewReport", resourceCulture);
             }
         }
         
@@ -178,6 +241,69 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Milestone Deadline.
+        /// </summary>
+        public static string CsvColumnMilestoneDeadline {
+            get {
+                return ResourceManager.GetString("CsvColumnMilestoneDeadline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Milestone Status.
+        /// </summary>
+        public static string CsvColumnMilestoneStatus {
+            get {
+                return ResourceManager.GetString("CsvColumnMilestoneStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Milestone Title.
+        /// </summary>
+        public static string CsvColumnMilestoneTitle {
+            get {
+                return ResourceManager.GetString("CsvColumnMilestoneTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project Title.
+        /// </summary>
+        public static string CsvColumnProjectjTitle {
+            get {
+                return ResourceManager.GetString("CsvColumnProjectjTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Task Due date.
+        /// </summary>
+        public static string CsvColumnTaskDueDate {
+            get {
+                return ResourceManager.GetString("CsvColumnTaskDueDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Task Status.
+        /// </summary>
+        public static string CsvColumnTaskStatus {
+            get {
+                return ResourceManager.GetString("CsvColumnTaskStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Task Title.
+        /// </summary>
+        public static string CsvColumnTaskTitle {
+            get {
+                return ResourceManager.GetString("CsvColumnTaskTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User Name.
         /// </summary>
         public static string CsvColumnUserName {
@@ -187,20 +313,38 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to From {0} to {1}.
-        /// </summary>
-        public static string CustomInterval {
-            get {
-                return ResourceManager.GetString("CustomInterval", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Deadline.
         /// </summary>
         public static string DeadLine {
             get {
                 return ResourceManager.GetString("DeadLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {!Group}.
+        /// </summary>
+        public static string Department {
+            get {
+                return ResourceManager.GetString("Department", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit.
+        /// </summary>
+        public static string Edit {
+            get {
+                return ResourceManager.GetString("Edit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No templates could be found.
+        /// </summary>
+        public static string Empty {
+            get {
+                return ResourceManager.GetString("Empty", resourceCulture);
             }
         }
         
@@ -268,6 +412,60 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export to .csv.
+        /// </summary>
+        public static string ExportToCSV {
+            get {
+                return ResourceManager.GetString("ExportToCSV", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not show again.
+        /// </summary>
+        public static string ExportToCSVCheckboxLabel {
+            get {
+                return ResourceManager.GetString("ExportToCSVCheckboxLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The generated report will be opened by ONLYOFFICE™ Spreadsheet Editor and saved in the My Documents folder..
+        /// </summary>
+        public static string ExportToCSVNote {
+            get {
+                return ResourceManager.GetString("ExportToCSVNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter.
+        /// </summary>
+        public static string Filter {
+            get {
+                return ResourceManager.GetString("Filter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to From.
+        /// </summary>
+        public static string From {
+            get {
+                return ResourceManager.GetString("From", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generate.
+        /// </summary>
+        public static string Generate {
+            get {
+                return ResourceManager.GetString("Generate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Generated Reports.
         /// </summary>
         public static string GeneratedReports {
@@ -282,6 +480,15 @@ namespace ASC.Web.Projects.Resources {
         public static string GeneratedReportsDescription {
             get {
                 return ResourceManager.GetString("GeneratedReportsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generate from Template.
+        /// </summary>
+        public static string GenerateFromTemplate {
+            get {
+                return ResourceManager.GetString("GenerateFromTemplate", resourceCulture);
             }
         }
         
@@ -367,29 +574,20 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects Closed.
+        ///   Looks up a localized string similar to Print Report.
         /// </summary>
-        public static string ProjectsClosed {
+        public static string PrintReport {
             get {
-                return ResourceManager.GetString("ProjectsClosed", resourceCulture);
+                return ResourceManager.GetString("PrintReport", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New Projects created.
+        ///   Looks up a localized string similar to Project.
         /// </summary>
-        public static string ProjectsCreated {
+        public static string Project {
             get {
-                return ResourceManager.GetString("ProjectsCreated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Projects paused.
-        /// </summary>
-        public static string ProjectsPaused {
-            get {
-                return ResourceManager.GetString("ProjectsPaused", resourceCulture);
+                return ResourceManager.GetString("Project", resourceCulture);
             }
         }
         
@@ -502,7 +700,7 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}{2}The Project List report will display a list of projects.{3}{2}To view all active projects with their respective manager, number of tasks, milestones, and team members, click the Generate Report button right away.{3}{2}To view projects of a particular group and/or view active, closed projects, and calculate the total number, configure the report parameters below, and then click the Generate Report button.{3}{1}.
+        ///   Looks up a localized string similar to {0}{2}The Project List report will display a list of projects.{3}{2}To view all active projects with their respective manager, number of tasks, milestones, actions, and team members, click the Generate Report button right away.{3}{2}To view projects of a particular group and/or view both active and closed projects, configure the report parameters below, and then click the Generate Report button.{3}{1}.
         /// </summary>
         public static string ReportProjectList_Description {
             get {
@@ -655,6 +853,15 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Save as template.
+        /// </summary>
+        public static string SaveAsTemplate {
+            get {
+                return ResourceManager.GetString("SaveAsTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Show tasks.
         /// </summary>
         public static string ShowTasks {
@@ -727,6 +934,15 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use template.
+        /// </summary>
+        public static string UseTemplate {
+            get {
+                return ResourceManager.GetString("UseTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to View by {!group}.
         /// </summary>
         public static string ViewByDepartments {
@@ -772,20 +988,11 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show average time:.
+        ///   Looks up a localized string similar to Show report information.
         /// </summary>
-        public static string ViewProjectsAverageTime {
+        public static string ViewInfo {
             get {
-                return ResourceManager.GetString("ViewProjectsAverageTime", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Show average time of completing tasks.
-        /// </summary>
-        public static string ViewProjectsAverageTimeCompletingTasks {
-            get {
-                return ResourceManager.GetString("ViewProjectsAverageTimeCompletingTasks", resourceCulture);
+                return ResourceManager.GetString("ViewInfo", resourceCulture);
             }
         }
         

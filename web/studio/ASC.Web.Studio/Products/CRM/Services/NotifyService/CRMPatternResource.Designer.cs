@@ -19,7 +19,7 @@ namespace ASC.Web.CRM.Services.NotifyService {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class CRMPatternResource {
@@ -72,8 +72,7 @@ namespace ASC.Web.CRM.Services.NotifyService {
         ///          ----------------------------------------
         ///
         ///          #each
-        ///
-        ///          &quot; [rest of string was truncated]&quot;;.
+        ///        /// [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_AddRelationshipEvent {
             get {
@@ -93,10 +92,7 @@ namespace ASC.Web.CRM.Services.NotifyService {
         ///
         ///$contactInfo: $AdditionalData.get_item($contactInfo)
         ///
-        ///#end
-        ///
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRoot [rest of string was truncated]&quot;;.
+        ///#end.
         /// </summary>
         public static string pattern_CreateNewContact {
             get {
@@ -111,13 +107,11 @@ namespace ASC.Web.CRM.Services.NotifyService {
         ///
         ///*Note*: this link is valid for 24 hours only.
         ///
-        ///If you have any questions or need assistance please feel free to contact us at &quot;support.onlyoffice.com&quot;:&quot;https://support.onlyoffice.com&quot;
+        ///If you have any questions or need assistance please feel free to contact us at &quot;support.onlyoffice.com&quot;:&quot;http://support.onlyoffice.com&quot;
         ///
         ///Best regards,
         ///ONLYOFFICE™ Support Team
-        ///&quot;www.onlyoffice.com&quot;:&quot;https://onlyoffice.com/&quot;
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRoot [rest of string was truncated]&quot;;.
+        ///&quot;www.onlyoffice.com&quot;:&quot;http://onlyoffice.com/&quot;.
         /// </summary>
         public static string pattern_ExportCompleted {
             get {
@@ -130,13 +124,11 @@ namespace ASC.Web.CRM.Services.NotifyService {
         ///
         ///Go to the &quot;Contacts&quot;:&quot;$__VirtualRootPath/Products/CRM/&quot; list.
         ///
-        ///If you have any questions or need assistance please feel free to contact us at &quot;support.onlyoffice.com&quot;:&quot;https://support.onlyoffice.com&quot;
+        ///If you have any questions or need assistance please feel free to contact us at &quot;support.onlyoffice.com&quot;:&quot;http://support.onlyoffice.com&quot;
         ///
         ///Best regards,
         ///ONLYOFFICE™ Support Team
-        ///&quot;www.onlyoffice.com&quot;:&quot;https://onlyoffice.com/&quot;
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change the notification type, please manage your &quot;subscri [rest of string was truncated]&quot;;.
+        ///&quot;www.onlyoffice.com&quot;:&quot;http://onlyoffice.com/&quot;.
         /// </summary>
         public static string pattern_ImportCompleted {
             get {
@@ -153,9 +145,7 @@ namespace ASC.Web.CRM.Services.NotifyService {
         ///
         ///Opportunity description:
         ///$AdditionalData.get_item(&quot;OpportunityDescription&quot;)
-        ///#end
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__Virtua [rest of string was truncated]&quot;;.
+        ///#end.
         /// </summary>
         public static string pattern_ResponsibleForOpportunity {
             get {
@@ -177,7 +167,7 @@ namespace ASC.Web.CRM.Services.NotifyService {
         ///#end
         ///#if($AdditionalData.get_item(&quot;CaseRelativeUrl&quot;))
         ///
-        ///Link with case: &quot;$Addit [rest of string was truncated]&quot;;.
+        ///Link with  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_ResponsibleForTask {
             get {
@@ -188,10 +178,7 @@ namespace ASC.Web.CRM.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Access granted to &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/${EntityRelativeURL}&quot;
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has granted you the access to &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/${EntityRelativeURL}&quot;.
-        ///
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you don&apos;t want to receive the notifications about the access granted to the CRM items, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has granted you the access to &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/${EntityRelativeURL}&quot;..
         /// </summary>
         public static string pattern_SetAccess {
             get {
@@ -211,7 +198,7 @@ namespace ASC.Web.CRM.Services.NotifyService {
         ///#end
         ///#if($AdditionalData.get_item(&quot;CaseRelativeUrl&quot;))
         ///
-        ///Link with case: &quot;$AdditionalData.get_item(&quot;CaseTitle&quot;)&quot;:&quot;${__VirtualRootPath}/$AdditionalData.get_item(&quot;CaseRelativeUrl&quot;) [rest of string was truncated]&quot;;.
+        ///Link with case: &quot;$AdditionalData.get_item(&quot;CaseTitle&quot;)&quot;:&quot;${__VirtualRootPath}/$AdditionalData.get_item(&quot;CaseRe [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_TaskReminder {
             get {
@@ -264,6 +251,15 @@ namespace ASC.Web.CRM.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CRM. [New contact created](${__VirtualRootPath}/Products/CRM/Default.aspx?id=$EntityID) using &apos;Website Contact Form&apos;.
+        /// </summary>
+        public static string subject_CreateNewContact_tg {
+            get {
+                return ResourceManager.GetString("subject_CreateNewContact_tg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CRM. Data export successfully completed.
         /// </summary>
         public static string subject_ExportCompleted {
@@ -291,7 +287,7 @@ namespace ASC.Web.CRM.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CRM. You were appointed as a responsible person for the opportunity: [$EntityTitle](${__VirtualRootPath}/products/crm/deals.aspx?id=$EntityID).
+        ///   Looks up a localized string similar to CRM. You were appointed as a responsible person for the opportunity: [$EntityTitle](${__VirtualRootPath}/Products/CRM/Deals.aspx?id=$EntityID).
         /// </summary>
         public static string subject_ResponsibleForOpportunity_tg {
             get {
@@ -309,7 +305,7 @@ namespace ASC.Web.CRM.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CRM. Task assigned to you: [$EntityTitle](${__VirtualRootPath}/products/crm/tasks.aspx).
+        ///   Looks up a localized string similar to CRM. Task assigned to you: [$EntityTitle](${__VirtualRootPath}/Products/CRM/Tasks.aspx).
         /// </summary>
         public static string subject_ResponsibleForTask_tg {
             get {
@@ -345,7 +341,7 @@ namespace ASC.Web.CRM.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CRM. Reminder about the task: [$EntityTitle](${__VirtualRootPath}/products/crm/tasks.aspx).
+        ///   Looks up a localized string similar to CRM. Reminder about the task: [$EntityTitle](${__VirtualRootPath}/Products/CRM/Tasks.aspx).
         /// </summary>
         public static string subject_TaskReminder_tg {
             get {

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,8 @@
 
 
 using System;
-using System.IO;
 using System.Web;
-
 using ASC.Common.Logging;
-using ASC.Security.Cryptography;
 
 namespace ASC.Data.Storage
 {
@@ -32,38 +29,11 @@ namespace ASC.Data.Storage
             {
                 return HttpContext.Current != null && Uri.UriSchemeHttps.Equals(HttpContext.Current.Request.GetUrlRewriter().Scheme, StringComparison.OrdinalIgnoreCase);
             }
-            catch (Exception err)
+            catch(Exception err)
             {
                 LogManager.GetLogger("ASC.Data.Storage.SecureHelper").Error(err);
                 return false;
             }
-        }
-
-        public static string GenerateSecureKeyHeader(string path)
-        {
-            var ticks = DateTime.UtcNow.Ticks;
-            var data = path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + "." + ticks;
-            var key = EmailValidationKeyProvider.GetEmailKey(data);
-
-            return Constants.SECUREKEY_HEADER + ":" + ticks + "-" + key;
-        }
-
-        public static bool CheckSecureKeyHeader(string header, string path)
-        {
-            if (string.IsNullOrEmpty(header))
-            {
-                return false;
-            }
-
-            header = header.Replace(Constants.SECUREKEY_HEADER + ":", string.Empty);
-
-            var separatorPosition = header.IndexOf('-');
-            var ticks = header.Substring(0, separatorPosition);
-            var key = header.Substring(separatorPosition + 1);
-
-            var validateResult = EmailValidationKeyProvider.ValidateEmailKey(path + "." + ticks, key);
-
-            return validateResult == EmailValidationKeyProvider.ValidationResult.Ok;
         }
     }
 }

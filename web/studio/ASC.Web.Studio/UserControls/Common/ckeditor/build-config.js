@@ -1,6 +1,6 @@
 ﻿/**
- * @license Copyright (c) 2003-2021, CKSource - Frederico Knabben. All rights reserved.
- * For licensing, see LICENSE.md or https://ckeditor.com/license
+ * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md or http://ckeditor.com/license
  */
 
 /**
@@ -10,13 +10,13 @@
  * If you would like to build CKEditor online again
  * (for example to upgrade), visit one the following links:
  *
- * (1) https://ckeditor.com/cke4/builder
+ * (1) http://ckeditor.com/builder
  *     Visit online builder to build CKEditor from scratch.
  *
- * (2) https://ckeditor.com/cke4/builder/e431e193e5a737fc50cd68589730b6df
+ * (2) http://ckeditor.com/builder/e36bab0e1b0cd2508382db742151f0ca
  *     Visit online builder to build CKEditor, starting with the same setup as before.
  *
- * (3) https://ckeditor.com/cke4/builder/download/e431e193e5a737fc50cd68589730b6df
+ * (3) http://ckeditor.com/builder/download/e36bab0e1b0cd2508382db742151f0ca
  *     Straight download link to the latest version of CKEditor (Optimized) with the same setup as before.
  *
  * NOTE:
@@ -38,8 +38,6 @@ var CKBUILDER_CONFIG = {
 		'.jshintignore',
 		'.jshintrc',
 		'.mailmap',
-		'.npm',
-		'.nvmrc',
 		'.travis.yml',
 		'bender-err.log',
 		'bender-out.log',
@@ -49,15 +47,12 @@ var CKBUILDER_CONFIG = {
 		'gruntfile.js',
 		'less',
 		'node_modules',
-		'package-lock.json',
 		'package.json',
 		'tests'
 	],
 	plugins : {
 		'a11yhelp' : 1,
 		'about' : 1,
-		'ajax' : 1,
-		'autocomplete' : 1,
 		'basicstyles' : 1,
 		'bidi' : 1,
 		'blockquote' : 1,
@@ -68,7 +63,6 @@ var CKBUILDER_CONFIG = {
 		'copyformatting' : 1,
 		'dialogadvtab' : 1,
 		'div' : 1,
-		'editorplaceholder' : 1,
 		'elementspath' : 1,
 		'enterkey' : 1,
 		'entities' : 1,
@@ -92,11 +86,8 @@ var CKBUILDER_CONFIG = {
 		'liststyle' : 1,
 		'magicline' : 1,
 		'maximize' : 1,
-		'mentions' : 1,
 		'newpage' : 1,
 		'pagebreak' : 1,
-		'pastefromgdocs' : 1,
-		'pastefromlibreoffice' : 1,
 		'pastefromword' : 1,
 		'pastetext' : 1,
 		'preview' : 1,
@@ -117,13 +108,10 @@ var CKBUILDER_CONFIG = {
 		'tableselection' : 1,
 		'tabletools' : 1,
 		'templates' : 1,
-		'textmatch' : 1,
-		'textwatcher' : 1,
 		'toolbar' : 1,
 		'undo' : 1,
-		'uploadimage' : 1,
-		'wysiwygarea' : 1,
-		'xml' : 1
+		'wsc' : 1,
+		'wysiwygarea' : 1
 	},
 	languages : {
 		'af' : 1,

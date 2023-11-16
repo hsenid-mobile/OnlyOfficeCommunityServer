@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,8 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
-
-using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Utility;
-
-using ICSharpCode.SharpZipLib.Zip;
+using Ionic.Zip;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -39,15 +36,9 @@ namespace ASC.Web.Studio.UserControls.Management
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            Page.RegisterBodyScripts("~/UserControls/Management/Monitoring/js/loghelper.js");
-            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
-            {
-                Page.RegisterStyle("~/uUserControls/Management/Monitoring/css/dark-monitoring.less");
-            }
-            else
-            {
-                Page.RegisterStyle("~/uUserControls/Management/Monitoring/css/monitoring.less");
-            }
+            Page.RegisterBodyScripts("~/UserControls/Management/Monitoring/js/loghelper.js")
+                .RegisterStyle("~/uUserControls/Management/Monitoring/css/monitoring.less");
+            
             if (IsDownloadRequest())
                 DownloadArchive();
 
@@ -62,23 +53,13 @@ namespace ASC.Web.Studio.UserControls.Management
             CreateArchive(Response.OutputStream);
             Response.End();
         }
-
+        
         private void CreateArchive(Stream outputStream)
         {
-            using (var zipOutputStream = new ZipOutputStream(outputStream))
+            using (var zip = new ZipFile())
             {
-                zipOutputStream.IsStreamOwner = false;
-
-                var logFiles = EnumerateLogFiles(GetStartDate(), GetEndDate());
-                foreach (var file in logFiles)
-                {
-                    zipOutputStream.PutNextEntry(new ZipEntry(file));
-                    using (FileStream fs = File.OpenRead(file))
-                    {
-                        fs.CopyTo(zipOutputStream);
-                    }
-                }
-                zipOutputStream.Finish();
+                zip.AddFiles(EnumerateLogFiles(GetStartDate(), GetEndDate()), true, "");
+                zip.Save(outputStream);
             }
         }
 
@@ -103,7 +84,7 @@ namespace ASC.Web.Studio.UserControls.Management
             string endDate = HttpContext.Current.Request["end"];
             return !string.IsNullOrEmpty(endDate) ? Convert.ToDateTime(endDate) : DateTime.MaxValue;
         }
-
+        
         private IEnumerable<string> EnumerateLogFiles(DateTime startDate, DateTime endDate)
         {
             return GetLogFolders()
@@ -114,7 +95,7 @@ namespace ASC.Web.Studio.UserControls.Management
         private IEnumerable<string> GetLogFolders()
         {
             var paths = ConfigurationManagerExtension.AppSettings["monitoring.log-folder"] ?? @"..\Logs\";
-            return paths.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            return paths.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)
                         .Select(path =>
                             {
                                 if (!Path.IsPathRooted(path))

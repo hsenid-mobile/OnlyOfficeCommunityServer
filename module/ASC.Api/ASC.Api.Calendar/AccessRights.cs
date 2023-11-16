@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 
 using System;
-
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Action = ASC.Common.Security.Authorizing.Action;
 
 namespace ASC.Api.Calendar
@@ -26,6 +28,6 @@ namespace ASC.Api.Calendar
         public static readonly Action FullAccessAction = new Action(
                                                         new Guid("{0d68b142-e20a-446e-a832-0d6b0b65a164}"),
                                                         "Full Access", false, false);
-
+       
     }
 }

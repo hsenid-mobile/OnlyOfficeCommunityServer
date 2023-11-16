@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-
 using ASC.Web.UserControls.Wiki.Data;
 
 namespace ASC.Web.UserControls.Wiki.UC
@@ -24,14 +23,14 @@ namespace ASC.Web.UserControls.Wiki.UC
     public partial class ViewPage : BaseUserControl
     {
         private string _pageName = string.Empty;
-
+        
         public string PageName
         {
             get { return PageNameUtil.Encode(_pageName); }
             set { _pageName = PageNameUtil.Decode(value); }
         }
 
-        public int Version { get; set; }
+        public int Version { get; set; }     
 
         public bool CanEditPage
         {
@@ -63,7 +62,7 @@ namespace ASC.Web.UserControls.Wiki.UC
             {
                 page = Wiki.GetPage(_pageName);
             }
-
+            
             if (page == null)
             {
                 return RenderEmptyPage();
@@ -72,8 +71,8 @@ namespace ASC.Web.UserControls.Wiki.UC
             RiseWikiPageLoaded(page);
             RisePublishVersionInfo(page);
 
-            return HtmlWikiUtil.WikiToHtml(page.PageName, page.Body, Page.ResolveUrl(Request.AppRelativeCurrentExecutionFilePath),
-                Wiki.GetPagesAndFiles(page.Body), Page.ResolveUrl(ImageHandlerUrlFormat),
+            return HtmlWikiUtil.WikiToHtml(page.PageName, page.Body, Page.ResolveUrl(Request.AppRelativeCurrentExecutionFilePath), 
+                Wiki.GetPagesAndFiles(page.Body), Page.ResolveUrl(ImageHandlerUrlFormat), 
                 TenantId, CanEditPage && Version == 0 ? ConvertType.Editable : ConvertType.NotEditable);
         }
 

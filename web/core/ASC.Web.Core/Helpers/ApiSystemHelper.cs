@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,11 @@
 */
 
 
+using ASC.Core;
+using ASC.Core.Tenants;
+using ASC.Security.Cryptography;
+using ASC.Web.Studio.Utility;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -24,13 +29,6 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
-
-using ASC.Core;
-using ASC.Core.Tenants;
-using ASC.Security.Cryptography;
-using ASC.Web.Studio.Utility;
-
-using Newtonsoft.Json.Linq;
 
 namespace ASC.Web.Core.Helpers
 {
@@ -143,7 +141,7 @@ namespace ASC.Web.Core.Helpers
 
             var url = String.Format("{0}/{1}", absoluteApiUrl, apiPath);
 
-            var webRequest = (HttpWebRequest)WebRequest.Create(url);
+            var webRequest = (HttpWebRequest) WebRequest.Create(url);
             webRequest.Method = httpMethod;
             webRequest.Accept = "application/json";
             webRequest.Headers.Add(HttpRequestHeader.Authorization, CreateAuthToken(SecurityContext.CurrentAccount.ID.ToString()));

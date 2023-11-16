@@ -133,6 +133,24 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add This Task.
+        /// </summary>
+        public static string AddThisTask {
+            get {
+                return ResourceManager.GetString("AddThisTask", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All.
+        /// </summary>
+        public static string All {
+            get {
+                return ResourceManager.GetString("All", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All Tasks.
         /// </summary>
         public static string AllTasks {
@@ -147,15 +165,6 @@ namespace ASC.Web.Projects.Resources {
         public static string AssignedTo {
             get {
                 return ResourceManager.GetString("AssignedTo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Average task completation time (hour).
-        /// </summary>
-        public static string AverageTask {
-            get {
-                return ResourceManager.GetString("AverageTask", resourceCulture);
             }
         }
         
@@ -178,11 +187,83 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Creation date.
+        /// </summary>
+        public static string ByCreateDate {
+            get {
+                return ResourceManager.GetString("ByCreateDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Due date.
+        /// </summary>
+        public static string ByDeadline {
+            get {
+                return ResourceManager.GetString("ByDeadline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Milestone.
+        /// </summary>
+        public static string ByMilestone {
+            get {
+                return ResourceManager.GetString("ByMilestone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Priority.
+        /// </summary>
+        public static string ByPriority {
+            get {
+                return ResourceManager.GetString("ByPriority", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Responsible.
         /// </summary>
         public static string ByResponsible {
             get {
                 return ResourceManager.GetString("ByResponsible", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Status.
+        /// </summary>
+        public static string ByStatus {
+            get {
+                return ResourceManager.GetString("ByStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tag.
+        /// </summary>
+        public static string ByTag {
+            get {
+                return ResourceManager.GetString("ByTag", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Title.
+        /// </summary>
+        public static string ByTitle {
+            get {
+                return ResourceManager.GetString("ByTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
             }
         }
         
@@ -214,6 +295,15 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Responsible.
+        /// </summary>
+        public static string ChooseResponsible {
+            get {
+                return ResourceManager.GetString("ChooseResponsible", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Choose task.
         /// </summary>
         public static string ChooseTaskForLink {
@@ -237,6 +327,15 @@ namespace ASC.Web.Projects.Resources {
         public static string ClosedBy {
             get {
                 return ResourceManager.GetString("ClosedBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string CloseTask {
+            get {
+                return ResourceManager.GetString("CloseTask", resourceCulture);
             }
         }
         
@@ -268,7 +367,7 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No comments for this task could be found..
+        ///   Looks up a localized string similar to Отсутствуют комментарии.
         /// </summary>
         public static string CommentsEmptyScreen_Describe {
             get {
@@ -277,11 +376,20 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No comments found.
+        ///   Looks up a localized string similar to Отсутствуют комментарии.
         /// </summary>
         public static string CommentsEmptyScreen_Header {
             get {
                 return ResourceManager.GetString("CommentsEmptyScreen_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Close Task.
+        /// </summary>
+        public static string CompleteTask {
+            get {
+                return ResourceManager.GetString("CompleteTask", resourceCulture);
             }
         }
         
@@ -295,11 +403,29 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Создание копии из выбранной задачи.
+        /// </summary>
+        public static string CopyTaskPopup {
+            get {
+                return ResourceManager.GetString("CopyTaskPopup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Created by.
         /// </summary>
         public static string CreatedBy {
             get {
                 return ResourceManager.GetString("CreatedBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create first subtask.
+        /// </summary>
+        public static string CreateFirstSubtask {
+            get {
+                return ResourceManager.GetString("CreateFirstSubtask", resourceCulture);
             }
         }
         
@@ -318,6 +444,15 @@ namespace ASC.Web.Projects.Resources {
         public static string CreatingDate {
             get {
                 return ResourceManager.GetString("CreatingDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date.
+        /// </summary>
+        public static string Date {
+            get {
+                return ResourceManager.GetString("Date", resourceCulture);
             }
         }
         
@@ -412,6 +547,24 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The link could not be created as the task has been changed or moved to another milestone. Please close this window to update the list of available tasks..
+        /// </summary>
+        public static string ErrorCreateTaskLink {
+            get {
+                return ResourceManager.GetString("ErrorCreateTaskLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The link could not be created as the task has been changed or moved to another milestone. Please close this window to update the Gantt chart..
+        /// </summary>
+        public static string ErrorCreateTaskLinkChart {
+            get {
+                return ResourceManager.GetString("ErrorCreateTaskLinkChart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Follow the task.
         /// </summary>
         public static string FollowTask {
@@ -435,6 +588,15 @@ namespace ASC.Web.Projects.Resources {
         public static string HighPriority {
             get {
                 return ResourceManager.GetString("HighPriority", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to hours.
+        /// </summary>
+        public static string hours {
+            get {
+                return ResourceManager.GetString("hours", resourceCulture);
             }
         }
         
@@ -493,11 +655,38 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Move to Gantt chart.
+        /// </summary>
+        public static string MoveToGanttChart {
+            get {
+                return ResourceManager.GetString("MoveToGanttChart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Move to milestone.
         /// </summary>
         public static string MoveToMilestone {
             get {
                 return ResourceManager.GetString("MoveToMilestone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Me.
+        /// </summary>
+        public static string My {
+            get {
+                return ResourceManager.GetString("My", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to My Tasks.
+        /// </summary>
+        public static string MyTasks {
+            get {
+                return ResourceManager.GetString("MyTasks", resourceCulture);
             }
         }
         
@@ -547,6 +736,15 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Other.
+        /// </summary>
+        public static string Other {
+            get {
+                return ResourceManager.GetString("Other", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Priority.
         /// </summary>
         public static string Priority {
@@ -592,7 +790,7 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are no other tasks linked to this task..
+        ///   Looks up a localized string similar to Отстутствуют связанные задачи.
         /// </summary>
         public static string RelatedTasksEmptyScreen_Describe {
             get {
@@ -601,11 +799,20 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No linked tasks found.
+        ///   Looks up a localized string similar to Отстутствуют связанные задачи.
         /// </summary>
         public static string RelatedTasksEmptyScreen_Header {
             get {
                 return ResourceManager.GetString("RelatedTasksEmptyScreen_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        public static string Remove {
+            get {
+                return ResourceManager.GetString("Remove", resourceCulture);
             }
         }
         
@@ -637,7 +844,7 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Are you sure you want to delete this tasks?.
+        ///   Looks up a localized string similar to Are you sure you want to delete tasks?.
         /// </summary>
         public static string RemoveTasksPopup {
             get {
@@ -655,11 +862,56 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Saving....
+        /// </summary>
+        public static string Saving {
+            get {
+                return ResourceManager.GetString("Saving", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Saving task....
+        /// </summary>
+        public static string SavingTask {
+            get {
+                return ResourceManager.GetString("SavingTask", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select.
+        /// </summary>
+        public static string Select {
+            get {
+                return ResourceManager.GetString("Select", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show more.
+        /// </summary>
+        public static string ShowMore {
+            get {
+                return ResourceManager.GetString("ShowMore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Show tasks without responsible.
         /// </summary>
         public static string ShowTasksWithoutResponsible {
             get {
                 return ResourceManager.GetString("ShowTasksWithoutResponsible", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start.
+        /// </summary>
+        public static string Start {
+            get {
+                return ResourceManager.GetString("Start", resourceCulture);
             }
         }
         
@@ -682,7 +934,7 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No subtasks have been created for this task..
+        ///   Looks up a localized string similar to Отсутствуют подзадачи.
         /// </summary>
         public static string SubtasksEmptyScreen_Describe {
             get {
@@ -691,7 +943,7 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No subtasks found.
+        ///   Looks up a localized string similar to Отсутствуют подзадачи.
         /// </summary>
         public static string SubtasksEmptyScreen_Header {
             get {
@@ -723,6 +975,15 @@ namespace ASC.Web.Projects.Resources {
         public static string TaskProducer {
             get {
                 return ResourceManager.GetString("TaskProducer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Resume.
+        /// </summary>
+        public static string TaskReopen {
+            get {
+                return ResourceManager.GetString("TaskReopen", resourceCulture);
             }
         }
         
@@ -763,7 +1024,7 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tasks help the manager distribute all the work evenly among the project participants, set responsible ones for various parts of the project..
+        ///   Looks up a localized string similar to Tasks help the manager distribute all the work evenly among the project participants, set responsible ones for various parts of the project. Start adding tasks, get them done, set who&apos;s responsible, manage team work..
         /// </summary>
         public static string TasksHelpTheManageVisitor {
             get {
@@ -786,6 +1047,15 @@ namespace ASC.Web.Projects.Resources {
         public static string TaskTitle {
             get {
                 return ResourceManager.GetString("TaskTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Title.
+        /// </summary>
+        public static string Title {
+            get {
+                return ResourceManager.GetString("Title", resourceCulture);
             }
         }
         

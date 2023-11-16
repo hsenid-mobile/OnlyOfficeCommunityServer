@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
 */
 
 
+#region usings
+
 using System;
 using System.Linq;
-
+using ASC.Common.Logging;
 using ASC.Notify.Recipients;
 
-using LogManager = ASC.Common.Logging.BaseLogManager;
+#endregion
 
 namespace ASC.Notify.Model
 {

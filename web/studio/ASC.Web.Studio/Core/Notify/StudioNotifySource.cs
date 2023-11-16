@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +38,13 @@ namespace ASC.Web.Studio.Core.Notify
                     Actions.SendWhatsNew,
                     Actions.UserHasJoin,
                     Actions.BackupCreated,
-                    Actions.RestoreStarted,
-                    Actions.RestoreCompletedV115,
                     Actions.PortalDeactivate,
                     Actions.PortalDelete,
-                    Actions.PortalDeleteSuccessV115,
+                    Actions.PortalDeleteSuccessV10,
                     Actions.DnsChange,
                     Actions.ConfirmOwnerChange,
-                    Actions.EmailChangeV115,
-                    Actions.PasswordChangeV115,
+                    Actions.EmailChange,
+                    Actions.PasswordChange,
                     Actions.ActivateEmail,
                     Actions.ProfileDelete,
                     Actions.ProfileHasDeletedItself,
@@ -57,7 +55,7 @@ namespace ASC.Web.Studio.Core.Notify
                     Actions.RemoveUserDataFailed,
                     Actions.PhoneChange,
                     Actions.MigrationPortalStart,
-                    Actions.MigrationPortalSuccessV115,
+                    Actions.MigrationPortalSuccess,
                     Actions.MigrationPortalError,
                     Actions.MigrationPortalServerFailure,
 
@@ -66,33 +64,33 @@ namespace ASC.Web.Studio.Core.Notify
                     Actions.VoipWarning,
                     Actions.VoipBlocked,
 
-                    Actions.SaasAdminActivationV115,
+                    Actions.SaasAdminActivationV10,
                     Actions.EnterpriseAdminActivationV10,
                     Actions.EnterpriseWhitelabelAdminActivationV10,
                     Actions.OpensourceAdminActivationV11,
 
-                    Actions.SaasAdminWelcomeV115,
+                    Actions.SaasAdminWelcomeV10,
                     Actions.EnterpriseAdminWelcomeV10,
                     Actions.EnterpriseWhitelabelAdminWelcomeV10,
                     Actions.OpensourceAdminWelcomeV11,
 
-                    Actions.SaasUserActivationV115,
+                    Actions.SaasUserActivationV10,
                     Actions.EnterpriseUserActivationV10,
                     Actions.EnterpriseWhitelabelUserActivationV10,
                     Actions.OpensourceUserActivationV11,
 
-                    Actions.SaasUserWelcomeV115,
+                    Actions.SaasUserWelcomeV10,
                     Actions.EnterpriseUserWelcomeV10,
                     Actions.EnterpriseWhitelabelUserWelcomeV10,
                     Actions.EnterpriseWhitelabelUserWelcomeCustomMode,
                     Actions.OpensourceUserWelcomeV11,
 
-                    Actions.SaasGuestActivationV115,
+                    Actions.SaasGuestActivationV10,
                     Actions.EnterpriseGuestActivationV10,
                     Actions.EnterpriseWhitelabelGuestActivationV10,
                     Actions.OpensourceGuestActivationV11,
 
-                    Actions.SaasGuestWelcomeV115,
+                    Actions.SaasGuestWelcomeV10,
                     Actions.EnterpriseGuestWelcomeV10,
                     Actions.EnterpriseWhitelabelGuestWelcomeV10,
                     Actions.OpensourceGuestWelcomeV11,
@@ -112,18 +110,22 @@ namespace ASC.Web.Studio.Core.Notify
                     Actions.EnterpriseAdminPaymentWarningV10,
                     Actions.EnterpriseWhitelabelAdminPaymentWarningV10,
 
-                    Actions.SaasAdminUserDocsTipsV115,
-                    Actions.SaasAdminComfortTipsV115,
-                    Actions.SaasAdminUserAppsTipsV115,
+                    Actions.SaasAdminInviteTeammatesV10,
+                    Actions.SaasAdminWithoutActivityV10,
+                    Actions.SaasAdminUserDocsTipsV10,
+                    Actions.SaasAdminUserComfortTipsV10,
+                    Actions.SaasAdminUserAppsTipsV10,
 
-                    Actions.SaasAdminTrialWarningBefore5V115,
-                    Actions.SaasAdminTrialWarningV115,
-                    Actions.SaasAdminTrialWarningAfter1V115,
-                    Actions.SaasAdminTrialWarningAfterHalfYearV115,
+                    Actions.SaasAdminTrialWarningBefore5V10,
+                    Actions.SaasAdminTrialWarningV10,
+                    Actions.SaasAdminTrialWarningAfter5V10,
+                    Actions.SaasAdminTrialWarningAfter30V10,
+                    Actions.SaasAdminTrialWarningAfterHalfYearV10,
 
-                    Actions.SaasAdminPaymentWarningEvery2MonthsV115,
+                    Actions.SaasAdminPaymentWarningBefore5V10,
+                    Actions.SaasAdminPaymentWarningAfter1V10,
 
-                    Actions.SaasAdminModulesV115,
+                    Actions.SaasAdminPaymentAfterMonthlySubscriptionsV10,
 
                     Actions.OpensourceAdminDocsTipsV11,
                     Actions.OpensourceUserDocsTipsV11,
@@ -135,8 +137,8 @@ namespace ASC.Web.Studio.Core.Notify
                     Actions.PersonalAfterRegistration21,
                     Actions.PersonalAfterRegistration28,
                     Actions.PersonalConfirmation,
-                    Actions.PersonalPasswordChangeV115,
-                    Actions.PersonalEmailChangeV115,
+                    Actions.PersonalPasswordChange,
+                    Actions.PersonalEmailChange,
                     Actions.PersonalProfileDelete,
 
                     Actions.MailboxCreated,
@@ -146,9 +148,10 @@ namespace ASC.Web.Studio.Core.Notify
                     Actions.MailboxWithoutSettingsCreated,
 
                     Actions.PersonalCustomModeAfterRegistration1,
+                    Actions.PersonalCustomModeAfterRegistration7,
                     Actions.PersonalCustomModeConfirmation,
-                    Actions.PersonalCustomModePasswordChangeV115,
-                    Actions.PersonalCustomModeEmailChangeV115,
+                    Actions.PersonalCustomModePasswordChange,
+                    Actions.PersonalCustomModeEmailChange,
                     Actions.PersonalCustomModeProfileDelete,
 
                     Actions.SaasCustomModeRegData,

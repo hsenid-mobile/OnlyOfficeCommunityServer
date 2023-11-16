@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ ASC.CRM.Voip.CallsView = (function ($) {
                     isTempLoad: true
                 });
 
-            jq(window).on("afterResetSelectedContact", function (event, obj, objName) {
+            jq(window).bind("afterResetSelectedContact", function (event, obj, objName) {
                 if (objName === "callsContactSelectorForFilter" && filterId) {
                     jq('#' + filterId).advansedFilter('resize');
                 }
@@ -89,12 +89,12 @@ ASC.CRM.Voip.CallsView = (function ($) {
                     $filteritem.removeClass("default-value");
                 });
 
-                $headerContainer.next().addBack().appendTo($filteritem.find('span.contact-selector:first'));
+                $headerContainer.next().andSelf().appendTo($filteritem.find('span.contact-selector:first'));
 
                 if (!filter.isset) {
                     setTimeout(function () {
                         if ($filteritem.hasClass("default-value")) {
-                            $headerContainer.trigger("click");
+                            $headerContainer.click();
                         }
                     }, 0);
                 }
@@ -106,7 +106,7 @@ ASC.CRM.Voip.CallsView = (function ($) {
             if (!$headerContainer.parent().is("#" + hiddenContainerId)) {
                 $headerContainer.off(showList);
                 $headerContainer.find(".inner-text .value").text(ASC.CRM.Resources.CRMCommonResource.Select);
-                $headerContainer.next().addBack().appendTo(jq('#' + hiddenContainerId));
+                $headerContainer.next().andSelf().appendTo(jq('#' + hiddenContainerId));
                 jq('#' + headerContainerId).contactadvancedSelector("reset");
             }
         }
@@ -164,7 +164,7 @@ ASC.CRM.Voip.CallsView = (function ($) {
 
     var loadingBanner = LoadingBanner,
         resources = ASC.CRM.Resources,
-        CRMJSResource = resources.CRMJSResource,
+        jsresource = resources.CRMJSResource,
         localStorageManagerLocal = localStorageManager,
         self;
 
@@ -287,7 +287,7 @@ ASC.CRM.Voip.CallsView = (function ($) {
         self.pagingCtrl = new ASC.Controls.PageNavigator.init(
             'ASC.CRM.Voip.CallsView.pagingCtrl', '#calls-paging-box',
             pageCount, pagingVisibleInterval, currentPage + 1,
-            CRMJSResource.Previous, CRMJSResource.Next
+            jsresource.Previous, jsresource.Next
         );
 
         self.pagingCtrl.changePageCallback = function (page) {
@@ -359,15 +359,15 @@ ASC.CRM.Voip.CallsView = (function ($) {
                     {
                         type: 'combobox',
                         id: 'answered',
-                        title: CRMJSResource.VoipCallAnsweredType,
-                        group: CRMJSResource.VoipCallType,
+                        title: jsresource.VoipCallAnsweredType,
+                        group: jsresource.VoipCallType,
                         groupby: 'type',
                         hash: 'callType',
                         options:
                         [
-                            { value: 'answered', title: CRMJSResource.VoipCallAnsweredType, def: true },
-                            { value: 'missed', title: CRMJSResource.VoipCallMissedType },
-                            { value: 'outgoing', title: CRMJSResource.VoipCallOutgoingType }
+                            { value: 'answered', title: jsresource.VoipCallAnsweredType, def: true },
+                            { value: 'missed', title: jsresource.VoipCallMissedType },
+                            { value: 'outgoing', title: jsresource.VoipCallOutgoingType }
                         ],
                         isset: !!typeParam && typeParam == 'answered',
                         params: !!typeParam && typeParam == 'answered' ? { value: 'answered' } : null
@@ -375,15 +375,15 @@ ASC.CRM.Voip.CallsView = (function ($) {
                     {
                         type: 'combobox',
                         id: 'missed',
-                        title: CRMJSResource.VoipCallMissedType,
-                        group: CRMJSResource.VoipCallType,
+                        title: jsresource.VoipCallMissedType,
+                        group: jsresource.VoipCallType,
                         groupby: 'type',
                         hash: 'callType',
                         options:
                         [
-                            { value: 'answered', title: CRMJSResource.VoipCallAnsweredType },
-                            { value: 'missed', title: CRMJSResource.VoipCallMissedType, def: true },
-                            { value: 'outgoing', title: CRMJSResource.VoipCallOutgoingType }
+                            { value: 'answered', title: jsresource.VoipCallAnsweredType },
+                            { value: 'missed', title: jsresource.VoipCallMissedType, def: true },
+                            { value: 'outgoing', title: jsresource.VoipCallOutgoingType }
                         ],
                         isset: !!typeParam && typeParam == 'missed',
                         params: !!typeParam && typeParam == 'missed' ? { value: 'missed' } : null
@@ -391,15 +391,15 @@ ASC.CRM.Voip.CallsView = (function ($) {
                     {
                         type: 'combobox',
                         id: 'outgoing',
-                        title: CRMJSResource.VoipCallOutgoingType,
-                        group: CRMJSResource.VoipCallType,
+                        title: jsresource.VoipCallOutgoingType,
+                        group: jsresource.VoipCallType,
                         groupby: 'type',
                         hash: 'callType',
                         options:
                         [
-                            { value: 'answered', title: CRMJSResource.VoipCallAnsweredType },
-                            { value: 'missed', title: CRMJSResource.VoipCallMissedType },
-                            { value: 'outgoing', title: CRMJSResource.VoipCallOutgoingType, def: true }
+                            { value: 'answered', title: jsresource.VoipCallAnsweredType },
+                            { value: 'missed', title: jsresource.VoipCallMissedType },
+                            { value: 'outgoing', title: jsresource.VoipCallOutgoingType, def: true }
                         ],
                         isset: !!typeParam && typeParam == 'outgoing',
                         params: !!typeParam && typeParam == 'outgoing' ? { value: 'outgoing' } : null
@@ -408,36 +408,36 @@ ASC.CRM.Voip.CallsView = (function ($) {
                     {
                         type: 'daterange',
                         id: 'today',
-                        title: CRMJSResource.Today,
+                        title: jsresource.Today,
                         filtertitle: ' ',
-                        group: CRMJSResource.VoipCallDate,
+                        group: jsresource.VoipCallDate,
                         groupby: 'date',
                         bydefault: { from: days.today, to: days.today }
                     },
                     {
                         type: 'daterange',
                         id: 'currentweek',
-                        title: CRMJSResource.CurrentWeek,
+                        title: jsresource.CurrentWeek,
                         filtertitle: ' ',
-                        group: CRMJSResource.VoipCallDate,
+                        group: jsresource.VoipCallDate,
                         groupby: 'date',
                         bydefault: { from: days.startWeek, to: days.endWeek }
                     },
                     {
                         type: 'daterange',
                         id: 'currentmonth',
-                        title: CRMJSResource.CurrentMonth,
+                        title: jsresource.CurrentMonth,
                         filtertitle: ' ',
-                        group: CRMJSResource.VoipCallDate,
+                        group: jsresource.VoipCallDate,
                         groupby: 'date',
                         bydefault: { from: days.startMonth, to: days.endMonth }
                     },
                     {
                         type: 'daterange',
                         id: 'date',
-                        title: CRMJSResource.CustomPeriod,
+                        title: jsresource.CustomPeriod,
                         filtertitle: ' ',
-                        group: CRMJSResource.VoipCallDate,
+                        group: jsresource.VoipCallDate,
                         groupby: 'date',
                         isset: !!fromParam && !!toParam,
                         params: !!fromParam && !!toParam ? { from: fromParam, to: toParam } : null
@@ -446,8 +446,8 @@ ASC.CRM.Voip.CallsView = (function ($) {
                     {
                         type: 'person',
                         id: 'agent',
-                        title: CRMJSResource.VoipCallAgent,
-                        group: CRMJSResource.VoipCallCaller,
+                        title: jsresource.VoipCallAgent,
+                        group: jsresource.VoipCallCaller,
                         isset: !!agentParam,
                         params: !!agentParam ? { id: agentParam } : null
                     },
@@ -462,13 +462,13 @@ ASC.CRM.Voip.CallsView = (function ($) {
                     }
                 ],
                 sorters: [
-                    { id: 'date', title: CRMJSResource.VoipCallDate, selected: sortByParam == 'date', sortOrder: sortByParam == 'date' ? sortOrderParam : 'descending', def: sortByParam == 'date' || !sortByParam },
-                    { id: 'duration', title: CRMJSResource.VoipCallDuration, selected: sortByParam == 'duration', sortOrder: sortByParam == 'duration' ? sortOrderParam : 'descending', def: sortByParam == 'duration' },
-                    { id: 'price', title: CRMJSResource.VoipCallCost, selected: sortByParam == 'price', sortOrder: sortByParam == 'price' ? sortOrderParam : 'descending', def: sortByParam == 'price' }
+                    { id: 'date', title: jsresource.VoipCallDate, selected: sortByParam == 'date', sortOrder: sortByParam == 'date' ? sortOrderParam : 'descending', def: sortByParam == 'date' || !sortByParam },
+                    { id: 'duration', title: jsresource.VoipCallDuration, selected: sortByParam == 'duration', sortOrder: sortByParam == 'duration' ? sortOrderParam : 'descending', def: sortByParam == 'duration' },
+                    { id: 'price', title: jsresource.VoipCallCost, selected: sortByParam == 'price', sortOrder: sortByParam == 'price' ? sortOrderParam : 'descending', def: sortByParam == 'price' }
                 ]
             })
-            .on('setfilter', filterChangedHandler)
-            .on('resetfilter', filterChangedHandler);
+            .bind('setfilter', filterChangedHandler)
+            .bind('resetfilter', filterChangedHandler);
     }
 
     function getFilterDays() {
@@ -624,7 +624,7 @@ ASC.CRM.Voip.CallsView = (function ($) {
         call.typeString = getCallTypeString(call);
 
         call.contactTitle = call.contact.id != -1
-            ? call.contact.displayName ? call.contact.displayName : CRMJSResource.VoipCallContactRemoved
+            ? call.contact.displayName ? call.contact.displayName : jsresource.VoipCallContactRemoved
             : '';
         call.durationString = getTimeString(call.dialDuration);
         if (call.recordUrl && call.recordUrl.length) {
@@ -648,9 +648,9 @@ ASC.CRM.Voip.CallsView = (function ($) {
 
     function getCallTypeString(call) {
         switch (call.status) {
-            case 1: return CRMJSResource.VoipCallOutgoingType;
-            case 2: return CRMJSResource.VoipCallAnsweredType;
-            case 3: return CRMJSResource.VoipCallMissedType;
+            case 1: return jsresource.VoipCallOutgoingType;
+            case 2: return jsresource.VoipCallAnsweredType;
+            case 3: return jsresource.VoipCallMissedType;
             default: return '';
         }
     }
@@ -862,7 +862,7 @@ ASC.CRM.Voip.CallsView = (function ($) {
     }
 
     function showErrorMessage() {
-        toastr.error(ASC.Resources.Master.ResourceJS.CommonJSErrorMsg);
+        toastr.error(ASC.Resources.Master.Resource.CommonJSErrorMsg);
     }
 
     //#endregion

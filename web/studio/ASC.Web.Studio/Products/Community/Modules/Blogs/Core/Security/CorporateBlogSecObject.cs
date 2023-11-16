@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,18 @@
 
 
 using System;
-using System.Collections.Generic;
-
+using ASC.Core.Users;
 using ASC.Common.Security;
 using ASC.Common.Security.Authorizing;
+using System.Collections.Generic;
 using ASC.Core;
-using ASC.Core.Users;
 
 namespace ASC.Blogs.Core.Security
 {
     public class CorporateBlogSecObject : SecurityObjectId, ISecurityObject
     {
 
-        private readonly GroupInfo groupInfo;
+        private GroupInfo groupInfo;
 
         public CorporateBlogSecObject(GroupInfo groupInfo)
             : base(groupInfo.ID, typeof(CorporateBlogSecObject))

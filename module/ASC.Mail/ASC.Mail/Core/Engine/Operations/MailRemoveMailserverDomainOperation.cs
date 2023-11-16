@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-
 using ASC.Common.Data;
 using ASC.Common.Security.Authentication;
 using ASC.Core;
@@ -51,21 +50,21 @@ namespace ASC.Mail.Core.Engine.Operations
         {
             try
             {
-                SetProgress((int?)MailOperationRemoveDomainProgress.Init, "Setup tenant and user");
+                SetProgress((int?) MailOperationRemoveDomainProgress.Init, "Setup tenant and user");
 
                 CoreContext.TenantManager.SetCurrentTenant(CurrentTenant);
 
                 try
                 {
-                    SecurityContext.CurrentAccount = CurrentUser;
+                    SecurityContext.AuthenticateMe(CurrentUser);
                 }
                 catch
                 {
                     // User was removed
-                    SecurityContext.CurrentAccount = ASC.Core.Configuration.Constants.CoreSystem;
+                    SecurityContext.AuthenticateMe(ASC.Core.Configuration.Constants.CoreSystem);
                 }
 
-                SetProgress((int?)MailOperationRemoveDomainProgress.RemoveFromDb, "Remove domain from Db");
+                SetProgress((int?) MailOperationRemoveDomainProgress.RemoveFromDb, "Remove domain from Db");
 
                 var tenant = CurrentTenant.TenantId;
 
@@ -127,7 +126,7 @@ namespace ASC.Mail.Core.Engine.Operations
                     }
                 }
 
-                SetProgress((int?)MailOperationRemoveDomainProgress.ClearCache, "Clear accounts cache");
+                SetProgress((int?) MailOperationRemoveDomainProgress.ClearCache, "Clear accounts cache");
 
                 CacheEngine.ClearAll();
 

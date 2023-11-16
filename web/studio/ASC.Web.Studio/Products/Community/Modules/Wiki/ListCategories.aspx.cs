@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,19 @@
 using System;
 using System.Collections.Generic;
 using System.Web;
-
-using ASC.Web.Community.Modules.Wiki.Resources;
-using ASC.Web.Community.Product;
+using System.Web.UI;
+using System.Web.UI.WebControls;
 using ASC.Web.Community.Wiki.Common;
-using ASC.Web.Core.Utility.Skins;
-using ASC.Web.Studio.Controls.Common;
 using ASC.Web.UserControls.Wiki;
 using ASC.Web.UserControls.Wiki.Data;
+using ASC.Web.UserControls.Wiki.Resources;
+using ASC.Web.Studio.Controls.Common;
+using ASC.Web.Core.Utility.Skins;
+using ASC.Web.Community.Product;
 
 namespace ASC.Web.Community.Wiki
 {
-
+    
     public class CategoryInfo
     {
         public string CategoryName { get; set; }
@@ -139,7 +140,7 @@ namespace ASC.Web.Community.Wiki
             {
                 var emptyScreenControl = new EmptyScreenControl
                 {
-                    ImgSrc = WebImageSupplier.GetAbsoluteWebPath("wikilogo150.svg", WikiManager.ModuleId),
+                    ImgSrc = WebImageSupplier.GetAbsoluteWebPath("wikilogo150.png", WikiManager.ModuleId),
                     Header = WikiResource.EmptyScreenWikiCategoriesCaption,
                     Describe = WikiResource.EmptyScreenWikiCategoriesText
                 };
@@ -159,7 +160,7 @@ namespace ASC.Web.Community.Wiki
             var name = PageNameUtil.NormalizeNameCase(catName);
             return new CategoryInfo()
             {
-
+                
                 CategoryName = HttpUtility.HtmlDecode(name).HtmlEncode(),
                 CategoryUrl = ActionHelper.GetViewPagePath(this.ResolveUrlLC("Default.aspx"), catName, ASC.Web.UserControls.Wiki.Constants.WikiCategoryKeyCaption)
             };

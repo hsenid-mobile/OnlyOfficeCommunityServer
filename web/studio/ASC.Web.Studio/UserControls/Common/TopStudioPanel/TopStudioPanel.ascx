@@ -9,22 +9,16 @@
 <%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
 <%@ Import Namespace="ASC.Web.Studio.UserControls.Statistics" %>
 <%@ Import Namespace="ASC.Web.Studio.Utility" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 <%@ Import Namespace="ASC.Data.Storage" %>
 
 <div class="studio-top-panel mainPageLayout  <% if (CoreContext.Configuration.Personal)
                                                 { %>try-welcome-top<% } %>">
     <ul>
         <li class="studio-top-logo">
-            <% if (SecurityContext.IsAuthenticated) { %>
             <a class="top-logo" title="<%: GetAbsoluteCompanyTopLogoTitle() %>" href="<%= CommonLinkUtility.GetDefault() %>">
                 <img alt="" src="<%= GetAbsoluteCompanyTopLogoPath() %>" />
             </a>
-            <% } else { %>
-            <span class="top-logo" title="<%: GetAbsoluteCompanyTopLogoTitle() %>">
-                <img alt="" src="<%= GetAbsoluteCompanyTopLogoPath() %>" />
-            </span>
-            <% } %>
         </li>
 
         <% if (CoreContext.Configuration.Personal && !SecurityContext.IsAuthenticated && !DisableLoginPersonal)
@@ -32,12 +26,17 @@
                 if (!CoreContext.Configuration.CustomMode)
                 { %>
                     <div class="personal-languages">
-                        <div class="personal-languages_select <%= CultureInfo.CurrentUICulture.Name %>" data-lang="<%= CultureInfo.CurrentUICulture.Name %>">
+                        <div class="personal-languages_select <%= CultureInfo.CurrentUICulture.Name %>" data-lang="<%= CultureInfo.CurrentUICulture.TwoLetterISOLanguageName %>">
                             <span><%= CultureInfo.CurrentUICulture.DisplayName %></span>
                         </div>
                         <div id="AuthFormLanguagesPanel" class="studio-action-panel">
                             <ul class="personal-languages_list dropdown-content">
-                                <% foreach (var item in SetupInfo.PersonalCultures) { %><li class="dropdown-item <%= item.Value.Name %>"><a href="<%= Request.Path %>?lang=<%= item.Key %>"><%= item.Value.DisplayName %></a></li><% } %>
+                                <% foreach (var ci in SetupInfo.EnabledCulturesPersonal)
+                                    { %>
+                                <li class="dropdown-item <%= ci.Name %>">
+                                    <a href="<%= Request.Path %>?lang=<%= ci.TwoLetterISOLanguageName %>"><%= ci.DisplayName %></a>
+                                </li>
+                                <% } %>
                             </ul>
                         </div>
                     </div>
@@ -102,9 +101,6 @@
         <% if (!DisableTariff)
            { %>
             <li class="top-item-box tariffs <%= DisplayTrialCountDays ? "has-led" : "" %>">
-                <% if (Startup) { %>
-                <a class="button green" href="<%= TenantExtra.GetTariffPageLink() %>"><%= UserControlsCommonResource.SaasTariffReActivateBusiness %></a>
-                <% } else { %>
                 <a class="inner-text" href="<%= TenantExtra.GetTariffPageLink() %>" title="<%= Resource.TariffSettings %>">
                     <svg><use base="<%= WebPath.GetPath("/")%>" href="/skins/default/images/svg/top-studio-menu.svg#svgTopStudioMenupayments<%= CoreContext.Configuration.CustomMode ? "Rub" : "" %>"></use></svg>
                     <% if (DisplayTrialCountDays)
@@ -112,7 +108,6 @@
                         <span class="inner-label"><%= CoreContext.Configuration.CustomMode ? Resource.Trial.ToLower() : "trial" %> <%= TariffDays %></span>
                     <% } %>
                 </a>
-                <% } %>
             </li>
         <% } %>
 
@@ -229,7 +224,7 @@
                                         <div class="apps-list">
                                         <% foreach (var service in AuthServiceList) { %>
                                             <span>
-                                                <img src="<%= VirtualPathUtility.ToAbsolute("~/UserControls/Management/AuthorizationKeys/img/" + service.Name.ToLowerInvariant() + ".svg") %>" alt="<%= service.Title %>" />
+                                                <img src="<%= VirtualPathUtility.ToAbsolute("~/UserControls/Management/AuthorizationKeys/img/" + service.Name.ToLower() + ".svg") %>" alt="<%= service.Title %>" />
                                             </span>
                                         <% } %>
                                         </div>
@@ -255,7 +250,7 @@
 
     <% if (!DisableSearch)
        { %>
-        <div id="studio_searchPopupPanel" class="studio-action-panel freeze-display">
+        <div id="studio_searchPopupPanel" class="studio-action-panel">
             <div class="dropdown-content">
                 <div class="search-input-box">
                     <input type="search" id="studio_search" class="search-input textEdit" placeholder="<%= UserControlsCommonResource.SearchHld %>" maxlength="255" data-url="<%= VirtualPathUtility.ToAbsolute("~/Search.aspx") %>" />
@@ -290,14 +285,6 @@
                     </li>
                 <% } %>
 
-                <% if (EnableAppServer)
-                    {%>
-                    <li id="switchToMobileBtn">
-                        <a class="dropdown-item" href="/?desktop_view=false" target="_self" onClick="jQuery.cookies.del('desktop_view'); window.location.reload(true);">
-                             <%= Resource.TurnOnMobileVersion %>
-                        </a>
-                    </li>
-                <%} %>
                 <li>
                     <span class="dropdown-item dropdown-about-btn"><%= Resource.AboutCompanyTitle %> </span>
 
@@ -312,38 +299,38 @@
                         <% } %>
 
                         <% if (!String.IsNullOrEmpty(Settings.CompanyName)) { %>
-                        <div class="confirmation-popup_name"><%: Settings.CompanyName %></div>
+                        <div class="confirmation-popup_name"><%= Settings.CompanyName %></div>
                         <% } %>
 
                         <ul class="confirmation-popup_info">
                             <% if (!String.IsNullOrEmpty(Settings.Address)) { %>
                             <li>
                                 <span class="gray-text"><%= Resource.AboutCompanyAddressTitle %>: 
-                                </span><%: Settings.Address %>
+                                </span><%= Settings.Address %>
                             </li>
                             <% } %>
                             <% if (!String.IsNullOrEmpty(Settings.Email)) { %>
                             <li>
                                 <span class="gray-text"><%= Resource.AboutCompanyEmailTitle %>: 
-                                </span><a href="mailto:<%: Settings.Email %>" class="link"><%: Settings.Email %></a>
+                                </span><a href="mailto:<%= Settings.Email %>" class="link"><%= Settings.Email %></a>
                             </li>
                             <% } %>
                             <% if (!String.IsNullOrEmpty(Settings.Phone)) { %>
                             <li>
                                 <span class="gray-text"><%= Resource.AboutCompanyTelTitle %>: 
-                                </span><%: Settings.Phone %>
+                                </span><%= Settings.Phone %>
                             </li>
                             <% } %>
                             <% if (!String.IsNullOrEmpty(Settings.Site)) { %>
                             <li>
-                                <a href="<%: Settings.Site %>" target="_blank" class="link">
-                                    <%: Settings.Site.Replace(Uri.UriSchemeHttp + Uri.SchemeDelimiter, String.Empty).Replace(Uri.UriSchemeHttps + Uri.SchemeDelimiter, String.Empty) %>
+                                <a href="<%= Settings.Site %>" target="_blank" class="link">
+                                    <%= Settings.Site.Replace(Uri.UriSchemeHttp + Uri.SchemeDelimiter, String.Empty).Replace(Uri.UriSchemeHttps + Uri.SchemeDelimiter, String.Empty) %>
                                 </a>
                             </li>
                             <% } %>
                         </ul>
 
-                        <% if (TenantExtra.Opensource && !CoreContext.Configuration.CustomMode)
+                        <% if (TenantExtra.Opensource)
                            { %>
                         <br />
                         <div><%= string.Format(UserControlsCommonResource.LicensedUnderApache, "<a href=\"http://www.apache.org/licenses/LICENSE-2.0\" class=\"link underline\" target=\"_blank\">", "</a>") %></div>
@@ -372,12 +359,7 @@
                 <% } %>
 
                 <%--Logout--%>
-                <% if (IsImpersonator) { %>
-                    <li id="back_to_yourself"><a class="dropdown-item"> <%= UserControlsCommonResource.LogoutButton %></a></li>
-                <% } %>
-                <% else { %>
-                    <li id="logout_ref"><a class="dropdown-item" href="<%= CommonLinkUtility.Logout %>"><%= UserControlsCommonResource.LogoutButton %></a></li>
-                <% } %>
+                <li id="logout_ref"><a class="dropdown-item" href="<%= CommonLinkUtility.Logout %>"><%= UserControlsCommonResource.LogoutButton %></a></li>
             </ul>
         </div>
     <% } %>
@@ -414,14 +396,14 @@
     <% if (!DisableGift)
        { %>
     <div id="studio_dropGiftPopupPanel" class="studio-action-panel">
-        <div id="drop-gift-box" class="drop-list-box drop-list-box-add">
+        <div id="drop-gift-box" class="drop-list-box">
             <% if (IsAdministrator) { %>
             <div class="hdr"><%= Resource.PresentAdminHdr %></div>
             <% } else { %>
             <div class="hdr"><%= Resource.PresentUserHdr %></div>
             <% } %>
             <div class="gift-list">
-                <%--<div class="gift-item gift-item-pro"><%= Resource.PresentItemPro %></div>--%>
+                <div class="gift-item gift-item-pro"><%= Resource.PresentItemPro %></div>
                 <% if (false && !CoreContext.Configuration.CustomMode) { %>
                 <div class="gift-item gift-item-private"><%= Resource.PresentItemPrivate %></div>
                 <% } %>
@@ -429,13 +411,13 @@
             </div>
             <% if (IsAdministrator) { %>
             <div class="btn-box">
-                <span class="btn-item left-btn" data-url="<%= SetupInfo.ControlPanelUrl.TrimEnd('/') + "/gift" %>"><%= Resource.PresentAdminOkBtn %></span>
-                <span class="btn-item right-btn"><%= Resource.PresentAdminHideBtn %></span>
+                <span class="left-btn" data-url="<%= SetupInfo.ControlPanelUrl.TrimEnd('/') + "/gift" %>"><%= Resource.PresentAdminOkBtn %></span>
+                <span class="right-btn"><%= Resource.PresentAdminHideBtn %></span>
             </div>
             <% } else { %>
             <div class="btn-box">
-                <span class="btn-item left-btn"><%= Resource.PresentUserOkBtn %></span>
-                <span class="btn-item right-btn"><%= Resource.PresentUserHideBtn %></span>
+                <span class="left-btn"><%= Resource.PresentUserOkBtn %></span>
+                <span class="right-btn"><%= Resource.PresentUserHideBtn %></span>
             </div>
              <% } %>
         </div>

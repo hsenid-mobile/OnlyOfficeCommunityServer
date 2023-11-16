@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ window.ASC.Files.Marker = (function () {
 
             ASC.Files.ServiceManager.bind(ASC.Files.ServiceManager.events.GetNews, ASC.Files.Marker.onGetNews);
 
-            jq(document).on("click", function (event) {
+            jq(document).click(function (event) {
                 jq.dropdownToggle().registerAutoHide(event, ".is-new", "#filesNewsPanel");
             });
         }
@@ -158,6 +158,10 @@ window.ASC.Files.Marker = (function () {
             folderId = itemData.entryId;
         }
 
+        //track event
+
+        trackingGoogleAnalytics("documents", "shownews", "folder");
+
         var targetSize = {
             top: target.offset().top,
             left: target.offset().left,
@@ -222,7 +226,7 @@ window.ASC.Files.Marker = (function () {
                 var entryTitle = entryData.title;
 
                 var ftClass = (entryType == "file" ? ASC.Files.Utility.getCssClassByFileTitle(entryTitle, true) : ASC.Files.Utility.getFolderCssClass(true));
-                entryObj.find(".thumb-img, .thumb-" + entryType).addClass(ftClass);
+                entryObj.find(".thumb-" + entryType).addClass(ftClass);
 
                 var rowLink = entryObj.find(".entry-title .name a");
 
@@ -292,7 +296,7 @@ window.ASC.Files.Marker = (function () {
             ASC.Files.Marker.markAsRead();
         });
 
-        jq("#filesNewsMarkRead").on("click", function () {
+        jq("#filesNewsMarkRead").click(function () {
             ASC.Files.Actions.hideAllActionPanels();
             var folderId = jq("#filesNewsPanel").attr("data-id");
             ASC.Files.Marker.markAsRead(folderId);
@@ -312,14 +316,12 @@ window.ASC.Files.Marker = (function () {
             if (ASC.Files.MediaPlayer && (ASC.Files.MediaPlayer.canPlay(fileData.title) || ASC.Files.Utility.CanImageView(fileData.title))) {
                 ASC.Files.Actions.hideAllActionPanels();
 
-                var newFiles = jq("#filesNewsList .file-row:not(.folder-row):not(.error-entry)").map(function (_, item) {
-                    return ASC.Files.UI.getObjectData(item);
-                });
+                var newFiles = jq("#filesNewsList .file-row:not(.folder-row):not(.error-entry) .ft_Image, #filesNewsList .file-row:not(.folder-row):not(.error-entry) .ft_Video");
 
                 var mediaFiles = [];
                 var pos = 0;
                 for (var i = 0; i < newFiles.length; i++) {
-                    var fData = newFiles[i];
+                    var fData = ASC.Files.UI.getObjectData(newFiles[i]);
 
                     if (ASC.Files.MediaPlayer.canPlay(fData.title) || ASC.Files.Utility.CanImageView(fData.title)) {
                         mediaFiles.push(fData);
@@ -344,10 +346,8 @@ window.ASC.Files.Marker = (function () {
                         ASC.Files.Anchor.navigationSet(ASC.Files.Folders.currentFolder.id, true);
                     },
                     onMediaChangedAction: function (fileId) {
-                        var newsListItem = jq("#filesNewsList " + ASC.Files.UI.getSelectorId(fileId));
                         var newsObj = ASC.Files.UI.getEntryObject("file", fileId).find(".is-new");
-                        if (!newsObj.is(":visible")
-                            && newsListItem.length) {
+                        if (!newsObj.is(":visible")) {
                             if (!newObj.is(":visible")) {
                                 newObj = ASC.Files.UI.getEntryObject("folder", newFolderId).find(".is-new");
                             }
@@ -356,9 +356,6 @@ window.ASC.Files.Marker = (function () {
                         }
 
                         ASC.Files.Marker.removeNewIcon("file", fileId);
-                        if (newsListItem.length) {
-                            ASC.Files.UI.getObjectData(newsListItem).entryObject.remove();
-                        }
 
                         var hash = ASC.Files.MediaPlayer.getPlayHash(fileId);
                         ASC.Files.Anchor.move(hash, true);
@@ -382,5 +379,6 @@ window.ASC.Files.Marker = (function () {
             return false;
         });
 
+        jq("#studio_sidePanel .page-menu .is-new").trackEvent("files_tree", "action-click", "mark_as_read");
     });
 })(jQuery);

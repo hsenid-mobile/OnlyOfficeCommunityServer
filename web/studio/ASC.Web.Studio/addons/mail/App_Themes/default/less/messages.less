@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 */
 
 
-@import "params.less";
+@import "settings.less";
 
 .messages {
     @border-style: @messages-border-style;
@@ -31,7 +31,7 @@
 
     a {
         text-decoration: none;
-        color: @dark-text;
+        color: black;
     }
 
     .row {
@@ -39,8 +39,8 @@
         border-bottom: @border-style;
         display: -ms-grid;
         display: grid;
-        -ms-grid-columns: 24px @row-height @row-height*6 1fr 20px 28px @row-height*2 @row-height*2;
-        grid-template-columns: 24px @row-height @row-height*6 1fr 20px 28px @row-height*2 @row-height*2;
+        -ms-grid-columns: 24px @row-height @row-height*6 1fr 40px @row-height*2 @row-height*2;
+        grid-template-columns: 24px @row-height @row-height*6 1fr 40px @row-height*2 @row-height*2;
         -ms-touch-action: auto;
         touch-action: auto;
 
@@ -150,24 +150,12 @@
 
             .tag {
                 float: left;
-                margin: floor((@row-height - 19px) / 2) 10px floor((@row-height - 19px) / 2) 0;
-            }
-        }
-
-        .readReq {
-            -ms-grid-column: 5;
-            padding-right: 0px;
-            .a-mixin();
-            .centered-childs();
-
-            > a > .readReq-svg {
-                margin-top: floor((@row-height - @icon-height) / 2);
-                fill: #83888d;
+                margin: floor((@row-height - 19px) / 2) 5px floor((@row-height - 19px) / 2) 0;
             }
         }
 
         .attachment {
-            -ms-grid-column: 6;
+            -ms-grid-column: 5;
             .a-mixin();
             .centered-childs();
 
@@ -187,7 +175,7 @@
         }
 
         .date {
-            -ms-grid-column: 7;
+            -ms-grid-column: 6;
         }
 
         .date,
@@ -200,7 +188,7 @@
 
         .time {
             padding-right: floor((@row-height - @icon-height) / 2);
-            -ms-grid-column: 8;
+            -ms-grid-column: 7;
         }
     }
 }
@@ -208,8 +196,8 @@
 #checkFilterResults {
     .messages {
         .row {
-            -ms-grid-columns: @row-height @row-height*6 1fr @row-height*2 20px 28px @row-height*2 @row-height*2;
-            grid-template-columns: @row-height @row-height*6 1fr @row-height*2 20px 28px @row-height*2 @row-height*2;
+            -ms-grid-columns: @row-height @row-height*6 1fr @row-height*2 40px @row-height*2 @row-height*2;
+            grid-template-columns: @row-height @row-height*6 1fr @row-height*2 40px @row-height*2 @row-height*2;
         }
     }
 }

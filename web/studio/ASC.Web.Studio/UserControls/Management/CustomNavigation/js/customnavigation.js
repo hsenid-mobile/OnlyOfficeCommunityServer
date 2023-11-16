@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ CustomNavigationManager = new function () {
 
     this.Init = function () {
 
-        jq("#addBtn").on("click", function () {
+        jq("#addBtn").click(function () {
             Teamlab.getCustomNavigationItemSample({},
             {
                 before: function () {
@@ -195,11 +195,11 @@ CustomNavigationManager = new function () {
             });
         });
 
-        jq("#customNavigationItemDialog .cancel-btn").on("click", function () {
+        jq("#customNavigationItemDialog .cancel-btn").click(function () {
             PopupKeyUpActionProvider.CloseDialog();
         });
 
-        jq("#saveBtn").on("click", function () {
+        jq("#saveBtn").click(function () {
             var data = getItemData();
 
             if (!data) return;
@@ -215,7 +215,7 @@ CustomNavigationManager = new function () {
                 success: function (params, response) {
                     renderItem(response);
                     PopupKeyUpActionProvider.CloseDialog();
-                    toastr.success(ASC.Resources.Master.ResourceJS.SuccessfullySaveSettingsMessage);
+                    toastr.success(ASC.Resources.Master.Resource.SuccessfullySaveSettingsMessage);
                 },
                 error: function (params, errors) {
                     LoadingBanner.showMesInfoBtn("#customNavigationItemDialog", errors[0], "error");
@@ -223,7 +223,7 @@ CustomNavigationManager = new function () {
             });
         });
 
-        jq("#removeBtn").on("click", function () {
+        jq("#removeBtn").click(function () {
             var id = jq("#customNavigationItemDialog #itemId").val();
 
             Teamlab.deleteCustomNavigationItem({}, id,

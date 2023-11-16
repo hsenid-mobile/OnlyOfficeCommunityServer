@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 
 using System;
+using ASC.Common.Data;
+using ASC.Common.Data.Sql;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Text;
-
-using ASC.Common.Data;
-using ASC.Common.Data.Sql;
 using ASC.Security.Cryptography;
 
 namespace ASC.Core.Data
@@ -69,7 +68,7 @@ namespace ASC.Core.Data
 
         protected IDbManager GetDb()
         {
-            return new DbManager(dbid);
+            return DbManager.FromHttpContext(dbid);
         }
 
         protected SqlQuery Query(string table, int tenant)

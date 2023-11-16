@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-
 using ASC.Common.DependencyInjection;
-
 using Autofac;
-
 using log4net.Config;
 using log4net.Core;
-
+using log4net.Util;
 using NLog;
 
 namespace ASC.Common.Logging
@@ -46,27 +43,42 @@ namespace ASC.Common.Logging
         void Debug(object message);
         void Debug(object message, Exception exception);
         void DebugFormat(string format, params object[] args);
+        void DebugFormat(string format, object arg0);
+        void DebugFormat(string format, object arg0, object arg1);
+        void DebugFormat(string format, object arg0, object arg1, object arg2);
         void DebugFormat(IFormatProvider provider, string format, params object[] args);
 
 
         void Info(object message);
         void Info(string message, Exception exception);
         void InfoFormat(string format, params object[] args);
+        void InfoFormat(string format, object arg0);
+        void InfoFormat(string format, object arg0, object arg1);
+        void InfoFormat(string format, object arg0, object arg1, object arg2);
         void InfoFormat(IFormatProvider provider, string format, params object[] args);
 
         void Warn(object message);
         void Warn(object message, Exception exception);
         void WarnFormat(string format, params object[] args);
+        void WarnFormat(string format, object arg0);
+        void WarnFormat(string format, object arg0, object arg1);
+        void WarnFormat(string format, object arg0, object arg1, object arg2);
         void WarnFormat(IFormatProvider provider, string format, params object[] args);
 
         void Error(object message);
         void Error(object message, Exception exception);
         void ErrorFormat(string format, params object[] args);
+        void ErrorFormat(string format, object arg0);
+        void ErrorFormat(string format, object arg0, object arg1);
+        void ErrorFormat(string format, object arg0, object arg1, object arg2);
         void ErrorFormat(IFormatProvider provider, string format, params object[] args);
 
         void Fatal(object message);
         void Fatal(string message, Exception exception);
         void FatalFormat(string format, params object[] args);
+        void FatalFormat(string format, object arg0);
+        void FatalFormat(string format, object arg0, object arg1);
+        void FatalFormat(string format, object arg0, object arg1, object arg2);
         void FatalFormat(IFormatProvider provider, string format, params object[] args);
 
         string LogDirectory { get; }
@@ -93,7 +105,7 @@ namespace ASC.Common.Logging
 
         public bool IsTraceEnabled { get; private set; }
 
-        public Log(string name, Func<string> getAlias)
+        public Log(string name)
         {
             loger = log4net.LogManager.GetLogger(name);
 
@@ -107,7 +119,7 @@ namespace ASC.Common.Logging
 
         public void Trace(object message)
         {
-            if (IsTraceEnabled) loger.Logger.Log(GetType(), Level.Trace, message, null);
+            if(IsTraceEnabled) loger.Logger.Log(GetType(), Level.Trace, message, null);
         }
 
         public void TraceFormat(string message, object arg0)
@@ -128,6 +140,21 @@ namespace ASC.Common.Logging
         public void DebugFormat(string format, params object[] args)
         {
             if (IsDebugEnabled) loger.DebugFormat(format, args);
+        }
+
+        public void DebugFormat(string format, object arg0)
+        {
+            if (IsDebugEnabled) loger.DebugFormat(format, arg0);
+        }
+
+        public void DebugFormat(string format, object arg0, object arg1)
+        {
+            if (IsDebugEnabled) loger.DebugFormat(format, arg0, arg1);
+        }
+
+        public void DebugFormat(string format, object arg0, object arg1, object arg2)
+        {
+            if (IsDebugEnabled) loger.DebugFormat(format, arg0, arg1, arg2);
         }
 
         public void DebugFormat(IFormatProvider provider, string format, params object[] args)
@@ -163,6 +190,21 @@ namespace ASC.Common.Logging
             if (IsInfoEnabled) loger.InfoFormat(format, args);
         }
 
+        public void InfoFormat(string format, object arg0)
+        {
+            if (IsInfoEnabled) loger.InfoFormat(format, arg0);
+        }
+
+        public void InfoFormat(string format, object arg0, object arg1)
+        {
+            if (IsInfoEnabled) loger.InfoFormat(format, arg0, arg1);
+        }
+
+        public void InfoFormat(string format, object arg0, object arg1, object arg2)
+        {
+            if (IsInfoEnabled) loger.InfoFormat(format, arg0, arg1, arg2);
+        }
+
         public void InfoFormat(IFormatProvider provider, string format, params object[] args)
         {
             if (IsInfoEnabled) loger.InfoFormat(provider, format, args);
@@ -182,6 +224,21 @@ namespace ASC.Common.Logging
         public void WarnFormat(string format, params object[] args)
         {
             if (IsWarnEnabled) loger.WarnFormat(format, args);
+        }
+
+        public void WarnFormat(string format, object arg0)
+        {
+            if (IsWarnEnabled) loger.WarnFormat(format, arg0);
+        }
+
+        public void WarnFormat(string format, object arg0, object arg1)
+        {
+            if (IsWarnEnabled) loger.WarnFormat(format, arg0, arg1);
+        }
+
+        public void WarnFormat(string format, object arg0, object arg1, object arg2)
+        {
+            if (IsWarnEnabled) loger.WarnFormat(format, arg0, arg1, arg2);
         }
 
         public void WarnFormat(IFormatProvider provider, string format, params object[] args)
@@ -205,6 +262,21 @@ namespace ASC.Common.Logging
             if (IsErrorEnabled) loger.ErrorFormat(format, args);
         }
 
+        public void ErrorFormat(string format, object arg0)
+        {
+            if (IsErrorEnabled) loger.ErrorFormat(format, arg0);
+        }
+
+        public void ErrorFormat(string format, object arg0, object arg1)
+        {
+            if (IsErrorEnabled) loger.ErrorFormat(format, arg0, arg1);
+        }
+
+        public void ErrorFormat(string format, object arg0, object arg1, object arg2)
+        {
+            if (IsErrorEnabled) loger.ErrorFormat(format, arg0, arg1, arg2);
+        }
+
         public void ErrorFormat(IFormatProvider provider, string format, params object[] args)
         {
             if (IsErrorEnabled) loger.ErrorFormat(provider, format, args);
@@ -226,6 +298,21 @@ namespace ASC.Common.Logging
             if (IsFatalEnabled) loger.FatalFormat(format, args);
         }
 
+        public void FatalFormat(string format, object arg0)
+        {
+            if (IsFatalEnabled) loger.FatalFormat(format, arg0);
+        }
+
+        public void FatalFormat(string format, object arg0, object arg1)
+        {
+            if (IsFatalEnabled) loger.FatalFormat(format, arg0, arg1);
+        }
+
+        public void FatalFormat(string format, object arg0, object arg1, object arg2)
+        {
+            if (IsFatalEnabled) loger.FatalFormat(format, arg0, arg1, arg2);
+        }
+
         public void FatalFormat(IFormatProvider provider, string format, params object[] args)
         {
             if (IsFatalEnabled) loger.FatalFormat(provider, format, args);
@@ -238,20 +325,23 @@ namespace ASC.Common.Logging
                 return log4net.GlobalContext.Properties["LogDirectory"].ToString();
             }
         }
-
     }
 
     public class LogNLog : ILog
     {
         private readonly NLog.ILogger loger;
         private readonly string name;
-        private Func<string> getAlias;
 
         public bool IsDebugEnabled { get; private set; }
+
         public bool IsInfoEnabled { get; private set; }
+
         public bool IsWarnEnabled { get; private set; }
+
         public bool IsErrorEnabled { get; private set; }
+
         public bool IsFatalEnabled { get; private set; }
+
         public bool IsTraceEnabled { get; private set; }
 
         static LogNLog()
@@ -262,16 +352,18 @@ namespace ASC.Common.Logging
             {
                 if (args[i] == "--log" && !string.IsNullOrEmpty(args[i + 1]))
                 {
-                    LogManager.Configuration.Variables["svcName"] = args[i + 1].Trim().Trim('"');
+                    NLog.LogManager.Configuration.Variables["svcName"] = args[i + 1].Trim().Trim('"');
                 }
             }
+
+            NLog.Targets.Target.Register<SelfCleaningTarget>("SelfCleaning");
         }
 
-        public LogNLog(string name, Func<string> getAlias)
+        public LogNLog(string name)
         {
             this.name = name;
-            loger = LogManager.GetLogger(name);
-            this.getAlias = getAlias;
+
+            loger = NLog.LogManager.GetLogger(name);
 
             IsDebugEnabled = loger.IsDebugEnabled;
             IsInfoEnabled = loger.IsInfoEnabled;
@@ -283,161 +375,207 @@ namespace ASC.Common.Logging
 
         public void Trace(object message)
         {
-            Log(LogLevel.Trace, message);
+            if (IsTraceEnabled) loger.Log(LogLevel.Trace, message);
         }
 
         public void TraceFormat(string message, object arg0)
         {
-            Log(LogLevel.Trace, string.Format(message, arg0));
+            if (IsTraceEnabled) loger.Log(LogLevel.Trace, string.Format(message, arg0));
         }
 
         public void Debug(object message)
         {
-            Log(LogLevel.Debug, message);
+            if (IsDebugEnabled) loger.Debug(message);
         }
 
         public void Debug(object message, Exception exception)
         {
-            Log(LogLevel.Debug, message, exception);
+            if (IsDebugEnabled) loger.Debug(exception, "{0}", message);
         }
 
         public void DebugFormat(string format, params object[] args)
         {
-            Log(LogLevel.Debug, string.Format(format, args));
+            if (IsDebugEnabled) loger.Debug(format, args);
+        }
+
+        public void DebugFormat(string format, object arg0)
+        {
+            if (IsDebugEnabled) loger.Debug(format, arg0);
+        }
+
+        public void DebugFormat(string format, object arg0, object arg1)
+        {
+            if (IsDebugEnabled) loger.Debug(format, arg0, arg1);
+        }
+
+        public void DebugFormat(string format, object arg0, object arg1, object arg2)
+        {
+            if (IsDebugEnabled) loger.Debug(format, arg0, arg1, arg2);
         }
 
         public void DebugFormat(IFormatProvider provider, string format, params object[] args)
         {
-            Log(LogLevel.Debug, string.Format(format, args), provider);
+            if (IsDebugEnabled) loger.Debug(provider, format, args);
         }
 
         public void DebugWithProps(string message, params KeyValuePair<string, object>[] props)
         {
-            Log(LogLevel.Debug, message, props);
+            if (!IsDebugEnabled) return;
+
+            var theEvent = new LogEventInfo { Message = message, LoggerName = name, Level = LogLevel.Debug };
+
+            foreach (var p in props)
+            {
+                theEvent.Properties[p.Key] = p.Value;
+            }
+
+            loger.Log(theEvent);
         }
 
         public void Info(object message)
         {
-            Log(LogLevel.Info, message);
+            if (IsInfoEnabled) loger.Info(message);
         }
 
         public void Info(string message, Exception exception)
         {
-            Log(LogLevel.Info, message,exception);
+            if (IsInfoEnabled) loger.Info(exception, message);
         }
 
         public void InfoFormat(string format, params object[] args)
         {
-            Log(LogLevel.Info, string.Format(format, args));
+            if (IsInfoEnabled) loger.Info(format, args);
+        }
+
+        public void InfoFormat(string format, object arg0)
+        {
+            if (IsInfoEnabled) loger.Info(format, arg0);
+        }
+
+        public void InfoFormat(string format, object arg0, object arg1)
+        {
+            if (IsInfoEnabled) loger.Info(format, arg0, arg1);
+        }
+
+        public void InfoFormat(string format, object arg0, object arg1, object arg2)
+        {
+            if (IsInfoEnabled) loger.Info(format, arg0, arg1, arg2);
         }
 
         public void InfoFormat(IFormatProvider provider, string format, params object[] args)
         {
-            Log(LogLevel.Info, string.Format(format, args), provider);
+            if (IsInfoEnabled) loger.Info(provider, format, args);
         }
 
 
         public void Warn(object message)
         {
-            Log(LogLevel.Warn, message);
+            if (IsWarnEnabled) loger.Warn(message);
         }
 
         public void Warn(object message, Exception exception)
         {
-            Log(LogLevel.Warn, message, exception);
+            if (IsWarnEnabled) loger.Warn(exception, "{0}", message);
         }
 
         public void WarnFormat(string format, params object[] args)
         {
-            Log(LogLevel.Warn, string.Format(format, args));
+            if (IsWarnEnabled) loger.Warn(format, args);
+        }
+
+        public void WarnFormat(string format, object arg0)
+        {
+            if (IsWarnEnabled) loger.Warn(format, arg0);
+        }
+
+        public void WarnFormat(string format, object arg0, object arg1)
+        {
+            if (IsWarnEnabled) loger.Warn(format, arg0, arg1);
+        }
+
+        public void WarnFormat(string format, object arg0, object arg1, object arg2)
+        {
+            if (IsWarnEnabled) loger.Warn(format, arg0, arg1, arg2);
         }
 
         public void WarnFormat(IFormatProvider provider, string format, params object[] args)
         {
-            Log(LogLevel.Warn, string.Format(format, args), provider);
+            if (IsWarnEnabled) loger.Warn(provider, format, args);
         }
+
 
         public void Error(object message)
         {
-            Log(LogLevel.Error, message);
+            if (IsErrorEnabled) loger.Error(message);
         }
 
         public void Error(object message, Exception exception)
         {
-            Log(LogLevel.Error, message, exception);
+            if (IsErrorEnabled) loger.Error(exception, "{0}", message);
         }
 
         public void ErrorFormat(string format, params object[] args)
         {
-            Log(LogLevel.Error, string.Format(format,args));
+            if (IsErrorEnabled) loger.Error(format, args);
+        }
+
+        public void ErrorFormat(string format, object arg0)
+        {
+            if (IsErrorEnabled) loger.Error(format, arg0);
+        }
+
+        public void ErrorFormat(string format, object arg0, object arg1)
+        {
+            if (IsErrorEnabled) loger.Error(format, arg0, arg1);
+        }
+
+        public void ErrorFormat(string format, object arg0, object arg1, object arg2)
+        {
+            if (IsErrorEnabled) loger.Error(format, arg0, arg1, arg2);
         }
 
         public void ErrorFormat(IFormatProvider provider, string format, params object[] args)
         {
-            Log(LogLevel.Error, string.Format(format, args), provider);
+            if (IsErrorEnabled) loger.Error(provider, format, args);
         }
 
 
         public void Fatal(object message)
         {
-            Log(LogLevel.Fatal, message);
+            if (IsFatalEnabled) loger.Fatal(message);
         }
 
         public void Fatal(string message, Exception exception)
         {
-            Log(LogLevel.Fatal, message,exception);
+            if (IsFatalEnabled) loger.Fatal(exception, message);
         }
 
         public void FatalFormat(string format, params object[] args)
         {
-            Log(LogLevel.Fatal, string.Format(format,args));
+            if (IsFatalEnabled) loger.Fatal(format, args);
+        }
+
+        public void FatalFormat(string format, object arg0)
+        {
+            if (IsFatalEnabled) loger.Fatal(format, arg0);
+        }
+
+        public void FatalFormat(string format, object arg0, object arg1)
+        {
+            if (IsFatalEnabled) loger.Fatal(format, arg0, arg1);
+        }
+
+        public void FatalFormat(string format, object arg0, object arg1, object arg2)
+        {
+            if (IsFatalEnabled) loger.Fatal(format, arg0, arg1, arg2);
         }
 
         public void FatalFormat(IFormatProvider provider, string format, params object[] args)
         {
-            Log(LogLevel.Fatal, string.Format(format, args), provider);
+            if (IsFatalEnabled) loger.Fatal(provider, format, args);
         }
 
-        private void Log(LogLevel level, object message)
-        {
-            var theEvent = new LogEventInfo { Message = message.ToString(), LoggerName = name, Level = level };
-            Log(theEvent);
-        }
-
-        private void Log(LogLevel level, object message, params KeyValuePair<string, object>[] props)
-        {
-            var theEvent = new LogEventInfo { Message = message.ToString(), LoggerName = name, Level = level };
-            foreach (var p in props)
-            {
-                theEvent.Properties[p.Key] = p.Value;
-            }
-            Log(theEvent);
-        }
-
-        private void Log(LogLevel level, object message, Exception exception)
-        {
-            var theEvent = new LogEventInfo { Message = message.ToString(), LoggerName = name, Level = level, Exception = exception };
-            Log(theEvent);
-        }
-
-        private void Log(LogLevel level, object message, IFormatProvider provider)
-        {
-            var theEvent = new LogEventInfo { Message = message.ToString(), LoggerName = name, Level = level, FormatProvider = provider };
-            Log(theEvent);
-        }
-
-        private void Log(LogEventInfo theEvent)
-        {
-            var alias = getAlias == null ? null : getAlias();
-            if (alias != null)
-            {
-                theEvent.Properties["alias"] = alias + " - ";
-            }
-            loger.Log(theEvent);
-        }
-
-        public string LogDirectory { get { return NLog.LogManager.Configuration.Variables["logDirectory"].ToString(); } }
-
+        public string LogDirectory { get { return NLog.LogManager.Configuration.Variables["logDirectory"].Text; } }
     }
 
     public class NullLog : ILog
@@ -501,6 +639,18 @@ namespace ASC.Common.Logging
         {
         }
 
+        public void InfoFormat(string format, object arg0)
+        {
+        }
+
+        public void InfoFormat(string format, object arg0, object arg1)
+        {
+        }
+
+        public void InfoFormat(string format, object arg0, object arg1, object arg2)
+        {
+        }
+
         public void InfoFormat(IFormatProvider provider, string format, params object[] args)
         {
         }
@@ -514,6 +664,18 @@ namespace ASC.Common.Logging
         }
 
         public void WarnFormat(string format, params object[] args)
+        {
+        }
+
+        public void WarnFormat(string format, object arg0)
+        {
+        }
+
+        public void WarnFormat(string format, object arg0, object arg1)
+        {
+        }
+
+        public void WarnFormat(string format, object arg0, object arg1, object arg2)
         {
         }
 
@@ -533,6 +695,18 @@ namespace ASC.Common.Logging
         {
         }
 
+        public void ErrorFormat(string format, object arg0)
+        {
+        }
+
+        public void ErrorFormat(string format, object arg0, object arg1)
+        {
+        }
+
+        public void ErrorFormat(string format, object arg0, object arg1, object arg2)
+        {
+        }
+
         public void ErrorFormat(IFormatProvider provider, string format, params object[] args)
         {
         }
@@ -549,21 +723,32 @@ namespace ASC.Common.Logging
         {
         }
 
+        public void FatalFormat(string format, object arg0)
+        {
+        }
+
+        public void FatalFormat(string format, object arg0, object arg1)
+        {
+        }
+
+        public void FatalFormat(string format, object arg0, object arg1, object arg2)
+        {
+        }
+
         public void FatalFormat(IFormatProvider provider, string format, params object[] args)
         {
         }
 
         public string LogDirectory { get { return ""; } }
-
     }
 
-    public class BaseLogManager
+    public class LogManager
     {
         internal static IContainer Builder { get; set; }
 
         internal static ConcurrentDictionary<string, ILog> Logs;
 
-        static BaseLogManager()
+        static LogManager()
         {
             var container = AutofacConfigLoader.Load("core");
             if (container != null)
@@ -574,13 +759,14 @@ namespace ASC.Common.Logging
             Logs = new ConcurrentDictionary<string, ILog>();
         }
 
-        public static ILog GetLogger(string name, Func<string> getAlias = null)
+        public static ILog GetLogger(string name)
         {
             ILog result;
             if (!Logs.TryGetValue(name, out result))
             {
-                result = Logs.AddOrUpdate(name, Builder != null ? Builder.Resolve<ILog>(new TypedParameter(typeof(string), name), new TypedParameter(typeof(Func<string>), getAlias)) : new NullLog(), (k, v) => v);
+                result = Logs.AddOrUpdate(name, Builder != null ? Builder.Resolve<ILog>(new TypedParameter(typeof(string), name)) : new NullLog(), (k, v) => v);
             }
+
             return result;
         }
     }

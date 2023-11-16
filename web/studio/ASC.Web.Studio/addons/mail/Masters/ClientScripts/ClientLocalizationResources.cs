@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,10 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Web;
-
+using ASC.Web.Mail.Resources;
 using ASC.Web.Core.Client.HttpHandlers;
 using ASC.Web.Core.Helpers;
-using ASC.Web.Mail.Resources;
-using ASC.Web.Studio.PublicResources;
+using Resources;
 
 namespace ASC.Web.Mail.Masters.ClientScripts
 {
@@ -52,7 +51,6 @@ namespace ASC.Web.Mail.Masters.ClientScripts
                     ErrorOpenMessageHelp = string.Format(MailScriptResource.ErrorOpenMessageHelp.HtmlEncode(), "<a href=\"" + MailPage.GetMailSupportUri() + "\" target=\"_blank\">", "</a>"),
                     ErrorParseMessageHelp = string.Format(MailScriptResource.ErrorParseMessageHelp.HtmlEncode(), "<a href=\"" + MailPage.GetMailSupportUri() + "\" target=\"_blank\">", "</a>"),
                     FilesCannotBeAttachedAsLinks = string.Format(MailResource.FilesCannotBeAttachedAsLinks_Body, "<br/>"),
-                    MultimediaFilesCannotBeAttachedAsLinksInTrial = string.Format(MailResource.MultimediaFilesCannotBeAttachedInTrial_Body, "<br/>"),
                     Autoreply = string.Format(MailResource.AutoreplyInformationText, string.Format(GrammaticalHelper.ChooseNumeralCase(autoreplyDaysInterval, Resource.DrnAgoDaysI, Resource.DrnAgoDaysR1, Resource.DrnAgoDaysRm), autoreplyDaysInterval)),
                     Resource.ErrorPasswordMessage,
                     Resource.ErrorPasswordLength,
@@ -63,8 +61,7 @@ namespace ASC.Web.Mail.Masters.ClientScripts
                     Resource.EmailAndPasswordCopiedToClipboard,
                     Resource.ChangePasswordSuccess,
                     Resource.ErrorPasswordOnlyLatinLetters,
-                    Resource.ErrorPasswordNoSpaces,
-                    Resource.ErrorPasswordOnlyASCII
+                    Resource.ErrorPasswordNoSpaces
                 })
             };
         }

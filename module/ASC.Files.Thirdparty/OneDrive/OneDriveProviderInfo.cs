@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Web;
-
 using ASC.Common.Caching;
 using ASC.Common.Web;
 using ASC.Core;
@@ -28,7 +27,6 @@ using ASC.FederatedLogin;
 using ASC.FederatedLogin.Helpers;
 using ASC.FederatedLogin.LoginProviders;
 using ASC.Files.Core;
-
 using Microsoft.OneDrive.Sdk;
 
 namespace ASC.Files.Thirdparty.OneDrive
@@ -203,7 +201,16 @@ namespace ASC.Files.Thirdparty.OneDrive
             CacheNotify.Subscribe<OneDriveCacheItem>((i, action) =>
                 {
                     if (action != CacheNotifyAction.Remove) return;
-                    ResetMemoryCache(i);
+                    if (i.ResetAll)
+                    {
+                        CacheChildItems.Remove(new Regex("^onedrivei-" + i.Key + ".*"));
+                        CacheItem.Remove(new Regex("^onedrive-" + i.Key + ".*"));
+                    }
+                    else
+                    {
+                        CacheChildItems.Remove(new Regex("onedrivei-" + i.Key));
+                        CacheItem.Remove("onedrive-" + i.Key);
+                    }
                 });
         }
 
@@ -234,32 +241,15 @@ namespace ASC.Files.Thirdparty.OneDrive
         internal void CacheReset(string onedriveId = null)
         {
             var key = ID + "-";
-            var item = new OneDriveCacheItem { Key = key };
-
             if (string.IsNullOrEmpty(onedriveId))
             {
-                item.ResetAll = true;
+                CacheNotify.Publish(new OneDriveCacheItem { ResetAll = true, Key = key }, CacheNotifyAction.Remove);
             }
             else
             {
-                item.Key += onedriveId;
-            }
+                key += onedriveId;
 
-            ResetMemoryCache(item);
-            CacheNotify.Publish(item, CacheNotifyAction.Remove);
-        }
-
-        private static void ResetMemoryCache(OneDriveCacheItem item)
-        {
-            if (item.ResetAll)
-            {
-                CacheChildItems.Remove(new Regex("^onedrivei-" + item.Key + ".*"));
-                CacheItem.Remove(new Regex("^onedrive-" + item.Key + ".*"));
-            }
-            else
-            {
-                CacheChildItems.Remove(new Regex("onedrivei-" + item.Key));
-                CacheItem.Remove("onedrive-" + item.Key);
+                CacheNotify.Publish(new OneDriveCacheItem { Key = key }, CacheNotifyAction.Remove);
             }
         }
 

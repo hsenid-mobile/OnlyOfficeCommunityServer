@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Runtime.Serialization;
-
 using ASC.Common.Security;
 
 
@@ -34,8 +33,8 @@ namespace ASC.CRM.Core.Entities
 
         [DataMember(Name = "rate")]
         public decimal Rate { get; set; }
-
-
+        
+        
         [DataMember(Name = "createOn")]
         public DateTime CreateOn { get; set; }
 
@@ -44,7 +43,7 @@ namespace ASC.CRM.Core.Entities
 
         [DataMember(Name = "lastModifedOn")]
         public DateTime? LastModifedOn { get; set; }
-
+        
         [DataMember(Name = "lastModifedBy")]
         public Guid? LastModifedBy { get; set; }
 

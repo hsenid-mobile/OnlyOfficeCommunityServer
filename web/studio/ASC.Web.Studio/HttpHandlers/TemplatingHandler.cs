@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Xml.Linq;
-
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Web.Core;
@@ -41,8 +40,6 @@ namespace ASC.Web.Studio.HttpHandlers
         {
             get { return false; }
         }
-
-        private ILog Log = LogManager.GetLogger("ASC.Web.Template");
 
         public void ProcessRequest(HttpContext context)
         {
@@ -75,7 +72,7 @@ namespace ASC.Web.Studio.HttpHandlers
             context.Response.Cache.SetCacheability(HttpCacheability.Public);
         }
 
-        private XDocument RenderDocument(HttpContext context, string templatePath, string templateName)
+        private static XDocument RenderDocument(HttpContext context, string templatePath, string templateName)
         {
             try
             {
@@ -125,12 +122,12 @@ namespace ASC.Web.Studio.HttpHandlers
             }
             catch (Exception err)
             {
-                Log.Error(err);
+                LogManager.GetLogger("ASC.Web.Template").Error(err);
                 throw;
             }
         }
 
-        private string GetModuleResource(string typeName, string key)
+        private static String GetModuleResource(string typeName, string key)
         {
             try
             {
@@ -151,7 +148,7 @@ namespace ASC.Web.Studio.HttpHandlers
             }
             catch (Exception err)
             {
-                Log.Error(err);
+                LogManager.GetLogger("ASC.Web.Template").Error(err);
                 return string.Empty;
             }
         }

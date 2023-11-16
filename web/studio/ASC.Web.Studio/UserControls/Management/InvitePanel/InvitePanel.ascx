@@ -1,11 +1,10 @@
 <%@ Control Language="C#" AutoEventWireup="true" CodeBehind="InvitePanel.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Management.InvitePanel" %>
-<%@ Import Namespace="ASC.Core" %>
 <%@ Import Namespace="ASC.Web.Core.Utility" %>
 <%@ Import Namespace="ASC.Web.Core.WhiteLabel" %>
 <%@ Import Namespace="ASC.Web.Studio.Core" %>
 <%@ Import Namespace="ASC.Web.Studio.Core.Users" %>
 <%@ Import Namespace="ASC.Web.Studio.Utility" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <div id="invitePanelContainer" class="display-none"
     data-header="<%= Resource.InviteLinkTitle %>"
@@ -19,7 +18,7 @@
             <%= UserControlsCommonResource.TariffUserLimitReason%>
             <%= CustomNamingPeople.Substitute<Resource>("KeepTariffInviteGuests").HtmlEncode() %>
         </p>
-        <% if (TenantExtra.EnableTariffSettings) { %>
+        <% if (TenantExtra.EnableTarrifSettings) { %>
         <a href="<%= TenantExtra.GetTariffPageLink() %>">
             <%= Resource.UpgradePlan %>
         </a>
@@ -40,11 +39,10 @@
                     <% } %>
 
                     <div id="chkVisitorContainer" class="clearFix">
-                        <input type="checkbox" id="chkVisitor" <%= EnableInviteLink && EnableInviteLinkVisitor ? "" : "disabled=\"disabled\"" %>  <%= EnableInviteLink ? "" : "checked=\"checked\"" %>/>
-                        <label for="chkVisitor" <%= EnableInviteLinkVisitor ? "" : IsFreeTariff ? "title=\""+ Resource.DisableAddGuest +"\" class=\"disable-help-block-right\"" : "title=\""+ Resource.MaxGuestExceeded +"\" class=\"disable-help-block-right\""%>><%= CustomNamingPeople.Substitute<Resource>("InviteUsersAsCollaborators").HtmlEncode() %></label>
-                         <% if (EnableInviteLinkVisitor) { %>
+                        <input type="checkbox" id="chkVisitor" <%= EnableInviteLink ? "" : "disabled=\"disabled\" checked=\"checked\"" %> />
+                        <label for="chkVisitor"><%= CustomNamingPeople.Substitute<Resource>("InviteUsersAsCollaborators").HtmlEncode() %></label>
+
                         <input id="hiddenVisitorLink" type="hidden" value="<%= HttpUtility.HtmlEncode(GeneratedVisitorLink) %>" />
-                         <% } %>
                         <% if (EnableInviteLink) { %>
                         <input id="hiddenUserLink" type="hidden" value="<%= HttpUtility.HtmlEncode(GeneratedUserLink) %>" />
                         <% } %>
@@ -55,7 +53,7 @@
                 </div>
             </div>
         </div>
-        <% if (!CoreContext.Configuration.CustomMode && CompanyWhiteLabelSettings.Instance.IsDefault) { %>
+        <% if (CompanyWhiteLabelSettings.Instance.IsDefault) { %>
         <ul id="shareInviteLinkViaSocPanel" class="clearFix">
             <li><a class="facebook" target="_blank" title="<%= Resource.TitleFacebook %>"></a></li>
             <li><a class="twitter" target="_blank" title="<%= Resource.TitleTwitter %>"></a></li>

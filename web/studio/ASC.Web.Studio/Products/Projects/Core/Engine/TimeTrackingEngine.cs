@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
-
 using ASC.Projects.Core.DataInterfaces;
 using ASC.Projects.Core.Domain;
 
@@ -39,7 +38,7 @@ namespace ASC.Projects.Engine
             while (true)
             {
                 var timeSpend = DaoFactory.TimeSpendDao.GetByFilter(filter, isAdmin, anyOne);
-                timeSpend = GetTasks(timeSpend).Where(r => r.Task != null).ToList();
+                timeSpend = GetTasks(timeSpend).Where(r=> r.Task != null).ToList();
 
                 if (filter.LastId != 0)
                 {

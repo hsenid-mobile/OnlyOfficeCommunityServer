@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,10 @@
 */
 
 
-using System;
-using System.Linq;
-
 using ASC.Core;
 using ASC.Security.Cryptography;
-
+using System;
+using System.Linq;
 using ConfigurationConstants = ASC.Core.Configuration.Constants;
 using UserConstants = ASC.Core.Users.Constants;
 

@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ window.administrationManager = (function($) {
             window.Teamlab.bind(window.Teamlab.events.addMailGroup, onAddMailGroup);
             window.Teamlab.bind(window.Teamlab.events.removeMailGroup, onRemoveMailGroup);
             window.Teamlab.bind(window.Teamlab.events.removeMailDomain, onRemoveMailDomain);
-            editMailboxModal.events.on('onupdatemailbox', onUpdateMailbox);
-            editMailGroupModal.events.on('onupdategroup', onUpdateMailgroup);
+            editMailboxModal.events.bind('onupdatemailbox', onUpdateMailbox);
+            editMailGroupModal.events.bind('onupdategroup', onUpdateMailgroup);
 
             administrationPage.init();
         }
@@ -73,16 +73,11 @@ window.administrationManager = (function($) {
         mailbox.aliases = aliases;
         mailbox.user = {};
         mailbox.user.id = serverMailbox.userId;
-
-        if (serverMailbox.userDisplayName && serverMailbox.userDisplayName.length > 0) {
-            mailbox.user.displayName = serverMailbox.userDisplayName;
-        } else {
-            var contacts = contactsManager.getTLContacts();
-            for (var i = 0; i < contacts.length; i++) {
-                if (serverMailbox.userId == contacts[i].id) {
-                    mailbox.user.displayName = contacts[i].displayName;
-                    break;
-                }
+        var contacts = contactsManager.getTLContacts();
+        for (var i = 0; i < contacts.length; i++) {
+            if (serverMailbox.userId == contacts[i].id) {
+                mailbox.user.displayName = contacts[i].displayName;
+                break;
             }
         }
         return mailbox;
@@ -372,7 +367,7 @@ window.administrationManager = (function($) {
 
 
     function loadData() {
-        serviceManager.getMailServerFullInfo({}, { error: administrationError.getErrorHandler("getMailServerFullInfo") }, ASC.Resources.Master.ResourceJS.LoadingProcessing);
+        serviceManager.getMailServerFullInfo({}, { error: administrationError.getErrorHandler("getMailServerFullInfo") }, ASC.Resources.Master.Resource.LoadingProcessing);
     }
 
     return {

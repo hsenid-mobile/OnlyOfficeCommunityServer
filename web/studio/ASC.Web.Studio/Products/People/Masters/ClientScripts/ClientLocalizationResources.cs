@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 
 
 using System;
+using System.Web;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-
-using ASC.Web.Core.Client.HttpHandlers;
-using ASC.Web.People.Classes;
 using ASC.Web.People.Core.Import;
 using ASC.Web.People.Resources;
+using ASC.Web.Core.Client.HttpHandlers;
+using ASC.Web.People.Classes;
 using ASC.Web.Studio.Core.Users;
-using ASC.Web.Studio.PublicResources;
+using Resources;
 
 namespace ASC.Web.People.Masters.ClientScripts
 {
@@ -38,7 +37,7 @@ namespace ASC.Web.People.Masters.ClientScripts
 
         protected override IEnumerable<KeyValuePair<string, object>> GetClientVariables(HttpContext context)
         {
-            Func<ImportParameters, object> parametersTemplate = r => new { id = r.Id, title = r.Title() };
+            Func<ImportParameters, object> parametersTemplate = r => new {id = r.Id, title = r.Title()};
 
             return new List<KeyValuePair<string, object>>(3)
             {
@@ -83,6 +82,11 @@ namespace ASC.Web.People.Masters.ClientScripts
             if (Studio.ThirdParty.ImportContacts.Google.Enable)
             {
                 importFromList.Add(new ImportDataSource(ImportFromWhatEnum.Google, PeopleResource.ImportFromGoogle));
+            }
+
+            if (Studio.ThirdParty.ImportContacts.Yahoo.Enable)
+            {
+                importFromList.Add(new ImportDataSource(ImportFromWhatEnum.Yahoo, PeopleResource.ImportFromYahoo));
             }
 
             return importFromList;

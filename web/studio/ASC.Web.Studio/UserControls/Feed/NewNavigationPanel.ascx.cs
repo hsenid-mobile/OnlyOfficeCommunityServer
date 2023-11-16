@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@
 
 using System;
 using System.Web.UI;
-
 using ASC.Web.Core;
-using ASC.Web.Studio.UserControls.Common.InviteLink;
 using ASC.Web.Studio.UserControls.Common.Support;
 using ASC.Web.Studio.UserControls.Common.UserForum;
+using ASC.Web.Studio.UserControls.Common.InviteLink;
 
 namespace ASC.Web.Studio.UserControls.Feed
 {
@@ -33,8 +32,6 @@ namespace ASC.Web.Studio.UserControls.Feed
             {
                 case "community":
                     return WebItemSecurity.IsAvailableForMe(WebItemManager.CommunityProductID);
-                case "people":
-                    return WebItemSecurity.IsAvailableForMe(WebItemManager.PeopleProductID);
                 case "crm":
                     return WebItemSecurity.IsAvailableForMe(WebItemManager.CRMProductID);
                 case "projects":

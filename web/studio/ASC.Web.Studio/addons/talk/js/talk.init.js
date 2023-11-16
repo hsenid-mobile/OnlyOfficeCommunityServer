@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ jq(document).ready(function () {
     TMTalk.init();
     var tmTalk = ASC.TMTalk,
         config = tmTalk.Config,
-        TalkResource = tmTalk.TalkResource;
+        resource = tmTalk.Resources;
 
     tmTalk.properties.init("2.0");
     tmTalk.iconManager.init();
@@ -33,7 +33,7 @@ jq(document).ready(function () {
     tmTalk.mucManager.init(config.validSymbols);
     tmTalk.roomsManager.init();
     tmTalk.contactsManager.init();
-    tmTalk.messagesManager.init(TalkResource.ShortDateFormat, TalkResource.FullDateFormat, tmTalk.abbreviatedMonthNames, config.historyLength, tmTalk.abbreviatedDayNames);
+    tmTalk.messagesManager.init(resource.ShortDateFormat, resource.FullDateFormat, tmTalk.abbreviatedMonthNames, config.historyLength, tmTalk.abbreviatedDayNames);
     tmTalk.connectionManager.init(config.boshUri, config.jabberAccount, config.resourcePriority, config.clientInactivity);
     tmTalk.properties.item("addonID", config.addonID);
     tmTalk.properties.item("enabledMassend", config.enabledMassend);
@@ -96,8 +96,8 @@ jq(document).ready(function () {
             }
         }, 1000);
     }
-    jQuery(window).on("focus", function () { reconnect();});
-    jQuery(window).on("click", function () { reconnect();});
+    jQuery(window).focus(function () { reconnect();});
+    jQuery(window).click(function () { reconnect();});
 
     setInterval(function () {
         if (!isConnected && navigator.onLine && !ASC.TMTalk.connectionManager.conflict && ASC.TMTalk.connectionManager.status().id == 0) {

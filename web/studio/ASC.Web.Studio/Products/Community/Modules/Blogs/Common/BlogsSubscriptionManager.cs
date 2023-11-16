@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,13 @@
 using System;
 using System.Collections.Generic;
 using System.Web;
-
 using ASC.Blogs.Core;
 using ASC.Blogs.Core.Domain;
 using ASC.Core;
 using ASC.Notify.Model;
 using ASC.Notify.Recipients;
-using ASC.Web.Community.Modules.Blogs.Core.Resources;
 using ASC.Web.Core.Subscriptions;
 using ASC.Web.Core.Users;
-
 using SubscrType = ASC.Web.Core.Subscriptions.SubscriptionType;
 
 namespace ASC.Web.Community.Blogs
@@ -56,12 +53,12 @@ namespace ASC.Web.Community.Blogs
                 if (list.Contains(null))
                 {
                     subscriptionObjects.Add(new SubscriptionObject
-                    {
-                        ID = new Guid(Constants._NewBlogSubscribeCategory).ToString(),
-                        Name = BlogsResource.SubscribeOnNewPostTitle,
-                        URL = string.Empty,
-                        SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_blogSubscriptionTypeID))
-                    });
+                        {
+                            ID = new Guid(Constants._NewBlogSubscribeCategory).ToString(),
+                            Name = ASC.Blogs.Core.Resources.BlogsResource.SubscribeOnNewPostTitle,
+                            URL = string.Empty,
+                            SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_blogSubscriptionTypeID))
+                        });
                 }
             }
 
@@ -79,12 +76,12 @@ namespace ASC.Web.Community.Blogs
                         if (!string.IsNullOrEmpty(id))
                         {
                             subscriptionObjects.Add(new SubscriptionObject
-                            {
-                                ID = id,
-                                Name = DisplayUserSettings.GetFullUserName(new Guid(id)),
-                                URL = VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Blogs/") + "?userid=" + id,
-                                SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_blogPersSubscriptionTypeID))
-                            });
+                                {
+                                    ID = id,
+                                    Name = DisplayUserSettings.GetFullUserName(new Guid(id)),
+                                    URL = VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Blogs/") + "?userid=" + id,
+                                    SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_blogPersSubscriptionTypeID))
+                                });
                         }
                     }
                 }
@@ -107,12 +104,12 @@ namespace ASC.Web.Community.Blogs
                         if (post != null)
                         {
                             subscriptionObjects.Add(new SubscriptionObject
-                            {
-                                ID = post.ID.ToString(),
-                                Name = post.Title,
-                                URL = VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Blogs/ViewBlog.aspx") + "?blogid=" + post.ID.ToString(),
-                                SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_commentSubscriptionTypeID))
-                            });
+                                {
+                                    ID = post.ID.ToString(),
+                                    Name = post.Title,
+                                    URL = VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Blogs/ViewBlog.aspx") + "?blogid=" + post.ID.ToString(),
+                                    SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_commentSubscriptionTypeID))
+                                });
                         }
                     }
                 }
@@ -183,12 +180,12 @@ namespace ASC.Web.Community.Blogs
             if (list.Contains(null))
             {
                 subscriptionObjects.Add(new SubscriptionObject
-                {
-                    ID = new Guid(Constants._NewBlogSubscribeCategory).ToString(),
-                    Name = BlogsResource.SubscribeOnNewPostTitle,
-                    URL = string.Empty,
-                    SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_blogSubscriptionTypeID))
-                });
+                    {
+                        ID = new Guid(Constants._NewBlogSubscribeCategory).ToString(),
+                        Name = ASC.Blogs.Core.Resources.BlogsResource.SubscribeOnNewPostTitle,
+                        URL = string.Empty,
+                        SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_blogSubscriptionTypeID))
+                    });
             }
 
             #endregion
@@ -207,12 +204,12 @@ namespace ASC.Web.Community.Blogs
                     if (!string.IsNullOrEmpty(id))
                     {
                         subscriptionObjects.Add(new SubscriptionObject
-                        {
-                            ID = id,
-                            Name = DisplayUserSettings.GetFullUserName(new Guid(id)),
-                            URL = VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Blogs/") + "?userid=" + id,
-                            SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_blogPersSubscriptionTypeID))
-                        });
+                            {
+                                ID = id,
+                                Name = DisplayUserSettings.GetFullUserName(new Guid(id)),
+                                URL = VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Blogs/") + "?userid=" + id,
+                                SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_blogPersSubscriptionTypeID))
+                            });
                     }
                 }
             }
@@ -236,12 +233,12 @@ namespace ASC.Web.Community.Blogs
                     if (post != null)
                     {
                         subscriptionObjects.Add(new SubscriptionObject
-                        {
-                            ID = post.ID.ToString(),
-                            Name = post.Title,
-                            URL = VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Blogs/ViewBlog.aspx") + "?blogid=" + post.ID.ToString(),
-                            SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_commentSubscriptionTypeID))
-                        });
+                            {
+                                ID = post.ID.ToString(),
+                                Name = post.Title,
+                                URL = VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Blogs/ViewBlog.aspx") + "?blogid=" + post.ID.ToString(),
+                                SubscriptionType = GetSubscriptionTypes().Find(st => st.ID.Equals(_commentSubscriptionTypeID))
+                            });
                     }
                 }
             }
@@ -258,7 +255,7 @@ namespace ASC.Web.Community.Blogs
                     new SubscrType
                         {
                             ID = _blogSubscriptionTypeID,
-                            Name = BlogsResource.SubscribeOnNewPostTitle,
+                            Name = ASC.Blogs.Core.Resources.BlogsResource.SubscribeOnNewPostTitle,
                             NotifyAction = Constants.NewPost,
                             Single = true,
                             IsEmptySubscriptionType = new IsEmptySubscriptionTypeDelegate(IsEmptySubscriptionType),
@@ -267,7 +264,7 @@ namespace ASC.Web.Community.Blogs
                     new SubscrType
                         {
                             ID = _blogPersSubscriptionTypeID,
-                            Name = BlogsResource.SubscribeOnAuthorTitle,
+                            Name = ASC.Blogs.Core.Resources.BlogsResource.SubscribeOnAuthorTitle,
                             NotifyAction = Constants.NewPostByAuthor,
                             GetSubscriptionObjects = new GetSubscriptionObjectsDelegate(GetSubscriptionObjectsByType),
                             IsEmptySubscriptionType = new IsEmptySubscriptionTypeDelegate(IsEmptySubscriptionType)
@@ -275,7 +272,7 @@ namespace ASC.Web.Community.Blogs
                     new SubscrType
                         {
                             ID = _commentSubscriptionTypeID,
-                            Name = BlogsResource.SubscribeOnNewCommentsTitle,
+                            Name = ASC.Blogs.Core.Resources.BlogsResource.SubscribeOnNewCommentsTitle,
                             NotifyAction = Constants.NewComment,
                             GetSubscriptionObjects = new GetSubscriptionObjectsDelegate(GetSubscriptionObjectsByType),
                             IsEmptySubscriptionType = new IsEmptySubscriptionTypeDelegate(IsEmptySubscriptionType)

@@ -214,6 +214,15 @@ namespace ASC.Web.CRM.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current opportunity.
+        /// </summary>
+        public static string CurrentDeal {
+            get {
+                return ResourceManager.GetString("CurrentDeal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Opportunity at stage.
         /// </summary>
         public static string CurrentDealMilestone {
@@ -264,6 +273,15 @@ namespace ASC.Web.CRM.Resources {
         public static string DealAmount {
             get {
                 return ResourceManager.GetString("DealAmount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Qty.
+        /// </summary>
+        public static string DealCount {
+            get {
+                return ResourceManager.GetString("DealCount", resourceCulture);
             }
         }
         
@@ -547,7 +565,7 @@ namespace ASC.Web.CRM.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Opportunities let you track potential sales. Determine the {0}opportunity stages{1} in accordance with your business process, keep history, assign tasks, upload documents, calculate profit from every client..
+        ///   Looks up a localized string similar to Opportunities let you track potential sales to your clients. Determine the {0}opportunity stages{1} in accordance with your business process, keep history, assign tasks, upload documents, calculate profit with every client..
         /// </summary>
         public static string EmptyContentDealsDescribe {
             get {
@@ -799,6 +817,15 @@ namespace ASC.Web.CRM.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Overdue.
+        /// </summary>
+        public static string Overdue {
+            get {
+                return ResourceManager.GetString("Overdue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Participants.
         /// </summary>
         public static string PeopleInDeal {
@@ -831,6 +858,15 @@ namespace ASC.Web.CRM.Resources {
         public static string ResponsibleDeal {
             get {
                 return ResourceManager.GetString("ResponsibleDeal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customize user fields.
+        /// </summary>
+        public static string SettingCustomFields {
+            get {
+                return ResourceManager.GetString("SettingCustomFields", resourceCulture);
             }
         }
         
@@ -876,6 +912,15 @@ namespace ASC.Web.CRM.Resources {
         public static string TooltipStages {
             get {
                 return ResourceManager.GetString("TooltipStages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Total.
+        /// </summary>
+        public static string Total {
+            get {
+                return ResourceManager.GetString("Total", resourceCulture);
             }
         }
         

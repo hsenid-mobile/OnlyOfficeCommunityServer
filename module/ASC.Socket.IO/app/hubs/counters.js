@@ -1,27 +1,9 @@
-﻿/*
- *
- * (c) Copyright Ascensio System Limited 2010-2020
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-*/
-
-
-module.exports = (io) => {
+﻿module.exports = (io) => {
     const apiRequestManager = require('../apiRequestManager.js');
     const co = require('co');
     const counters = io.of('/counters');
     const onlineUsers = [];
     const uaParser = require('ua-parser-js');
-    var timeInterval;
 
     counters.on('connection', (socket) => {
         const request = socket.client.request;
@@ -45,7 +27,7 @@ module.exports = (io) => {
         socket.join([tenantId, `${tenantId}-${userId}`, `${tenantId}-${userName}`]);
 
         getNewMessagesCount();
-        
+
         socket
             .on('disconnect', () => {
                 if (!onlineUsers[tenantId]) return;
@@ -58,16 +40,10 @@ module.exports = (io) => {
                     delete onlineUsers[tenantId][userId].browsers[browserName];
                 }
                 if (Object.keys(onlineUsers[tenantId][userId].browsers).length === 0) {
-                    
-                    timeInterval = setTimeout(function(){
-                        delete onlineUsers[tenantId][userId];
-                        if(typeof onlineUsers[tenantId][userId] != "undefined") return;
-            
-                        counters.to(tenantId).emit('renderOfflineUser', userId);
-                        updateMailUserActivity(socket.client.request, false);
-                        timeInterval = undefined;
-                        console.log(`a user ${userName} in portal ${tenantId} disconnected`);
-                    }, 3000);
+                    delete onlineUsers[tenantId][userId];
+                    counters.to(tenantId).emit('renderOfflineUser', userId);
+                    updateMailUserActivity(socket.client.request, false);
+                    console.log(`a user ${userName} in portal ${tenantId} disconnected`);
                 }
             })
             .on('renderOnlineUsers', () => {
@@ -92,11 +68,14 @@ module.exports = (io) => {
 
         function updateMailUserActivity(request, userOnline = true) {
             if(!request.mailEnabled) return;
-            if((!userOnline && typeof onlineUsers[tenantId][userId] != "undefined") || 
-            (userOnline && !onlineUsers[tenantId][userId])) return;
 
-            apiRequestManager.put("mail/accounts/updateuseractivity.json", request, { userOnline });
-            console.log(`updateuseractivity ${userOnline}`);
+            setTimeout(function(){
+                if((!userOnline && typeof onlineUsers[tenantId][userId] != "undefined") || 
+                (userOnline && !onlineUsers[tenantId][userId])) return;
+    
+                apiRequestManager.put("mail/accounts/updateuseractivity.json", request, { userOnline });
+                console.log(`updateuseractivity ${userOnline}`);
+            }, 3000);
         }
 
         function getNewMessagesCount() {
@@ -139,18 +118,13 @@ module.exports = (io) => {
                         if (!onlineUsers[tenantId]) {
                             onlineUsers[tenantId] = {};
                         }
-                        if(timeInterval == undefined){
-                            if (!onlineUsers[tenantId][userId]) {
-                                onlineUsers[tenantId][userId] = {browsers: {},FirstConnection: new Date(), LastConnection: new Date() };
-                                socket.broadcast.to(tenantId).emit('renderOnlineUser', userId);
-                                updateMailUserActivity(socket.client.request);
-                            }
-                            else {
-                                onlineUsers[tenantId][userId].LastConnection = new Date();
-                            }
-                        }else{
-                            clearTimeout(timeInterval);
-                            timeInterval = undefined;
+                        if (!onlineUsers[tenantId][userId]) {
+                            onlineUsers[tenantId][userId] = {browsers: {},FirstConnection: new Date(), LastConnection: new Date() };
+                            socket.broadcast.to(tenantId).emit('renderOnlineUser', userId);
+                            updateMailUserActivity(socket.client.request);
+                        }
+                        else {
+                            onlineUsers[tenantId][userId].LastConnection = new Date();
                         }
                     
                         if (!onlineUsers[tenantId][userId].browsers[browserName]) {
@@ -165,9 +139,6 @@ module.exports = (io) => {
         };
 
         function getCleanIP (ipAddress) {
-			if(typeof(ipAddress) == "undefined"){
-				return "127.0.0.1";
-			}
             const indexOfColon = ipAddress.indexOf(':');
             if (indexOfColon === -1){
                 return ipAddress;

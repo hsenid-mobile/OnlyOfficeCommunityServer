@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ if (typeof window.ASC.Controls.AnchorController === 'undefined') {
 
         var getLabelObject = function(label) {
             var labelObj = {};
-            if (label.trim().length == 0) {
+            if (jq.trim(label).length == 0) {
                 return labelObj;
             }
             var pairs = label.split('&');
@@ -349,8 +349,6 @@ if (typeof window.ASC.Controls.AnchorController === 'undefined') {
                     }
                 }
             }
-
-            PopupKeyUpActionProvider.CloseDialog();
         };
 
         var init = function() {

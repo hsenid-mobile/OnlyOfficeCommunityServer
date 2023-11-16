@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,14 @@
 
 using System;
 using System.Reflection;
-
 using ASC.Common.Logging;
 using ASC.Core;
-using ASC.Core.Common.Contracts;
 using ASC.Notify.Messages;
 using ASC.Web.Core.WhiteLabel;
 
 namespace ASC.Notify
 {
-    class NotifyService : INotifyService, IHealthCheckService
+    class NotifyService : INotifyService
     {
         private static readonly ILog log = LogManager.GetLogger("ASC");
 
@@ -65,15 +63,6 @@ namespace ASC.Notify
             CoreContext.TenantManager.SetCurrentTenant(tenant);
             TenantWhiteLabelSettings.Apply(tenant);
             methodInfo.Invoke(instance, parameters);
-        }
-
-        public HealthCheckResponse CheckHealth()
-        {
-            return HealthCheckResult.ToResponse(new HealthCheckResult
-            {
-                Message = "Service Notify is OK! Warning: Method is not implement. Always return the Healthy status",
-                Status = HealthStatus.Healthy
-            });
         }
     }
 }

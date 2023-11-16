@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
 */
 
 
-using System;
 using System.IO;
-using System.Web;
 using System.Web.UI;
-
 using ASC.Web.Sample.Classes;
+using System;
+using System.Web;
 
 namespace ASC.Web.Sample.Controls
 {
@@ -48,7 +47,7 @@ namespace ASC.Web.Sample.Controls
 
                 CurrentPage = (page ?? string.Empty).ToLowerInvariant();
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 ExceptionMessage = ex.Message;
             }

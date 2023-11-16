@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.Common.Data.Sql;
 using ASC.Core;
 using ASC.Core.Tenants;
@@ -54,14 +53,10 @@ namespace ASC.Projects.Data.DAO
 
         public List<ReportTemplate> GetAutoTemplates()
         {
-            var result = Db.ExecuteList(new SqlQuery(ReportTemplateTable).Select(templateColumns)
+            return Db.ExecuteList(new SqlQuery(ReportTemplateTable).Select(templateColumns)
                                                         .Where("auto", true)
                                                         .OrderBy("tenant_id", true))
                 .ConvertAll(converter);
-
-            result.RemoveAll(item => item == null);
-
-            return result;
         }
 
         public ReportTemplate GetTemplate(int id)
@@ -148,9 +143,6 @@ namespace ASC.Projects.Data.DAO
         private static ReportTemplate ToTemplate(IList<object> r)
         {
             var tenant = CoreContext.TenantManager.GetTenant(Convert.ToInt32(r[7]));
-
-            if (tenant == null) return null;
-
             var template = new ReportTemplate((ReportType)Convert.ToInt32(r[1]))
             {
                 Id = Convert.ToInt32(r[0]),

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 
 using System;
-
 using ASC.Web.Core;
 using ASC.Web.Projects.Core;
-
 using Autofac;
 
 namespace ASC.Projects.Engine
@@ -62,7 +60,7 @@ namespace ASC.Projects.Engine
         public MessageEngine MessageEngine { get { return messageEngine ?? (messageEngine = Container.Resolve<MessageEngine>(DisableNotifications)); } }
 
         private TimeTrackingEngine timeTrackingEngine;
-        public TimeTrackingEngine TimeTrackingEngine { get { return timeTrackingEngine ?? (timeTrackingEngine = Container.Resolve<TimeTrackingEngine>()); } }
+        public TimeTrackingEngine TimeTrackingEngine { get { return timeTrackingEngine ?? (timeTrackingEngine =Container.Resolve<TimeTrackingEngine>()); } }
 
         private ParticipantEngine participantEngine;
         public ParticipantEngine ParticipantEngine { get { return participantEngine ?? (participantEngine = Container.Resolve<ParticipantEngine>()); } }

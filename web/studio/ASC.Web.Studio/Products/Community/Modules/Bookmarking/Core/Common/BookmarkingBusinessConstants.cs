@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,15 @@
 
 
 using System;
-
 using ASC.Notify.Model;
 using ASC.Web.Community.Product;
-
 using Action = ASC.Common.Security.Authorizing.Action;
 
 namespace ASC.Bookmarking.Common
 {
     public static class BookmarkingBusinessConstants
     {
-        public const string BookmarkingDbID = "default";
+        public const string BookmarkingDbID = "community";
 
         public static Guid CommunityProductID = CommunityProduct.ID;
 
@@ -34,11 +32,10 @@ namespace ASC.Bookmarking.Common
 
         public const string BookmarkCreatedID = "new bookmark created";
         public const string BookmarkCommentCreatedID = "new bookmark comment created";
-        public const string MentionForBookmarkComment = "mention for bookmark comment";
 
         #endregion
 
-        public const string BookmarkingActionPattern = "ASC.Web.Community.Modules.Bookmarking.Core.Patterns.action_pattern.xml";
+        public const string BookmarkingActionPattern = "ASC.Web.Community.Bookmarking.Core.Patterns.action_pattern.xml";
 
 
         public static INotifyAction NotifyActionNewBookmark = new NotifyAction(BookmarkCreatedID, "new-bookmark");
@@ -46,7 +43,6 @@ namespace ASC.Bookmarking.Common
 
         public static INotifyAction NotifyActionNewComment = new NotifyAction(BookmarkCommentCreatedID, "new-bookmark-comment");
         internal static Guid NotifyActionNewCommentID = Guid.NewGuid();
-        public static INotifyAction NotifyActionMentionForBookmarkComment = new NotifyAction(MentionForBookmarkComment, "mention-for-bookmark-comment");
 
         public const string SubscriptionRecentBookmarkID = null;
 

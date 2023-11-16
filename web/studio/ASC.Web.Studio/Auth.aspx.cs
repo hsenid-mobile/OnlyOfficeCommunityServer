@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,26 @@
 
 using System;
 using System.Web;
-
 using ASC.Common.Utils;
 using ASC.Core;
-using ASC.Core.Data;
-using ASC.Core.Security.Authentication;
 using ASC.Core.Users;
 using ASC.MessagingSystem;
 using ASC.Web.Core;
-using ASC.Web.Core.Utility.Skins;
 using ASC.Web.Core.WhiteLabel;
+using ASC.Web.Core.Utility.Skins;
 using ASC.Web.Studio.Core;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls;
 using ASC.Web.Studio.UserControls.Common;
 using ASC.Web.Studio.UserControls.Common.AuthorizeDocs;
-using ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;
 using ASC.Web.Studio.Utility;
+using ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;
+using Resources;
 
 namespace ASC.Web.Studio
 {
     public partial class Auth : MainPage
     {
-        protected string LogoPath
-        {
+        protected string LogoPath {
             get { return String.Format("/TenantLogo.ashx?logotype={0}&general={1}", (int)WhiteLabelLogoTypeEnum.Dark, (!TenantLogoManager.IsRetina(Request)).ToString().ToLower()); }
         }
 
@@ -83,15 +79,11 @@ namespace ASC.Web.Studio
 
             if (IsLogout)
             {
-                var cookie = CookiesManager.GetCookies(CookiesType.AuthKey);
-                int loginEventId = CookieStorage.GetLoginEventIdFromCookie(cookie);
-                DbLoginEventsManager.LogOutEvent(loginEventId);
-
                 var user = CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID);
-                var loginName = user.DisplayUserName(false);
-                MessageService.Send(HttpContext.Current.Request, loginName, MessageAction.Logout);
 
+                var loginName = user.DisplayUserName(false);
                 ProcessLogout();
+                MessageService.Send(HttpContext.Current.Request, loginName, MessageAction.Logout);
 
                 if (!string.IsNullOrEmpty(user.SsoNameId))
                 {
@@ -132,7 +124,9 @@ namespace ASC.Web.Studio
             if (CoreContext.Configuration.Personal)
             {
                 Master.DisabledLayoutMedia = true;
-                Master.TopStudioPanel.TopLogo = WebImageSupplier.GetAbsoluteWebPath("personal_logo/logo_personal_auth.svg");
+                Master.TopStudioPanel.TopLogo = TenantLogoManager.IsRetina(Request)
+                                                        ? WebImageSupplier.GetAbsoluteWebPath("personal_logo/logo_personal_auth-@2x.png") 
+                                                        : WebImageSupplier.GetAbsoluteWebPath("personal_logo/logo_personal_auth.png");
                 AutorizeDocuments.Controls.Add(CoreContext.Configuration.CustomMode
                                                    ? LoadControl(AuthorizeDocs.LocationCustomMode)
                                                    : LoadControl(AuthorizeDocs.Location));
@@ -150,9 +144,9 @@ namespace ASC.Web.Studio
 
         public static void ProcessLogout()
         {
+            //logout
             CookiesManager.ClearCookies(CookiesType.AuthKey);
             CookiesManager.ClearCookies(CookiesType.SocketIO);
-
             SecurityContext.Logout();
         }
 
@@ -202,7 +196,7 @@ namespace ASC.Web.Studio
             if (!Enum.TryParse(messageKey, out authMessage)) return null;
             return GetAuthMessage(authMessage);
         }
-
+        
         public static string GetAuthMessage(MessageKey messageKey)
         {
             switch (messageKey)

@@ -1,9 +1,0 @@
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Feed.dll.config
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Feed.xml
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Feed.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Feed.pdb
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Feed\obj\Debug\ASC.Feed.csproj.AssemblyReference.cache
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Feed\obj\Debug\ASC.Feed.csproj.CoreCompileInputs.cache
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Feed\obj\Debug\ASC.Feed.csproj.CopyComplete
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Feed\obj\Debug\ASC.Feed.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Feed\obj\Debug\ASC.Feed.pdb

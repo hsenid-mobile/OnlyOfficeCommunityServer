@@ -1,17 +1,22 @@
 [Unit]
 Description=ONLYOFFICE MailWatchdog Service
-After=network.target syslog.target mysqld.service
-Wants=mysqld.service
+After=network.target syslog.target mysqld.service redis-server.service
+Wants=mysqld.service redis-server.service
 
 [Service]
-Type=notify
+Type=forking
+ExecStartPre=/bin/bash -c 'rm -f /tmp/onlyofficeMailWatchdog'
+ExecStart=/usr/bin/mono-service -d:/var/www/onlyoffice/Services/MailWatchdog -l:/tmp/onlyofficeMailWatchdog /var/www/onlyoffice/Services/MailWatchdog/ASC.Mail.Watchdog.Service.exe
+Environment=MONO_IOMAP=all MONO_PATH=/var/www/onlyoffice/Services/MailWatchdog/
 User=onlyoffice
 Group=onlyoffice
-WorkingDirectory=/var/www/onlyoffice/Services/MailWatchdog/
-ExecStart=/usr/bin/dotnet /var/www/onlyoffice/Services/MailWatchdog/ASC.Mail.Watchdog.Service.dll --urls=http://0.0.0.0:5031 --pathToConf=/etc/onlyoffice/communityserver --pathToNlogConf=/etc/onlyoffice/communityserver --log:dir=/var/log/onlyoffice/mail --log:name=mail-watchdog --ENVIRONMENT=production
+# Give up if ping don't get an answer
 TimeoutSec=600
 
-Restart=always
+# Auto-Restart every 24 hours
+WatchdogSec=24h
+
+Restart=no
 PrivateTmp=false
 
 [Install]

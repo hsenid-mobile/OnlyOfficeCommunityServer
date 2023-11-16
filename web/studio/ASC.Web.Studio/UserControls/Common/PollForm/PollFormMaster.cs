@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,7 @@ using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-
-using ASC.Web.Studio.PublicResources;
+using Resources;
 
 namespace ASC.Web.Studio.UserControls.Common.PollForm
 {
@@ -141,7 +140,7 @@ namespace ASC.Web.Studio.UserControls.Common.PollForm
         {
             base.OnLoad(e);
             Page.RegisterBodyScripts("~/UserControls/Common/PollForm/js/pollform.js")
-                .RegisterStyle("~/UserControls/Common/PollForm/css/style.less");
+                .RegisterStyle("~/UserControls/Common/PollForm/css/style.css");
         }
 
         protected override void OnInit(EventArgs e)

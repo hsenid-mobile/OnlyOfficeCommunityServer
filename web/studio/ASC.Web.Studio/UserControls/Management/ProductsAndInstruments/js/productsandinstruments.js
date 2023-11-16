@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,11 @@ ASC.Settings.ProductsAndInstruments = new function() {
         disableElements: function (disable) {
             if (disable) {
                 LoadingBanner.displayLoading();
-                jq(".web-item-list input[type=checkbox]").prop("disabled", true);
+                jq(".web-item-list input[type=checkbox]").attr("disabled", true);
                 jq("#btnSaveSettings").addClass("disable");
             } else {
                 LoadingBanner.hideLoading();
-                jq(".web-item-list input[type=checkbox]").prop("disabled", false);
+                jq(".web-item-list input[type=checkbox]").removeAttr("disabled");
                 jq("#btnSaveSettings").removeClass("disable");
             }
         },
@@ -70,7 +70,6 @@ ASC.Settings.ProductsAndInstruments = new function() {
                 var cbx = jq(this).find(".web-item-header input[type=checkbox]");
                 var itemId = jq(cbx).attr("data-id");
                 var itemEnabled = jq(cbx).is(":checked");
-                var itemProduct = jq(cbx).attr("id");
 
                 var subItemList = jq(this).find(".web-item-subitem-list");
                 if(subItemList.length > 0 && itemEnabled) {
@@ -88,7 +87,7 @@ ASC.Settings.ProductsAndInstruments = new function() {
                         });
                     });
                     
-                    if (!hasEnabledSubitems && itemProduct != 'cbx_people') itemEnabled = false;
+                    if (!hasEnabledSubitems) itemEnabled = false;
                 }
 
                 data.items.push({
@@ -107,7 +106,7 @@ ASC.Settings.ProductsAndInstruments = new function() {
                 },
                 success: function() {
                     ASC.Settings.ProductsAndInstruments.disableElements(false);
-                    ASC.Settings.ProductsAndInstruments.showInfoPanel(true, ASC.Resources.Master.ResourceJS.SuccessfullySaveSettingsMessage);
+                    ASC.Settings.ProductsAndInstruments.showInfoPanel(true, ASC.Resources.Master.Resource.SuccessfullySaveSettingsMessage);
                     window.location.reload();
                 }
             });
@@ -120,11 +119,11 @@ ASC.Settings.ProductsAndInstruments = new function() {
 (function ($) {
     $(function () {
 
-        jq(".web-item-header input[type=checkbox]").on("change", function () {
+        jq(".web-item-header input[type=checkbox]").change(function () {
             ASC.Settings.ProductsAndInstruments.changeSubItems(this);
         });
         
-        jq("#btnSaveSettings").on("click", function () {
+        jq("#btnSaveSettings").click(function () {
             if (jq(this).hasClass("disable")) return;
             ASC.Settings.ProductsAndInstruments.saveSettings();
         });

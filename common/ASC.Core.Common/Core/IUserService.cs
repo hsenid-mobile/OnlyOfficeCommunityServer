@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using ASC.Core.Users;
 
 namespace ASC.Core
@@ -28,17 +27,11 @@ namespace ASC.Core
 
         UserInfo GetUser(int tenant, Guid id);
 
-        UserInfo GetUser(int tenant, string email);
-
-        UserInfo GetUserByUserName(int tenant, string userName);
-
         UserInfo GetUserByPasswordHash(int tenant, string login, string passwordHash);
 
         UserInfo SaveUser(int tenant, UserInfo user);
 
         void RemoveUser(int tenant, Guid id);
-
-        IEnumerable<string> GetDavUserEmails(int tenant);
 
         byte[] GetUserPhoto(int tenant, Guid id);
 
@@ -63,7 +56,5 @@ namespace ASC.Core
         UserGroupRef SaveUserGroupRef(int tenant, UserGroupRef r);
 
         void RemoveUserGroupRef(int tenant, Guid userId, Guid groupId, UserGroupRefType refType);
-
-        IEnumerable<UserInfo> GetUsersAllTenants(IEnumerable<string> userIds);
     }
 }

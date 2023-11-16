@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,6 @@ using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-
-using ASC.Web.Community.Modules.Forum.Resources;
-using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Core;
 
 namespace ASC.Web.Community.Forum
@@ -56,22 +53,15 @@ namespace ASC.Web.Community.Forum
         {
             ForumContainer.Options.InfoType = InfoType.Alert;
             var sb = new StringBuilder();
-            sb.Append(" ForumMakerProvider.All='" + ForumResource.All + "'; ");
-            sb.Append(" ForumMakerProvider.ConfirmMessage='" + ForumResource.ConfirmMessage + "'; ");
-            sb.Append(" ForumMakerProvider.SaveButton='" + ForumResource.SaveButton + "'; ");
-            sb.Append(" ForumMakerProvider.CancelButton='" + ForumResource.CancelButton + "'; ");
-            sb.Append(" ForumMakerProvider.NameEmptyString='" + ForumResource.NameEmptyString + "'; ");
+            sb.Append(" ForumMakerProvider.All='" + Resources.ForumResource.All + "'; ");
+            sb.Append(" ForumMakerProvider.ConfirmMessage='" + Resources.ForumResource.ConfirmMessage + "'; ");
+            sb.Append(" ForumMakerProvider.SaveButton='" + Resources.ForumResource.SaveButton + "'; ");
+            sb.Append(" ForumMakerProvider.CancelButton='" + Resources.ForumResource.CancelButton + "'; ");
+            sb.Append(" ForumMakerProvider.NameEmptyString='" + Resources.ForumResource.NameEmptyString + "'; ");
             sb.Append(" ForumContainer_PanelInfoID = '" + ForumContainer.GetInfoPanelClientID() + "'; ");
 
-            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
-            {
-                Page.RegisterStyle("~/Products/Community/App_Themes/dark/dark-style.less");
-            }
-            else
-            {
-                Page.RegisterStyle(ForumManager.BaseVirtualPath + "/App_Themes/default/style.less");
-            }
             Page.RegisterBodyScripts(ForumManager.BaseVirtualPath + "/js/forummaker.js")
+                .RegisterStyle(ForumManager.BaseVirtualPath + "/App_Themes/default/style.css")
                 .RegisterInlineScript(sb.ToString());
 
             SearchText = "";

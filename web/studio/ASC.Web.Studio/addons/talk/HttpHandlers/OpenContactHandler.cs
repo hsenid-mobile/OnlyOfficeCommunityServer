@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Text;
 using System.Web;
 using System.Xml.Linq;
-
 using ASC.Web.Core.Jabber;
 using ASC.Web.Studio.Utility;
 
@@ -30,7 +29,7 @@ namespace ASC.Web.Talk.HttpHandlers
         private const string FROM = "from";
         private const string TO = "to";
         private const string FROM_TENANT = "fromtenant";
-        private static readonly TalkConfiguration cfg = new TalkConfiguration();
+        private static TalkConfiguration cfg = new TalkConfiguration();
 
         public bool IsReusable
         {

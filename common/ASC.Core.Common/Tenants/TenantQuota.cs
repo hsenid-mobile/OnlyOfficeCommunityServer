@@ -1,6 +1,6 @@
-﻿/*
+/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,60 +27,43 @@ namespace ASC.Core.Tenants
     public class TenantQuota : ICloneable
     {
         public static readonly TenantQuota Default = new TenantQuota(Tenant.DEFAULT_TENANT)
-        {
-            Name = "Default",
-            MaxFileSize = 25 * 1024 * 1024, // 25Mb
-            MaxTotalSize = long.MaxValue,
-            ActiveUsers = int.MaxValue,
-        };
+            {
+                Name = "Default",
+                MaxFileSize = 25*1024*1024, // 25Mb
+                MaxTotalSize = long.MaxValue,
+                ActiveUsers = int.MaxValue,
+            };
 
-        ///<example type="int">234</example>
-        ///<order>10</order>
         [DataMember(Name = "Id", Order = 10)]
         public int Id { get; private set; }
 
-        ///<example>Name</example>
-        ///<order>20</order>
         [DataMember(Name = "Name", Order = 20)]
         public string Name { get; set; }
 
-        ///<example type="int">12345</example>
-        ///<order>30</order>
         [DataMember(Name = "MaxFileSize", Order = 30)]
         public long MaxFileSize { get; set; }
 
-        ///<example type="int">12345</example>
-        ///<order>40</order>
         [DataMember(Name = "MaxTotalSize", Order = 40)]
         public long MaxTotalSize { get; set; }
 
-        ///<example type="int">2</example>
-        ///<order>50</order>
         [DataMember(Name = "ActiveUsers", Order = 50)]
         public int ActiveUsers { get; set; }
 
-        ///<example>Features</example>
-        ///<order>60</order>
         [DataMember(Name = "Features", Order = 60)]
         public string Features { get; set; }
 
-        ///<example type="double">22.5</example>
-        ///<order>70</order>
         [DataMember(Name = "Price", Order = 70)]
         public decimal Price { get; set; }
 
-        ///<example>AvangateId</example>
-        ///<order>90</order>
+        [DataMember(Name = "Price2", Order = 80)]
+        public decimal Price2 { get; set; }
+
         [DataMember(Name = "AvangateId", Order = 90)]
         public string AvangateId { get; set; }
 
-        ///<example>true</example>
-        ///<order>100</order>
         [DataMember(Name = "Visible", Order = 100)]
         public bool Visible { get; set; }
 
-        ///<example>true</example>
-        ///<order>110</order>
         [DataMember(Name = "Year", Order = 110)]
         public bool Year
         {
@@ -88,8 +71,6 @@ namespace ASC.Core.Tenants
             set { SetFeature("year", value); }
         }
 
-        ///<example>true</example>
-        ///<order>110</order>
         [DataMember(Name = "Year3", Order = 110)]
         public bool Year3
         {
@@ -119,6 +100,12 @@ namespace ASC.Core.Tenants
         {
             get { return GetFeature("open"); }
             set { SetFeature("open", value); }
+        }
+
+        public bool ControlPanel
+        {
+            get { return GetFeature("controlpanel"); }
+            set { SetFeature("controlpanel", value); }
         }
 
         public bool Update
@@ -151,6 +138,12 @@ namespace ASC.Core.Tenants
             set { SetFeature("domain", value); }
         }
 
+        public bool HealthCheck
+        {
+            get { return GetFeature("healthcheck"); }
+            set { SetFeature("healthcheck", value); }
+        }
+
         public bool HasMigration
         {
             get { return GetFeature("migration"); }
@@ -169,6 +162,18 @@ namespace ASC.Core.Tenants
             set { SetFeature("sso", value); }
         }
 
+        public bool Branding
+        {
+            get { return GetFeature("branding"); }
+            set { SetFeature("branding", value); }
+        }
+
+        public bool SSBranding
+        {
+            get { return GetFeature("ssbranding"); }
+            set { SetFeature("ssbranding", value); }
+        }
+
         public bool WhiteLabel
         {
             get { return GetFeature("whitelabel"); }
@@ -181,73 +186,44 @@ namespace ASC.Core.Tenants
             set { SetFeature("customization", value); }
         }
 
-        public bool EnableMailServer
+        public bool DiscEncryption
         {
-            get { return GetFeature("mailserver"); }
-            set { SetFeature("mailserver", value); }
+            get { return GetFeature("discencryption"); }
+            set { SetFeature("discencryption", value); }
         }
 
-        public bool Custom
+        public bool PrivacyRoom
         {
-            get { return GetFeature("custom"); }
-            set { SetFeature("custom", value); }
+            get { return GetFeature("privacyroom"); }
+            set { SetFeature("privacyroom", value); }
         }
 
-        public int CountAdmin
+        public int CountPortals
         {
             get
             {
                 var features = (Features ?? string.Empty).Split(' ', ',', ';').ToList();
-                var admin = features.FirstOrDefault(f => f.StartsWith("admin:"));
-                int countAdmin;
-                if (admin == null || !Int32.TryParse(admin.Replace("admin:", ""), out countAdmin))
+                var portals = features.FirstOrDefault(f => f.StartsWith("portals:"));
+                int countPortals;
+                if (portals == null || !Int32.TryParse(portals.Replace("portals:", ""), out countPortals) || countPortals <= 0)
                 {
-                    countAdmin = Int32.MaxValue;
+                    countPortals = 0;
                 }
-                return countAdmin;
+                return countPortals;
             }
             set
             {
                 var features = (Features ?? string.Empty).Split(' ', ',', ';').ToList();
-                var admin = features.FirstOrDefault(f => f.StartsWith("admin:"));
-                features.Remove(admin);
+                var portals = features.FirstOrDefault(f => f.StartsWith("portals:"));
+                features.Remove(portals);
                 if (value > 0)
                 {
-                    features.Add("admin:" + value);
+                    features.Add("portals:" + value);
                 }
                 Features = string.Join(",", features.ToArray());
             }
         }
 
-        public bool Restore
-        {
-            get { return GetFeature("restore"); }
-            set { SetFeature("restore", value); }
-        }
-
-        public bool AutoBackup
-        {
-            get { return GetFeature("autobackup"); }
-            set { SetFeature("autobackup", value); }
-        }
-
-        public bool Oauth
-        {
-            get { return GetFeature("oauth"); }
-            set { SetFeature("oauth", value); }
-        }
-
-        public bool ContentSearch
-        {
-            get { return GetFeature("contentsearch"); }
-            set { SetFeature("contentsearch", value); }
-        }
-
-        public bool ThirdParty
-        {
-            get { return GetFeature("thirdparty"); }
-            set { SetFeature("thirdparty", value); }
-        }
 
         public TenantQuota(int tenant)
         {

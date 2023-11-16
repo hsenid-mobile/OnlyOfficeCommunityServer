@@ -23,7 +23,6 @@
             position: "absolute",
             fixWinSize: false,
             popup: false,
-            BlockHelper: null,
             BlockHelperID: '', //obligatory  parameter
             enableAutoHide: true,
             close: false,
@@ -37,9 +36,9 @@
                 scrWidth = w.width(),
                 scrHeight = w.height(),
                 addTop = options.addTop-20,
-                addLeft = options.addLeft-29, // the left padding of the arrow
+                addLeft = options.addLeft-29,         // the left padding of the arrow
                 topPadding = w.scrollTop(),
-                leftPadding = w.scrollLeft();
+                leftPadding = w.scrollLeft();            
 
             if (options.position == "fixed") {
                 addTop -= topPadding;
@@ -47,7 +46,7 @@
             }
 
 
-            var $helpBlock = options.BlockHelper || jq('#' + options.BlockHelperID),
+            var $helpBlock = jq('#' + options.BlockHelperID),
                 elem = jq(this),
                 elemPos = elem.offset(),
                 elemPosLeft = elemPos.left,
@@ -59,22 +58,22 @@
             }
 
             if (options.close) {
-                if ($helpBlock.find('.closeBlock').length == 0) {
+                if (jq('#' + options.BlockHelperID + ' .closeBlock').length == 0) {
                     $helpBlock.prepend('<div class="closeBlock"></div>');
-                    $helpBlock.find('.closeBlock').on("click", function() {
+                    jq('#' + options.BlockHelperID + ' .closeBlock').click(function() {
                         $helpBlock.hide();
                     });
                 }
             }
             if (options.next) {
-                if ($helpBlock.find('.buttons').length == 0) {
+                if (jq('#' + options.BlockHelperID + ' .buttons').length == 0) {
                      $helpBlock.append('<div class="buttons"><a class="button gray nextHelp">' 
-                     + ASC.Resources.Master.ResourceJS.ShowNext + '</a><a class="neverShow">'
-                     + ASC.Resources.Master.ResourceJS.NeverShow + '</a></div>');
+                     + ASC.Resources.Master.Resource.ShowNext + '</a><a class="neverShow">'
+                     + ASC.Resources.Master.Resource.NeverShow + '</a></div>');                                     
                 }
-            }
+            }          
 
-            $helpBlock.find('.cornerHelpBlock').remove();
+            jq('#' + options.BlockHelperID + ' ' + '.cornerHelpBlock').remove();
 
             if (options.fixWinSize && (elemPosLeft + addLeft + $helpBlock.outerWidth()) > (leftPadding + scrWidth)) {
                 elemPosLeft = Math.max(0, leftPadding + scrWidth - $helpBlock.outerWidth()) - addLeft;
@@ -103,12 +102,12 @@
 
             if (options.enableAutoHide) {
 
-                jq(document).on("click", function(e) {
+                jq(document).click(function(e) {
                     if (!jq(e.target).parents().addBack().is(elem)) {
                         $helpBlock.hide();
                     }
                 });
-                //                elem.on("click", function(e) {
+                //                elem.click(function(e) {
                 //                    e.stopPropagation();
                 //                });
             }
@@ -119,7 +118,7 @@
               "left": elemPosLeft + addLeft,
               "position": options.position
             });
-            jq(window).on("resize", function(){
+            jq(window).resize(function(){
                 elemPosLeft = elem.offset().left;
                 if ((elemPosLeft + addLeft + $helpBlock.outerWidth()) > jq(window).width()) {
                     elemPosLeft = elemPosLeft - addLeft - $helpBlock.outerWidth() + 40;

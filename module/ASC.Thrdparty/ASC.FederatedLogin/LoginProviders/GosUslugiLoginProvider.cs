@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Web;
-
-using ASC.Core.Common.Configuration;
 using ASC.FederatedLogin.Helpers;
 using ASC.FederatedLogin.Profile;
-
 using JWT;
-using JWT.Algorithms;
-using JWT.Builder;
-using JWT.Serializers;
-
 using Newtonsoft.Json.Linq;
 
 namespace ASC.FederatedLogin.LoginProviders
@@ -83,7 +76,7 @@ namespace ASC.FederatedLogin.LoginProviders
         {
         }
 
-        public GosUslugiLoginProvider(string name, int order, Dictionary<string, Prop> props, Dictionary<string, Prop> additional = null)
+        public GosUslugiLoginProvider(string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
             : base(name, order, props, additional)
         {
         }
@@ -189,11 +182,8 @@ namespace ASC.FederatedLogin.LoginProviders
         }
 
         public override LoginProfile GetLoginProfile(string accessToken)
-        {            
-            var tokenPayloadString = JwtBuilder.Create()
-                                    .WithAlgorithm(new HMACSHA256Algorithm())
-                                    .Decode(accessToken);
-
+        {
+            var tokenPayloadString = JsonWebToken.Decode(accessToken, string.Empty, false);
             var tokenPayload = JObject.Parse(tokenPayloadString);
             if (tokenPayload == null)
             {
@@ -207,15 +197,15 @@ namespace ASC.FederatedLogin.LoginProviders
             {
                 throw new Exception("userinfo is incorrect");
             }
-
+            
             var profile = new LoginProfile
-            {
-                Id = oid,
-                FirstName = userInfo.Value<string>("firstName"),
-                LastName = userInfo.Value<string>("lastName"),
+                {
+                    Id = oid,
+                    FirstName = userInfo.Value<string>("firstName"),
+                    LastName = userInfo.Value<string>("lastName"),
 
-                Provider = ProviderConstants.GosUslugi,
-            };
+                    Provider = ProviderConstants.GosUslugi,
+                };
 
             var userContactsString = RequestHelper.PerformRequest(GosUslugiProfileUrl + oid + "/ctts", "application/x-www-form-urlencoded", headers: new Dictionary<string, string> { { "Authorization", "Bearer " + accessToken } });
             var userContacts = JObject.Parse(userContactsString);

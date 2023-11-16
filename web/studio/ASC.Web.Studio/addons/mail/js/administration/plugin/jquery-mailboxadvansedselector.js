@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 
 (function ($) {
-    var MailResource = ASC.Mail.Resources.MailResource;
+    var resources = ASC.Mail.Resources.MailResource;
     var mailboxadvancedSelector = function(element, options) {
         this.$element = $(element);
         this.options = $.extend({}, $.fn.mailboxadvancedSelector.defaults, options);
@@ -28,7 +28,7 @@
         initAdvSelectorData: function() {
             var that = this;
             that.refrashSelectorData();
-            that.$element.off('click.once').on('click.once', function() {
+            that.$element.unbind('click.once').bind('click.once', function() {
                 that.refrashSelectorData();
             });
         },
@@ -56,7 +56,6 @@
         rewriteObjectItem: function(data) {
             var that = this;
             that.items = data;
-            that.itemsSelectedIds = {};
             that.showItemsListAdvSelector.call(that);
         }
     });
@@ -82,9 +81,9 @@
 
     $.fn.mailboxadvancedSelector.defaults = $.extend({}, $.fn.advancedSelector.defaults, {
         showme: true,
-        noresults: MailResource.MailBoxSelectorNoResult,
-        noitems: MailResource.MailBoxSelectorNoItems,
-        emptylist: MailResource.MailBoxSelectorEmptyList
+        noresults: resources.MailBoxSelectorNoResult,
+        noitems: resources.MailBoxSelectorNoItems,
+        emptylist: resources.MailBoxSelectorEmptyList
     });
 
 })(jQuery, window, document, document.body);

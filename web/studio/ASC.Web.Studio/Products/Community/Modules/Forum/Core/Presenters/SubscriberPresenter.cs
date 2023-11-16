@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using ASC.Forum.Module;
 using ASC.Notify.Model;
 using ASC.Notify.Recipients;
@@ -42,13 +41,13 @@ namespace ASC.Forum
             _view.Subscribe += new EventHandler<SubscribeEventArgs>(SubscribeHandler);
             _view.UnSubscribe += new EventHandler<SubscribeEventArgs>(UnSubscribeHandler);
             _view.GetSubscriptionState += new EventHandler<SubscribeEventArgs>(GetSubscriptionStateHandler);
-
+            
         }
-
+        
         void UnSubscribeHandler(object sender, SubscribeEventArgs e)
         {
             var recipient = (IDirectRecipient)ForumNotifySource.Instance.GetRecipientsProvider().GetRecipient(e.UserID.ToString());
-            if (recipient != null)
+            if(recipient!=null)
                 ForumNotifySource.Instance.GetSubscriptionProvider().UnSubscribe(e.NotifyAction, e.ObjectID, recipient);
         }
 
@@ -59,7 +58,7 @@ namespace ASC.Forum
                 return;
 
             ISubscriptionProvider subscriptionProvider = ForumNotifySource.Instance.GetSubscriptionProvider();
-            List<string> objectIDs = new List<string>(subscriptionProvider.GetSubscriptions(e.NotifyAction, recipient, false));
+            List<string> objectIDs = new List<string>(subscriptionProvider.GetSubscriptions(e.NotifyAction,recipient,false));
 
             if (e.ObjectID == null && objectIDs.Count == 1 && objectIDs[0] == null)
             {
@@ -72,11 +71,11 @@ namespace ASC.Forum
         }
 
         private void SubscribeHandler(object sender, SubscribeEventArgs e)
-        {
+        {            
             var recipient = (IDirectRecipient)ForumNotifySource.Instance.GetRecipientsProvider().GetRecipient(e.UserID.ToString());
-            if (recipient != null)
+            if(recipient!=null)
                 ForumNotifySource.Instance.GetSubscriptionProvider().Subscribe(e.NotifyAction, e.ObjectID, recipient);
-
+                
         }
     }
 }

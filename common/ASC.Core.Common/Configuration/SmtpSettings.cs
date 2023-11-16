@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,21 +43,19 @@ namespace ASC.Core.Configuration
 
         public bool EnableAuth { get; set; }
 
-        public bool UseNtlm { get; set; }
-
         public bool IsDefaultSettings { get; internal set; }
 
         public static SmtpSettings Empty = new SmtpSettings();
 
         private SmtpSettings()
         {
-
+            
         }
 
         public SmtpSettings(string host, string senderAddress)
             : this(host, senderAddress, DefaultSenderDisplayName)
         {
-
+            
         }
 
         public SmtpSettings(string host, string senderAddress, string senderDisplayName)
@@ -103,7 +101,7 @@ namespace ASC.Core.Configuration
             {
                 throw new ArgumentException("Empty user name.", "userName");
             }
-            if (string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty("password"))
             {
                 throw new ArgumentException("Empty password.", "password");
             }
@@ -133,9 +131,9 @@ namespace ASC.Core.Configuration
             var senderDisplayName = HttpUtility.UrlDecode(props[6]) ?? DefaultSenderDisplayName;
 
             var settings = new SmtpSettings(host, port, senderAddress, senderDisplayName)
-            {
-                EnableSSL = 7 < props.Length && !string.IsNullOrEmpty(props[7]) && Convert.ToBoolean(props[7])
-            };
+                {
+                    EnableSSL = 7 < props.Length && !string.IsNullOrEmpty(props[7]) && Convert.ToBoolean(props[7])
+                };
 
             var credentialsUserName = HttpUtility.UrlDecode(props[1]);
             var credentialsUserPassword = HttpUtility.UrlDecode(props[2]);
@@ -144,14 +142,12 @@ namespace ASC.Core.Configuration
             {
                 settings.SetCredentials(credentialsUserName, credentialsUserPassword, credentialsDomain);
                 settings.EnableAuth = true;
-                settings.UseNtlm = 8 < props.Length && !string.IsNullOrEmpty(props[8]) && Convert.ToBoolean(props[8]);
             }
             else
             {
                 settings.EnableAuth = false;
-                settings.UseNtlm = false;
             }
-
+            
             return settings;
         }
 
@@ -165,8 +161,7 @@ namespace ASC.Core.Configuration
                                Port.ToString(),
                                HttpUtility.UrlEncode(SenderAddress),
                                HttpUtility.UrlEncode(SenderDisplayName),
-                               EnableSSL.ToString(),
-                               UseNtlm.ToString());
+                               EnableSSL.ToString());
         }
     }
 }

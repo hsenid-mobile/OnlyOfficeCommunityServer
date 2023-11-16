@@ -1,6 +1,6 @@
-﻿/*
+/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,15 @@
 */
 
 
-using System;
-using System.Linq;
-using System.Web.UI;
-
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.Web.Core;
 using ASC.Web.People.Core;
 using ASC.Web.Studio.UserControls.Statistics;
 using ASC.Web.Studio.Utility;
+using System;
+using System.Linq;
+using System.Web.UI;
 
 
 namespace ASC.Web.People.UserControls
@@ -33,8 +32,6 @@ namespace ASC.Web.People.UserControls
     {
         protected bool HasPendingProfiles;
         protected bool EnableAddUsers;
-        protected bool EnableAddVisitors;
-        protected bool IsFreeTariff;
         protected bool CurrentUserFullAdmin;
         protected bool CurrentUserAdmin;
 
@@ -51,11 +48,9 @@ namespace ASC.Web.People.UserControls
         private void InitData()
         {
             HasPendingProfiles = CoreContext.UserManager.GetUsers().Any(u => u.ActivationStatus == EmployeeActivationStatus.Pending);
-            EnableAddUsers = TenantStatisticsProvider.GetUsersCount() < TenantExtra.GetTenantQuota().ActiveUsers;
-            EnableAddVisitors = CoreContext.Configuration.Standalone || TenantStatisticsProvider.GetVisitorsCount() < TenantExtra.GetTenantQuota().ActiveUsers * Constants.CoefficientOfVisitors;
+            EnableAddUsers =  TenantStatisticsProvider.GetUsersCount() < TenantExtra.GetTenantQuota().ActiveUsers;
             CurrentUserFullAdmin = CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID).IsAdmin();
             CurrentUserAdmin = CurrentUserFullAdmin || WebItemSecurity.IsProductAdministrator(WebItemManager.PeopleProductID, SecurityContext.CurrentAccount.ID);
-            IsFreeTariff = TenantExtra.GetTenantQuota().Free;
         }
     }
 }

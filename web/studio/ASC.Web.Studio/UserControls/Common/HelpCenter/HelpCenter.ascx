@@ -1,5 +1,5 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="HelpCenter.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Common.HelpCenter.HelpCenter" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 <%@ Import Namespace="ASC.Data.Storage" %>
 
 <% if (HelpCenterItems != null)
@@ -12,7 +12,7 @@
     <div class="category-wrapper">
         <span class="expander"></span>
         <a class="menu-item-label outer-text text-overflow" href="<%= HelpLink %>" title="<%= Resource.HelpCenter %>">
-            <span class="menu-item-icon help"><svg class="menu-item-svg" xmlns:xlink="http://www.w3.org/1999/xlink"><use base="<%= WebPath.GetPath("/")%>" href="/skins/default/images/svg/top-studio-menu.svg#svgTopStudioMenuhelp" xlink:href="/skins/default/images/svg/top-studio-menu.svg#svgTopStudioMenuhelp"></use></svg></span>
+            <span class="menu-item-icon help"><svg class="menu-item-svg"><use base="<%= WebPath.GetPath("/")%>" href="/skins/default/images/svg/top-studio-menu.svg#svgTopStudioMenuhelp"></use></svg></span>
             <span class="menu-item-label inner-text"><%= Resource.HelpCenter %></span>
         </a>
     </div>

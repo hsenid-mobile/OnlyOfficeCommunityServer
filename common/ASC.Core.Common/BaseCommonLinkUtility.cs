@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Web;
-
 using ASC.Common.Logging;
 
 namespace ASC.Core.Common
@@ -47,7 +46,7 @@ namespace ASC.Core.Common
             }
         }
 
-        public static void Initialize(string serverUri, bool localhost = true)
+        public static void Initialize(string serverUri)
         {
             if (string.IsNullOrEmpty(serverUri))
             {
@@ -55,7 +54,7 @@ namespace ASC.Core.Common
             }
 
             var uri = new Uri(serverUri.Replace('*', 'x').Replace('+', 'x'));
-            _serverRoot = new UriBuilder(uri.Scheme, localhost ? LOCALHOST : uri.Host, uri.Port);
+            _serverRoot = new UriBuilder(uri.Scheme, LOCALHOST, uri.Port);
             _vpath = "/" + uri.AbsolutePath.Trim('/');
         }
 
@@ -100,12 +99,10 @@ namespace ASC.Core.Common
                     if (!string.IsNullOrEmpty(tenant.MappedDomain))
                     {
                         var mapped = tenant.MappedDomain.ToLowerInvariant();
-                     
                         if (!mapped.Contains(Uri.SchemeDelimiter))
                         {
-                            mapped = result.Scheme + Uri.SchemeDelimiter + mapped;
+                            mapped = Uri.UriSchemeHttp + Uri.SchemeDelimiter + mapped;
                         }
-
                         result = new UriBuilder(mapped);
                     }
                 }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ window.master = {
             peopleImport = ASC.People.Import;
         if (typeof evt.data == "string") {
             try {
-                obj = JSON.parse(evt.data);
+                obj = jQuery.parseJSON(evt.data);
             } catch (err) {
                 return;
             }
@@ -88,14 +88,16 @@ ASC.People.Import = (function () {
         email = '',
         emptyEmail = '',
         info = true,
-        portalLicence = { name: '', cost: '', maxUsers: 0, currectUsers: 0, maxVisitors: 0, visitorsCount: 0, isStandalone: false },
+        portalLicence = { name: '', cost: '', maxUsers: 0, currectUsers: 0 },
         errorImport = '',
         flatUploader = null,
         msUploader = null,
         columns,
         clip = null,
+        alreadyChecking = false,
         toWizard = true,
         manualImport = false,
+        progressBarIntervalId = null,
         encoding = 0,
         separator = 0,
         delimiter = 0,
@@ -114,8 +116,7 @@ ASC.People.Import = (function () {
         classLastName = '.lastName',
         classEmail = '.studioEditableInput.email',
         classUserItem = '.userItem',
-        classIncorrectBox = 'incorrectBox',
-        statuses = [{ title: jq("#createNewButton").find(".dropdown-item").eq(0).text(), id: 0 }, { title: jq("#createNewButton").find(".dropdown-item").eq(1).text(), id: 1 }, { title: ASC.People.Resources.PeopleResource.NotImport, id: 2 }];
+        classIncorrectBox = 'incorrectBox';
 
     var $blockProcess,
         $okwin,
@@ -149,6 +150,7 @@ ASC.People.Import = (function () {
         $errorBubble,
         $okImportUsers,
         $saveSettingsBtn,
+        $importAsCollaborators,
         $importBtn,
         $importCancelBtn,
         $importLimitBtn,
@@ -181,9 +183,6 @@ ASC.People.Import = (function () {
         $impBtn = jq("#importUsers .middle-button-container .impBtn");
         $cncBtn = jq("#importUsers .middle-button-container .cncBtn");
         $deleteUserButton = jq("#deleteUserButton");
-        $addAsUserButton = jq("#addAsUser");
-        $addAsGuestButton = jq("#addAsGuest");
-        $notAddButton = jq("#notAdd");
         $userList = jq('#userList');
         $fnError = jq('#fnError');
         $lnError = jq('#lnError');
@@ -208,6 +207,7 @@ ASC.People.Import = (function () {
         $okImportUsers = jq('.okImportUsers');
         $importAreaBlock = jq('#importAreaBlock');
         $saveSettingsBtn = jq("#saveSettingsBtn");
+        $importAsCollaborators = jq("#importAsCollaborators");
         $importBtn = jq("#import-btn");
         $importCancelBtn = jq("#import-cancel-btn");
         $importLimitBtn = jq("#import-limit-btn");
@@ -220,7 +220,6 @@ ASC.People.Import = (function () {
         $importUsers = jq('#importUsers');
         $mainPageContent = jq('.mainPageContent');
         $restr = jq('.restr');
-        $errorContainer = jq(".error-container");
 
         $okImportUsers.on('click', function () { ASC.People.Import.hideInfoWindow('okcss'); });
         $importAreaBlock.find('.file').on('click', changeVisionFileSelector);
@@ -229,6 +228,11 @@ ASC.People.Import = (function () {
         $saveSettingsBtn.on('click', function () {
             addUser();
             checkEmptyUserItem();
+            checkCountUsersForAdd();
+        });
+        $importAsCollaborators.on('click', changeInviteLinkType);
+        $importAreaBlock.find('.HelpCenterSwitcher').on('click', function () {
+            jq(this).helper({ BlockHelperID: 'answerForHelpInviteGuests', position: 'fixed' });
         });
         $importBtn.on('click', importList);
         $importCancelBtn.on('click', hideImportWindow);
@@ -250,9 +254,6 @@ ASC.People.Import = (function () {
         });
         $userList.on('click', '.check', indetermCheck);
         $deleteUserButton.on('click', removeChecked);
-        $addAsUserButton.on('click', userChecked);
-        $addAsGuestButton.on('click', guestChecked);
-        $notAddButton.on('click', notAddChecked);
         $importUsers.on('click', '.newRandomUser', updateExampleValues);
         $mainPageContent.on('click', function (e) { trackError(jq(e.target)); });
         $restr.on('scroll', function () { trackError(jq(document.activeElement)); });
@@ -272,7 +273,7 @@ ASC.People.Import = (function () {
         var dataPath = flatUploader._settings.data;
 
         $importFrom.advancedSelector({
-            height: 30 * itemsImportFrom.length,
+            height: 26 * itemsImportFrom.length,
             onechosen: true,
             showSearch: false,
             itemsChoose: itemsImportFrom,
@@ -292,10 +293,14 @@ ASC.People.Import = (function () {
                     var button = frame.getElementsByClassName('google');
                     jq(button).trigger("click");
                 }
+                if (item.id === 2) {
+                    var button = frame.getElementsByClassName('yahoo');
+                    jq(button).trigger("click");
+                }
             });
 
         $delimiter.advancedSelector({
-            height: 30 * itemsDelimiter.length,
+            height: 26 * itemsDelimiter.length,
             onechosen: true,
             showSearch: false,
             itemsChoose: itemsDelimiter,
@@ -312,7 +317,7 @@ ASC.People.Import = (function () {
         $delimiter.advancedSelector("selectBeforeShow", itemsDelimiter[0]);
 
         $separator.advancedSelector({
-            height: 30 * itemsSeparator.length,
+            height: 26 * itemsSeparator.length,
             onechosen: true,
             showSearch: false,
             itemsChoose: itemsSeparator,
@@ -329,7 +334,7 @@ ASC.People.Import = (function () {
         $separator.advancedSelector("selectBeforeShow", itemsSeparator[0]);
 
         $encoding.advancedSelector({
-            height: 30 * itemsEncoding.length,
+            height: 26 * itemsEncoding.length,
             onechosen: true,
             showSearch: false,
             itemsChoose: itemsEncoding,
@@ -350,7 +355,7 @@ ASC.People.Import = (function () {
         $userListDQ.on("change", ".userItem .email [type='text']", eraseError);
         $userListDQ.on("change", ".userItem .name .firstname [type='text']", eraseError);
         $userListDQ.on("change", ".userItem .name .lastname [type='text']", eraseError);
-
+        $userListDQ.on("click", ".userItem .remove div", removeItem);
 
         fName = resources.ImportContactsFirstName;
         emptyFName = resources.ImportContactsEmptyFirstName;
@@ -362,13 +367,14 @@ ASC.People.Import = (function () {
         errorImportFileTooLarge = resources.ImportContactsFromFileErrorTooLarge;
         errorEmail = resources.ImportContactsIncorrectFields;
 
-        updateQuota();
+        teamlab.getQuotas({}, {
+            success: function (params, quota) {
+                portalLicence.maxUsers = quota.maxUsersCount;
+                portalLicence.currectUsers = quota.usersCount;
+            }
+        });
 
-        $addAsUserButton.val(statuses[0].title);
-        $addAsGuestButton.val(statuses[1].title);
-        $notAddButton.val(statuses[2].title);
-
-        jq(document).on("click", function (event) {
+        jq(document).click(function (event) {
             jq.dropdownToggle({ rightPos: true }).registerAutoHide(event, '.file', '.fileSelector');
             jq('#upload img').attr('src', StudioManager.GetImage('loader_16.gif'));
         });
@@ -383,7 +389,8 @@ ASC.People.Import = (function () {
         jq('#donor tr').clone().appendTo('#userList');
 
         $impBtn.add($cncBtn).addClass("disable");
-        $checkAll.prop("disabled", true);
+        $checkAll.attr("disabled", "disabled");
+
         PopupKeyUpActionProvider.ClearActions();
         PopupKeyUpActionProvider.EnterActionCallback = callback;
         PopupKeyUpActionProvider.EnterAction = 'ASC.People.Import.checkAndAdd();';
@@ -403,7 +410,7 @@ ASC.People.Import = (function () {
             clip = ASC.Clipboard.create(url, "inviteLinkCopy", {
                 onComplete: function () {
                     if (typeof (window.toastr) !== "undefined") {
-                        toastr.success(ASC.Resources.Master.ResourceJS.LinkCopySuccess);
+                        toastr.success(ASC.Resources.Master.Resource.LinkCopySuccess);
                     } else {
                         jq("#inviteUserLink, #inviteLinkCopy").yellowFade();
                     }
@@ -443,9 +450,9 @@ ASC.People.Import = (function () {
     };
 
     function checkAndAdd() {
-        var firstName = $firstName.val().trim(),
-            lastName = $lastName.val().trim(),
-            address = $email.val().trim();
+        var firstName = jQuery.trim($firstName.val()),
+            lastName = jQuery.trim($lastName.val()),
+            address = jQuery.trim($email.val());
 
         checkInputValues(firstName, firstName == fName, $firstName, $fnError);
         checkInputValues(lastName, lastName == lName, $lastName, $lnError);
@@ -460,7 +467,7 @@ ASC.People.Import = (function () {
                 $inputControl.addClass(classIncorrectBox);
                 makeVisible($errorControl);
             } else {
-                $inputControl.trigger("focus");
+                $inputControl.focus();
             }
             return;
         } else {
@@ -472,19 +479,19 @@ ASC.People.Import = (function () {
     function addUser() {
         var items = $userList.find('.userItem');
 
-        var firstName = $firstName.val().trim(),
-            lastName = $lastName.val().trim(),
-            address = $email.val().trim();
+        var firstName = jQuery.trim($firstName.val()),
+            lastName = jQuery.trim($lastName.val()),
+            address = jQuery.trim($email.val());
 
         if (!isContainErrors(items, firstName, lastName, address)) {
             $userList.find('tr').not('.userItem').remove();
             $email.add($firstName).add($lastName).removeClass(classIncorrectBox);
             makeHidden($fnError.add($lnError).add($eaError));
             appendUser({ FirstName: $firstName.val(), LastName: $lastName.val(), Email: $email.val() });
-            $firstName.val('').trigger("blur");
-            $lastName.val('').trigger("blur");
-            $email.val('').trigger("blur");
-            $firstName.trigger("focus");
+            $firstName.val('').blur();
+            $lastName.val('').blur();
+            $email.val('').blur();
+            $firstName.focus();
         } else {
             checkValuesBeforeAdd(address, !isValidEmail(address), $email, $eaError);
             checkValuesBeforeAdd(lastName, lastName == lName || !userNameRegExp.test(lastName), $lastName, $lnError);
@@ -496,7 +503,7 @@ ASC.People.Import = (function () {
         if (currentVal == '' || hasError) {
             $inputControl.addClass(classIncorrectBox);
             makeVisible($errorControl);
-            $inputControl.trigger("focus");
+            $inputControl.focus();
         } else {
             $inputControl.removeClass(classIncorrectBox);
             makeHidden($errorControl);
@@ -530,7 +537,7 @@ ASC.People.Import = (function () {
 
     function isExists(items, email, select) {
         for (var index = 0, n = items.length; index < n; index++) {
-            if (jq(items[index]).find('.email input').val().trim() == email) {
+            if (jQuery.trim(jq(items[index]).find('.email input').val()) == email) {
                 if (select) {
                     jq(items[index]).find('.email').addClass('incorrectValue');
                 }
@@ -541,6 +548,17 @@ ASC.People.Import = (function () {
         return false;
     };
 
+    function removeItem() {
+        var $item = jq(this).parent().parent();
+        $item.addClass('remove');
+        if ($userList.find(".userItem").not('.remove').length == 0) {
+            jq('#addUserBlock').removeClass('bordered');
+        }
+        $item.remove();
+
+        checkEmptyUserItem();
+    };
+
     function removeChecked() {
         var $items = jq('.check:checkbox:checked').parent().parent();
         jQuery.each($items, function () {
@@ -549,63 +567,17 @@ ASC.People.Import = (function () {
         checkEmptyUserItem();
     };
 
-    function userChecked() {
-        var $items = jq('.check:checkbox:checked').parent().parent();
-        jQuery.each($items, function () {
-            if (jq(this).find('.statusValue').text() == statuses[1].title) {
-                portalLicence.visitorsCount--;
-            }
-            if (jq(this).find('.statusValue').text() != statuses[0].title) {
-                portalLicence.currectUsers++;
-                jq(this).find('.statusValue').text(statuses[0].title);
-            } 
-        });
-        clearCheckBox();
-    }
-
-    function clearCheckBox() {
-        jq(".check").prop('checked', false);
-        $checkAll.prop({ 'indeterminate': false, 'checked': false });
-        checkGroupButtonActive();
-    }
-
-    function guestChecked() {
-        var $items = jq('.check:checkbox:checked').parent().parent();
-        jQuery.each($items, function () {
-            if (jq(this).find('.statusValue').text() == statuses[0].title) {
-                portalLicence.currectUsers--;
-            }
-            if (jq(this).find('.statusValue').text() != statuses[1].title) {
-                portalLicence.visitorsCount++;
-                jq(this).find('.statusValue').text(statuses[1].title);
-            } 
-        });
-        clearCheckBox();
-    }
-
-    function notAddChecked() {
-        var $items = jq('.check:checkbox:checked').parent().parent();
-        jQuery.each($items, function () {
-            if (jq(this).find('.statusValue').text() == statuses[0].title) {
-                portalLicence.currectUsers--;
-            }
-            if (jq(this).find('.statusValue').text() == statuses[1].title) {
-                portalLicence.visitorsCount--;
-            }
-            if (jq(this).find('.statusValue').text() != statuses[2].title) {
-                jq(this).find('.statusValue').text(statuses[2].title);
-            }
-        });
-        clearCheckBox()
-    }
-
     function checkEmptyUserItem() {
         checkButtonActive();
         checkGroupButtonActive();
         $checkAll.prop({ 'indeterminate': false, 'checked': false });
         if ($userList.find('.userItem').length == 0) {
             $checkAll.prop('disabled', true);
-        } 
+            $importAsCollaborators.prop('disabled', true);
+        } else {
+            $checkAll.prop('disabled', false);
+            $importAsCollaborators.prop('disabled', false);
+        }
         checkCountUsersForAdd();
     };
 
@@ -616,15 +588,13 @@ ASC.People.Import = (function () {
             items.push(this);
         });
         var arr = new Array();
+
         for (var i = 0, n = items.length; i < n; i++) {
-            if (jq(items[i]).find('.statusValue').text() != statuses[2].title) {
             arr.push({
-                "FirstName": checkValue(jq(items[i]).find('.name .firstname .studioEditableInput').val().trim(), emptyFName),
-                "LastName": checkValue(jq(items[i]).find('.name .lastname .studioEditableInput').val().trim(), emptyLName),
-                "Email": jq(items[i]).find('.email input').val().trim(),
-                "Status": jq(items[i]).find('.statusValue').text() == statuses[0].title ? 1 : 2
+                "FirstName": checkValue(jQuery.trim(jq(items[i]).find('.name .firstname .studioEditableInput').val()), emptyFName),
+                "LastName": checkValue(jQuery.trim(jq(items[i]).find('.name .lastname .studioEditableInput').val()), emptyLName),
+                "Email": jQuery.trim(jq(items[i]).find('.email input').val())
             });
-        }
         }
         return arr;
     };
@@ -668,77 +638,7 @@ ASC.People.Import = (function () {
             $counter.append(' (' + usersCount + ')');
             cropTitle($text, $counter);
         }
-        createWindows();
     };
-
-    function createWindows() {
-        var usersCount = $userList.find('.userItem').length;
-        $impBtn.add($cncBtn).removeClass("disabled");
-        for (let i = 0; i < usersCount; i++) {
-            if (jq('.statusValue').eq(i).text() == "") {
-                var idStatus;
-                if (portalLicence.maxUsers - portalLicence.currectUsers > 0) {
-                    idStatus = 0;
-                    jq('.statusValue').eq(i).text(statuses[idStatus].title);
-                    portalLicence.currectUsers++;
-                } else if (portalLicence.isStandalone || portalLicence.maxVisitors - portalLicence.visitorsCount > 0) {
-                    idStatus = 1;
-                    jq('.statusValue').eq(i).text(statuses[idStatus].title);
-                    portalLicence.visitorsCount++;
-                } else {
-                    idStatus = 2;
-                    jq('.statusValue').eq(i).text(statuses[idStatus].title);
-                }
-                jq(".status").eq(i).advancedSelector(
-                    {
-                        height: 30 * 3,
-                        itemsChoose: statuses,
-                        showSearch: false,
-                        onechosen: true,
-                        sortMethod: function () { return 0; }
-                    }
-                );
-            }
-        }
-        jq(".status").on("click", function (event, item) {
-            let value = jq(this).children().text();
-            if (value != statuses[0].title && portalLicence.maxUsers - portalLicence.currectUsers <= 0) {
-                jq(this).parent().find(".advanced-selector-list").children().eq(0).addClass("disableList");
-            }
-            if (value != statuses[1].title && portalLicence.maxVisitors - portalLicence.visitorsCount <= 0 && !portalLicence.isStandalone) {
-                jq(this).parent().find(".advanced-selector-list").children().eq(1).addClass("disableList");
-                console.log("sss");
-            }
-            jq(this).parent().find(".advanced-selector-list").children().removeClass("selected");
-            jq(this).parent().find(".advanced-selector-list").children().eq(statuses.find(i => i.title == value).id).addClass("selected");
-        });
-
-        jq(".status").on("showList", function (event, item) {
-            var status = statuses.find(function (i) { return i.id == item.id; });
-            var lastValue = jq(this).children('.statusValue').text();
-            if (status.title == statuses[0].title && lastValue != statuses[0].title) {
-                if (lastValue == statuses[1].title) {
-                    portalLicence.visitorsCount--;
-                    portalLicence.currectUsers++;
-                } else {
-                    portalLicence.currectUsers++
-                }
-            } else if (status.title == statuses[1].title && lastValue != statuses[1].title) {
-                if (lastValue == statuses[0].title) {
-                    portalLicence.visitorsCount++;
-                    portalLicence.currectUsers--;
-                } else {
-                    portalLicence.visitorsCount++
-                }
-            } else if (lastValue == statuses[0].title && status.title != statuses[0].title) {
-                portalLicence.currectUsers--;
-            } else if (lastValue == statuses[1].title && status.title != statuses[1].title) {
-                portalLicence.visitorsCount--;
-            }
-            jq(this).children('.statusValue').text(status.title);
-            checkGroupButtonActive();
-        });
-    }
 
     function cropTitle($text, $counter) {
         while ($text.text().length > 27 - $counter.text().length) {
@@ -750,38 +650,24 @@ ASC.People.Import = (function () {
         var usersCount = $userList.find('.userItem').length;
 
         if (usersCount == 0) {
-            $impBtn.prop("disabled", true).addClass('disable');
+            $impBtn.attr('disabled', 'disabled').addClass('disable');
             jq('#last-step').removeClass('disable');
-            $cncBtn.prop("disabled", true).addClass('disable');
+            $cncBtn.attr('disabled', 'disabled').addClass('disable');
         }
         else {
-            $impBtn.prop("disabled", false).removeClass('disable');
-            $cncBtn.prop("disabled", false).removeClass('disable');
+            $impBtn.removeAttr('disabled').removeClass('disable');
+            $cncBtn.removeAttr('disabled').removeClass('disable');
         }
     };
 
     function checkGroupButtonActive() {
         var checkedCount = $userList.find('.userItem .check input:checkbox:checked').length;
 
-        var countActiveUsers = $userList.find('.userItem .check input:checkbox:checked').parent().parent().find('.status .statusValue').text().split("user").length - 1;
-        var countActiveGuest = $userList.find('.userItem .check input:checkbox:checked').parent().parent().find('.status .statusValue').text().split("guest").length - 1;
-        if (checkedCount != 0) {
-            if (portalLicence.maxUsers - portalLicence.currectUsers >= checkedCount - countActiveUsers) {
-                jq("#addAsUser").addClass('activeGroupInput').prop('disabled', false);
-            } else {
-                jq("#addAsUser").removeClass('activeGroupInput').prop('disabled', true);
-        }
-            if (portalLicence.maxVisitors - portalLicence.visitorsCount >= checkedCount - countActiveGuest || portalLicence.isStandalone) {
-                jq("#addAsGuest").addClass('activeGroupInput').prop('disabled', false);
-            } else {
-                jq("#addAsGuest").removeClass('activeGroupInput').prop('disabled', true);
-            }
-            jq("#notAdd").addClass('activeGroupInput').prop('disabled', false);
+        if (checkedCount == 0) {
+            $deleteUserButton.removeClass('activeGroupInput').prop('disabled', true);
         }
         else {
-            jq("#addAsUser").removeClass('activeGroupInput').prop('disabled', true);
-            jq("#addAsGuest").removeClass('activeGroupInput').prop('disabled', true);
-            jq("#notAdd").removeClass('activeGroupInput').prop('disabled', true);
+            $deleteUserButton.addClass('activeGroupInput').prop('disabled', false);
         }
     };
 
@@ -800,8 +686,10 @@ ASC.People.Import = (function () {
             return;
         }
         var users = getUsers();
+        var importUsersAsCollaborators = $importAsCollaborators.is(':checked');
         var inputUsers = $userList.find(classUserItem);
         var error = 0;
+
         if (users.length > 0) {
             for (var i = 0; i < users.length; i++) {
                 var $inputUser = jq(inputUsers[i]),
@@ -851,11 +739,19 @@ ASC.People.Import = (function () {
                 $tableList.scrollTop(offset - $tableList.find('tr').first().position().top);
                 return;
             }
-            saveUsers(users);
+            if (!importUsersAsCollaborators) {
+                if (parseInt(portalLicence.maxUsers, 10) < (parseInt(portalLicence.currectUsers, 10) + users.length)) {
+                    if (parseInt(portalLicence.maxUsers, 10) == (parseInt(portalLicence.currectUsers, 10))) {
+                        jq("#importUserLimitHeader").html(ASC.Resources.Master.Resource.ImportUserOverlimitHeader);
+                    }
+                    showImportUserLimitPanel();
+                    return;
+                }
+            }
+            saveUsers(users, importUsersAsCollaborators);
             return;
         }
         hideImportUserLimitPanel();
-        $errorContainer.addClass("display-none");
         closeWindow(false);
     };
 
@@ -888,18 +784,26 @@ ASC.People.Import = (function () {
             : resources.ImportContactsInvalidEmail);
     };
 
-    function saveUsers(users) {
+    function saveUsers(users, importUsersAsCollaborators) {
         showProgressPanel();
         $importUsers.css({ 'opacity': '0.5' }, { 'pointer-events': 'none' });
 
         teamlab.addImportUser({
-            userList: JSON.stringify(users)
+            userList: JSON.stringify(users),
+            importUsersAsCollaborators: importUsersAsCollaborators
         }, {
-            success: checkImportUsersStatus
+            success: function() {
+                progressBarIntervalId = setInterval(checkImportUsersStatus, 100);
+            }
         });
     };
 
     function checkImportUsersStatus() {
+        if (alreadyChecking) {
+            return;
+        }
+        alreadyChecking = true;
+
         teamlab.getImportStatus({
             success: function(params, status) {
                 if (status) {
@@ -911,10 +815,9 @@ ASC.People.Import = (function () {
                             saveUsersCallback(status);
                             location.reload();
                         }
-                        return;
                     }
                 }
-                setTimeout(checkImportUsersStatus, 1000);
+                alreadyChecking = false;
             }
         });
     };
@@ -924,13 +827,13 @@ ASC.People.Import = (function () {
             $text = jq('#3.wizard.active span.importStepName');
 
         $counter.html('');
-        $counter.append(' (' + step + ' ' + ASC.Resources.Master.ResourceJS.ImportOf + ' ' + userCount + ')');
+        $counter.append(' (' + step + ' ' + ASC.Resources.Master.Resource.ImportOf + ' ' + userCount + ')');
         cropTitle($text, $counter);
     };
 
     function showProgressPanel() {
         $wizardUsers.addClass("disable");
-        $wizardUsersInput.prop("disabled", true);
+        $wizardUsersInput.attr("disabled", true);
         $importUsersButton.addClass("disable");
         $importUserLimitPanelButton.addClass("disable");
         $wizardAddToPortal.addClass("active");
@@ -938,7 +841,7 @@ ASC.People.Import = (function () {
 
     function hideProgressPanel() {
         $wizardUsers.removeClass("disable");
-        $wizardUsersInput.prop("disabled", false);
+        $wizardUsersInput.attr("disabled", false);
         $importUsersButton.removeClass("disable");
         $importUserLimitPanelButton.removeClass("disable");
         $wizardAddToPortal.removeClass("active");
@@ -964,7 +867,7 @@ ASC.People.Import = (function () {
     function informImportedWindow() {
         defaultState();
         jq.unblockUI();
-        toastr.success(ASC.Resources.Master.ResourceJS.FinishImportUserTitle);
+        toastr.success(ASC.Resources.Master.Resource.FinishImportUserTitle);
         window.location.href = "./#";
     };
 
@@ -984,7 +887,7 @@ ASC.People.Import = (function () {
             jq(this).attr('class', attrs.replace(/error\d/gi, ''));
             jq(this).find('.remove').removeClass('removeError');
 
-            var valueMail = jq(this).find('.email input').val().trim();
+            var valueMail = jQuery.trim(jq(this).find('.email input').val());
             for (var i = 0, n = result.Data.length; i < n; i++) {
                 if (result.Data[i].Email == valueMail) {
                     if (result.Data[i].Result != '') {
@@ -1011,12 +914,11 @@ ASC.People.Import = (function () {
             if (savedUsers.length) {
                 teamlab.getQuotas({}, {
                     success: function (params, data) {
-                        console.log(data);
                         portalLicence.currectUsers = data.usersCount;
                     }
                 });
                 savedUsers.remove();
-                toastr.success(ASC.Resources.Master.ResourceJS.SuccessfullyImportCountUsers.format(savedUsers.length))
+                toastr.success(ASC.Resources.Master.Resource.SuccessfullyImportCountUsers.format(savedUsers.length))
             }
             bindHints();
         }
@@ -1055,7 +957,7 @@ ASC.People.Import = (function () {
 
             if ($userList.find(".userItem").length > 0) {
                 $impBtn.add($cncBtn).removeClass("disable");
-                $checkAll.prop("disabled", false);
+                $checkAll.removeAttr("disabled");
             }
             checkCountUsersForAdd();
             checkGroupButtonActive();
@@ -1207,7 +1109,7 @@ ASC.People.Import = (function () {
     };
 
     function setControlHintSettings(controlName, defaultText) {
-        jq(controlName).on("focus", function () {
+        jq(controlName).focus(function () {
             jq(controlName).removeClass('textEditDefault');
             jq(controlName).addClass('textEditMain');
             if (jq(controlName).val() == defaultText) {
@@ -1215,7 +1117,7 @@ ASC.People.Import = (function () {
             }
         });
 
-        jq(controlName).on("blur", function () {
+        jq(controlName).blur(function () {
             if (jq(controlName).val() == '') {
                 jq(controlName).removeClass('textEditMain');
                 jq(controlName).addClass('textEditDefault');
@@ -1272,6 +1174,25 @@ ASC.People.Import = (function () {
         $okcssInfoMessage.html('');
         $okcss.hide();
         defaultState();
+    };
+
+    function changeInviteLinkType() {
+        var importTypeCheckbox = $importAsCollaborators;
+        var linkContainer = $inviteUserLink;
+
+        if (importTypeCheckbox.is(":disabled")) return;
+
+        if (importTypeCheckbox.is(":checked")) {
+            linkContainer.val(linkContainer.attr("data-invite-visitor-link"));
+        } else {
+            linkContainer.val(linkContainer.attr("data-invite-user-link"));
+        }
+        updateClipboard();
+    };
+
+    function showImportUserLimitPanel() {
+        $importUsers.block();
+        jq("#importUserLimitPanel").show();
     };
 
     function hideImportUserLimitPanel() {
@@ -1358,8 +1279,6 @@ ASC.People.Import = (function () {
             .add(jq("#deleteUserBlock"))
             .add(jq(".desc"))
             .hide();
-
-        $errorContainer.addClass("display-none");
     };
 
     function showImportWindow() {
@@ -1373,10 +1292,7 @@ ASC.People.Import = (function () {
             .add(jq("#next-step"))
             .hide();
 
-        $errorContainer.removeClass("display-none");
-
         jq("#last-step").show().removeClass("blue").addClass("gray");
-
     };
 
     function showManualImportWindow() {
@@ -1393,7 +1309,7 @@ ASC.People.Import = (function () {
             .hide();
 
         $importBtn.show().removeClass('disable');
-        $checkAll.prop("disabled", false);
+        $checkAll.removeAttr('disabled');
 
         manualImport = true;
         wizard.next();
@@ -1402,26 +1318,14 @@ ASC.People.Import = (function () {
         checkEmptyUserItem();
     };
 
-    function updateQuota() {
-        teamlab.getQuotas({}, {
-            success: function (params, quota) {
-                portalLicence.maxUsers = quota.maxUsersCount;
-                portalLicence.currectUsers = quota.usersCount;
-                portalLicence.maxVisitors = quota.maxVisitors;
-                portalLicence.visitorsCount = quota.visitorsCount;
-                portalLicence.isStandalone = quota.maxVisitors == -1;
-            } 
-        });
-    }
-
     var wizard = (function () {
         var index = -1,
-            PeopleResource = ASC.People.Resources.PeopleResource,
+            resource = ASC.People.Resources.PeopleResource,
             steps = [
-                { id: 0, name: PeopleResource.ImportWizardFirstStep, handler: function () { } },
-                { id: 1, name: PeopleResource.ImportWizardSecondStep, handler: function () { if (!manualImport) { createComplTableHeader(); showWizardWindow(); updateQuota();} } },
-                { id: 2, name: PeopleResource.ImportWizardThirdStep, handler: function () { if (!manualImport) { parseAllFile(); createSelectTableHeader(); showImportWindow(); } } },
-                { id: 3, name: PeopleResource.ImportWizardFourthStep, handler: function () { } }
+                { id: 0, name: resource.ImportWizardFirstStep, handler: function () { } },
+                { id: 1, name: resource.ImportWizardSecondStep, handler: function () { if (!manualImport) { createComplTableHeader(); showWizardWindow(); } } },
+                { id: 2, name: resource.ImportWizardThirdStep, handler: function () { if (!manualImport) { parseAllFile(); createSelectTableHeader(); showImportWindow(); } } },
+                { id: 3, name: resource.ImportWizardFourthStep, handler: function () { } }
             ],
             $steps = [],
             endStep = steps.length - 1,
@@ -1468,9 +1372,10 @@ ASC.People.Import = (function () {
         }
 
         var users = getUsers();
+        var importUsersAsCollaborators = $importAsCollaborators.is(":checked");
 
         if (users.length > 0) {
-            saveUsers(users);
+            saveUsers(users, importUsersAsCollaborators);
             return;
         }
 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,9 @@
 */
 
 
+using ASC.Common.Caching;
 using System;
 using System.Collections.Generic;
-
-using ASC.Common.Caching;
 
 namespace ASC.IPSecurity
 {
@@ -47,7 +46,7 @@ namespace ASC.IPSecurity
             return restrictions;
         }
 
-        public static IEnumerable<IPRestrictionBase> Save(IEnumerable<IPRestrictionBase> ips, int tenant)
+        public static IEnumerable<string> Save(IEnumerable<string> ips, int tenant)
         {
             var restrictions = IPRestrictionsRepository.Save(ips, tenant);
             notify.Publish(new IPRestriction { TenantId = tenant }, CacheNotifyAction.InsertOrUpdate);

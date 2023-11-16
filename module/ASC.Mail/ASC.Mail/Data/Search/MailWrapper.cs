@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
-using System.Web;
-
 using ASC.ElasticSearch;
 using ASC.ElasticSearch.Core;
 using ASC.Mail.Core;
 using ASC.Mail.Resources;
-
-using Nest;
-
-using Newtonsoft.Json;
 
 namespace ASC.Mail.Data.Search
 {
@@ -85,21 +78,17 @@ namespace ASC.Mail.Data.Search
         [ColumnMeta("attachments_count", 15)]
         public bool HasAttachments { get; set; }
 
-        [ElasticSearch.Join(JoinTypeEnum.Sub, "id:id_mail")]
+        [Join(JoinTypeEnum.Sub, "id:id_mail")]
         public List<UserFolderWrapper> UserFolders { get; set; }
 
         [ColumnMeta("calendar_uid", 16)]
         public bool WithCalendar { get; set; }
 
-        [ElasticSearch.Join(JoinTypeEnum.Sub, "id:id_mail")]
+        [Join(JoinTypeEnum.Sub, "id:id_mail")]
         public List<TagWrapper> Tags { get; set; }
 
         [Column("introduction", 17)]
         public string Introduction { get; set; }
-
-        [Ignore, JsonIgnore]
-        [ColumnMeta("stream", 18)]
-        public string Stream { get; set; }
 
         protected override string Table
         {
@@ -110,52 +99,7 @@ namespace ASC.Mail.Data.Search
         {
             var factory = new EngineFactory(TenantId, UserId.ToString());
             var messageEngine = factory.MessageEngine;
-
-            var lenght = messageEngine.GetMessageLength(Stream);
-            if (lenght > MaxFileSize || lenght == 0) return null;
-
-            return messageEngine.GetMessageStream(Stream);
-        }
-
-        protected override async Task<Stream> GetDocumentStreamAsync()
-        {
-            var factory = new EngineFactory(TenantId, UserId.ToString());
-            var messageEngine = factory.MessageEngine;
-
-            var lenght = await messageEngine.GetMessageLengthAsync(Stream);
-            if (lenght > MaxFileSize || lenght == 0) return null;
-
-            return await messageEngine.GetMessageStreamAsync(Stream);
-        }
-
-        protected override string GetDocumentData()
-        {
-            using (var stream = GetDocumentStream())
-            {
-                if (stream == null) return null;
-
-                using (var sr = new StreamReader(stream))
-                {
-                    var data = sr.ReadToEnd();
-
-                    return HttpUtility.HtmlDecode(data);
-                }
-            }
-        }
-
-        protected override async Task<string> GetDocumentDataAsync()
-        {
-            using (var stream = await GetDocumentStreamAsync())
-            {
-                if (stream == null) return null;
-
-                using (var sr = new StreamReader(stream))
-                {
-                    var data = await sr.ReadToEndAsync();
-
-                    return HttpUtility.HtmlDecode(data);
-                }
-            }
+            return messageEngine.GetMessageStream(Id);
         }
 
         public override string SettingsTitle

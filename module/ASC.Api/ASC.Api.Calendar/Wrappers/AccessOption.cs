@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,29 +23,21 @@ namespace ASC.Api.Calendar.Wrappers
     [DataContract(Name = "sharingOption", Namespace = "")]
     public class AccessOption
     {
-        ///<example name="id">read</example>
-        ///<order>10</order>
         [DataMember(Name = "id", Order = 10)]
         public string Id { get; set; }
 
-        ///<example name="name">Read only</example>
-        ///<order>20</order>
         [DataMember(Name = "name", Order = 20)]
         public string Name { get; set; }
 
-        ///<example name="defaultAction">true</example>
-        ///<order>30</order>
         [DataMember(Name = "defaultAction", Order = 30)]
         public bool Default { get; set; }
 
-        ///<example name="defaultStyle">read</example>
-        ///<order>40</order>
         [DataMember(Name = "defaultStyle", Order = 40)]
         public string DefaultStyle { get; set; }
 
         public static AccessOption ReadOption
         {
-            get { return new AccessOption() { Id = "read", Default = true, DefaultStyle = "read", Name = Resources.CalendarApiResource.ReadOption }; }
+            get { return new AccessOption() { Id = "read", Default = true, DefaultStyle = "read", Name= Resources.CalendarApiResource.ReadOption }; }
         }
 
         public static AccessOption FullAccessOption
@@ -59,11 +51,9 @@ namespace ASC.Api.Calendar.Wrappers
         }
 
 
-        public static List<AccessOption> CalendarStandartOptions
-        {
-            get
-            {
-                return new List<AccessOption>() { ReadOption, FullAccessOption };
+        public static List<AccessOption> CalendarStandartOptions {
+            get {
+                 return new List<AccessOption>(){ReadOption, FullAccessOption};
             }
         }
 

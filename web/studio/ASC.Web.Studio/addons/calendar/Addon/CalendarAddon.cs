@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,7 @@ using System.Text;
 using System.Web;
 using System.Web.UI;
 
-using ASC.Api.Calendar.Attachments;
 using ASC.Data.Storage;
-using ASC.Web.Calendar.Configuration;
 using ASC.Web.Calendar.Notification;
 using ASC.Web.Core;
 using ASC.Web.Core.WebZones;
@@ -75,10 +73,7 @@ namespace ASC.Web.Calendar
                 IconFileName = "logo.png",
                 LargeIconFileName = "product_logolarge.svg",
                 SubscriptionManager = new CalendarSubscriptionManager(),
-                SpaceUsageStatManager = new CalendarSpaceUsageStatManager(),
             };
-
-            AttachmentEngine.RegisterFileSecurityProvider();
         }
 
         public string Name

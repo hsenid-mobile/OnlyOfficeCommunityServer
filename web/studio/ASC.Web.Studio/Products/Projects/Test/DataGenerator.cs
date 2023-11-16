@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ namespace ASC.Web.Projects.Test
             WebItemManager.Instance.LoadItems();
             CoreContext.TenantManager.SetCurrentTenant(0);
             var tenant = CoreContext.TenantManager.GetCurrentTenant();
-            SecurityContext.CurrentUser = tenant.OwnerId;;
+            SecurityContext.AuthenticateMe(tenant.OwnerId);
             Users = CoreContext.UserManager.GetUsers().Select(r => r.ID).ToList();
             Fixture = new Fixture();
         }

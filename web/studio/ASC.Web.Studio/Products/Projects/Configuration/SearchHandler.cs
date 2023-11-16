@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@
 using System;
 using System.Linq;
 
-using ASC.Projects.Engine;
 using ASC.Web.Core.ModuleManagement.Common;
 using ASC.Web.Core.Utility;
 using ASC.Web.Core.Utility.Skins;
 using ASC.Web.Projects.Classes;
-using ASC.Web.Projects.Core;
 using ASC.Web.Projects.Resources;
 
+using ASC.Projects.Engine;
+using ASC.Web.Projects.Core;
 using Autofac;
 
 namespace ASC.Web.Projects.Configuration
@@ -39,7 +39,7 @@ namespace ASC.Web.Projects.Configuration
 
         public override ImageOptions Logo
         {
-            get { return new ImageOptions { ImageFileName = "common_search_icon.svg" }; }
+            get { return new ImageOptions { ImageFileName = "common_search_icon.png" }; }
         }
 
         public override Guid ModuleID
@@ -68,13 +68,13 @@ namespace ASC.Web.Projects.Configuration
         public SearchResultItem GetSearchResultItem(SearchItem searchResultItem)
         {
             return new SearchResultItem
-            {
-                Name = searchResultItem.Title,
-                Additional = searchResultItem.GetAdditional(),
-                URL = searchResultItem.ItemPath,
-                Date = searchResultItem.CreateOn,
-                Description = searchResultItem.Description
-            };
+                {
+                    Name = searchResultItem.Title,
+                    Additional = searchResultItem.GetAdditional(),
+                    URL = searchResultItem.ItemPath,
+                    Date = searchResultItem.CreateOn,
+                    Description = searchResultItem.Description
+                };
         }
     }
 }

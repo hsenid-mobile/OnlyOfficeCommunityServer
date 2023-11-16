@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 using System.Web.Routing;
 
 using ASC.Api.Collections;
 using ASC.Api.Impl;
 using ASC.Api.Interfaces;
-
 using Autofac;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -44,18 +41,18 @@ namespace ASC.Api.Batch
         {
         }
 
-        protected override async Task DoProcess(HttpContextBase context)
+        protected override void DoProcess(HttpContextBase context)
         {
             //Read body
             var batch = context.Request["batch"];
             IEnumerable<ApiBatchRequest> requests = null;
             if (!string.IsNullOrEmpty(batch))
             {
-                requests = JsonConvert.DeserializeObject<IEnumerable<ApiBatchRequest>>(batch, new JsonSerializerSettings
-                {
-                    DefaultValueHandling = DefaultValueHandling.Ignore,
-                    ContractResolver = new CamelCasePropertyNamesContractResolver()
-                });
+                requests = JsonConvert.DeserializeObject<IEnumerable<ApiBatchRequest>>(batch,new JsonSerializerSettings
+                            {
+                                DefaultValueHandling = DefaultValueHandling.Ignore,
+                                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                            });
 
             }
             else
@@ -67,12 +64,12 @@ namespace ASC.Api.Batch
                 }
             }
 
-            if (requests != null && requests.Any())
+            if (requests!=null && requests.Any())
             {
                 try
                 {
                     Log.Debug("processing batch started");
-                    await ProcessBatch(context, requests);
+                    ProcessBatch(context, requests);
                     Log.Debug("processing batch finished");
                 }
                 catch (Exception e)
@@ -92,21 +89,15 @@ namespace ASC.Api.Batch
             RespondTo(null, context);
         }
 
-        private async Task ProcessBatch(HttpContextBase context, IEnumerable<ApiBatchRequest> requests)
+        private void ProcessBatch(HttpContextBase context, IEnumerable<ApiBatchRequest> requests)
         {
-            var response = new List<ApiBatchResponse>();
+            var resonse = requests.OrderBy(x => x.Order).Select(x => ProcessBatchRequest(context, x)).ToList();
 
-            foreach (ApiBatchRequest request in requests.OrderBy(x => x.Order))
-            {
-                response.Add(await ProcessBatchRequest(context, request));
-            }
-
-
-            ApiResponce.Response = response;
-            PostProcessResponse(context, response);
+            ApiResponce.Response = resonse;
+            PostProcessResponse(context, resonse);
         }
 
-        internal async Task<ApiBatchResponse> ProcessBatchRequest(HttpContextBase context, ApiBatchRequest apiBatchRequest)
+        internal ApiBatchResponse ProcessBatchRequest(HttpContextBase context, ApiBatchRequest apiBatchRequest)
         {
             if (context.Request == null) throw new InvalidOperationException("Request is empty");
             if (context.Request.Url == null) throw new InvalidOperationException("Url is empty");
@@ -118,9 +109,9 @@ namespace ASC.Api.Batch
                 {
                     path = path.Substring(context.Request.ApplicationPath.Length);
                 }
-                var uri = new Uri(context.Request.Url, "/" + path.TrimStart('/'));
-
-                var workerRequest = new ApiWorkerRequest(Uri.UnescapeDataString(uri.AbsolutePath.TrimStart('/')), uri.Query.TrimStart('?'), writer, context, new ContentType(apiBatchRequest.BodyContentType));
+                var uri = new Uri(context.Request.Url,"/"+path.TrimStart('/'));
+                
+                var workerRequest = new ApiWorkerRequest(Uri.UnescapeDataString(uri.AbsolutePath.TrimStart('/')),uri.Query.TrimStart('?'), writer, context, new ContentType(apiBatchRequest.BodyContentType));
                 workerRequest.HttpVerb = apiBatchRequest.Method;
 
                 if (!string.IsNullOrEmpty(apiBatchRequest.Body))
@@ -129,23 +120,23 @@ namespace ASC.Api.Batch
                     var encoding = Encoding.GetEncoding(contentType.CharSet);
                     workerRequest.EntityBody = encoding.GetBytes(apiBatchRequest.Body);
                 }
-                var workContext = new HttpContext(workerRequest) { Handler = this };
+                var workContext = new HttpContext(workerRequest) {Handler = this};
                 var newContext = new HttpContextWrapper(workContext);
-
+                
                 //Make a faked request
                 var routeData = RouteTable.Routes.GetRouteData(newContext);
                 if (routeData != null)
                 {
                     //Construct new context
-                    await Container.BeginLifetimeScope().Resolve<ApiHttpAsyncHandler>(new TypedParameter(typeof(RouteData), routeData)).ProcessRequestAsync(workContext);
+                    Container.BeginLifetimeScope().Resolve<IApiHttpHandler>(new TypedParameter(typeof(RouteData), routeData)).Process(newContext);
                     newContext.Response.Flush();
-
+                    
                     //Form response
                     var response = new ApiBatchResponse(apiBatchRequest)
-                    {
-                        Data = writer.GetStringBuilder().ToString(),
-                        Headers = new ItemDictionary<string, string>()
-                    };
+                                       {
+                                           Data = writer.GetStringBuilder().ToString(),
+                                           Headers = new ItemDictionary<string, string>()
+                                       };
                     foreach (var responseHeaderKey in workerRequest.ResponseHeaders.AllKeys)
                     {
                         response.Headers.Add(responseHeaderKey, workerRequest.ResponseHeaders[responseHeaderKey]);
@@ -154,7 +145,7 @@ namespace ASC.Api.Batch
                     response.Name = apiBatchRequest.Name;
                     return response;
                 }
-
+                
             }
             return null;
         }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System.Collections.Generic;
 using System.Web;
-
 using ASC.Web.Core.Users;
 using ASC.Web.Studio.Utility;
 
@@ -46,7 +45,7 @@ namespace ASC.Web.Studio.Core.HelpCenter
                 return new List<VideoGuideItem>();
             }
 
-            var storage = new BaseHelpCenterStorage<VideoGuideData>(HttpContext.Current.Server.MapPath("~/"), "videoguide.html", "videoguide");
+            var storage = new BaseHelpCenterStorage<VideoGuideData>(HttpContext.Current.Server.MapPath("~/"),"videoguide.html", "videoguide");
             var storageData = storage.GetData(baseUrl, CommonLinkUtility.GetHelpLink() + "/video.aspx", baseUrl);
             var result = new List<VideoGuideItem>();
             if (storageData != null)

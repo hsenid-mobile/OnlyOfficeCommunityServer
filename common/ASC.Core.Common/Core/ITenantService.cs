@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using ASC.Core.Tenants;
 
 namespace ASC.Core
@@ -27,8 +26,6 @@ namespace ASC.Core
         void ValidateDomain(string domain);
 
         IEnumerable<Tenant> GetTenants(DateTime from, bool active = true);
-
-        IEnumerable<Tenant> GetTenants(List<int> ids);
 
         IEnumerable<Tenant> GetTenants(string login, string passwordHash);
 

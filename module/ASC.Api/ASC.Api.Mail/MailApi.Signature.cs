@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Linq;
-
 using ASC.Api.Attributes;
 using ASC.Mail.Data.Contracts;
 
@@ -28,14 +27,10 @@ namespace ASC.Api.Mail
     public partial class MailApi
     {
         /// <summary>
-        /// Returns a signature of a mailbox with the ID specified in the request.
+        /// This method needed for getting mailbox signature.
         /// </summary>
-        /// <short>Get a signature</short>
-        /// <category>Signature</category>
-        /// <param type="System.Int32, System" method="url" name="mailbox_id">Mailbox ID</param>
-        /// <returns type="ASC.Mail.Data.Contracts.MailSignatureData, ASC.Mail">Signature object</returns>
-        /// <path>api/2.0/mail/signature/{mailbox_id}</path>
-        /// <httpMethod>GET</httpMethod>
+        /// <param name="mailbox_id"></param>
+        /// <returns>Signature object</returns>
         [Read(@"signature/{mailbox_id:[0-9]+}")]
         public MailSignatureData GetSignature(int mailbox_id)
         {
@@ -50,16 +45,11 @@ namespace ASC.Api.Mail
         }
 
         /// <summary>
-        /// Updates a signature of a mailbox with the ID specified in the request.
+        /// This method needed for update or create signature.
         /// </summary>
-        /// <short>Update a signature</short>
-        /// <category>Signature</category>
-        /// <param type="System.Int32, System" method="url" name="mailbox_id">Mailbox ID</param>
-        /// <param type="System.String, System" name="html">New signature value in the HTML format</param>
-        /// <param type="System.Boolean, System" name="is_active">New signature status (active or not)</param>
-        /// <httpMethod>POST</httpMethod>
-        /// <path>api/2.0/mail/signature/update/{mailbox_id}</path>
-        /// <returns type="ASC.Mail.Data.Contracts.MailSignatureData, ASC.Mail">Updated signature object</returns>
+        /// <param name="mailbox_id">Id of updated mailbox.</param>
+        /// <param name="html">New signature value.</param>
+        /// <param name="is_active">New signature status.</param>
         [Create(@"signature/update/{mailbox_id:[0-9]+}")]
         public MailSignatureData UpdateSignature(int mailbox_id, string html, bool is_active)
         {

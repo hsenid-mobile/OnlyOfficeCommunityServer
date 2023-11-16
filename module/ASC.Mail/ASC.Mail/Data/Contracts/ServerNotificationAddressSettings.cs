@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Runtime.Serialization;
-
 using ASC.Core.Common.Settings;
 
 namespace ASC.Mail.Data.Contracts
@@ -31,7 +30,7 @@ namespace ASC.Mail.Data.Contracts
 
         public override ISettings GetDefault()
         {
-            return new ServerNotificationAddressSettings { NotificationAddress = string.Empty };
+            return new ServerNotificationAddressSettings {NotificationAddress = string.Empty};
         }
 
         public override Guid ID

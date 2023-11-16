@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Web;
 using ASC.Core;
 using ASC.Core.Tenants;
-
-using Twilio.Http;
 using Twilio.TwiML;
-using Twilio.TwiML.Voice;
+using Twilio.Types;
 
 namespace ASC.VoipService.Twilio
 {
@@ -39,12 +37,12 @@ namespace ASC.VoipService.Twilio
             this.baseUrl = baseUrl.TrimEnd('/') + "/twilio/";
         }
 
-        public VoiceResponse Inbound(Tuple<Agent, bool> agentTuple)
+        public VoiceResponse Inbound(Tuple<Agent,bool> agentTuple)
         {
             var agent = agentTuple != null ? agentTuple.Item1 : null;
             var anyOnline = agentTuple != null ? agentTuple.Item2 : false;
             var response = new VoiceResponse();
-
+            
             if (settings.WorkingHours != null && settings.WorkingHours.Enabled)
             {
                 var now = TenantUtil.DateTimeFromUtc(DateTime.UtcNow);
@@ -58,11 +56,11 @@ namespace ASC.VoipService.Twilio
             {
                 if (!string.IsNullOrEmpty(settings.GreetingAudio))
                 {
-                    response.Play(new Uri(settings.GreetingAudio));
+                    response.Play(Uri.EscapeUriString(settings.GreetingAudio));
                 }
 
-                response.Enqueue(settings.Queue.Name, new Uri(GetEcho("Enqueue", agent != null)), "POST",
-                   new Uri(GetEcho("Wait", agent != null)), "POST");
+                response.Enqueue(settings.Queue.Name, GetEcho("Enqueue", agent != null), "POST",
+                    GetEcho("Wait", agent != null), "POST");
             }
 
             return AddVoiceMail(response);
@@ -109,9 +107,9 @@ namespace ASC.VoipService.Twilio
 
             if (!string.IsNullOrEmpty(queue.WaitUrl))
             {
-                var gather = new Gather(method: "POST", action: new Uri(GetEcho("gatherQueue")));
-                gather.Play(new Uri(queue.WaitUrl));
-                response.Append(gather);
+                var gather = new Gather(method: "POST", action: GetEcho("gatherQueue"));
+                gather.Play(Uri.EscapeUriString(queue.WaitUrl));
+                response.Gather(gather);
             }
             else
             {
@@ -137,18 +135,18 @@ namespace ASC.VoipService.Twilio
         {
             if (to == "hold")
             {
-                return new VoiceResponse().Play(new Uri(settings.HoldAudio), 0);
+                return new VoiceResponse().Play(Uri.EscapeUriString(settings.HoldAudio), 0);
             }
 
             Guid newCallerId;
 
             if (Guid.TryParse(to, out newCallerId))
             {
-                SecurityContext.CurrentUser = newCallerId;
+                SecurityContext.AuthenticateMe(newCallerId);
             }
 
-            return new VoiceResponse().Enqueue(settings.Queue.Name, new Uri(GetEcho("enqueue")), "POST",
-              new Uri(GetEcho("wait") + "&RedirectTo=" + to), "POST");
+            return new VoiceResponse().Enqueue(settings.Queue.Name, GetEcho("enqueue"), "POST",
+                GetEcho("wait") + "&RedirectTo=" + to, "POST");
         }
 
         public VoiceResponse VoiceMail()
@@ -158,18 +156,18 @@ namespace ASC.VoipService.Twilio
 
         private VoiceResponse AddToResponse(VoiceResponse response, Agent agent)
         {
-            var dial = new Dial(method: "POST", action: new Uri(GetEcho("dial")), timeout: agent.TimeOut, record: agent.Record ? "record-from-answer" : "do-not-record");
+            var dial = new Dial(method: "POST", action: GetEcho("dial"), timeout: agent.TimeOut, record: agent.Record ? "record-from-answer" : "do-not-record");
 
             switch (agent.Answer)
             {
                 case AnswerType.Number:
-                    response.Append(dial.Number(agent.PhoneNumber, method: "POST", url: new Uri(GetEcho("client"))));
+                    response.Dial(dial.Number(agent.PhoneNumber, method: "POST", url: GetEcho("client")));
                     break;
                 case AnswerType.Client:
-                    response.Append(dial.Client(agent.ClientID, method: HttpMethod.Post, url: new Uri(GetEcho("client"))));
+                    response.Dial(dial.Client(agent.ClientID, "POST", GetEcho("client")));
                     break;
                 case AnswerType.Sip:
-                    response.Append(dial.Sip(new Uri(agent.ClientID), method: "POST", url: new Uri(GetEcho("client"))));
+                    response.Dial(dial.Sip(agent.ClientID, method: "POST", url: GetEcho("client")));
                     break;
             }
 
@@ -181,7 +179,7 @@ namespace ASC.VoipService.Twilio
         {
             return string.IsNullOrEmpty(settings.VoiceMail)
                        ? response.Say("")
-                       : response.Play(new Uri(settings.VoiceMail)).Record(method: "POST", action: new Uri(GetEcho("voiceMail")), maxLength: 30);
+                       : response.Play(Uri.EscapeUriString(settings.VoiceMail)).Record(method: "POST", action: GetEcho("voiceMail"), maxLength: 30);
         }
 
         public string GetEcho(string action, bool user = true)

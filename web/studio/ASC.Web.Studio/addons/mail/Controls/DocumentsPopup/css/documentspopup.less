@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,12 @@
     display: none;
 }
 
-#popupDocumentUploader .popupContainerClass .containerBodyBlock {
-    padding: 28px 0 16px 0;
-}
-
-#popupDocumentUploader.without-links .popupContainerClass .containerBodyBlock {
-    padding-top: 0;
-}
-
-#filesCannotBeAttachedAsLinksBox, #multimediaFilesCannotBeAttachedBox {
+#filesCannotBeAttachedAsLinksBox {
     .warning-box {
         width: 100px;
         height: 100px;
         float: left;
-        background-image: url(images/warning.svg);
+        background-image: url(images/warning.png);
     }
 
     .description-box {
@@ -43,7 +35,7 @@
             font-size: 14px;
             margin-bottom: 10px;
         }
-
+        
     }
 }
 
@@ -64,13 +56,8 @@
     }
 }
 
-#attachFilesAsLinks {
-    position: absolute;
-    top: 58px;
-    left: 24px;
-}
-
 #attachFrame {
+    margin-left: -24px;
     width: 976px;
 }
 

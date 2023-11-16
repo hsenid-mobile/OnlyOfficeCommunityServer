@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ ASC.Controls.ConfirmTfaManager = (function () {
             return false;
         });
 
-        $tfaAuthCode.on("keydown", function (event) {
+        $tfaAuthCode.keydown(function (event) {
             if (!e) {
                 var e = event;
             }
@@ -50,7 +50,7 @@ ASC.Controls.ConfirmTfaManager = (function () {
 
         var code = $tfaAuthCode.val().trim();
         if (!code.length) {
-            $errorTfaActivate.html(ASC.Resources.Master.ResourceJS.ActivateTfaAppEmptyCode).show();
+            $errorTfaActivate.html(ASC.Resources.Master.Resource.ActivateTfaAppEmptyCode).show();
             return;
         }
 

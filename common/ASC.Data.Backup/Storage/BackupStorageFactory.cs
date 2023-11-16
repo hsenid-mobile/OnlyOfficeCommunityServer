@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-
-using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Common.Contracts;
 using ASC.Data.Backup.Service;
@@ -30,15 +28,7 @@ namespace ASC.Data.Backup.Storage
     {
         public static IBackupStorage GetBackupStorage(BackupRecord record)
         {
-            try
-            {
-                return GetBackupStorage(record.StorageType, record.TenantId, record.StorageParams);
-            }
-            catch (Exception error)
-            {
-                LogManager.GetLogger("ASC.Backup.Service").Error("can't get backup storage for record " + record.Id, error);
-                return null;
-            }
+            return GetBackupStorage(record.StorageType, record.TenantId, record.StorageParams);
         }
 
         public static IBackupStorage GetBackupStorage(BackupStorageType type, int tenantId, Dictionary<string, string> storageParams)
@@ -51,7 +41,7 @@ namespace ASC.Data.Backup.Storage
                 case BackupStorageType.ThridpartyDocuments:
                     return new DocumentsBackupStorage(tenantId, webConfigPath);
                 case BackupStorageType.DataStore:
-                    return new ConsumerBackupStorage(tenantId, webConfigPath);
+                    return new DataStoreBackupStorage(tenantId, webConfigPath);
                 case BackupStorageType.Local:
                     return new LocalBackupStorage();
                 case BackupStorageType.ThirdPartyConsumer:

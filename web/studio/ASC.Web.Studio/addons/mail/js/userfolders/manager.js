@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * limitations under the License.
  *
 */
-
 
 if (!Array.prototype.findIndex) {
     Array.prototype.findIndex = function (predicate) {
@@ -49,7 +48,7 @@ window.userFoldersManager = (function($) {
         OnUnreadChanged: "uf.unread_changed",
         OnError: "uf.error"
     };
-
+    var progressBarIntervalId = null;
     var getStatusTimeout = 1000;
     var onLoading = true;
 
@@ -222,11 +221,6 @@ window.userFoldersManager = (function($) {
     function moveTo(id, toId) {
         var initFolder = get(id);
 
-        if (!initFolder) {
-            eventsHandler.trigger(supportedCustomEvents.OnError, "Unknown folder");
-            return;
-        }
-
         if (initFolder.parent === toId) {
             eventsHandler.trigger(supportedCustomEvents.OnError, "Folder already exists in this folder");
             return;
@@ -347,6 +341,30 @@ window.userFoldersManager = (function($) {
             });
     }
 
+    function checkRemoveUserFolderStatus(operation, options) {
+        serviceManager.getMailOperationStatus(operation.id,
+        null,
+        {
+            success: function (params, data) {
+                if (data.completed) {
+                    clearInterval(progressBarIntervalId);
+                    progressBarIntervalId = null;
+
+                    options.onSuccess.call();
+                    window.LoadingBanner.hideLoading();
+                }
+            },
+            error: function (params, errors) {
+                console.error("checkRemoveUserFolderStatus", e, errors);
+                clearInterval(progressBarIntervalId);
+                progressBarIntervalId = null;
+
+                options.onError.call(params, errors);
+                window.LoadingBanner.hideLoading();
+            }
+        });
+    }
+
     function removeWithChildren(id) {
         var index = userFolders.findIndex(function(f) {
             return f.id === id;
@@ -365,35 +383,23 @@ window.userFoldersManager = (function($) {
         }
     }
 
-    var removeInProgress = false;
-
     function remove(folder) {
         userFoldersModal.showDelete(
             folder,
             {
-                onSave: function (removeFolder) {
-                    if (removeInProgress)
-                        return;
-
-                    removeInProgress = true;
-
+                onSave: function(removeFolder) {
                     window.Teamlab.removeMailFolder({},
                         removeFolder.id,
                         {
-                            success: function (_, operation) {
+                            success: function (params, data) {
                                 userFoldersModal.hide();
 
                                 window.LoadingBanner.displayMailLoading();
 
-                                var removeUfIntervalId = setInterval(function () {
-                                    return serviceManager.getMailOperationStatus(operation.id,
-                                    null,
-                                    {
-                                        success: function (_, data) {
-                                            if (data.completed) {
-                                                clearInterval(removeUfIntervalId);
-                                                removeUfIntervalId = null;
-
+                                progressBarIntervalId = setInterval(function() {
+                                        return checkRemoveUserFolderStatus(data,
+                                        {
+                                            onSuccess: function() {
                                                 removeWithChildren(removeFolder.id);
 
                                                 if (removeFolder.parent > 0) {
@@ -409,28 +415,16 @@ window.userFoldersManager = (function($) {
                                                 window.toastr.success(MailScriptResource.InfoRemoveFolder.format(Encoder.htmlEncode(removeFolder.name)));
 
                                                 eventsHandler.trigger(supportedCustomEvents.OnDelete, removeFolder);
-
-                                                window.LoadingBanner.hideLoading();
-
-                                                removeInProgress = false;
+                                            },
+                                            onError: function (params, errors) {
+                                                window.toastr.error(errors[0]);
+                                                eventsHandler.trigger(supportedCustomEvents.OnError, errors[0]);
                                             }
-                                        },
-                                        error: function (_, errors) {
-                                            console.error("checkRemoveUserFolderStatus", e, errors);
-                                            clearInterval(removeUfIntervalId);
-                                            removeUfIntervalId = null;
-
-                                            window.toastr.error(errors[0]);
-                                            eventsHandler.trigger(supportedCustomEvents.OnError, errors[0]);
-
-                                            window.LoadingBanner.hideLoading();
-
-                                            removeInProgress = false;
-                                        }
-                                    })},
+                                        });
+                                    },
                                     getStatusTimeout);
                             },
-                            error: function (_, errors) {
+                            error: function (params, errors) {
                                 window.toastr.error(errors[0]);
                                 eventsHandler.trigger(supportedCustomEvents.OnError, errors[0]);
                             }
@@ -441,11 +435,11 @@ window.userFoldersManager = (function($) {
     }
 
     function bind(eventName, fn) {
-        eventsHandler.on(eventName, fn);
+        eventsHandler.bind(eventName, fn);
     }
 
     function unbind(eventName) {
-        eventsHandler.off(eventName);
+        eventsHandler.unbind(eventName);
     }
 
     function isLoading() {

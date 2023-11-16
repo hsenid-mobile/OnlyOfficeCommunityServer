@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-
 using ASC.Common.Security.Authentication;
 using ASC.Core;
 using ASC.Core.Tenants;
@@ -24,7 +23,7 @@ using ASC.Mail.Core.Engine.Operations.Base;
 
 namespace ASC.Mail.Core.Engine.Operations
 {
-    public class MailRecalculateFoldersOperation : MailOperation
+    public class MailRecalculateFoldersOperation: MailOperation
     {
         public override MailOperationType OperationType
         {
@@ -40,11 +39,11 @@ namespace ASC.Mail.Core.Engine.Operations
         {
             try
             {
-                SetProgress((int?)MailOperationRecalculateMailboxProgress.Init, "Setup tenant and user");
+                SetProgress((int?) MailOperationRecalculateMailboxProgress.Init, "Setup tenant and user");
 
                 CoreContext.TenantManager.SetCurrentTenant(CurrentTenant);
 
-                SecurityContext.CurrentAccount = CurrentUser;
+                SecurityContext.AuthenticateMe(CurrentUser);
 
                 var engine = new EngineFactory(CurrentTenant.TenantId, CurrentUser.ID.ToString());
 

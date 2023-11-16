@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-
 using ASC.Web.Core;
 using ASC.Web.Studio.Utility;
 
@@ -31,7 +30,7 @@ namespace ASC.Web.Studio.ThirdParty.ImportContacts
 
         public static bool Enable
         {
-            get { return Google.Enable; }
+            get { return Google.Enable || Yahoo.Enable; }
         }
 
         protected void Page_Load(object sender, EventArgs e)

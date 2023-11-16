@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-
 using ASC.Blogs.Core.Domain;
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
@@ -29,7 +28,7 @@ namespace ASC.Blogs.Core.Data
 {
     public class DbPostDao : DbDao, IPostDao
     {
-        public DbPostDao(IDbManager db, int tenant) : base(db, tenant) { }
+        public DbPostDao(DbManager db, int tenant) : base(db, tenant) { }
 
         #region IPostDao
 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@
 #region Import
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
 
 #endregion
 
@@ -28,7 +31,7 @@ namespace ASC.CRM.Core
     [Serializable]
     public class DomainObject
     {
-        ///<example name="id">1234</example>
+     
         [DataMember(Name = "id")]
         public virtual int ID
         {
@@ -53,6 +56,6 @@ namespace ASC.CRM.Core
         {
             return ID.Equals(default(int));
         }
-
+        
     }
 }

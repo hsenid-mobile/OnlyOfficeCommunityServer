@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Core;
@@ -51,39 +50,19 @@ namespace ASC.CRM.Core.Dao
         {
             var rates = Db.ExecuteList(GetSqlQuery(Exp.Eq("from_currency", fromCurrency.ToUpper()) & Exp.Eq("to_currency", toCurrency.ToUpper())))
                 .ConvertAll(ToCurrencyRate);
-
+                
             return rates.Count > 0 ? rates[0] : null;
         }
 
         public int SaveOrUpdate(CurrencyRate currencyRate)
         {
-            if (string.IsNullOrEmpty(currencyRate.FromCurrency) || string.IsNullOrEmpty(currencyRate.ToCurrency) || currencyRate.Rate < 0)
+            if (String.IsNullOrEmpty(currencyRate.FromCurrency) || String.IsNullOrEmpty(currencyRate.ToCurrency) || currencyRate.Rate < 0)
                 throw new ArgumentException();
 
-            var exist = false;
-
-            if (currencyRate.ID > 0)
-            {
-                exist = Db.ExecuteScalar<int>(Query("crm_currency_rate").SelectCount().Where(Exp.Eq("id", currencyRate.ID))) > 0;
-            }
-
-            if (!exist)
-            {
-                var existCurrency = GetByCurrencies(currencyRate.FromCurrency, currencyRate.ToCurrency);
-
-                if (existCurrency != null)
-                {
-                    currencyRate.ID = existCurrency.ID;
-                    exist = true;
-                }
-            }
-
-            if (exist && currencyRate.Rate == 0)
-            {
+            if (currencyRate.ID > 0 && currencyRate.Rate == 0)
                 return Delete(currencyRate.ID);
-            }
 
-            if (!exist)
+            if (Db.ExecuteScalar<int>(Query("crm_currency_rate").SelectCount().Where(Exp.Eq("id", currencyRate.ID))) == 0)
             {
                 var query = Insert("crm_currency_rate")
                     .InColumnValue("id", 0)
@@ -130,7 +109,7 @@ namespace ASC.CRM.Core.Dao
             using (var tx = Db.BeginTransaction())
             {
                 Db.ExecuteNonQuery(Delete("crm_currency_rate"));
-
+                
                 foreach (var rate in rates)
                 {
                     var query = Insert("crm_currency_rate")
@@ -169,13 +148,12 @@ namespace ASC.CRM.Core.Dao
 
         private static CurrencyRate ToCurrencyRate(object[] row)
         {
-            return new CurrencyRate
-            {
-                ID = Convert.ToInt32(row[0]),
-                FromCurrency = Convert.ToString(row[1]),
-                ToCurrency = Convert.ToString(row[2]),
-                Rate = Convert.ToDecimal(row[3])
-            };
+            return new CurrencyRate{
+                    ID = Convert.ToInt32(row[0]),
+                    FromCurrency = Convert.ToString(row[1]),
+                    ToCurrency = Convert.ToString(row[2]),
+                    Rate = Convert.ToDecimal(row[3])
+                };
         }
     }
 }

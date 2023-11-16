@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,18 @@
 */
 
 
-using System;
-
 namespace ASC.Data.Storage
 {
     public interface IQuotaController
     {
-        //quotaCheckFileSize:hack for Backup bug 48873
-        void QuotaUsedAdd(string module, string domain, string dataTag, long size, Guid ownerId, bool quotaCheckFileSize = true);
-        void QuotaUsedAdd(string module, string domain, string dataTag, long size, bool quotaCheckFileSize = true);
+        void QuotaUsedAdd(string module, string domain, string dataTag, long size);
 
         void QuotaUsedDelete(string module, string domain, string dataTag, long size);
-        void QuotaUsedDelete(string module, string domain, string dataTag, long size, Guid ownerId);
 
         void QuotaUsedSet(string module, string domain, string dataTag, long size);
 
-        void QuotaUsedCheck(long size, Guid ownerId);
+        long QuotaUsedGet(string module, string domain);
+
+        void QuotaUsedCheck(long size);
     }
 }

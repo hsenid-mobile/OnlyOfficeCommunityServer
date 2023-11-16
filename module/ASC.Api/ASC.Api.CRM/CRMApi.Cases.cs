@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,38 +18,33 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.Api.Attributes;
-using ASC.Api.Collections;
 using ASC.Api.CRM.Wrappers;
+using ASC.Api.Collections;
 using ASC.Api.Exceptions;
-using ASC.Core;
-using ASC.Core.Users;
 using ASC.CRM.Core;
 using ASC.CRM.Core.Entities;
-using ASC.ElasticSearch;
+using ASC.Core;
 using ASC.MessagingSystem;
-
 using EnumExtension = ASC.Web.CRM.Classes.EnumExtension;
+using ASC.Core.Users;
+using ASC.ElasticSearch;
 
 namespace ASC.Api.CRM
 {
-    ///<name>crm</name>
     public partial class CRMApi
     {
         /// <summary>
-        /// Closes a case with the ID specified in the request.
+        ///   Close the case with the ID specified in the request
         /// </summary>
-        /// <short>Close a case</short> 
+        /// <short>Close case</short> 
         /// <category>Cases</category>
-        /// <param type="System.Int32, System" method="url" name="caseid" optional="false">Case ID</param>
+        /// <param name="caseid" optional="false">Case ID</param>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemNotFoundException"></exception>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">
-        /// Case
+        /// <returns>
+        ///   Case
         /// </returns>
-        /// <path>api/2.0/crm/case/{caseid}/close</path>
-        /// <httpMethod>PUT</httpMethod>
         [Update(@"case/{caseid:[0-9]+}/close")]
         public CasesWrapper CloseCases(int caseid)
         {
@@ -64,18 +59,16 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Reopens a case with the ID specified in the request.
+        ///   Resume the case with the ID specified in the request
         /// </summary>
-        /// <short>Reopen a case</short> 
+        /// <short>Resume case</short> 
         /// <category>Cases</category>
-        /// <param type="System.Int32, System" method="url" name="caseid" optional="false">Case ID</param>
+        /// <param name="caseid" optional="false">Case ID</param>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemNotFoundException"></exception>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">
-        /// Case
+        /// <returns>
+        ///   Case
         /// </returns>
-        /// <path>api/2.0/crm/case/{caseid}/reopen</path>
-        /// <httpMethod>PUT</httpMethod>
         [Update(@"case/{caseid:[0-9]+}/reopen")]
         public CasesWrapper ReOpenCases(int caseid)
         {
@@ -90,16 +83,16 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Creates a case with the parameters specified in the request.
+        ///    Creates the case with the parameters specified in the request
         /// </summary>
-        /// <short>Create a case</short> 
-        /// <param type="System.String, System" name="title" optional="false">Case title</param>
-        /// <param type="System.Collections.Generic.IEnumerable{System.Int32}, System.Collections.Generic" name="members" optional="true">List of contact IDs of the case participants</param>
-        /// <param type="System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Int32, System.String}}, System.Collections.Generic" name="customFieldList" optional="true">List of case custom fields</param>
-        /// <param type="System.Boolean, System" name="isPrivate" optional="true">Case privacy: private or not</param>
-        /// <param type="System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic" name="accessList" optional="true">List of users with access to the case</param>
-        /// <param type="System.Boolean, System" name="isNotify" optional="true">Notifies users from the access list about the case</param>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">Case</returns>
+        /// <short>Create case</short> 
+        /// <param name="title" optional="false">Case title</param>
+        /// <param name="members" optional="true">Participants</param>
+        /// <param name="customFieldList" optional="true">User field list</param>
+        /// <param name="isPrivate" optional="true">Case privacy: private or not</param>
+        /// <param name="accessList" optional="true">List of users with access to the case</param>
+        /// <param name="isNotify" optional="true">Notify users in accessList about the case</param>
+        /// <returns>Case</returns>
         /// <category>Cases</category>
         /// <exception cref="ArgumentException"></exception>
         /// <example>
@@ -115,8 +108,6 @@ namespace ASC.Api.CRM
         /// 
         /// ]]>
         /// </example>
-        /// <path>api/2.0/crm/case</path>
-        /// <httpMethod>POST</httpMethod>
         [Create(@"case")]
         public CasesWrapper CreateCases(
             string title,
@@ -131,12 +122,12 @@ namespace ASC.Api.CRM
             var casesID = DaoFactory.CasesDao.CreateCases(title);
 
             var cases = new Cases
-            {
-                ID = casesID,
-                Title = title,
-                CreateBy = SecurityContext.CurrentAccount.ID,
-                CreateOn = DateTime.UtcNow
-            };
+                {
+                    ID = casesID,
+                    Title = title,
+                    CreateBy = SecurityContext.CurrentAccount.ID,
+                    CreateOn = DateTime.UtcNow
+                };
             FactoryIndexer<Web.CRM.Core.Search.CasesWrapper>.IndexAsync(cases);
             SetAccessToCases(cases, isPrivate, accessList, isNotify, false);
 
@@ -162,18 +153,18 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Updates the selected case with the parameters specified in the request.
+        ///   Updates the selected case with the parameters specified in the request
         /// </summary>
-        /// <short>Update a case</short> 
-        /// <param type="System.Int32, System" method="url" name="caseid" optional="false">Case ID</param>
-        /// <param type="System.String, System" name="title" optional="false">New case title</param>
-        /// <param type="System.Collections.Generic.IEnumerable{System.Int32}, System.Collections.Generic" name="members" optional="true">List of contact IDs of the case participants</param>
-        /// <param type="System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Int32, System.String}}, System.Collections.Generic" name="customFieldList" optional="true">New list of case custom fields</param>
-        /// <param type="System.Boolean, System" name="isPrivate" optional="true">Case privacy: private or not</param>
-        /// <param type="System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic" name="accessList" optional="true">New list of users with access to the case</param>
-        /// <param type="System.Boolean, System" name="isNotify" optional="true">Notifies users from the access list about the case</param>
+        /// <short>Update case</short> 
+        /// <param name="caseid" optional="false">Case ID</param>
+        /// <param name="title" optional="false">Case title</param>
+        /// <param name="members" optional="true">Participants</param>
+        /// <param name="customFieldList" optional="true">User field list</param>
+        /// <param name="isPrivate" optional="true">Case privacy: private or not</param>
+        /// <param name="accessList" optional="true">List of users with access to the case</param>
+        /// <param name="isNotify" optional="true">Notify users in accessList about the case</param>
         /// <category>Cases</category>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">Case</returns>
+        /// <returns>Case</returns>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemNotFoundException"></exception>
         /// <example>
@@ -190,8 +181,6 @@ namespace ASC.Api.CRM
         /// 
         /// ]]>
         /// </example>
-        /// <path>api/2.0/crm/case/{caseid}</path>
-        /// <httpMethod>PUT</httpMethod>
         [Update(@"case/{caseid:[0-9]+}")]
         public CasesWrapper UpdateCases(
             int caseid,
@@ -238,20 +227,18 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Sets access rights to the selected case with the parameters specified in the request.
+        ///   Sets access rights for the selected case with the parameters specified in the request
         /// </summary>
-        /// <param type="System.Int32, System" method="url" name="caseid" optional="false">Case ID</param>
-        /// <param type="System.Boolean, System" name="isPrivate" optional="false">Case privacy: private or not</param>
-        /// <param type="System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic" name="accessList" optional="false">List of users with access to the case</param>
-        /// <short>Set access rights to the case</short> 
+        /// <param name="caseid" optional="false">Case ID</param>
+        /// <param name="isPrivate" optional="false">Case privacy: private or not</param>
+        /// <param name="accessList" optional="false">List of users with access to the case</param>
+        /// <short>Set rights to case</short> 
         /// <category>Cases</category>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemNotFoundException"></exception>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">
-        /// Case 
+        /// <returns>
+        ///   Case 
         /// </returns>
-        /// <path>api/2.0/crm/case/{caseid}/access</path>
-        /// <httpMethod>PUT</httpMethod>
         [Update(@"case/{caseid:[0-9]+}/access")]
         public CasesWrapper SetAccessToCases(int caseid, bool isPrivate, IEnumerable<Guid> accessList)
         {
@@ -301,21 +288,18 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Sets access rights to the list of cases with the IDs specified in the request.
+        ///   Sets access rights for other users to the list of cases with the IDs specified in the request
         /// </summary>
-        /// <param type="System.Collections.Generic.IEnumerable{System.Int32}, System.Collections.Generic" name="casesid">List of case IDs</param>
-        /// <param type="System.Boolean, System" name="isPrivate">Case privacy: private or not</param>
-        /// <param type="System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic" name="accessList">List of users with access</param>
-        /// <short>Set access rights to the cases by IDs</short> 
+        /// <param name="casesid">Case ID list</param>
+        /// <param name="isPrivate">Case privacy: private or not</param>
+        /// <param name="accessList">List of users with access</param>
+        /// <short>Set case access rights</short> 
         /// <category>Cases</category>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemNotFoundException"></exception>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">
-        /// List of cases
+        /// <returns>
+        ///   Case list
         /// </returns>
-        /// <path>api/2.0/crm/case/access</path>
-        /// <httpMethod>PUT</httpMethod>
-        /// <collection>list</collection>
         [Update(@"case/access")]
         public IEnumerable<CasesWrapper> SetAccessToBatchCases(IEnumerable<int> casesid, bool isPrivate, IEnumerable<Guid> accessList)
         {
@@ -339,23 +323,20 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Sets access rights to the list of all the cases matching the parameters specified in the request.
+        ///   Sets access rights for other users to the list of all cases matching the parameters specified in the request
         /// </summary>
-        /// <param type="System.Int32, System" optional="true" name="contactid">Contact ID</param>
-        /// <param type="System.Nullable{System.Boolean}, System" optional="true" name="isClosed">Case status: closed or not</param>
-        /// <param type="System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic" optional="true" name="tags">Case tags</param>
-        /// <param type="System.Boolean, System" name="isPrivate">Case privacy: private or not</param>
-        /// <param type="System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic" name="accessList">List of users with access</param>
-        /// <short>Set access rights to the cases by parameters</short> 
+        /// <param optional="true" name="contactid">Contact ID</param>
+        /// <param optional="true" name="isClosed">Case status</param>
+        /// <param optional="true" name="tags">Tags</param>
+        /// <param name="isPrivate">Case privacy: private or not</param>
+        /// <param name="accessList">List of users with access</param>
+        /// <short>Set case access rights</short> 
         /// <category>Cases</category>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemNotFoundException"></exception>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">
-        /// List of cases
+        /// <returns>
+        ///   Case list
         /// </returns>
-        /// <path>api/2.0/crm/case/filter/access</path>
-        /// <httpMethod>PUT</httpMethod>
-        ///<collection>list</collection>
         [Update(@"case/filter/access")]
         public IEnumerable<CasesWrapper> SetAccessToBatchCases(
             int contactid,
@@ -385,16 +366,13 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Returns the detailed information about a case with the ID specified in the request.
+        ///    Returns the detailed information about the case with the ID specified in the request
         /// </summary>
-        /// <short>Get a case by ID</short> 
+        /// <short>Get case by ID</short> 
         /// <category>Cases</category>
-        /// <param type="System.Int32, System" method="url" name="caseid">Case ID</param>
+        /// <param name="caseid">Case ID</param>
         ///<exception cref="ArgumentException"></exception>
         ///<exception cref="ItemNotFoundException"></exception>
-        ///<path>api/2.0/crm/case/{caseid}</path>
-        ///<httpMethod>GET</httpMethod>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">Case</returns>
         [Read(@"case/{caseid:[0-9]+}")]
         public CasesWrapper GetCaseByID(int caseid)
         {
@@ -407,19 +385,16 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Returns a list of all the cases matching the parameters specified in the request.
+        ///     Returns the list of all cases matching the parameters specified in the request
         /// </summary>
-        /// <short>Get cases</short> 
-        /// <param type="System.Int32, System" method="url" optional="true" name="contactid">Contact ID</param>
-        /// <param type="System.Nullable{System.Boolean}, System" method="url" optional="true" name="isClosed">Case status: closed or not</param>
-        /// <param type="System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic" method="url" optional="true" name="tags">Case tags</param>
+        /// <short>Get case list</short> 
+        /// <param optional="true" name="contactid">Contact ID</param>
+        /// <param optional="true" name="isClosed">Case status</param>
+        /// <param optional="true" name="tags">Tags</param>
         /// <category>Cases</category>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">
-        /// List of cases
+        /// <returns>
+        ///    Case list
         /// </returns>
-        /// <path>api/2.0/crm/case/filter</path>
-        /// <httpMethod>GET</httpMethod>
-        /// <collection>list</collection>
         [Read(@"case/filter")]
         public IEnumerable<CasesWrapper> GetCases(int contactid, bool? isClosed, IEnumerable<string> tags)
         {
@@ -492,18 +467,16 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Deletes a case with the ID specified in the request.
+        ///   Deletes the case with the ID specified in the request
         /// </summary>
-        /// <short>Delete a case</short> 
-        /// <param type="System.Int32, System" method="url" name="caseid">Case ID</param>
+        /// <short>Delete case</short> 
+        /// <param name="caseid">Case ID</param>
         /// <category>Cases</category>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemNotFoundException"></exception>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">
-        /// Case
+        /// <returns>
+        ///    Case
         /// </returns>
-        /// <path>api/2.0/crm/case/{caseid}</path>
-        /// <httpMethod>DELETE</httpMethod>
         [Delete(@"case/{caseid:[0-9]+}")]
         public CasesWrapper DeleteCase(int caseid)
         {
@@ -520,19 +493,16 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Deletes a group of cases with the IDs specified in the request.
+        ///   Deletes the group of cases with the IDs specified in the request
         /// </summary>
-        /// <param type="System.Collections.Generic.IEnumerable{System.Int32}, System.Collections.Generic" name="casesids">List of case IDs</param>
+        /// <param name="casesids">Case ID list</param>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemNotFoundException"></exception>
-        /// <short>Delete cases by IDs</short> 
+        /// <short>Delete case group</short> 
         /// <category>Cases</category>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">
-        /// List of cases
+        /// <returns>
+        ///   Case list
         /// </returns>
-        /// <path>api/2.0/crm/case</path>
-        /// <httpMethod>PUT</httpMethod>
-        /// <collection>list</collection>
         [Update(@"case")]
         public IEnumerable<CasesWrapper> DeleteBatchCases(IEnumerable<int> casesids)
         {
@@ -549,21 +519,18 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Deletes a list of all the cases matching the parameters specified in the request.
+        ///   Deletes the list of all cases matching the parameters specified in the request
         /// </summary>
-        /// <param type="System.Int32, System" optional="true" name="contactid">Contact ID</param>
-        /// <param type="System.Nullable{System.Boolean}, System" optional="true" name="isClosed">Case status: closed or not</param>
-        /// <param type="System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic" optional="true" name="tags">Case tags</param>
+        /// <param optional="true" name="contactid">Contact ID</param>
+        /// <param optional="true" name="isClosed">Case status</param>
+        /// <param optional="true" name="tags">Tags</param>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemNotFoundException"></exception>
-        /// <short>Delete cases by parameters</short> 
+        /// <short>Delete case group</short> 
         /// <category>Cases</category>
-        /// <returns type="ASC.Api.CRM.Wrappers.CasesWrapper, ASC.Api.CRM">
-        /// List of cases
+        /// <returns>
+        ///   Case list
         /// </returns>
-        /// <path>api/2.0/crm/case/filter</path>
-        /// <httpMethod>DELETE</httpMethod>
-        /// <collection>list</collection>
         [Delete(@"case/filter")]
         public IEnumerable<CasesWrapper> DeleteBatchCases(int contactid, bool? isClosed, IEnumerable<string> tags)
         {
@@ -578,16 +545,13 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Returns a list of all the contacts related to the case with the ID specified in the request.
+        ///    Returns the list of all contacts associated with the case with the ID specified in the request
         /// </summary>
-        /// <short>Get case contacts</short> 
-        /// <param type="System.Int32, System" method="url" name="caseid">Case ID</param>
+        /// <short>Get all case contacts</short> 
+        /// <param name="caseid">Case ID</param>
         /// <category>Cases</category>
-        /// <returns type="ASC.Api.CRM.Wrappers.ContactWrapper, ASC.Api.CRM">List of contacts</returns>
+        /// <returns>Contact list</returns>
         ///<exception cref="ArgumentException"></exception>
-        ///<path>api/2.0/crm/case/{caseid}/contact</path>
-        ///<httpMethod>GET</httpMethod>
-        /// <collection>list</collection>
         [Read(@"case/{caseid:[0-9]+}/contact")]
         public IEnumerable<ContactWrapper> GetCasesMembers(int caseid)
         {
@@ -598,19 +562,17 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Adds the selected contact to the case with the ID specified in the request.
+        ///   Adds the selected contact to the case with the ID specified in the request
         /// </summary>
-        /// <short>Add a case contact</short> 
+        /// <short>Add case contact</short> 
         /// <category>Cases</category>
-        /// <param type="System.Int32, System" method="url" name="caseid">Case ID</param>
-        /// <param type="System.Int32, System" name="contactid">Contact ID</param>
+        /// <param name="caseid">Case ID</param>
+        /// <param name="contactid">Contact ID</param>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemNotFoundException"></exception>
-        /// <returns type="ASC.Api.CRM.Wrappers.ContactWrapper, ASC.Api.CRM">
-        /// Contact
+        /// <returns>
+        ///    Participant
         /// </returns>
-        /// <path>api/2.0/crm/case/{caseid}/contact</path>
-        /// <httpMethod>POST</httpMethod>
         [Create(@"case/{caseid:[0-9]+}/contact")]
         public ContactWrapper AddMemberToCases(int caseid, int contactid)
         {
@@ -631,19 +593,17 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Deletes the selected contact from the case with the ID specified in the request.
+        ///   Delete the selected contact from the case with the ID specified in the request
         /// </summary>
-        /// <short>Delete a case contact</short> 
+        /// <short>Delete case contact</short> 
         /// <category>Cases</category>
-        /// <param type="System.Int32, System" method="url" name="caseid">Case ID</param>
-        /// <param type="System.Int32, System" method="url" name="contactid">Contact ID</param>
+        /// <param name="caseid">Case ID</param>
+        /// <param name="contactid">Contact ID</param>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ItemNotFoundException"></exception>
-        /// <returns type="ASC.Api.CRM.Wrappers.ContactWrapper, ASC.Api.CRM">
-        /// Contact
+        /// <returns>
+        ///    Participant
         /// </returns>
-        /// <path>api/2.0/crm/case/{caseid}/contact/{contactid}</path>
-        /// <httpMethod>DELETE</httpMethod>
         [Delete(@"case/{caseid:[0-9]+}/contact/{contactid:[0-9]+}")]
         public ContactWrapper DeleteMemberFromCases(int caseid, int contactid)
         {
@@ -666,17 +626,14 @@ namespace ASC.Api.CRM
         }
 
         /// <summary>
-        /// Returns a list of 30 cases from the CRM module with a prefix specified in the request.
+        ///    Returns the list of 30 cases in the CRM module with prefix
         /// </summary>
-        /// <param type="System.String, System" optional="true" name="prefix">Case prefix</param>
-        /// <param type="System.Int32, System" optional="true" name="contactID">Contact ID</param>
+        /// <param optional="true" name="prefix"></param>
+        /// <param optional="true" name="contactID"></param>
         /// <category>Cases</category>
         /// <returns>
-        /// List of cases
+        ///    Cases list
         /// </returns>
-        /// <path>api/2.0/crm/case/byprefix</path>
-        /// <httpMethod>GET</httpMethod>
-        /// <collection>list</collection>
         /// <visible>false</visible>
         [Read(@"case/byprefix")]
         public IEnumerable<CasesWrapper> GetCasesByPrefix(string prefix, int contactID)
@@ -721,7 +678,7 @@ namespace ASC.Api.CRM
             var casesIDs = items.Select(item => item.ID).ToArray();
 
             var customFields = DaoFactory.CustomFieldDao
-                                         .GetEntityFields(EntityType.Case, casesIDs)
+                                         .GetEnityFields(EntityType.Case, casesIDs)
                                          .GroupBy(item => item.EntityID)
                                          .ToDictionary(item => item.Key, item => item.Select(ToCustomFieldBaseWrapper));
 
@@ -740,14 +697,14 @@ namespace ASC.Api.CRM
             foreach (var cases in items)
             {
                 var casesWrapper = new CasesWrapper(cases)
-                {
-                    CustomFields = customFields.ContainsKey(cases.ID)
+                    {
+                        CustomFields = customFields.ContainsKey(cases.ID)
                                            ? customFields[cases.ID]
                                            : new List<CustomFieldBaseWrapper>(),
-                    Members = casesMembers.ContainsKey(cases.ID)
+                        Members = casesMembers.ContainsKey(cases.ID)
                                       ? casesMembers[cases.ID].Where(contacts.ContainsKey).Select(item => contacts[item])
                                       : new List<ContactBaseWrapper>()
-                };
+                    };
 
                 result.Add(casesWrapper);
             }
@@ -758,14 +715,14 @@ namespace ASC.Api.CRM
         private CasesWrapper ToCasesWrapper(Cases cases)
         {
             var casesWrapper = new CasesWrapper(cases)
-            {
-                CustomFields = DaoFactory
+                {
+                    CustomFields = DaoFactory
                         .CustomFieldDao
-                        .GetEntityFields(EntityType.Case, cases.ID, false)
+                        .GetEnityFields(EntityType.Case, cases.ID, false)
                         .ConvertAll(item => new CustomFieldBaseWrapper(item))
                         .ToSmartList(),
-                Members = new List<ContactBaseWrapper>()
-            };
+                    Members = new List<ContactBaseWrapper>()
+                };
 
             var memberIDs = DaoFactory.CasesDao.GetMembers(cases.ID);
             var membersList = DaoFactory.ContactDao.GetContacts(memberIDs);

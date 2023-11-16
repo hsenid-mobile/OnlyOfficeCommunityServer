@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Drawing;
 using System.Runtime.Serialization;
-
 using ASC.Core.Common.Settings;
 
 namespace ASC.Web.Core.Users
@@ -60,11 +59,11 @@ namespace ASC.Web.Core.Users
         public override ISettings GetDefault()
         {
             return new UserPhotoThumbnailSettings
-            {
-                Point = new Point(0, 0),
-                Size = new Size(UserPhotoManager.MaxFotoSize.Width, UserPhotoManager.MaxFotoSize.Height),
-                IsDefault = true
-            };
+                {
+                    Point = new Point(0, 0),
+                    Size = new Size(UserPhotoManager.MaxFotoSize.Width, UserPhotoManager.MaxFotoSize.Height),
+                    IsDefault = true
+                };
         }
     }
 }

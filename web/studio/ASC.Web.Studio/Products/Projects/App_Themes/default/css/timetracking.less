@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  *
 */
 
-
-@import "params.less";
 
 /*---table---*/
 
@@ -80,19 +78,16 @@
 
 .timeSpendRecord {
     .checkbox {
-        width: 20px;
-        padding: 0 0 0 4px;
-        color-scheme: @checkbox-color-scheme;
-        accent-color: @checkbox-accent-color;
-    }
-
+             width:20px;
+             padding: 0 0 0 4px;
+        }
     .changeStatusCombobox {
         display: block;
         width: 35px;
         border: 1px solid transparent;
 
         &.canEdit {
-            border: 1px solid @border-color;
+            border: 1px solid #d1d1d1;
             border-radius: 3px;
             -moz-border-radius: 3px;
             -webkit-border-radius: 3px;
@@ -208,10 +203,10 @@
     }
 
     tbody {
-        border-top: 1px solid @border-color;
+        border-top: 1px solid #D1D1D1;
 
         td {
-            color: @text-color;
+            color: #333;
             height: 40px;
         }
     }
@@ -219,11 +214,11 @@
     .timeSpendRecord:hover,
     .timeSpendRecord.checked-row:hover,
     .timeSpendRecord.menuopen {
-        background: @body-color-hover-another;
+        background: #E5E5E5;
     }
 
     .timeSpendRecord.checked-row {
-        background: @body-color-selected;
+        background: #f2f2f2;
     }
 
     .pm-ts-noteColumn span {
@@ -244,7 +239,7 @@
     }
 
     .pm-ts-noteColumn a {
-        color: @text-color;
+        color: #333;
         display: block;
         font-weight: bold;
         overflow: hidden;
@@ -265,7 +260,7 @@
         text-overflow: ellipsis;
 
         b {
-            color: @grey-text;
+            color: #666;
         }
     }
 
@@ -276,7 +271,7 @@
                 border-bottom: 1px dotted transparent;
 
                 &:hover {
-                    border-bottom: 1px dotted @text-color;
+                    border-bottom: 1px dotted #333;
                 }
 
                 &.not-action,
@@ -289,7 +284,7 @@
 
         .timeSpendRecord:hover {
             .pm-ts-personColumn span {
-                border-bottom: 1px dotted @text-color;
+                border-bottom: 1px dotted #333;
 
                 &.not-action {
                     border: none;

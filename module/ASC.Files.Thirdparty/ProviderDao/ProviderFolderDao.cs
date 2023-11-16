@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,11 @@
 */
 
 
+using System.Threading;
+using ASC.Files.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-
-using ASC.Core.ChunkedUploader;
-using ASC.Data.Storage.ZipOperators;
-using ASC.Files.Core;
-using ASC.Web.Studio.Core;
 
 namespace ASC.Files.Thirdparty.ProviderDao
 {
@@ -42,7 +38,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
 
                 if (result != null && !Default.IsMatch(folderId))
                 {
-                    SetSharedProperty(new[] { result });
+                    SetSharedProperty(new[] {result});
                 }
 
                 return result;
@@ -52,10 +48,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
         public Folder GetFolder(string title, object parentId)
         {
             var selector = GetSelector(parentId);
-            using (var folderDao = selector.GetFolderDao(parentId))
-            {
-                return folderDao.GetFolder(title, selector.ConvertId(parentId));
-            }
+            return selector.GetFolderDao(parentId).GetFolder(title, selector.ConvertId(parentId));
         }
 
         public Folder GetRootFolder(object folderId)
@@ -107,7 +100,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
             }
         }
 
-        public List<Folder> GetFolders(IEnumerable<object> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true)
+        public List<Folder> GetFolders(object[] folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true)
         {
             var result = Enumerable.Empty<Folder>();
 
@@ -124,7 +117,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
                                                     using (var folderDao = selectorLocal.GetFolderDao(matchedId.FirstOrDefault()))
                                                     {
                                                         return folderDao
-                                                            .GetFolders(matchedId.Select(selectorLocal.ConvertId).ToList(),
+                                                            .GetFolders(matchedId.Select(selectorLocal.ConvertId).ToArray(),
                                                                 filterType, subjectGroup, subjectID, searchText, searchSubfolders, checkShare);
                                                     }
                                                 })
@@ -229,7 +222,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
             var folderId = folder.ID;
             var selector = GetSelector(folderId);
             folder.ID = selector.ConvertId(folderId);
-            folder.ParentFolderID = selector.IsMatch(folder.ParentFolderID) ? selector.ConvertId(folder.ParentFolderID) : null;
+            folder.ParentFolderID = selector.ConvertId(folder.ParentFolderID);
             using (var folderDao = selector.GetFolderDao(folderId))
             {
                 return folderDao.RenameFolder(folder, newTitle);
@@ -301,27 +294,15 @@ namespace ASC.Files.Thirdparty.ProviderDao
                 var storageMaxUploadSize = folderDao.GetMaxUploadSize(selector.ConvertId(folderId), chunkedUpload);
 
                 if (storageMaxUploadSize == -1 || storageMaxUploadSize == long.MaxValue)
-                    storageMaxUploadSize = SetupInfo.ProviderMaxUploadSize;
+                    storageMaxUploadSize = 1024L*1024L*1024L;
 
                 return storageMaxUploadSize;
             }
         }
 
-        public IDataWriteOperator CreateDataWriteOperator(
-            string folderId,
-            CommonChunkedUploadSession chunkedUploadSession,
-            CommonChunkedUploadSessionHolder sessionHolder)
-        {
-            var selector = GetSelector(folderId);
-            using (var folderDao = selector.GetFolderDao(folderId))
-            {
-                return folderDao.CreateDataWriteOperator(folderId, chunkedUploadSession, sessionHolder);
-            }
-        }
-
         #region Only for TMFolderDao
 
-        public void ReassignFolders(IEnumerable<object> folderIds, Guid newOwnerId)
+        public void ReassignFolders(object[] folderIds, Guid newOwnerId)
         {
             foreach (var selector in GetSelectors())
             {
@@ -334,7 +315,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
                 {
                     using (var folderDao = selectorLocal.GetFolderDao(matchedId.FirstOrDefault()))
                     {
-                        folderDao.ReassignFolders(matchedId.Select(selectorLocal.ConvertId).ToList(), newOwnerId);
+                        folderDao.ReassignFolders(matchedId.Select(selectorLocal.ConvertId).ToArray(), newOwnerId);
                     }
                 }
             }
@@ -421,7 +402,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
             return null;
         }
 
-        public Dictionary<string, string> GetBunchObjectIDs(IEnumerable<object> folderIDs)
+        public Dictionary<string, string> GetBunchObjectIDs(List<object> folderIDs)
         {
             foreach (var selector in GetSelectors())
             {

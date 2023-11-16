@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-
 using ASC.Core;
 using ASC.Core.Common.Settings;
 using ASC.Web.Studio.Utility;
@@ -44,10 +43,10 @@ namespace ASC.Web.Studio.Core.TFA
         public override ISettings GetDefault()
         {
             return new TfaAppUserSettings
-            {
-                CodesSetting = new List<BackupCode>(),
-                SaltSetting = 0
-            };
+                {
+                    CodesSetting = new List<BackupCode>(),
+                    SaltSetting = 0
+                };
         }
 
         public static long GetSalt(Guid userId)

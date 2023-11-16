@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace ASC.Files.Core
 {
@@ -77,7 +76,7 @@ namespace ASC.Files.Core
         /// </summary>
         /// <param name="fileIds">id file</param>
         /// <returns></returns>
-        List<File> GetFiles(IEnumerable<object> fileIds);
+        List<File> GetFiles(object[] fileIds);
 
         /// <summary>
         ///     Gets the file (s) by ID (s) for share
@@ -89,7 +88,7 @@ namespace ASC.Files.Core
         /// <param name="searchText"></param>
         /// <param name="searchInContent"></param>
         /// <returns></returns>
-        List<File> GetFilesFiltered(IEnumerable<object> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent);
+        List<File> GetFilesFiltered(object[] fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent);
 
         /// <summary>
         /// 
@@ -121,8 +120,6 @@ namespace ASC.Files.Core
         /// <param name="file"></param>
         /// <returns>Stream</returns>
         Stream GetFileStream(File file);
-
-        Task<Stream> GetFileStreamAsync(File file);
 
         /// <summary>
         /// Get stream of file
@@ -176,13 +173,6 @@ namespace ASC.Files.Core
         /// </summary>
         /// <param name="fileId">file id</param>
         void DeleteFile(object fileId);
-
-        /// <summary>
-        ///   Deletes a file including all previous versions
-        /// </summary>
-        /// <param name="fileId">file id</param>
-        /// <param name="ownerId">file owner id</param>
-        void DeleteFile(object fileId, Guid ownerId);
 
         /// <summary>
         ///     Checks whether or not file
@@ -246,9 +236,7 @@ namespace ASC.Files.Core
 
         ChunkedUploadSession CreateUploadSession(File file, long contentLength);
 
-        File UploadChunk(ChunkedUploadSession uploadSession, Stream chunkStream, long chunkLength);
-        Task UploadChunkAsync(ChunkedUploadSession uploadSession, Stream chunkStream, long chunkLength);
-        File FinalizeUploadSession(ChunkedUploadSession uploadSession);
+        void UploadChunk(ChunkedUploadSession uploadSession, Stream chunkStream, long chunkLength);
 
         void AbortUploadSession(ChunkedUploadSession uploadSession);
 
@@ -261,10 +249,10 @@ namespace ASC.Files.Core
         /// </summary>
         /// <param name="fileIds"></param>
         /// <param name="newOwnerId"></param>
-        void ReassignFiles(IEnumerable<object> fileIds, Guid newOwnerId);
+        void ReassignFiles(object[] fileIds, Guid newOwnerId);
 
         /// <summary>
-        /// Search files in SharedWithMe &amp; Projects
+        /// Search files in SharedWithMe & Projects
         /// </summary>
         /// <param name="parentIds"></param>
         /// <param name="filterType"></param>
@@ -273,7 +261,7 @@ namespace ASC.Files.Core
         /// <param name="searchText"></param>
         /// <param name="searchInContent"></param>
         /// <returns></returns>
-        List<File> GetFiles(IEnumerable<object> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent);
+        List<File> GetFiles(object[] parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent);
 
         /// <summary>
         /// Search the list of files containing text
@@ -291,8 +279,6 @@ namespace ASC.Files.Core
         /// <returns></returns>
         bool IsExistOnStorage(File file);
 
-        Task<bool> IsExistOnStorageAsync(File file);
-
         void SaveEditHistory(File file, string changes, Stream differenceStream);
 
         List<EditHistory> GetEditHistory(object fileId, int fileVersion = 0);
@@ -300,14 +286,6 @@ namespace ASC.Files.Core
         Stream GetDifferenceStream(File file);
 
         bool ContainChanges(object fileId, int fileVersion);
-
-        void SaveThumbnail(File file, Stream thumbnail);
-
-        Stream GetThumbnail(File file);
-
-        EntryProperties GetProperties(object fileId);
-
-        void SaveProperties(object fileId, EntryProperties entryProperties);
 
         #endregion
     }

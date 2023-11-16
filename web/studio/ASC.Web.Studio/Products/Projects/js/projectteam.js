@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,7 @@ ASC.Projects.ProjectTeam = (function() {
         clickEventName = "click",
         project,
         handler,
-        mailModuleEnabled = false,
-        talkModuleEnabled = false;
+        mailModuleEnabled;
 
     var init = function () {
         teamlab = Teamlab;
@@ -61,7 +60,7 @@ ASC.Projects.ProjectTeam = (function() {
             project = prj;
 
             // calculate width
-            jq(window).on("resize", calculateWidthBlockUserInfo);
+            jq(window).resize(calculateWidthBlockUserInfo);
 
 
             //--change partisipant security
@@ -143,17 +142,10 @@ ASC.Projects.ProjectTeam = (function() {
             }
         });
 
-        teamlab.getEnabledModules({},
+        teamlab.getWebItemSecurityInfo({}, "2A923037-8B2D-487b-9A22-5AC0918ACF3F",
         {
-            success: function (params, modules) {
-                modules.forEach(function (module) {
-                    if (module.id == "mail") {
-                        mailModuleEnabled = true;
-                    }
-                    if (module.id == "talk") {
-                        talkModuleEnabled = true;
-                    }
-                });
+            success: function(params, data) {
+                mailModuleEnabled = data[0].enabled;
             }
         });
     };
@@ -167,7 +159,7 @@ ASC.Projects.ProjectTeam = (function() {
 
         if (!user.isVisitor) {
             if (project.canCreateTask && !user.isTerminated) {
-                menuItems.push(new ActionMenuItem("team_task", resources.TaskResource.AddNewTask, teamAddNewTask.bind(null, userId), "new-task"));
+                menuItems.push(new ActionMenuItem("team_task", resources.TasksResource.AddNewTask, teamAddNewTask.bind(null, userId), "new-task"));
             }
             if (!teamlab.profile.isVisitor) {
                 menuItems.push(new ActionMenuItem("team_reportOpen", resources.ReportResource.ReportOpenTasks, teamReportOpenTasksHandler.bind(null, userId), "open-tasks-report"));
@@ -186,16 +178,14 @@ ASC.Projects.ProjectTeam = (function() {
                 menuItems.push(new ActionMenuItem("team_email", resources.ProjectResource.ClosedProjectTeamWriteMail, teamSendEmailHandler.bind(null, user.email), "email"));
             }
 
-            if (talkModuleEnabled) {
-                menuItems.push(new ActionMenuItem("team_jabber", resources.ProjectResource.ClosedProjectTeamWriteInMessenger, teamWriteJabberHandler.bind(null, user.userName), "chat"));
-            }
+            menuItems.push(new ActionMenuItem("team_jabber", resources.ProjectResource.ClosedProjectTeamWriteInMessenger, teamWriteJabberHandler.bind(null, user.userName), "chat"));
 
             if (project.security.canEditTeam && userId !== project.responsibleId) {
                 if (menuItems.length >= 3) {
                     menuItems.push(new ActionMenuItem(null, null, null, null, true));
                 }
 
-                menuItems.push(new ActionMenuItem("team_remove", resources.ProjectsCommonResource.RemoveMemberFromTeam, teamRemoveHanlder.bind(null, userId), "user"));
+                menuItems.push(new ActionMenuItem("team_remove", resources.CommonResource.RemoveMemberFromTeam, teamRemoveHanlder.bind(null, userId), "user"));
             }
         }
 
@@ -331,9 +321,9 @@ ASC.Projects.ProjectTeam = (function() {
             security: [
                 security(item.canReadMessages, "Messages", resources.MessageResource.Messages),
                 security(item.canReadFiles, "Files", resources.ProjectsFileResource.Documents),
-                security(item.canReadTasks, "Tasks", resources.TaskResource.AllTasks),
+                security(item.canReadTasks, "Tasks", resources.TasksResource.AllTasks),
                 security(item.canReadMilestones, "Milestone", resources.MilestoneResource.Milestones),
-                security(item.canReadContacts, "Contacts", resources.ProjectsCommonResource.ModuleContacts, item.isVisitor)
+                security(item.canReadContacts, "Contacts", resources.CommonResource.ModuleContacts, item.isVisitor)
             ]
         }, item);
     }

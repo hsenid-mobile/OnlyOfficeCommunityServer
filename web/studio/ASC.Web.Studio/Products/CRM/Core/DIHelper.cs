@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 
 using ASC.Common.Data;
 using ASC.Common.DependencyInjection;
+using ASC.CRM.Core;
 using ASC.CRM.Core.Dao;
 using ASC.Web.Studio.Utility;
-
 using Autofac;
 
 namespace ASC.Web.CRM.Core
@@ -40,7 +40,7 @@ namespace ASC.Web.CRM.Core
 
                 var container = AutofacConfigLoader.Load("crm");
 
-                container.Register(c => new DbManager("default"))
+                container.Register(c => DbManager.FromHttpContext("default"))
                     .AsSelf()
                     .As<IDbManager>()
                     .InstancePerRequest();

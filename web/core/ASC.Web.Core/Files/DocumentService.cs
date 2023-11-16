@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -28,18 +27,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
-
 using ASC.Core;
-using ASC.Core.Billing;
-
 using JWT;
-using JWT.Algorithms;
-using JWT.Serializers;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-
 using Formatting = Newtonsoft.Json.Formatting;
 
 namespace ASC.Web.Core.Files
@@ -52,7 +44,7 @@ namespace ASC.Web.Core.Files
         /// <summary>
         /// Timeout to request conversion
         /// </summary>
-        public static int Timeout = Convert.ToInt32(ConfigurationManagerExtension.AppSettings["files.docservice.timeout"] ?? "120000");
+        public static int Timeout = 120000;
 
         /// <summary>
         /// Number of tries request conversion
@@ -82,9 +74,6 @@ namespace ASC.Web.Core.Files
         /// <param name="toExtension">Extension to which to convert</param>
         /// <param name="documentRevisionId">Key for caching on service</param>
         /// <param name="password">Password</param>
-        /// <param name="region">Four letter language codes</param>
-        /// <param name="thumbnail">Thumbnail settings</param>
-        /// <param name="spreadsheetLayout"></param>
         /// <param name="isAsync">Perform conversions asynchronously</param>
         /// <param name="signatureSecret">Secret key to generate the token</param>
         /// <param name="convertedDocumentUri">Uri to the converted document</param>
@@ -102,9 +91,6 @@ namespace ASC.Web.Core.Files
             string toExtension,
             string documentRevisionId,
             string password,
-            string region,
-            ThumbnailData thumbnail,
-            SpreadsheetLayout spreadsheetLayout,
             bool isAsync,
             string signatureSecret,
             out string convertedDocumentUri)
@@ -128,17 +114,14 @@ namespace ASC.Web.Core.Files
             request.Timeout = Timeout;
 
             var body = new ConvertionBody
-            {
-                Async = isAsync,
-                FileType = fromExtension.Trim('.'),
-                Key = documentRevisionId,
-                OutputType = toExtension.Trim('.'),
-                Title = title,
-                Thumbnail = thumbnail,
-                SpreadsheetLayout = spreadsheetLayout,
-                Url = documentUri,
-                Region = region,
-            };
+                {
+                    Async = isAsync,
+                    FileType = fromExtension.Trim('.'),
+                    Key = documentRevisionId,
+                    OutputType = toExtension.Trim('.'),
+                    Title = title,
+                    Url = documentUri,
+                };
 
             if (!string.IsNullOrEmpty(password))
             {
@@ -151,17 +134,12 @@ namespace ASC.Web.Core.Files
                     {
                         { "payload", body }
                     };
-
-                var encoder = new JwtEncoder(new HMACSHA256Algorithm(),
-                                             new JsonNetSerializer(),
-                                             new JwtBase64UrlEncoder());
-
-                var token = encoder.Encode(payload, signatureSecret);
-
+                JsonWebToken.JsonSerializer = new JwtSerializer();
+                var token = JsonWebToken.Encode(payload, signatureSecret, JwtHashAlgorithm.HS256);
                 //todo: remove old scheme
                 request.Headers.Add(FileUtility.SignatureHeader, "Bearer " + token);
 
-                token = encoder.Encode(body, signatureSecret);
+                token = JsonWebToken.Encode(body, signatureSecret, JwtHashAlgorithm.HS256);
                 body.Token = token;
             }
 
@@ -235,15 +213,17 @@ namespace ASC.Web.Core.Files
         /// <param name="users">users id for drop</param>
         /// <param name="meta">file meta data for update</param>
         /// <param name="signatureSecret">Secret key to generate the token</param>
+        /// <param name="version">server version</param>
         /// <returns>Response</returns>
-        public static CommandResponse CommandRequest(
+        public static CommandResultTypes CommandRequest(
             string documentTrackerUrl,
             CommandMethod method,
             string documentRevisionId,
             string callbackUrl,
             string[] users,
             MetaData meta,
-            string signatureSecret)
+            string signatureSecret,
+            out string version)
         {
             var request = (HttpWebRequest)WebRequest.Create(documentTrackerUrl);
             request.Method = "POST";
@@ -251,10 +231,10 @@ namespace ASC.Web.Core.Files
             request.Timeout = Timeout;
 
             var body = new CommandBody
-            {
-                Command = method,
-                Key = documentRevisionId,
-            };
+                {
+                    Command = method,
+                    Key = documentRevisionId,
+                };
 
             if (!string.IsNullOrEmpty(callbackUrl)) body.Callback = callbackUrl;
             if (users != null && users.Length > 0) body.Users = users;
@@ -266,17 +246,12 @@ namespace ASC.Web.Core.Files
                     {
                         { "payload", body }
                     };
-
-                var encoder = new JwtEncoder(new HMACSHA256Algorithm(),
-                                                  new JsonNetSerializer(),
-                                                  new JwtBase64UrlEncoder());
-
-                var token = encoder.Encode(payload, signatureSecret);
-
+                JsonWebToken.JsonSerializer = new JwtSerializer();
+                var token = JsonWebToken.Encode(payload, signatureSecret, JwtHashAlgorithm.HS256);
                 //todo: remove old scheme
                 request.Headers.Add(FileUtility.SignatureHeader, "Bearer " + token);
 
-                token = encoder.Encode(body, signatureSecret);
+                token = JsonWebToken.Encode(body, signatureSecret, JwtHashAlgorithm.HS256);
                 body.Token = token;
             }
 
@@ -307,19 +282,18 @@ namespace ASC.Web.Core.Files
                 }
             }
 
+            var jResponse = JObject.Parse(dataResponse);
+
             try
             {
-                var commandResponse = JsonConvert.DeserializeObject<CommandResponse>(dataResponse);
-                return commandResponse;
+                version = jResponse.Value<string>("version");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new CommandResponse
-                {
-                    Error = CommandResponse.ErrorTypes.ParseError,
-                    ErrorString = ex.Message
-                };
+                version = "0";
             }
+
+            return (CommandResultTypes)jResponse.Value<int>("error");
         }
 
         public static string DocbuilderRequest(
@@ -342,11 +316,11 @@ namespace ASC.Web.Core.Files
             request.Timeout = Timeout;
 
             var body = new BuilderBody
-            {
-                Async = isAsync,
-                Key = requestKey,
-                Url = scriptUrl
-            };
+                {
+                    Async = isAsync,
+                    Key = requestKey,
+                    Url = scriptUrl
+                };
 
             if (!string.IsNullOrEmpty(signatureSecret))
             {
@@ -355,16 +329,12 @@ namespace ASC.Web.Core.Files
                         { "payload", body }
                     };
 
-                var encoder = new JwtEncoder(new HMACSHA256Algorithm(),
-                                             new JsonNetSerializer(),
-                                             new JwtBase64UrlEncoder());
-
-                var token = encoder.Encode(payload, signatureSecret);
-
+                JsonWebToken.JsonSerializer = new JwtSerializer();
+                var token = JsonWebToken.Encode(payload, signatureSecret, JwtHashAlgorithm.HS256);
                 //todo: remove old scheme
                 request.Headers.Add(FileUtility.SignatureHeader, "Bearer " + token);
 
-                token = encoder.Encode(body, signatureSecret);
+                token = JsonWebToken.Encode(body, signatureSecret, JwtHashAlgorithm.HS256);
                 body.Token = token;
             }
 
@@ -448,112 +418,18 @@ namespace ASC.Web.Core.Files
             Version,
             ForceSave, //not used
             Meta,
-            License,
         }
 
-        [Serializable]
-        [DataContract(Name = "CommandResponse", Namespace = "")]
-        [DebuggerDisplay("{Key}")]
-        public class CommandResponse
+        public enum CommandResultTypes
         {
-            [DataMember(Name = "error")]
-            public ErrorTypes Error;
-
-            [DataMember(Name = "errorString")]
-            public string ErrorString;
-
-            [DataMember(Name = "key")]
-            public string Key;
-
-            [DataMember(Name = "license")]
-            public License License;
-
-            [DataMember(Name = "server")]
-            public ServerInfo Server;
-
-            [DataMember(Name = "quota")]
-            public QuotaInfo Quota;
-
-            [DataMember(Name = "version")]
-            public string Version;
-
-            public enum ErrorTypes
-            {
-                NoError = 0,
-                DocumentIdError = 1,
-                ParseError = 2,
-                UnknownError = 3,
-                NotModify = 4,
-                UnknownCommand = 5,
-                Token = 6,
-                TokenExpire = 7,
-            }
-
-            [Serializable]
-            [DataContract(Name = "Server", Namespace = "")]
-            [DebuggerDisplay("{BuildVersion}")]
-            public class ServerInfo
-            {
-                [DataMember(Name = "buildDate")]
-                public DateTime BuildDate;
-
-                [DataMember(Name = "buildNumber")]
-                public int buildNumber;
-
-                [DataMember(Name = "buildVersion")]
-                public string BuildVersion;
-
-                [DataMember(Name = "packageType")]
-                public PackageTypes PackageType;
-
-                [DataMember(Name = "resultType")]
-                public ResultTypes ResultType;
-
-                [DataMember(Name = "workersCount")]
-                public int WorkersCount;
-
-                public enum PackageTypes
-                {
-                    OpenSource = 0,
-                    IntegrationEdition = 1,
-                    DeveloperEdition = 2
-                }
-
-                public enum ResultTypes
-                {
-                    Error = 1,
-                    Expired = 2,
-                    Success = 3,
-                    UnknownUser = 4,
-                    Connections = 5,
-                    ExpiredTrial = 6,
-                    SuccessLimit = 7,
-                    UsersCount = 8,
-                    ConnectionsOS = 9,
-                    UsersCountOS = 10,
-                    ExpiredLimited = 11
-                }
-            }
-
-            [Serializable]
-            [DataContract(Name = "Quota", Namespace = "")]
-            public class QuotaInfo
-            {
-                [DataMember(Name = "users")]
-                public List<User> Users;
-
-                [Serializable]
-                [DataContract(Name = "User", Namespace = "")]
-                [DebuggerDisplay("{UserId} ({Expire})")]
-                public class User
-                {
-                    [DataMember(Name = "userid")]
-                    public string UserId;
-
-                    [DataMember(Name = "expire")]
-                    public DateTime Expire;
-                }
-            }
+            NoError = 0,
+            DocumentIdError = 1,
+            ParseError = 2,
+            UnknownError = 3,
+            NotModify = 4,
+            UnknownCommand = 5,
+            Token = 6,
+            TokenExpire = 7,
         }
 
         [Serializable]
@@ -599,84 +475,6 @@ namespace ASC.Web.Core.Files
         }
 
         [Serializable]
-        [DataContract(Name = "thumbnail", Namespace = "")]
-        [DebuggerDisplay("{Height}x{Width}")]
-        public class ThumbnailData
-        {
-            [DataMember(Name = "aspect")]
-            public int Aspect;
-
-            [DataMember(Name = "first")]
-            public bool First;
-
-            [DataMember(Name = "height")]
-            public int Height;
-
-            [DataMember(Name = "width")]
-            public int Width;
-        }
-
-        [Serializable]
-        [DataContract(Name = "spreadsheetLayout", Namespace = "")]
-        [DebuggerDisplay("SpreadsheetLayout {IgnorePrintArea} {Orientation} {FitToHeight} {FitToWidth} {Headings} {GridLines}")]
-        public class SpreadsheetLayout
-        {
-            [DataMember(Name = "ignorePrintArea")]
-            public bool IgnorePrintArea;
-
-            [DataMember(Name = "orientation")]
-            public string Orientation;
-
-            [DataMember(Name = "fitToHeight")]
-            public int FitToHeight;
-
-            [DataMember(Name = "fitToWidth")]
-            public int FitToWidth;
-
-            [DataMember(Name = "headings")]
-            public bool Headings;
-
-            [DataMember(Name = "gridLines")]
-            public bool GridLines;
-
-            [DataMember(Name = "margins")]
-            public LayoutMargins Margins;
-
-            [DataMember(Name = "pageSize")]
-            public LayoutPageSize PageSize;
-
-            [Serializable]
-            [DataContract(Name = "margins", Namespace = "")]
-            [DebuggerDisplay("Margins {Top} {Right} {Bottom} {Left}")]
-            public class LayoutMargins
-            {
-                [DataMember(Name = "left")]
-                public string Left;
-
-                [DataMember(Name = "right")]
-                public string Right;
-
-                [DataMember(Name = "top")]
-                public string Top;
-
-                [DataMember(Name = "bottom")]
-                public string Bottom;
-            }
-
-            [Serializable]
-            [DataContract(Name = "pageSize", Namespace = "")]
-            [DebuggerDisplay("PageSize {Width} {Height}")]
-            public class LayoutPageSize
-            {
-                [DataMember(Name = "height")]
-                public string Height;
-
-                [DataMember(Name = "width")]
-                public string Width;
-            }
-        }
-
-        [Serializable]
         [DataContract(Name = "Converion", Namespace = "")]
         [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
         private class ConvertionBody
@@ -699,17 +497,8 @@ namespace ASC.Web.Core.Files
             [DataMember(Name = "title")]
             public string Title { get; set; }
 
-            [DataMember(Name = "thumbnail", EmitDefaultValue = false)]
-            public ThumbnailData Thumbnail { get; set; }
-
-            [DataMember(Name = "spreadsheetLayout", EmitDefaultValue = false)]
-            public SpreadsheetLayout SpreadsheetLayout { get; set; }
-
             [DataMember(Name = "url", IsRequired = true)]
             public string Url { get; set; }
-
-            [DataMember(Name = "region", IsRequired = true)]
-            public string Region { get; set; }
 
             [DataMember(Name = "token", EmitDefaultValue = false)]
             public string Token { get; set; }
@@ -747,7 +536,6 @@ namespace ASC.Web.Core.Files
             public string Url;
         }
 
-        [Serializable]
         public class DocumentServiceException : Exception
         {
             public ErrorCode Code;
@@ -758,24 +546,6 @@ namespace ASC.Web.Core.Files
                 Code = errorCode;
             }
 
-            protected DocumentServiceException(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-                if (info != null)
-                {
-                    Code = (ErrorCode)info.GetValue("Code", typeof(ErrorCode));
-                }
-            }
-
-            public override void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                base.GetObjectData(info, context);
-
-                if (info != null)
-                {
-                    info.AddValue("Code", Code);
-                }
-            }
 
             public static void ProcessResponseError(string errorCode)
             {
@@ -905,10 +675,10 @@ namespace ASC.Web.Core.Files
             public string Serialize(object obj)
             {
                 var settings = new JsonSerializerSettings
-                {
-                    ContractResolver = new CamelCaseExceptDictionaryKeysResolver(),
-                    NullValueHandling = NullValueHandling.Ignore,
-                };
+                    {
+                        ContractResolver = new CamelCaseExceptDictionaryKeysResolver(),
+                        NullValueHandling = NullValueHandling.Ignore,
+                    };
 
                 return JsonConvert.SerializeObject(obj, Formatting.Indented, settings);
             }
@@ -916,10 +686,10 @@ namespace ASC.Web.Core.Files
             public T Deserialize<T>(string json)
             {
                 var settings = new JsonSerializerSettings
-                {
-                    ContractResolver = new CamelCaseExceptDictionaryKeysResolver(),
-                    NullValueHandling = NullValueHandling.Ignore,
-                };
+                    {
+                        ContractResolver = new CamelCaseExceptDictionaryKeysResolver(),
+                        NullValueHandling = NullValueHandling.Ignore,
+                    };
 
                 return JsonConvert.DeserializeObject<T>(json, settings);
             }

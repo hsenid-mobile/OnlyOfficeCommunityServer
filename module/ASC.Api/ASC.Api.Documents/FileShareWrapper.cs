@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-
 using ASC.Api.Employee;
 using ASC.Core;
 using ASC.Files.Core;
@@ -42,13 +41,13 @@ namespace ASC.Api.Documents
             IsLocked = aceWrapper.LockedRights;
             if (aceWrapper.SubjectGroup)
             {
-                if (aceWrapper.IsLink)
+                if (aceWrapper.SubjectId == FileConstant.ShareLinkId)
                 {
                     SharedTo = new FileShareLink
-                    {
-                        Id = aceWrapper.SubjectId,
-                        ShareLink = aceWrapper.Link
-                    };
+                        {
+                            Id = aceWrapper.SubjectId,
+                            ShareLink = aceWrapper.Link
+                        };
                 }
                 else
                 {
@@ -65,38 +64,18 @@ namespace ASC.Api.Documents
 
         /// <summary>
         /// </summary>
-        /// <example type="int">1</example>
         public FileShare Access { get; set; }
 
         /// <summary>
         /// </summary>
-        /// <object>
-        ///     <member>
-        ///         <example name="id">00000000-0000-0000-0000-000000000000</example>
-        ///     </member>
-        ///     <member>
-        ///         <example name="displayName">Mike Zanyatski</example>
-        ///     </member>
-        ///     <member>
-        ///         <example name="title">Manager</example>
-        ///     </member>
-        ///     <member>
-        ///         <example name="avatarSmall">url to small avatar</example>
-        ///     </member>
-        ///     <member>
-        ///         <example name="profileUrl"></example>
-        ///     </member>
-        /// </object>
         public object SharedTo { get; set; }
 
         /// <summary>
         /// </summary>
-        /// <example>false</example>
         public bool IsLocked { get; set; }
 
         /// <summary>
         /// </summary>
-        /// <example>true</example>
         public bool IsOwner { get; set; }
 
         /// <summary>
@@ -105,12 +84,12 @@ namespace ASC.Api.Documents
         public static FileShareWrapper GetSample()
         {
             return new FileShareWrapper
-            {
-                Access = FileShare.ReadWrite,
-                IsLocked = false,
-                IsOwner = true,
-                SharedTo = EmployeeWraper.GetSample()
-            };
+                {
+                    Access = FileShare.ReadWrite,
+                    IsLocked = false,
+                    IsOwner = true,
+                    SharedTo = EmployeeWraper.GetSample()
+                };
         }
     }
 

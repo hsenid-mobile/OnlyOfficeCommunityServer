@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 
 (function ($) {
-    var ResourceJS = ASC.Resources.Master.ResourceJS, teamlab = Teamlab;
+    var resources = ASC.Resources.Master.Resource, teamlab = Teamlab;
 
     var useradvancedSelector = function (element, options) {
         this.$element = $(element);
@@ -44,17 +44,17 @@
 
             opts.newoptions =
                     [
-                        { title: ResourceJS.SelectorType, type: "choice", tag: "type", items: [
-                                        { type: "user", title: ResourceJS.SelectorUser },
-                                        { type: "visitor", title: ResourceJS.SelectorVisitor }
+                        { title: resources.SelectorType, type: "choice", tag: "type", items: [
+                                        { type: "user", title: resources.SelectorUser },
+                                        { type: "visitor", title: resources.SelectorVisitor }
                             ]
                         },
-                        { title: ResourceJS.SelectorFirstName, type: "input", tag: "first-name" },
-                        { title: ResourceJS.SelectorLastName, type: "input", tag: "last-name" },
-                        { title: ResourceJS.SelectorEmail, type: "input", tag: "email" },
-                        { title: ResourceJS.SelectorGroup, type: "select", tag: "group" }
+                        { title: resources.SelectorFirstName, type: "input", tag: "first-name" },
+                        { title: resources.SelectorLastName, type: "input", tag: "last-name" },
+                        { title: resources.SelectorEmail, type: "input", tag: "email" },
+                        { title: resources.SelectorGroup, type: "select", tag: "group" }
                     ],
-            opts.newbtn = ResourceJS.InviteButton;
+            opts.newbtn = resources.InviteButton;
 
             that.displayAddItemBlock.call(that, opts);
             that.initDataSimpleSelector.call(that, { tag: "group", items: itemsSimpleSelect });
@@ -65,7 +65,7 @@
                 teamlab.getQuotas({}, {
                     success: function (params, data) {
                         if (data.availableUsersCount == 0) {
-                            $addPanel.find(".type select").val("visitor").prop("disabled", true);
+                            $addPanel.find(".type select").val("visitor").attr("disabled", "disabled");
                         }
                     },
                     error: function (params, errors) { }
@@ -73,17 +73,6 @@
             } else {
                 $addPanel.find(".type").hide();
             }
-        },
-
-        getTooltip: function (profile) {
-            var tooltip = Encoder.htmlDecode(profile.displayName);
-            if (profile.email) {
-                tooltip += "\n" + profile.email;
-            }
-            if (profile.isPending || profile.isActivated === false) {
-                tooltip += " (" + ASC.Resources.Master.ResourceJS.UserPending + ")";
-            }
-            return tooltip;
         },
 
         initAdvSelectorData: function () {
@@ -103,11 +92,8 @@
                 var newObj = {
                     title: dataItem.displayName,
                     id: dataItem.id,
-                    isVisitor: dataItem.isVisitor,
-                    status: dataItem.isPending || dataItem.isActivated === false ? "pending" : "",
-                    groups: window.GroupManager.getGroups(dataItem.groups),
-                    avatarSmall: dataItem.avatarSmall,
-                    tooltip: that.getTooltip(dataItem)
+                    status: dataItem.isPending || dataItem.isActivated === false ? ASC.Resources.Master.Resource.UserPending : "",
+                    groups: window.GroupManager.getGroups(dataItem.groups)
                 };
 
                 data.push(newObj);
@@ -142,7 +128,7 @@
         initAdvSelectorGroupsData: function () {
             var that = this;
 
-            that.rewriteObjectGroup.call(that, window.GroupManager.getGroupsArray());
+            that.rewriteObjectGroup.call(that, window.GroupManager.getAllGroups());
 
             if (that.options.isAdmin) {
                 var groups = [];
@@ -224,45 +210,45 @@
             };
 
             if (!newUser.firstname) {
-                that.showErrorField.call(that, { field: $addPanel.find(".first-name"), error: ResourceJS.ErrorEmptyUserFirstName });
+                that.showErrorField.call(that, { field: $addPanel.find(".first-name"), error: resources.ErrorEmptyUserFirstName });
                 isError = true;
             }
             if (!newUser.lastname) {
-                that.showErrorField.call(that, { field: $addPanel.find(".last-name"), error: ResourceJS.ErrorEmptyUserLastName });
+                that.showErrorField.call(that, { field: $addPanel.find(".last-name"), error: resources.ErrorEmptyUserLastName });
                 isError = true;
             }
             if (newUser.firstname && newUser.firstname.length > 64) {
-                that.showErrorField.call(that, { field: $addPanel.find(".first-name"), error: ResourceJS.ErrorMesLongField64 });
+                that.showErrorField.call(that, { field: $addPanel.find(".first-name"), error: resources.ErrorMesLongField64 });
                 isError = true;
             }
             if (newUser.lastname && newUser.lastname.length > 64) {
-                that.showErrorField.call(that, { field: $addPanel.find(".last-name"), error: ResourceJS.ErrorMesLongField64 });
+                that.showErrorField.call(that, { field: $addPanel.find(".last-name"), error: resources.ErrorMesLongField64 });
                 isError = true;
             }
             if (!jq.isValidEmail(newUser.email)) {
-                that.showErrorField.call(that, { field: $addPanel.find(".email"), error: ResourceJS.ErrorNotCorrectEmail });
+                that.showErrorField.call(that, { field: $addPanel.find(".email"), error: resources.ErrorNotCorrectEmail });
                 isError = true;
             }
             if (!newUser.department.length && $addPanel.find(".group input").val()) {
-                that.showErrorField.call(that, { field: $addPanel.find(".group"), error: ResourceJS.ErrorGroupNotExist });
+                that.showErrorField.call(that, { field: $addPanel.find(".group"), error: resources.ErrorGroupNotExist });
                 isError = true;
             }
 
             if (isError) {
-                $addPanel.find(".error input").first().trigger("focus");
+                $addPanel.find(".error input").first().focus();
                 return;
             }
 
             teamlab.getQuotas({}, {
                 success: function (params, data) {
                     if (data.availableUsersCount == 0 && !newUser.isVisitor) {
-                        that.showServerError.call(that, { field: $btn, error: ResourceJS.UserSelectorErrorLimitUsers + " " + data.maxUsersCount });
+                        that.showServerError.call(that, { field: $btn, error: resources.UserSelectorErrorLimitUsers + data.maxUsersCount });
                         return;
                     }
 
                     teamlab.addProfile({}, newUser, {
                         before: function () {
-                            that.displayLoadingBtn.call(that, { btn: $btn, text: ResourceJS.LoadingProcessing });
+                            that.displayLoadingBtn.call(that, { btn: $btn, text: resources.LoadingProcessing });
                         },
                         success: function (params, profile) {
                             profile = this.__responses[0];
@@ -271,18 +257,15 @@
                                 id: profile.id,
                                 title: profile.displayName,
                                 isVisitor: profile.isVisitor,
-                                isPending: true,
-                                status: "pending",
-                                groups: [],
-                                avatarSmall: profile.avatarSmall,
-                                tooltip: that.getTooltip(profile)
+                                status: ASC.Resources.Master.Resource.UserPending,
+                                groups: []
                             };
 
                             var copy = Object.assign({}, profile);
                             copy.groups = (profile.groups || []).map(function (group) { return group.id; });
                             UserManager.addNewUser(copy);
 
-                            toastr.success(ResourceJS.UserSelectorAddSuccess.format("<b>" + newuser.title + "</b>"));
+                            toastr.success(resources.UserSelectorAddSuccess.format("<b>" + newuser.title + "</b>"));
                             that.actionsAfterCreateItem.call(that, { newitem: newuser, response: profile, nameProperty: "groups" });
                         },
                         error: function () {
@@ -302,10 +285,8 @@
                 id: item.id,
                 title: item.displayName,
                 isVisitor: item.isVisitor,
-                status: item.isPending || item.isActivated === false ? "pending" : "",
-                groups: [],
-                avatarSmall: profile.avatarSmall,
-                tooltip: that.getTooltip(profile)
+                status: item.isPending || item.isActivated === false ? ASC.Resources.Master.Resource.UserPending : "",
+                groups: []
             };
             this.actionsAfterCreateItem.call(this, { newitem: newuser, response: item, nameProperty: "groups" });
         },
@@ -328,11 +309,11 @@
   }
     $.fn.useradvancedSelector.defaults = $.extend({}, $.fn.advancedSelector.defaults, {
         showme: true,
-        addtext: ResourceJS.UserSelectorAddText,
-        noresults: ResourceJS.UserSelectorNoResults,
-        noitems: ResourceJS.UserSelectorNoItems,
-        nogroups: ResourceJS.UserSelectorNoGroups,
-        emptylist: ResourceJS.UserSelectorEmptyList,
+        addtext: resources.UserSelectorAddText,
+        noresults: resources.UserSelectorNoResults,
+        noitems: resources.UserSelectorNoItems,
+        nogroups: resources.UserSelectorNoGroups,
+        emptylist: resources.UserSelectorEmptyList,
         isAdmin: false,
         withGuests: true,
         showDisabled: false,

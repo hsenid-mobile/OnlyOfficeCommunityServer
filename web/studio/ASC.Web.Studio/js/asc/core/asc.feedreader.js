@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,14 +42,11 @@ ASC.Feed = (function () {
     return jq.extend({
             Products: {
                 community: feedResource.CommunityProduct,
-                people: feedResource.PeopleProduct,
                 projects: feedResource.ProjectsProduct,
                 crm: feedResource.CrmProduct,
                 documents: feedResource.DocumentsProduct
             },
             Texts: {
-                birthday: createTextsObj(null, feedResource.Birthdays),
-                newEmployee: createTextsObj(null, feedResource.NewEmployee),
                 blog: createTextsObj(feedResource.BlogCreatedText, feedResource.BlogsModule, feedResource.BlogCommentedText),
                 bookmark: createTextsObj(feedResource.BookmarkCreatedText, feedResource.BookmarksModule, feedResource.BookmarkCommentedText),
                 news: createTextsObj(feedResource.NewsCreatedText, feedResource.EventsModule, feedResource.NewsCommentedText),
@@ -216,10 +213,6 @@ ASC.Feed.Reader = (function() {
         $loader.hide();
         jq(dropFeedsList).removeClass('display-none');
         $seeAllBtn.css('display', 'inline-block');
-        if (dropFeedsList.prop('scrollHeight') > dropFeedsList.prop('clientHeight')) {
-            $dropFeedsBox.addClass("scrollbar-popup");
-            dropFeedsList.addClass("scrollbar-popup-list");
-        }
     }
 
     function getFeedTemplate(feed) {
@@ -237,24 +230,6 @@ ASC.Feed.Reader = (function() {
 
         resolveAdditionalFeedData(template);
         template.actionText = getFeedActionText(template);
-
-        if (!template.isGuest) {
-            template.userName = new URL(window.location.protocol + '//' + window.location.hostname + template.author.profileUrl).searchParams.get("user");
-        }
-
-        if (template.isAllDayEvent) {
-            template.title = "";
-            template.today = ASC.Resources.Master.ResourceJS.Today;
-            template.yesterday = ASC.Resources.Master.ResourceJS.Yesterday;
-            template.tomorrow = ASC.Resources.Master.FeedResource.Tomorrow;
-            template.displayCreatedTime = null;
-        }
-        else {
-            template.today = ASC.Resources.Master.FeedResource.TodayAt;
-            template.yesterday = ASC.Resources.Master.FeedResource.YesterdayAt;
-            template.tomorrow = ASC.Resources.Master.FeedResource.TomorrowAt;
-            template.actionText = template.actionText + '.';
-        }
 
         return template;
     }
@@ -318,24 +293,6 @@ ASC.Feed.Reader = (function() {
 
     function resolveAdditionalFeedData(template) {
         switch (template.item) {
-            case 'birthday':
-                if (template.isToday) {
-                    template.itemClass = 'birthdaysToday';
-                }
-                else {
-                    template.itemClass = 'birthdays';
-                }
-                template.linkOnClickAttr = 'ASC.Controls.JabberClient.open(\'' + template.userName + '\')';
-                template.linkInnerText = template.author.displayName;
-                break;
-            case 'newEmployee':
-                template.itemClass = 'people';
-                template.linkOnClickAttr = 'window.location.href=\'' + template.author.profileUrl + '\'';
-                template.linkInnerText = template.author.displayName;
-                break;
-            case 'people':
-                template.itemClass = 'people';
-                break;
             case 'blog':
                 template.itemClass = 'blogs';
                 break;
@@ -346,9 +303,7 @@ ASC.Feed.Reader = (function() {
                 template.itemClass = 'events';
                 break;
             case 'forum':
-            case 'forumTopic':
             case 'forumPoll':
-            case 'forumPost':
                 template.itemClass = 'forum';
                 break;
             case 'bookmark':

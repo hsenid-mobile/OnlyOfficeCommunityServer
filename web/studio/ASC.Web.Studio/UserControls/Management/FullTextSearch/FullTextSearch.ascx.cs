@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,14 @@
 using System;
 using System.Web;
 using System.Web.UI;
-
-using AjaxPro;
-
 using ASC.Core;
 using ASC.Core.Tenants;
-using ASC.ElasticSearch;
-using ASC.ElasticSearch.Service;
 using ASC.MessagingSystem;
 using ASC.Web.Studio.Core;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
+using AjaxPro;
+using ASC.ElasticSearch;
+using ASC.ElasticSearch.Service;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -48,12 +45,12 @@ namespace ASC.Web.Studio.UserControls.Management
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!CoreContext.Configuration.Standalone)
+            if(!CoreContext.Configuration.Standalone)
                 Response.Redirect("~/Management.aspx");
 
             AjaxPro.Utility.RegisterTypeForAjax(GetType(), Page);
             Page.RegisterBodyScripts("~/UserControls/Management/FullTextSearch/js/fulltextsearch.js")
-                .RegisterStyle("~/UserControls/Management/FullTextSearch/css/fulltextsearch.less");
+                .RegisterStyle("~/UserControls/Management/FullTextSearch/css/fulltextsearch.css");
 
             HelpLink = CommonLinkUtility.GetHelpLink();
         }
@@ -71,8 +68,8 @@ namespace ASC.Web.Studio.UserControls.Management
         public object Test()
         {
             return FactoryIndexer.CheckState() ?
-                new { success = true, message = Resource.FullTextSearchServiceIsRunning } :
-                new { success = false, message = Resource.FullTextSearchServiceIsNotRunning };
+                new { success = true, message = Resources.Resource.FullTextSearchServiceIsRunning } :
+                new { success = false, message = Resources.Resource.FullTextSearchServiceIsNotRunning };
         }
     }
 }

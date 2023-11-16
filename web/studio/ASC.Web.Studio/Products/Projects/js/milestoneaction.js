@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ ASC.Projects.MilestoneAction = (function() {
     function initMilestoneFormElementsAndConstants() {
         if (isInitMilestoneForm) return;
         isInitMilestoneForm = true;
+        var milesoneResource = resources.MilestoneResource;
 
         jq("#milestoneActionPanel")
             .html(jq.tmpl("common_containerTmpl",
@@ -80,13 +81,13 @@ ASC.Projects.MilestoneAction = (function() {
                     title: "projects_milestone_action",
                     data: {
                         title: {
-                            error: resources.MilestoneResource.NoTitleMessage,
-                            header: resources.MilestoneResource.Title
+                            error: milesoneResource.NoTitleMessage,
+                            header: milesoneResource.Title
                         },
-                        description: resources.MilestoneResource.Description,
+                        description: milesoneResource.Description,
                         project: {
                             header: resources.ProjectResource.Project,
-                            error: resources.MilestoneResource.ChooseProject
+                            error: milesoneResource.ChooseProject
                         }
                     }
                 }
@@ -118,7 +119,7 @@ ASC.Projects.MilestoneAction = (function() {
         }
 
         $milestoneDeadlineInputBox.on("change", function () {
-            if ($milestoneDeadlineInputBox.val().trim() != '') {
+            if (jq.trim($milestoneDeadlineInputBox.val()) != '') {
                 $milestoneDeadlineContainer.removeClass(requiredFieldErrorClass);
             }
             var date = getMilestoneDate();
@@ -137,13 +138,13 @@ ASC.Projects.MilestoneAction = (function() {
                 boldDeadlineLeft(-1);
             }
         });
-        $milestoneTitleInputBox.on("keyup", function () {
-            if ($milestoneTitleInputBox.val().trim() != '') {
+        $milestoneTitleInputBox.keyup(function () {
+            if (jq.trim($milestoneTitleInputBox.val()) != '') {
                 $milestoneTitleContainer.removeClass(requiredFieldErrorClass);
             }
         });
 
-        $milestoneDeadlineLeft.on("click", function () {
+        $milestoneDeadlineLeft.click(function () {
             var period = parseInt(jq(this).attr('data-value'));
             boldDeadlineLeft(period);
             var date = new Date();
@@ -168,7 +169,7 @@ ASC.Projects.MilestoneAction = (function() {
                 projectId: $milestoneProject.attr("data-id") || currentProjectId,
                 responsible: $milestoneResponsible.attr("data-id"),
                 notifyResponsible: $notifyResponsibleCheckbox.is(':checked'),
-                title: $milestoneTitleInputBox.val().trim(),
+                title: jq.trim($milestoneTitleInputBox.val()),
                 description: $milestoneDescriptionInputBox.val(),
                 isKey: $milestoneKeyCheckBox.is(':checked'),
                 isNotify: $milestoneNotifyManagerCheckBox.is(':checked')
@@ -212,7 +213,7 @@ ASC.Projects.MilestoneAction = (function() {
             }
             return false;
         });
-        jq('#milestoneActionCancelButton').on("click", function () {
+        jq('#milestoneActionCancelButton').click(function () {
             if (location.href.toLowerCase().indexOf(ganttChartPage) > 0) {
                 ASC.Projects.GantChartPage.enableChartEvents();
             }
@@ -291,7 +292,7 @@ ASC.Projects.MilestoneAction = (function() {
         var selectorObj = {
             onechosen: true,
             inPopup: true,
-            noresults: ASC.Resources.Master.ResourceJS.UserSelectorNoResults
+            noresults: ASC.Resources.Master.Resource.UserSelectorNoResults
         };
         currentProjectId = jq.getURLParam('prjID');
         if (currentProjectId) {
@@ -349,7 +350,7 @@ ASC.Projects.MilestoneAction = (function() {
         
         if (item.id && item.id != myGuid) {
             $notifyResponsibleContainer.show();
-            $notifyResponsibleCheckbox.prop('checked', true);
+            $notifyResponsibleCheckbox.attr('checked', true);
         } else {
             $notifyResponsibleContainer.hide();
         }
@@ -381,26 +382,26 @@ ASC.Projects.MilestoneAction = (function() {
     };
 
     var lockMilestoneActionPage = function() {
-        $milestoneDeadlineInputBox.prop(disabledAttr, true);
-        $milestoneTitleInputBox.prop(disabledAttr, true);
-        $milestoneDescriptionInputBox.prop(disabledAttr, true);
-        $milestoneKeyCheckBox.prop(disabledAttr, true);
-        $milestoneNotifyManagerCheckBox.prop(disabledAttr, true);
+        $milestoneDeadlineInputBox.attr(disabledAttr, true);
+        $milestoneTitleInputBox.attr(disabledAttr, true);
+        $milestoneDescriptionInputBox.attr(disabledAttr, true);
+        $milestoneKeyCheckBox.attr(disabledAttr, true);
+        $milestoneNotifyManagerCheckBox.attr(disabledAttr, true);
     };
 
     var unlockMilestoneActionPage = function () {
         if (!isInitMilestoneForm) return;
-        $milestoneDeadlineInputBox.prop(disabledAttr, false);
-        $milestoneTitleInputBox.prop(disabledAttr, false).val('');
-        $milestoneDescriptionInputBox.prop(disabledAttr, false).val('');
-        $milestoneKeyCheckBox.prop(disabledAttr, false).prop("checked", false);
-        $milestoneNotifyManagerCheckBox.prop(disabledAttr, false);
+        $milestoneDeadlineInputBox.removeAttr(disabledAttr);
+        $milestoneTitleInputBox.removeAttr(disabledAttr).val('');
+        $milestoneDescriptionInputBox.removeAttr(disabledAttr).val('');
+        $milestoneKeyCheckBox.removeAttr(disabledAttr).removeAttr("checked");
+        $milestoneNotifyManagerCheckBox.removeAttr(disabledAttr);
         loadingBanner.hideLoaderBtn($milestoneActionPanel);
     };
 
     var clearPanel = function() {
         $milestoneActionPanel.removeAttr('type');
-        $notifyResponsibleCheckbox.prop('checked', true);
+        $notifyResponsibleCheckbox.attr('checked', true);
 
         if (!$milestoneProject.attr("data-id")) {
             $milestoneResponsibleContainer.hide();
@@ -413,13 +414,16 @@ ASC.Projects.MilestoneAction = (function() {
         $milestoneDeadlineInputBox.val('');
         $milestoneDeadlineInputBox.datepicker({ popupContainer: '#milestoneActionPanel', selectDefaultDate: true });
         $milestoneDeadlineInputBox.mask(ASC.Resources.Master.DatePatternJQ);
+        $milestoneDeadlineInputBox.on("keydown", onDatePickerKeyDown).on("change", onDatePickerChange);
 
-        jq("#ui-datepicker-div").addClass("blockMsg");
+        if (jq.browser.mobile)
+            jq("#ui-datepicker-div").addClass("blockMsg");
 
         var date = new Date();
         date.setDate(date.getDate() + 7);
         $milestoneDeadlineInputBox.datepicker('setDate', date);
         boldDeadlineLeft(7);
+
 
         $milestoneResponsibleContainer.removeClass(requiredFieldErrorClass);
         $milestoneResponsible.projectadvancedSelector("reset");
@@ -429,11 +433,24 @@ ASC.Projects.MilestoneAction = (function() {
 
         $milestoneDescriptionInputBox.val('');
 
-        $milestoneKeyCheckBox.prop("checked", false);
+        $milestoneKeyCheckBox.removeAttr('checked');
 
-        $milestoneNotifyManagerCheckBox.prop("checked", false);
+        $milestoneNotifyManagerCheckBox.removeAttr('checked');
         loadingBanner.hideLoaderBtn($milestoneActionPanel);
     };
+
+    function onDatePickerKeyDown(e) {
+        if (e.keyCode === 13) {
+            onDatePickerChange(e);
+        }
+    }
+
+    function onDatePickerChange(e) {
+        var obj = jq(e.target);
+        var date = obj.datepicker("getDate");
+        obj.unmask().blur().mask(ASC.Resources.Master.DatePatternJQ);
+        obj.datepicker("setDate", date);
+    }
 
     function boldDeadlineLeft(dataValue) {
         var dotline = "dotline", bold = "bold";
@@ -474,11 +491,11 @@ ASC.Projects.MilestoneAction = (function() {
             errorBox.addClass(displayNoneClass);
             actionContainer.css('marginTop', '43px');
 
-            $milestoneDeadlineInputBox.prop(disabledAttr, false);
-            $milestoneTitleInputBox.prop(disabledAttr, false);
-            $milestoneDescriptionInputBox.prop(disabledAttr, false);
-            $milestoneKeyCheckBox.prop(disabledAttr, false);
-            $milestoneNotifyManagerCheckBox.prop(disabledAttr, false);
+            $milestoneDeadlineInputBox.removeAttr(disabledAttr);
+            $milestoneTitleInputBox.removeAttr(disabledAttr);
+            $milestoneDescriptionInputBox.removeAttr(disabledAttr);
+            $milestoneKeyCheckBox.removeAttr(disabledAttr);
+            $milestoneNotifyManagerCheckBox.removeAttr(disabledAttr);
         }, 3000);
         currentProjectId = jq.getURLParam('prjID');
         if (location.href.toLowerCase().indexOf("milestones.aspx") > 0 && (currentProjectId == params.projectId)) {
@@ -504,7 +521,7 @@ ASC.Projects.MilestoneAction = (function() {
                 return !item.isVisitor;
             })
             .map(function (item) {
-                return { id: item.id, title: item.id == teamlab.profile.id ? ASC.Resources.Master.ResourceJS.MeLabel : item.displayName };
+                return { id: item.id, title: item.id == teamlab.profile.id ? ASC.Resources.Master.Resource.MeLabel : item.displayName };
             });
         
         var mileResp = participants.find(function(item) {
@@ -520,7 +537,7 @@ ASC.Projects.MilestoneAction = (function() {
             if (!participants.length) {
                 $noActiveParticipantsMilNote.removeClass(displayNoneClass);
                 $milestoneActionButton.addClass(disableClass);
-                respSelected = [{ id: "", title: resources.ProjectsCommonResource.Select }];
+                respSelected = [{ id: "", title: resources.CommonResource.Select }];
             } else {
                 var currentProject = common.getProjectById(selectedPrjId);
                 $noActiveParticipantsMilNote.addClass(displayNoneClass);
@@ -567,7 +584,7 @@ ASC.Projects.MilestoneAction = (function() {
 
         if (milestone.deadline) {
             $milestoneDeadlineInputBox.datepicker("setDate", milestone.deadline);
-            $milestoneDeadlineInputBox.trigger("change");
+            $milestoneDeadlineInputBox.change();
         }
 
         $milestoneTitleInputBox.val(milestone.title);
@@ -623,7 +640,7 @@ ASC.Projects.MilestoneAction = (function() {
 
     function showMilestoneActionPanel() {
         StudioBlockUIManager.blockUI($milestoneActionPanel, 550);
-        $milestoneTitleInputBox.trigger("focus");
+        $milestoneTitleInputBox.focus();
     };
 
     var filterProjectsByIdInCombobox = function(ids) {  // only for gantt chart

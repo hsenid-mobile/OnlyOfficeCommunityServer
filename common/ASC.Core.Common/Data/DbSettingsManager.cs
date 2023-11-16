@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Json;
 using System.Text;
-
 using ASC.Common.Caching;
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
@@ -92,7 +91,7 @@ namespace ASC.Core.Data
                 var key = settings.ID.ToString() + tenantId + userId;
                 var data = Serialize(settings);
 
-                using (var db = GetDbManager())
+                using(var db = GetDbManager())
                 {
                     var defaultData = Serialize(settings.GetDefault());
 
@@ -113,7 +112,7 @@ namespace ASC.Core.Data
                             .InColumnValue("tenantid", tenantId)
                             .InColumnValue("data", data);
                     }
-                    notify.Publish(new SettingsCacheItem { Key = key }, CacheNotifyAction.Remove);
+                    notify.Publish(new SettingsCacheItem {Key = key}, CacheNotifyAction.Remove);
                     db.ExecuteNonQuery(i);
                 }
 
@@ -127,14 +126,14 @@ namespace ASC.Core.Data
             }
         }
 
-        internal T LoadSettingsFor<T>(int tenantId, Guid userId, bool useCache = true) where T : class, ISettings
+        internal T LoadSettingsFor<T>(int tenantId, Guid userId) where T : class, ISettings
         {
-            var settingsInstance = (ISettings)Activator.CreateInstance<T>();
+            var settingsInstance = (ISettings) Activator.CreateInstance<T>();
             var key = settingsInstance.ID.ToString() + tenantId + userId;
 
             try
             {
-                var settings = useCache ? cache.Get<T>(key) : null;
+                var settings = cache.Get<T>(key);
                 if (settings != null) return settings;
 
                 using (var db = GetDbManager())
@@ -145,15 +144,15 @@ namespace ASC.Core.Data
                         .Where("tenantid", tenantId)
                         .Where("userid", userId.ToString());
 
-                    var result = db.ExecuteScalar<string>(q);
-                    if (!string.IsNullOrEmpty(result))
+                    var result = db.ExecuteScalar<object>(q);
+                    if (result != null)
                     {
-                        var data = Encoding.UTF8.GetBytes(result);
+                        var data = result is string ? Encoding.UTF8.GetBytes((string) result) : (byte[]) result;
                         settings = Deserialize<T>(data);
                     }
                     else
                     {
-                        settings = (T)settingsInstance.GetDefault();
+                        settings = (T) settingsInstance.GetDefault();
                     }
                 }
 
@@ -164,15 +163,17 @@ namespace ASC.Core.Data
             {
                 log.Error(ex);
             }
-            return (T)settingsInstance.GetDefault();
+            return (T) settingsInstance.GetDefault();
         }
 
         private T Deserialize<T>(byte[] data)
         {
             using (var stream = new MemoryStream(data))
             {
-                var settings = GetJsonSerializer(typeof(T)).ReadObject(stream);
-                return (T)settings;
+                var settings = data[0] == 0
+                    ? new BinaryFormatter().Deserialize(stream)
+                    : GetJsonSerializer(typeof(T)).ReadObject(stream);
+                return (T) settings;
             }
         }
 
@@ -187,7 +188,7 @@ namespace ASC.Core.Data
 
         private IDbManager GetDbManager()
         {
-            return new DbManager(dbId);
+            return DbManager.FromHttpContext(dbId);
         }
 
         private DataContractJsonSerializer GetJsonSerializer(Type type)
@@ -201,12 +202,12 @@ namespace ASC.Core.Data
                 return jsonSerializers[type];
             }
         }
-    }
 
-    [Serializable]
-    class SettingsCacheItem
-    {
-        public string Key { get; set; }
-    }
 
+        [Serializable]
+        class SettingsCacheItem
+        {
+            public string Key { get; set; }
+        }
+    }
 }

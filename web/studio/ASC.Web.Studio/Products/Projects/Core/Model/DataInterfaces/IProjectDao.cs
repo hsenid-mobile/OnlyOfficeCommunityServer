@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
 
 using System;
 using System.Collections.Generic;
-
-using ASC.Common.Data.Sql.Expressions;
 using ASC.Projects.Core.Domain;
+using System.Collections;
+using ASC.Common.Data.Sql.Expressions;
 
 #endregion
 
@@ -32,35 +32,34 @@ namespace ASC.Projects.Core.DataInterfaces
         List<Project> GetAll(ProjectStatus? status, int max);
 
         List<Project> GetLast(ProjectStatus? status, int offset, int max);
-
+        
         List<Project> GetByParticipiant(Guid participantId, ProjectStatus status);
 
         List<Project> GetFollowing(Guid participantId);
 
         List<Project> GetOpenProjectsWithTasks(Guid participantId);
-
-        List<Tuple<Guid, int>> GetByFilterAverageTime(TaskFilter filter, bool isAdmin, bool checkAccess);
-
+            
+        
         DateTime GetMaxLastModified();
 
         void UpdateLastModified(int projectID);
-
+            
         Project GetById(int projectId);
 
-        List<Project> GetById(List<int> projectIDs);
+        List<Project> GetById(ICollection projectIDs);
 
         bool IsExists(int projectId);
 
         bool IsFollow(int projectId, Guid participantId);
-
+        
         int Count();
 
         List<int> GetTaskCount(List<int> projectId, TaskStatus? taskStatus, bool isAdmin);
 
         int GetMessageCount(int projectId);
-
+        
         int GetTotalTimeCount(int projectId);
-
+        
         int GetMilestoneCount(int projectId, params MilestoneStatus[] milestoneStatus);
 
         Project Create(Project project);
@@ -90,11 +89,8 @@ namespace ASC.Projects.Core.DataInterfaces
 
         List<Project> GetByFilter(TaskFilter filter, bool isAdmin, bool checkAccess);
 
-        List<Project> GetByFilterForReport(TaskFilter filter, bool isAdmin, bool checkAccess);
-
         int GetByFilterCount(TaskFilter filter, bool isAdmin, bool checkAccess);
 
-        int GetByFilterCountForReport(TaskFilter filter, bool isAdmin, bool checkAccess);
 
         List<Project> GetByContactID(int contactID);
 
@@ -102,7 +98,7 @@ namespace ASC.Projects.Core.DataInterfaces
 
         void DeleteProjectContact(int projectID, int contactid);
 
-
+        
         void SetTaskOrder(int projectID, string order);
 
         string GetTaskOrder(int projectID);

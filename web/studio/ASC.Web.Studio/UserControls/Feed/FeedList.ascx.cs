@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@
 using System;
 using System.Web;
 using System.Web.UI;
-
+using ASC.Core;
 using ASC.Web.Core;
-using ASC.Web.Core.Utility;
 
 namespace ASC.Web.Studio.UserControls.Feed
 {
@@ -28,16 +27,9 @@ namespace ASC.Web.Studio.UserControls.Feed
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
-            {
-                Page.RegisterStyle("~/UserControls/Feed/css/dark-feed.less");
-            }
-            else
-            {
-                Page.RegisterStyle("~/UserControls/Feed/css/feed.less");
-            }
             Page.RegisterBodyScripts("~/UserControls/Feed/js/feed.js", "~/UserControls/Feed/js/feed.filter.js")
-                .RegisterInlineScript(@"ASC.Feed.init('" + AccessRights() + "');");
+                .RegisterStyle("~/UserControls/Feed/css/feed.less")
+                .RegisterInlineScript(@"ASC.Feed.init('"+ AccessRights() + "');");
         }
 
         public static string Location
@@ -47,9 +39,8 @@ namespace ASC.Web.Studio.UserControls.Feed
 
         public static string AccessRights()
         {
-            return string.Join(",",
+            return string.Join(",", 
                     WebItemSecurity.IsAvailableForMe(WebItemManager.CommunityProductID).ToString(),
-                    WebItemSecurity.IsAvailableForMe(WebItemManager.PeopleProductID).ToString(),
                     WebItemSecurity.IsAvailableForMe(WebItemManager.CRMProductID).ToString(),
                     WebItemSecurity.IsAvailableForMe(WebItemManager.ProjectsProductID).ToString(),
                     WebItemSecurity.IsAvailableForMe(WebItemManager.DocumentsProductID).ToString()

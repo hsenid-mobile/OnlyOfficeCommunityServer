@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -24,9 +23,7 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.UI;
-
 using AjaxPro;
-
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Billing;
@@ -35,16 +32,14 @@ using ASC.Core.Users;
 using ASC.MessagingSystem;
 using ASC.Web.Core;
 using ASC.Web.Core.Security;
-using ASC.Web.Core.Utility;
 using ASC.Web.Core.Utility.Settings;
 using ASC.Web.Core.WhiteLabel;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Core.Notify;
 using ASC.Web.Studio.Core.Users;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Management;
 using ASC.Web.Studio.Utility;
-
+using Resources;
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Web.Studio.UserControls.FirstTime
@@ -77,8 +72,7 @@ namespace ASC.Web.Studio.UserControls.FirstTime
         {
             get
             {
-                return TenantExtra.EnableTariffSettings && TenantExtra.Enterprise
-                    && !File.Exists(LicenseReader.LicensePath);
+                return TenantExtra.EnableTarrifSettings && TenantExtra.Enterprise;
             }
         }
 
@@ -91,11 +85,9 @@ namespace ASC.Web.Studio.UserControls.FirstTime
 
         protected bool ShowPortalRename { get; set; }
 
-        protected Web.Core.Utility.PasswordSettings TenantPasswordSettings;
+        protected Web.Core.Utility.PasswordSettings PasswordSetting;
 
         protected string OpensourceLicenseAgreementsUrl { get; set; }
-
-        private ILog Log = LogManager.GetLogger("ASC.Web.FirstTime");
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -111,7 +103,7 @@ namespace ASC.Web.Studio.UserControls.FirstTime
 
             ShowPortalRename = SetupInfo.IsVisibleSettings("PortalRename");
 
-            TenantPasswordSettings = Web.Core.Utility.PasswordSettings.Load();
+            PasswordSetting = Web.Core.Utility.PasswordSettings.Load();
 
             OpensourceLicenseAgreementsUrl = string.IsNullOrEmpty(Web.Core.Files.FilesLinkUtility.DocServiceApiUrl)
                 ? "http://www.apache.org/licenses/LICENSE-2.0"
@@ -122,15 +114,10 @@ namespace ASC.Web.Studio.UserControls.FirstTime
         {
             Page.RegisterBodyScripts(
                 "~/js/uploader/jquery.fileupload.js",
-                "~/UserControls/FirstTime/js/manager.js");
-            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
-            {
-                Page.RegisterStyle("~/UserControls/FirstTime/css/dark-emailandpassword.less");
-            }
-            else
-            {
-                Page.RegisterStyle("~/UserControls/FirstTime/css/emailandpassword.less");
-            }
+                "~/js/third-party/xregexp.js",
+                "~/UserControls/FirstTime/js/manager.js")
+                .RegisterStyle("~/UserControls/FirstTime/css/emailandpassword.less");
+
             var script = new StringBuilder();
 
             script.AppendFormat(@"ASC.Controls.EmailAndPasswordManager.init('{0}','{1}','{2}','{3}','{4}');",
@@ -146,7 +133,7 @@ namespace ASC.Web.Studio.UserControls.FirstTime
 
         [AjaxMethod]
         [SecurityPassthrough]
-        public object SaveData(string email, string passwordHash, string lng, string promocode, string amiid, bool subscribeFromSite)
+        public object SaveData(string email, string passwordHash, string lng, string promocode, string amiid, bool analytics, bool subscribeFromSite)
         {
             try
             {
@@ -168,12 +155,13 @@ namespace ASC.Web.Studio.UserControls.FirstTime
                     tenant = CoreContext.TenantManager.GetTenant(tenant.TenantId);
                     if (tenant.OwnerId == Guid.Empty)
                     {
-                        Log.Error(tenant.TenantId + ": owner id is empty.");
+                        LogManager.GetLogger("ASC.Web.FirstTime").Error(tenant.TenantId + ": owner id is empty.");
                     }
                 }
 
                 var currentUser = CoreContext.UserManager.GetUsers(CoreContext.TenantManager.GetCurrentTenant().OwnerId);
-                CookiesManager.AuthenticateMeAndSetCookies(currentUser.Tenant, currentUser.ID, MessageAction.LoginSuccess);
+                var cookie = SecurityContext.AuthenticateMe(currentUser.ID);
+                CookiesManager.SetCookies(CookiesType.AuthKey, cookie);
 
                 if (!UserManagerWrapper.ValidateEmail(email))
                 {
@@ -201,7 +189,7 @@ namespace ASC.Web.Studio.UserControls.FirstTime
                     }
                     catch (Exception err)
                     {
-                        Log.Error("Incorrect Promo: " + promocode, err);
+                        LogManager.GetLogger("ASC.Web.FirstTime").Error("Incorrect Promo: " + promocode, err);
                         throw new Exception(Resource.EmailAndPasswordIncorrectPromocode);
                     }
                 }
@@ -214,6 +202,10 @@ namespace ASC.Web.Studio.UserControls.FirstTime
                     LicenseReader.RefreshLicense();
                 }
 
+                if (TenantExtra.Opensource)
+                {
+                    settings.Analytics = analytics;
+                }
                 settings.Completed = true;
                 settings.Save();
 
@@ -221,6 +213,7 @@ namespace ASC.Web.Studio.UserControls.FirstTime
 
                 StudioNotifyService.Instance.SendCongratulations(currentUser);
                 StudioNotifyService.Instance.SendRegData(currentUser);
+                FirstTimeTenantSettings.SendInstallInfo(currentUser);
 
                 if (subscribeFromSite
                     && TenantExtra.Opensource
@@ -245,7 +238,7 @@ namespace ASC.Web.Studio.UserControls.FirstTime
             }
             catch (Exception ex)
             {
-                Log.Error(ex);
+                LogManager.GetLogger("ASC.Web.FirstTime").Error(ex);
                 return new { Status = 0, Message = ex.Message };
             }
         }
@@ -301,24 +294,32 @@ namespace ASC.Web.Studio.UserControls.FirstTime
             try
             {
                 var url = (SetupInfo.TeamlabSiteRedirect ?? "").Trim().TrimEnd('/');
-
                 if (string.IsNullOrEmpty(url)) return;
 
                 url += "/post.ashx";
 
-                using (var webClient = new WebClient())
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.Method = "POST";
+                request.ContentType = "application/x-www-form-urlencoded";
+                request.Timeout = 10000;
+
+                var bodyString = string.Format("type=sendsubscription&email={0}", HttpUtility.UrlEncode(user.Email));
+                var bytes = Encoding.UTF8.GetBytes(bodyString);
+                request.ContentLength = bytes.Length;
+                using (var stream = request.GetRequestStream())
                 {
-                    var values = new NameValueCollection
-                        {
-                            { "type", "sendsubscription" },
-                            { "subscr_type", "Opensource" },
-                            { "email", user.Email }
-                        };
+                    stream.Write(bytes, 0, bytes.Length);
+                }
 
-                    var responseBody = webClient.UploadValues(url, values);
-                    var responseBodyStr = Encoding.UTF8.GetString(responseBody);
+                using (var response = request.GetResponse())
+                using (var stream = response.GetResponseStream())
+                {
+                    if (stream == null) throw new Exception("Response is null");
 
-                    LogManager.GetLogger("ASC.Web.FirstTime").Debug("Subscribe response: " + responseBodyStr);
+                    using (var reader = new StreamReader(stream))
+                    {
+                        LogManager.GetLogger("ASC.Web.FirstTime").Debug("Subscribe response: " + reader.ReadToEnd());
+                    }
                 }
             }
             catch (Exception e)

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ using ASC.Web.Studio.Utility;
 
 using Autofac;
 
+using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 
@@ -93,8 +94,8 @@ namespace ASC.Web.CRM.Classes
         {
             Id = TenantProvider.CurrentTenantID;
             Percentage = 0;
-            _fileID = fileID ?? new List<int>();
-            _contactID = contactID ?? new List<int>();
+            _fileID = fileID;
+            _contactID = contactID;
             _subject = subject;
             _bodyTempate = bodyTempate;
 
@@ -154,7 +155,7 @@ namespace ASC.Web.CRM.Classes
             try
             {
                 CoreContext.TenantManager.SetCurrentTenant(_tenantID);
-                SecurityContext.CurrentUser = _currUser;
+                SecurityContext.AuthenticateMe(CoreContext.Authentication.GetAccountByID(_currUser));
 
                 smtpClient = GetSmtpClient();
 
@@ -186,7 +187,7 @@ namespace ASC.Web.CRM.Classes
                             if (fileObj == null) continue;
                             using (var fileStream = fileDao.GetFileStream(fileObj))
                             {
-                                var directoryPath = Path.Combine(TempPath.GetTempPath(), "teamlab", _tenantID.ToString(),
+                                var directoryPath = Path.Combine(Path.GetTempPath(), "teamlab", _tenantID.ToString(),
                                     "crm/files/mailsender/");
                                 if (!Directory.Exists(directoryPath))
                                 {
@@ -195,7 +196,7 @@ namespace ASC.Web.CRM.Classes
                                 var filePath = Path.Combine(directoryPath, fileObj.Title);
                                 using (var newFileStream = File.Create(filePath))
                                 {
-                                    fileStream.CopyTo(newFileStream);
+                                    fileStream.StreamCopyTo(newFileStream);
                                 }
                                 filePaths.Add(filePath);
                             }
@@ -233,7 +234,7 @@ namespace ASC.Web.CRM.Classes
                                 continue;
                             }
 
-                            var to = MailboxAddress.Parse(recipientEmail);
+                            var to = new MailboxAddress(recipientEmail);
 
                             var mimeMessage = new MimeMessage
                             {
@@ -414,11 +415,10 @@ namespace ASC.Web.CRM.Classes
         {
             var client = new SmtpClient
             {
+                ServerCertificateValidationCallback = (sender, certificate, chain, errors) =>
+                    WorkContext.IsMono || MailKit.MailService.DefaultServerCertificateValidationCallback(sender, certificate, chain, errors),
                 Timeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds
             };
-
-            if (WorkContext.IsMono)
-                client.ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true;
 
             client.Connect(_smtpSetting.Host, _smtpSetting.Port,
                     _smtpSetting.EnableSSL ? SecureSocketOptions.Auto : SecureSocketOptions.None);
@@ -512,7 +512,7 @@ namespace ASC.Web.CRM.Classes
     public class MailSender
     {
         private static readonly Object _syncObj = new Object();
-        private static readonly ProgressQueue _mailQueue = new ProgressQueue(Global.GetQueueWorkerCount("mail"), Global.GetQueueWaitInterval("mail"), true);
+        private static readonly ProgressQueue _mailQueue = new ProgressQueue(2, TimeSpan.FromSeconds(60), true);
         private static readonly int quotas = 50;
 
 
@@ -577,11 +577,9 @@ namespace ASC.Web.CRM.Classes
         {
             var client = new SmtpClient
             {
+                ServerCertificateValidationCallback = (sender, certificate, chain, errors) => MailService.DefaultServerCertificateValidationCallback(sender, certificate, chain, errors),
                 Timeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds
             };
-
-            if (WorkContext.IsMono)
-                client.ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true;
 
             client.Connect(smtpSetting.Host, smtpSetting.Port,
                     smtpSetting.EnableSSL ? SecureSocketOptions.Auto : SecureSocketOptions.None);
@@ -611,7 +609,7 @@ namespace ASC.Web.CRM.Classes
             {
                 try
                 {
-                    var toAddress = MailboxAddress.Parse(recipientEmail);
+                    var toAddress = new MailboxAddress(recipientEmail);
                     var fromAddress = new MailboxAddress(smtpSetting.SenderDisplayName, smtpSetting.SenderEmailAddress);
 
                     var mimeMessage = new MimeMessage

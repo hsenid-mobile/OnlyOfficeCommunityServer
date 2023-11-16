@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,10 @@ using System.Threading;
 using System.Web.Configuration;
 using System.Xml.Linq;
 using System.Xml.XPath;
-
-using ASC.Common;
 using ASC.Common.Data;
 using ASC.Common.Logging;
-using ASC.Data.Storage.ZipOperators;
+using ASC.Data.Storage;
+
 
 namespace ASC.Data.Backup
 {
@@ -172,11 +171,14 @@ namespace ASC.Data.Backup
                         if (c.DataType == typeof(DateTime)) c.DateTimeMode = DataSetDateTime.Unspecified;
                     }
 
-                    using (var file = TempStream.Create())
+                    var tmp = Path.GetTempFileName();
+                    using (var file = File.OpenWrite(tmp))
                     {
                         dataTable.WriteXml(file, XmlWriteMode.WriteSchema);
-                        writer.WriteEntry(string.Format("{0}\\{1}\\{2}", Name, connectionString.Name, table).ToLower(), file);
                     }
+
+                    writer.WriteEntry(string.Format("{0}\\{1}\\{2}", Name, connectionString.Name, table).ToLower(), tmp);
+                    File.Delete(tmp);
 
                     processedTables.Add(table);
                 }
@@ -298,7 +300,8 @@ namespace ASC.Data.Backup
                     "core_settings",
                     "webstudio_uservisit",
                     "webstudio_useractivity",
-                    "tenants_forbiden"
+                    "tenants_tariff",
+                    "tenants_forbiden",
                 };
 
                 IEnumerable<string> tables;

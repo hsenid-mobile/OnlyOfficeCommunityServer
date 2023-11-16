@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using ASC.Core;
 using ASC.Core.Common.Settings;
 
 namespace ASC.Web.Core.Utility
@@ -34,173 +35,91 @@ namespace ASC.Web.Core.Utility
             get { return new Guid("aa93a4d1-012d-4ccd-895a-e094e809c840"); }
         }
 
+        public const int MaxLength = 30;
 
-        private static bool? printableASCII;
-
-        private static bool PrintableASCII
-        {
-            get
-            {
-                if (!printableASCII.HasValue)
-                {
-                    printableASCII = true;
-
-                    if (bool.TryParse(ConfigurationManagerExtension.AppSettings["web.password.ascii.cut"], out bool cut))
-                    {
-                        printableASCII = !cut;
-                    }
-                }
-
-                return printableASCII.Value;
-            }
-        }
-
-
-        private static int? limitMaxLength;
-
+        /// <summary>
+        /// Minimal length password has
+        /// </summary>
         [DataMember]
-        public static int LimitMaxLength
-        {
-            get
-            {
-                if (!limitMaxLength.HasValue)
-                {
-                    limitMaxLength = 120;
+        public int MinLength { get; set; }
 
-                    if (int.TryParse(ConfigurationManagerExtension.AppSettings["web.password.max"], out int max))
-                    {
-                        limitMaxLength = max;
-                    }
-                }
-
-                return limitMaxLength.Value;
-            }
-        }
-
-
-        private static int? limitMinLength;
-
-        [DataMember]
-        public static int LimitMinLength
-        {
-            get
-            {
-                if (!limitMinLength.HasValue)
-                {
-                    limitMinLength = 8;
-
-                    if (int.TryParse(ConfigurationManagerExtension.AppSettings["web.password.min"], out int min))
-                    {
-                        limitMinLength = min;
-                    }
-                }
-
-                return limitMinLength.Value;
-            }
-        }
-
-
-        private int maxLength;
-
-        [DataMember]
-        public int MaxLength
-        {
-            get
-            {
-                return maxLength == 0 ? LimitMaxLength : maxLength;
-            }
-            set
-            {
-                maxLength = GetLimitedValue(value);
-            }
-        }
-
-
-        private int minLength;
-
-        [DataMember]
-        public int MinLength
-        {
-            get
-            {
-                return minLength == 0 ? LimitMinLength : minLength;
-            }
-            set
-            {
-                minLength = GetLimitedValue(value);
-            }
-        }
-
-
-        [DataMember]
-        public static string AllowedCharactersRegexStr
-        {
-            get
-            {
-                return PrintableASCII ? @"[\x21-\x7E]" : @"[0-9a-zA-Z!""#$%&()*+,.:;<>?@^_{}~]"; // excluding SPACE or (SPACE and '-/=[\]`|)
-            }
-        }
-
-
+        /// <summary>
+        /// Password must contains upper case
+        /// </summary>
         [DataMember]
         public bool UpperCase { get; set; }
 
-        [DataMember]
-        public static string UpperCaseRegexStr
-        {
-            get
-            {
-                return @"(?=.*[A-Z])";
-            }
-        }
-
-
+        /// <summary>
+        /// Password must contains digits
+        /// </summary>
         [DataMember]
         public bool Digits { get; set; }
 
-        [DataMember]
-        public static string DigitsRegexStr
-        {
-            get
-            {
-                return @"(?=.*\d)";
-            }
-        }
-
-
+        /// <summary>
+        /// Password must contains special symbols
+        /// </summary>
         [DataMember]
         public bool SpecSymbols { get; set; }
 
-        [DataMember]
-        public static string SpecSymbolsRegexStr
-        {
-            get
-            {
-                return PrintableASCII ? @"(?=.*[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E])" : @"(?=.*[!""#$%&()*+,.:;<>?@^_{}~])";
-            }
-        }
-
+        private static PasswordSettings _default;
 
         public override ISettings GetDefault()
         {
-            return new PasswordSettings { MaxLength = LimitMaxLength, MinLength = LimitMinLength, UpperCase = false, Digits = false, SpecSymbols = false };
+            if (_default == null)
+            {
+                _default = new PasswordSettings { MinLength = 8, UpperCase = false, Digits = false, SpecSymbols = false };
+
+                int defaultMinLength;
+                if (int.TryParse(ConfigurationManagerExtension.AppSettings["web.password.min"], out defaultMinLength))
+                {
+                    _default.MinLength = Math.Max(1, Math.Min(MaxLength, defaultMinLength));
+                }
+            }
+
+            return _default;
         }
 
 
         public static string GetPasswordRegex(PasswordSettings passwordSettings)
         {
-            var pwdBuilder = new StringBuilder("^");
+            var pwdBuilder = new StringBuilder();
 
-            if (passwordSettings.Digits)
-                pwdBuilder.Append(DigitsRegexStr);
+            if (CoreContext.Configuration.CustomMode)
+            {
+                pwdBuilder.Append(@"^(?=.*[a-z]{0,})");
 
-            if (passwordSettings.UpperCase)
-                pwdBuilder.Append(UpperCaseRegexStr);
+                if (passwordSettings.Digits)
+                    pwdBuilder.Append(@"(?=.*\d)");
 
-            if (passwordSettings.SpecSymbols)
-                pwdBuilder.Append(SpecSymbolsRegexStr);
+                if (passwordSettings.UpperCase)
+                    pwdBuilder.Append(@"(?=.*[A-Z])");
 
-            pwdBuilder.Append(AllowedCharactersRegexStr + "{" + passwordSettings.MinLength + "," + passwordSettings.MaxLength + "}$");
+                if (passwordSettings.SpecSymbols)
+                    pwdBuilder.Append(@"(?=.*[_\-.~!$^*()=|])");
+
+                pwdBuilder.Append(@"[0-9a-zA-Z_\-.~!$^*()=|]");
+            }
+            else
+            {
+                pwdBuilder.Append(@"^(?=.*\p{Ll}{0,})");
+
+                if (passwordSettings.Digits)
+                    pwdBuilder.Append(@"(?=.*\d)");
+
+                if (passwordSettings.UpperCase)
+                    pwdBuilder.Append(@"(?=.*\p{Lu})");
+
+                if (passwordSettings.SpecSymbols)
+                    pwdBuilder.Append(@"(?=.*[\W])");
+
+                pwdBuilder.Append(@".");
+            }
+
+            pwdBuilder.Append(@"{");
+            pwdBuilder.Append(passwordSettings.MinLength);
+            pwdBuilder.Append(@",");
+            pwdBuilder.Append(MaxLength);
+            pwdBuilder.Append(@"}$");
 
             return pwdBuilder.ToString();
         }
@@ -211,16 +130,6 @@ namespace ASC.Web.Core.Utility
             var passwordRegex = GetPasswordRegex(passwordSettings);
 
             return new Regex(passwordRegex).IsMatch(password);
-        }
-
-
-        private int GetLimitedValue(int value)
-        {
-            return value > LimitMaxLength
-                ? LimitMaxLength
-                : value < LimitMinLength
-                    ? LimitMinLength
-                    : value;
         }
     }
 }

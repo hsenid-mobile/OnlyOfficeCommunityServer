@@ -1,7 +1,7 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="SharingSettings.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Common.SharingSettings" %>
 
 <%@ Import Namespace="ASC.Core" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <%@ Register TagPrefix="sc" Namespace="ASC.Web.Studio.Controls.Common" Assembly="ASC.Web.Studio" %>
 
@@ -27,8 +27,6 @@
 
                 <div id="sharingSettingsItems"></div>
                 <div class="sharing-empty describe-text"><%= string.Format(UserControlsCommonResource.SharingSettingsEmpty.HtmlEncode(), "<br />") %></div>
-
-                <asp:PlaceHolder ID="FormFillingHolder" runat="server"></asp:PlaceHolder>
 
                 <% if (EnableShareMessage)
                    { %>

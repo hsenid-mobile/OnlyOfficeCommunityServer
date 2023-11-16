@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Threading;
-
 using ASC.Common.Logging;
-using ASC.Common.Utils;
 using ASC.Mail.Clients;
 using ASC.Mail.Core;
 using ASC.Mail.Core.Dao.Expressions.Mailbox;
@@ -196,21 +194,21 @@ namespace ASC.Mail.Reloader
                                 continue;
                             }
 
-                            if (!storedMessage.From.Equals(StringUtils.NormalizeStringForMySql(message.From)) ||
-                                !storedMessage.To.Equals(StringUtils.NormalizeStringForMySql(message.To)) ||
-                                !storedMessage.Subject.Equals(StringUtils.NormalizeStringForMySql(message.Subject)))
+                            if (!storedMessage.From.Equals(MailUtil.NormalizeStringForMySql(message.From)) ||
+                                !storedMessage.To.Equals(MailUtil.NormalizeStringForMySql(message.To)) ||
+                                !storedMessage.Subject.Equals(MailUtil.NormalizeStringForMySql(message.Subject)))
                             {
                                 Console.WriteLine(@"storedMessage.From = '{0}'", storedMessage.From);
                                 Console.WriteLine(@"message.From = '{0}'",
-                                    StringUtils.NormalizeStringForMySql(message.From));
+                                    MailUtil.NormalizeStringForMySql(message.From));
 
                                 Console.WriteLine(@"storedMessage.To = '{0}'", storedMessage.To);
                                 Console.WriteLine(@"message.To = '{0}'",
-                                    StringUtils.NormalizeStringForMySql(message.To));
+                                    MailUtil.NormalizeStringForMySql(message.To));
 
                                 Console.WriteLine(@"storedMessage.Subject = '{0}'", storedMessage.Subject);
                                 Console.WriteLine(@"message.Subject = '{0}'",
-                                    StringUtils.NormalizeStringForMySql(message.Subject));
+                                    MailUtil.NormalizeStringForMySql(message.Subject));
 
                                 Console.WriteLine(@"[ERROR] Stored message not equals to server message");
                                 continue;

@@ -1,7 +1,8 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="PricingPageSettings.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Management.PricingPageSettings" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="ASC.Web.Studio.Utility" %>
+<%@ Import Namespace="Resources" %>
 
-<% if (Enabled)
+<% if (TenantExtra.EnableTarrifSettings)
    { %>
 <div class="clearFix">
     <div id="studio_pricingPageSettings" class="settings-block">

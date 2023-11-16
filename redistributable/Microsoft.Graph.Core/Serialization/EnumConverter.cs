@@ -5,10 +5,12 @@
 namespace Microsoft.Graph
 {
     using System;
-
+    using System.Linq;
+    using System.Reflection;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
-    using Newtonsoft.Json.Serialization;
+    using Newtonsoft.Json.Linq;
+    using System.Globalization;
 
     /// <summary>
     /// Handles resolving interfaces to the correct derived class during serialization/deserialization.
@@ -21,7 +23,7 @@ namespace Microsoft.Graph
         public EnumConverter()
             : base()
         {
-            NamingStrategy = new CamelCaseNamingStrategy();
+            this.CamelCaseText = true;
         }
 
         /// <summary>

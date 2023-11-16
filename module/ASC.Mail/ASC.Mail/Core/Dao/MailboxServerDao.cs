@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Mail.Core.Dao.Interfaces;
@@ -33,7 +32,7 @@ namespace ASC.Mail.Core.Dao
     {
         protected static ITable table = new MailTableFactory().Create<MailboxServerTable>();
 
-        public MailboxServerDao(IDbManager dbManager)
+        public MailboxServerDao(IDbManager dbManager) 
             : base(table, dbManager, -1)
         {
         }
@@ -64,10 +63,10 @@ namespace ASC.Mail.Core.Dao
                 .InColumnValue(MailboxServerTable.Columns.Id, mailboxServer.Id)
                 .InColumnValue(MailboxServerTable.Columns.ProviderId, mailboxServer.ProviderId)
                 .InColumnValue(MailboxServerTable.Columns.Type, mailboxServer.Type)
-                .InColumnValue(MailboxServerTable.Columns.Hostname, mailboxServer.Hostname)
-                .InColumnValue(MailboxServerTable.Columns.Port, mailboxServer.Port)
-                .InColumnValue(MailboxServerTable.Columns.SocketType, mailboxServer.SocketType)
-                .InColumnValue(MailboxServerTable.Columns.Username, mailboxServer.Username)
+                .InColumnValue(MailboxServerTable.Columns.Hostname,  mailboxServer.Hostname)
+                .InColumnValue(MailboxServerTable.Columns.Port,  mailboxServer.Port)
+                .InColumnValue(MailboxServerTable.Columns.SocketType,  mailboxServer.SocketType)
+                .InColumnValue(MailboxServerTable.Columns.Username,  mailboxServer.Username)
                 .InColumnValue(MailboxServerTable.Columns.Authentication, mailboxServer.Authentication)
                 .InColumnValue(MailboxServerTable.Columns.IsUserData, mailboxServer.IsUserData)
                 .Identity(0, 0, true);

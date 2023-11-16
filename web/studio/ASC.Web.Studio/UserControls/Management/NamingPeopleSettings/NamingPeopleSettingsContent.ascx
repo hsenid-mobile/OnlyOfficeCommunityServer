@@ -1,11 +1,10 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="NamingPeopleSettingsContent.ascx.cs"
     Inherits="ASC.Web.Studio.UserControls.Management.NamingPeopleSettingsContent" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
 <table class="namingPeopleBox">
     <%--schema--%>
     <tr>
         <td colspan="2" class="caption header-base-small schemaCaption headertitle">
-            <%=Resource.NamingPeopleSchema%>
+            <%=Resources.Resource.NamingPeopleSchema%>
         </td>
     </tr>
     <tr valign="top">
@@ -27,7 +26,7 @@
             <input class="textEdit" id="usrcaption" type="text" maxlength="30" />
         </td>
         <td class="caption">
-            <%=Resource.UserCaption%>
+            <%=Resources.Resource.UserCaption%>
         </td>
     </tr>
     <tr>
@@ -35,7 +34,7 @@
             <input class="textEdit" id="usrscaption" type="text" maxlength="30" />
         </td>
         <td class="caption">
-            <%=Resource.UsersCaption%>
+            <%=Resources.Resource.UsersCaption%>
         </td>
     </tr>
     <%--group--%>
@@ -44,7 +43,7 @@
             <input class="textEdit" id="grpcaption" type="text" maxlength="30" />
         </td>
         <td class="caption">
-            <%=Resource.GroupCaption%>
+            <%=Resources.Resource.GroupCaption%>
         </td>
     </tr>
     <tr>
@@ -52,7 +51,7 @@
             <input class="textEdit" id="grpscaption" type="text" maxlength="30" />
         </td>
         <td class="caption">
-            <%=Resource.GroupsCaption%>
+            <%=Resources.Resource.GroupsCaption%>
         </td>
     </tr>
     <%--post--%>
@@ -61,7 +60,7 @@
             <input class="textEdit" id="usrstatuscaption" type="text" maxlength="30" />
         </td>
         <td class="caption">
-            <%=Resource.UserStatusCaption%>
+            <%=Resources.Resource.UserStatusCaption%>
         </td>
     </tr>
     <%--red date--%>
@@ -70,7 +69,7 @@
             <input class="textEdit" id="regdatecaption" type="text" maxlength="30" />
         </td>
         <td class="caption">
-            <%=Resource.RegDateCaption%>
+            <%=Resources.Resource.RegDateCaption%>
         </td>
     </tr>
     <%--group head--%>
@@ -79,16 +78,7 @@
             <input class="textEdit" id="grpheadcaption" type="text" maxlength="30" />
         </td>
         <td class="caption">
-            <%=Resource.GroupHeadCaption%>
-        </td>
-    </tr>
-    <%--user lead--%>
-    <tr>
-        <td>
-            <input class="textEdit" id="usrleadcaption" type="text" maxlength="30" />
-        </td>
-        <td class="caption">
-            <%=Resource.UserLeadCaption%>
+            <%=Resources.Resource.GroupHeadCaption%>
         </td>
     </tr>
     <%--guest caption--%>
@@ -97,7 +87,7 @@
             <input class="textEdit" id="guestcaption" type="text" maxlength="30" />
         </td>
         <td class="caption">
-            <%=Resource.GuestCaption%>
+            <%=Resources.Resource.GuestCaption%>
         </td>
     </tr>
     <%--guests captoin--%>
@@ -106,7 +96,7 @@
             <input class="textEdit" id="guestscaption" type="text" maxlength="30" />
         </td>
         <td class="caption">
-            <%=Resource.GuestsCaption%>
+            <%=Resources.Resource.GuestsCaption%>
         </td>
     </tr>
 </table>

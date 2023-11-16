@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,26 @@ window.folderPanel = (function($) {
             }
 
             wndQuestion = $('#removeQuestionWnd');
-            wndQuestion.find('.buttons .cancel').on('click', function() {
+            wndQuestion.find('.buttons .cancel').bind('click', function() {
                 hide();
                 return false;
             });
 
-            wndQuestion.find('.buttons .remove').on('click', function() {
+            wndQuestion.find('.buttons .remove').bind('click', function() {
                 if (clearFolderId) {
                     serviceManager.removeMailFolderMessages(clearFolderId, {}, {}, window.MailScriptResource.DeletionMessage);
                     serviceManager.getMailFolders();
                     serviceManager.getTags();
                 }
+
+                var text = "";
+                if (clearFolderId == 4) {
+                    text = "trash";
+                }
+                if (clearFolderId == 5) {
+                    text = "spam";
+                }
+                window.ASC.Mail.ga_track(ga_Categories.folder, ga_Actions.filterClick, text);
 
                 if (TMMail.pageIs('viewmessage') && MailFilter.getFolder() == clearFolderId) {
                     mailBox.updateAnchor(true, true);
@@ -84,7 +93,7 @@ window.folderPanel = (function($) {
 
                 var deleteTrash = $this.find('.delete_mails');
                 if (deleteTrash.length > 0) {
-                    deleteTrash.off('click').on('click', { folder: folder }, function (e) {
+                    deleteTrash.unbind('click').bind('click', { folder: folder }, function (e) {
                         if (e) {
                             showQuestionBox(e.data.folder);
                             e.preventDefault();

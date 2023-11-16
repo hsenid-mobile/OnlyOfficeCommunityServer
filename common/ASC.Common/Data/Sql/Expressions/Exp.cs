@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 */
 
 
-using System.Collections.Generic;
+using System.Collections;
 using System.Diagnostics;
 
 namespace ASC.Common.Data.Sql.Expressions
@@ -41,7 +41,7 @@ namespace ASC.Common.Data.Sql.Expressions
 
         public abstract string ToString(ISqlDialect dialect);
 
-        public virtual IEnumerable<object> GetParameters()
+        public virtual object[] GetParameters()
         {
             return new object[0];
         }
@@ -90,16 +90,19 @@ namespace ASC.Common.Data.Sql.Expressions
             return new LikeExp(column, value, like);
         }
 
-
-        public static Exp In<T>(string column, IEnumerable<T> values)
+        public static Exp In(string column, ICollection values)
         {
-            return new InExp<T>(column, values);
+            return new InExp(column, new ArrayList(values).ToArray());
         }
 
+        public static Exp In(string column, object[] values)
+        {
+            return new InExp(column, values);
+        }
 
         public static Exp In(string column, SqlQuery subQuery)
         {
-            return new InExp<object>(column, subQuery);
+            return new InExp(column, subQuery);
         }
 
         public static Exp Between(string column, object minValue, object maxValue)

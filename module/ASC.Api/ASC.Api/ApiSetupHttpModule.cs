@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Web;
-
 using ASC.Common.Logging;
 
 namespace ASC.Api
@@ -25,7 +24,7 @@ namespace ASC.Api
     public class ApiSetupHttpModule : IHttpModule
     {
         private static volatile bool initialized = false;
-        private static readonly object locker = new object();
+        private static object locker = new object();
 
 
         public void Init(HttpApplication context)

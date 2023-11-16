@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,12 @@
 
 
 using System;
-
 using ASC.Core.Tenants;
 
 namespace ASC.Mail.Extensions
 {
     public static class DateTimeExtensions
     {
-        /// <summary>
-		/// Cuts off precision beyond a second on a DateTime value.
-		/// </summary>
-		/// <param name="value">The value.</param>
-		/// <returns>A DateTime with a 0 millisecond component.</returns>
-		public static DateTime CutToSecond(this DateTime value)
-        {
-            return value - TimeSpan.FromMilliseconds(value.Millisecond);
-        }
-
         public static string ToVerbString(this DateTime dateTime)
         {
             try
@@ -42,7 +31,7 @@ namespace ASC.Mail.Extensions
                 if (diff.Days == 0)
                 {
                     return dateTime.ToShortTimeString();
-                }
+                } 
                 if (TenantUtil.DateTimeNow().Year == dateTime.Date.Year)
                 {
                     return String.Format("{0}", dateTime.ToString("MMMM dd"));

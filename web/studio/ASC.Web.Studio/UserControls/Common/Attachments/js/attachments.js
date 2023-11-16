@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ window.Attachments = (function () {
         return str.replace(characterRegExp, '_');
     };
     var checkCharacter = function(input) {
-        jq(input).off("keyup").on("keyup", function() {
+        jq(input).unbind("keyup").bind("keyup", function() {
             var str = jq(this).val();
             if (str.search(characterRegExp) != -1) {
                 jq(this).val(replaceSpecCharacter(str));
@@ -177,7 +177,7 @@ window.Attachments = (function () {
             });
         }
 
-        jq('#questionWindowAttachments #noButton').on('click', function() {
+        jq('#questionWindowAttachments #noButton').bind('click', function() {
             jq.unblockUI();
             return false;
         });
@@ -191,7 +191,7 @@ window.Attachments = (function () {
             showQuestionWindow(fileId);
             return false;
         });
-        jq("#storeOriginalFileFlag").on("change", function() {
+        jq("#storeOriginalFileFlag").change(function() {
             onChangeStoreFlag();
         });
     };
@@ -283,10 +283,10 @@ window.Attachments = (function () {
     };
 
     var showQuestionWindow = function(fileId) {
-        jq('#questionWindowAttachments #okButton').off('click');
+        jq('#questionWindowAttachments #okButton').unbind('click');
         StudioBlockUIManager.blockUI("#questionWindowAttachments", 400);
-        PopupKeyUpActionProvider.EnterAction = "jq(\"#okButton\").trigger('click');";
-        jq('#questionWindowAttachments #okButton').on('click', function() {
+        PopupKeyUpActionProvider.EnterAction = "jq(\"#okButton\").click();";
+        jq('#questionWindowAttachments #okButton').bind('click', function() {
             jq.unblockUI();
             jq(document).trigger("deleteFile", fileId);
             return false;
@@ -308,7 +308,7 @@ window.Attachments = (function () {
         var htmlNewDoc = jq.tmpl("template-newFile", tmpl);
         jq("#attachmentsContainer tbody").prepend(htmlNewDoc);
         jq("#attachmentsContainer tr.newDoc").show();
-        jq("#newDocTitle").trigger("focus").trigger("select");
+        jq("#newDocTitle").focus().select();
     };
     var removeNewDocument = function() {
         jq("#attachmentsContainer tr.newDoc").remove();
@@ -318,11 +318,11 @@ window.Attachments = (function () {
     };
     var createFile = function() {
         var hWindow = window.open("");
-        hWindow.document.write(ASC.Resources.Master.ResourceJS.LoadingPleaseWait);
+        hWindow.document.write(ASC.Resources.Master.Resource.LoadingPleaseWait);
         hWindow.document.close();
 
         var title = jq("#newDocTitle").val();
-        if (title.trim() == "") {
+        if (jq.trim(title) == "") {
             title = jq("#newDocTitle").attr("data");
         }
         var ext = jq(".createFile").attr("id");
@@ -396,7 +396,7 @@ window.Attachments = (function () {
     var isAddedFile = function(title, fileId) {
         var listAttachFiles = jq("#attachmentsContainer tbody tr td:first-child");
         for (var i = 0, n = listAttachFiles.length; i < n; i++) {
-            var fileName = jq(listAttachFiles[i]).children("a").children(".attachmentsTitle").text().trim();
+            var fileName = jq.trim(jq(listAttachFiles[i]).children("a").children(".attachmentsTitle").text());
             var id = jq(listAttachFiles[i]).attr("id").split("_")[1];
             if (fileName == title && id == fileId) {
                 return listAttachFiles[i];
@@ -494,7 +494,7 @@ window.Attachments = (function () {
 
     var events = [];
     var bind = function(eventName, handler) {
-        jq(document).on(eventName, handler);
+        jq(document).bind(eventName, handler);
         events.push(eventName);
     };
 
@@ -502,7 +502,7 @@ window.Attachments = (function () {
         var $doc = jq(document);
         while (events.length) {
             var item = events.shift();
-            $doc.off(item);
+            $doc.unbind(item);
         }
     };
 

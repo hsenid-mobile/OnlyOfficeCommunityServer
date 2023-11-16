@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,27 @@ using System;
 using System.Configuration;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI;
-
 using ASC.Core;
+using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.Web.Core;
 using ASC.Web.Core.Client.Bundling;
 using ASC.Web.Core.Client.HttpHandlers;
 using ASC.Web.Core.Mobile;
 using ASC.Web.Core.Utility;
-using ASC.Web.Core.Utility.Skins;
+using ASC.Web.Core.Utility.Settings;
 using ASC.Web.Core.WebZones;
-using ASC.Web.Core.WhiteLabel;
 using ASC.Web.Studio.Core;
-using ASC.Web.Studio.PublicResources;
+using ASC.Web.Studio.Core.Users;
 using ASC.Web.Studio.UserControls.Common;
-using ASC.Web.Studio.UserControls.Common.Support;
+using ASC.Web.Studio.UserControls.Common.ThirdPartyBanner;
 using ASC.Web.Studio.UserControls.Management;
 using ASC.Web.Studio.UserControls.Statistics;
 using ASC.Web.Studio.Utility;
-
-using Newtonsoft.Json;
+using Resources;
+using ASC.Web.Core.Utility.Skins;
 
 namespace ASC.Web.Studio.Masters
 {
@@ -68,8 +66,6 @@ namespace ASC.Web.Studio.Masters
 
         public bool IsMobile { get; set; }
 
-        public bool IsHealthcheck { get; set; }
-
         public TopStudioPanel TopStudioPanel;
 
         protected override void OnInit(EventArgs e)
@@ -81,13 +77,11 @@ namespace ASC.Web.Studio.Masters
             MetaDescriptionOG.Content = Resource.MetaDescription.HtmlEncode();
             MetaTitleOG.Content = (String.IsNullOrEmpty(Page.Title) ? Resource.MainPageTitle : Page.Title).HtmlEncode();
             CanonicalURLOG.Content = HttpContext.Current.Request.Url.Scheme + "://" + Request.GetUrlRewriter().Host;
-            MetaImageOG.Content = WebImageSupplier.GetAbsoluteWebPath("logo/fb_icon_325x325.jpg");
+            MetaImageOG.Content = WebImageSupplier.GetAbsoluteWebPath("onlyoffice_logo/fb_icon_325x325.jpg");
         }
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            IsHealthcheck = !string.IsNullOrEmpty(Request["healthcheck"]);
-
             InitScripts();
 
             HubUrl = ConfigurationManagerExtension.AppSettings["web.hub"] ?? string.Empty;
@@ -108,11 +102,11 @@ namespace ASC.Web.Studio.Masters
 
             if (!DisabledSidePanel && !CoreContext.Configuration.Personal)
             {
-                // InvitePanel popup
+                /** InvitePanel popup **/
                 InvitePanelHolder.Controls.Add(LoadControl(InvitePanel.Location));
             }
 
-            if ((!DisabledSidePanel || !DisabledTopStudioPanel) && !TopStudioPanel.DisableSettings && !IsHealthcheck &&
+            if ((!DisabledSidePanel || !DisabledTopStudioPanel) && !TopStudioPanel.DisableSettings &&
                 HubUrl != string.Empty && SecurityContext.IsAuthenticated)
             {
                 AddBodyScripts(ResolveUrl, "~/js/third-party/socket.io.js", "~/js/asc/core/asc.socketio.js");
@@ -123,18 +117,20 @@ namespace ASC.Web.Studio.Masters
                 TopContent.Controls.Add(TopStudioPanel);
             }
 
+            if (!EmailActivated && !CoreContext.Configuration.Personal && SecurityContext.IsAuthenticated && EmailActivationSettings.LoadForCurrentUser().Show)
+            {
+                activateEmailPanel.Controls.Add(LoadControl(ActivateEmailPanel.Location));
+            }
+
+            if (ThirdPartyBanner.Display && !Request.DesktopApp())
+            {
+                BannerHolder.Controls.Add(LoadControl(ThirdPartyBanner.Location));
+            }
+
             var curUser = CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID);
 
             if (!DisabledSidePanel)
             {
-                if (curUser.ActivationStatus != EmployeeActivationStatus.Activated &&
-                    curUser.CreateDate.Date != DateTime.UtcNow.Date &&
-                    !CoreContext.Configuration.Personal &&
-                    SecurityContext.IsAuthenticated &&
-                    EmailActivationSettings.LoadForCurrentUser().Show)
-                {
-                    activateEmailPanel.Controls.Add(LoadControl(ActivateEmailPanel.Location));
-                }
                 TariffNotifyHolder.Controls.Add(LoadControl(TariffNotify.Location));
             }
 
@@ -147,17 +143,37 @@ namespace ASC.Web.Studio.Masters
                 }
             }
 
-            if (Request.DesktopApp())
+
+            #region third-party scripts
+
+            if (TenantExtra.Saas)
             {
-                AddBodyScripts(ResolveUrl, "~/js/asc/core/desktop.polyfills.js");
+                if (SetupInfo.CustomScripts.Length != 0)
+                {
+                    if (CoreContext.Configuration.Personal)
+                    {
+                        if (TenantAnalyticsSettings.LoadForCurrentUser().Analytics)
+                        {
+                            GoogleAnalyticsScriptPlaceHolder.Controls.Add(LoadControl("~/UserControls/Common/ThirdPartyScripts/GoogleAnalyticsScriptPersonal.ascx"));
+                        }
+                    }
+                    else
+                    {
+                        if (TenantAnalyticsSettings.Load().Analytics)
+                        {
+                            GoogleAnalyticsScriptPlaceHolder.Controls.Add(LoadControl("~/UserControls/Common/ThirdPartyScripts/GoogleAnalyticsScript.ascx"));
+                        }
+                    }
+                }
+            }
+            else if (TenantExtra.Opensource
+                     && WizardSettings.Load().Analytics
+                     && SecurityContext.IsAuthenticated)
+            {
+                GoogleAnalyticsScriptPlaceHolder.Controls.Add(LoadControl("~/UserControls/Common/ThirdPartyScripts/GoogleAnalyticsScriptOpenSource.ascx"));
             }
 
-            var matches = Regex.Match(HttpContext.Current.Request.Url.AbsolutePath, "(products|addons)/(\\w+)/(share\\.aspx|saveas\\.aspx|filechoice\\.aspx|ganttchart\\.aspx|jabberclient\\.aspx|timer\\.aspx|generatedreport\\.aspx).*", RegexOptions.IgnoreCase);
-
-            if (SecurityContext.IsAuthenticated && !matches.Success && AdditionalWhiteLabelSettings.Instance.FeedbackAndSupportEnabled)
-            {
-                LiveChatHolder.Controls.Add(LoadControl(SupportChat.Location));
-            }
+            #endregion
         }
 
         protected string RenderStatRequest()
@@ -166,6 +182,27 @@ namespace ASC.Web.Studio.Masters
 
             var page = HttpUtility.UrlEncode(Page.AppRelativeVirtualPath.Replace("~", ""));
             return String.Format("<img style=\"display:none;\" src=\"{0}\"/>", SetupInfo.StatisticTrackURL + "&page=" + page);
+        }
+
+        protected string RenderCustomScript()
+        {
+            var sb = new StringBuilder();
+            //custom scripts
+            foreach (var script in SetupInfo.CustomScripts.Where(script => !String.IsNullOrEmpty(script)))
+            {
+                sb.AppendFormat("<script language=\"javascript\" src=\"{0}\" type=\"text/javascript\"></script>", script);
+            }
+
+            return sb.ToString();
+        }
+
+        protected bool EmailActivated
+        {
+            get
+            {
+                var usr = CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID);
+                return usr.CreateDate.Date == DateTime.UtcNow.Date || usr.ActivationStatus == EmployeeActivationStatus.Activated;
+            }
         }
 
         protected string ColorThemeClass
@@ -178,15 +215,6 @@ namespace ASC.Web.Studio.Masters
 
         private void InitScripts()
         {
-            ThemeStyles.AddSource(ResolveUrl, "~/skins/default/layout.less");
-
-            if (!DisabledLayoutMedia)
-            {
-                ThemeStyles.AddSource(ResolveUrl, Request.DesktopApp()
-                    ? "~/skins/default/layout-desktop.less"
-                    : "~/skins/default/layout-media.less");
-            }
-
             AddStyles(r => r, "~/skins/<theme_folder>/main.less");
 
             AddClientScript(
@@ -204,31 +232,25 @@ namespace ASC.Web.Studio.Masters
         private void InitStudioSettingsInlineScript()
         {
             var paid = !TenantStatisticsProvider.IsNotPaid();
-            var showPromotions = !IsHealthcheck && paid && PromotionsSettings.Load().Show;
-            var showTips = !IsHealthcheck && paid && !Request.DesktopApp() && TipsSettings.LoadForCurrentUser().Show;
-            var modeThemeSettings = ModeThemeSettings.GetModeThemesSettings();
+            var showPromotions = paid && PromotionsSettings.Load().Show;
+            var showTips = !Request.DesktopApp() && paid && TipsSettings.LoadForCurrentUser().Show;
 
             var script = new StringBuilder();
             script.AppendFormat("window.ASC.Resources.Master.ShowPromotions={0};", showPromotions.ToString().ToLowerInvariant());
             script.AppendFormat("window.ASC.Resources.Master.ShowTips={0};", showTips.ToString().ToLowerInvariant());
-            script.AppendFormat("window.ASC.Resources.Master.ModeThemeSettings={0};", JsonConvert.SerializeObject(modeThemeSettings));
 
             RegisterInlineScript(script.ToString(), true, false);
         }
 
         private void InitProductSettingsInlineScript()
         {
-            var isAdmin = false;
+            var isAdmin = WebItemSecurity.IsProductAdministrator(CommonLinkUtility.GetProductID(), SecurityContext.CurrentAccount.ID);
 
-            if (!CoreContext.Configuration.Personal)
+            if (!isAdmin)
             {
-                isAdmin = WebItemSecurity.IsProductAdministrator(CommonLinkUtility.GetProductID(), SecurityContext.CurrentAccount.ID);
-
-                if (!isAdmin)
-                {
-                    isAdmin = WebItemSecurity.IsProductAdministrator(CommonLinkUtility.GetAddonID(), SecurityContext.CurrentAccount.ID);
-                }
+                isAdmin = WebItemSecurity.IsProductAdministrator(CommonLinkUtility.GetAddonID(), SecurityContext.CurrentAccount.ID);
             }
+
             RegisterInlineScript(string.Format("window.ASC.Resources.Master.IsProductAdmin={0};", isAdmin.ToString().ToLowerInvariant()), true, false);
         }
 

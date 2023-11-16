@@ -19,7 +19,7 @@ namespace ASC.Web.Studio.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class ResourceJS {
@@ -84,24 +84,6 @@ namespace ASC.Web.Studio.PublicResources {
         public static string ActivateTfaAppEmptyCode {
             get {
                 return ResourceManager.GetString("ActivateTfaAppEmptyCode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Active connections was logged out.
-        /// </summary>
-        public static string ActiveConnectionsWasLoggedOut {
-            get {
-                return ResourceManager.GetString("ActiveConnectionsWasLoggedOut", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The active connection was logged out: {0}, {1}.
-        /// </summary>
-        public static string ActiveConnectionWasLoggedOut {
-            get {
-                return ResourceManager.GetString("ActiveConnectionWasLoggedOut", resourceCulture);
             }
         }
         
@@ -196,11 +178,11 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot generate certificate.
+        ///   Looks up a localized string similar to All the data you entered will be lost. Are you sure you want to continue?.
         /// </summary>
-        public static string CannotGenerateCertificate {
+        public static string CancelConfirmMessage {
             get {
-                return ResourceManager.GetString("CannotGenerateCertificate", resourceCulture);
+                return ResourceManager.GetString("CancelConfirmMessage", resourceCulture);
             }
         }
         
@@ -219,6 +201,33 @@ namespace ASC.Web.Studio.PublicResources {
         public static string ChangesSuccessfullyAppliedMsg {
             get {
                 return ResourceManager.GetString("ChangesSuccessfullyAppliedMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose owner.
+        /// </summary>
+        public static string ChooseOwner {
+            get {
+                return ResourceManager.GetString("ChooseOwner", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose user.
+        /// </summary>
+        public static string ChooseUser {
+            get {
+                return ResourceManager.GetString("ChooseUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear Filter.
+        /// </summary>
+        public static string ClearFilterButton {
+            get {
+                return ResourceManager.GetString("ClearFilterButton", resourceCulture);
             }
         }
         
@@ -246,15 +255,6 @@ namespace ASC.Web.Studio.PublicResources {
         public static string Complete {
             get {
                 return ResourceManager.GetString("Complete", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Log out from {0}, {1}.
-        /// </summary>
-        public static string ConfirmLogoutFrom {
-            get {
-                return ResourceManager.GetString("ConfirmLogoutFrom", resourceCulture);
             }
         }
         
@@ -349,398 +349,11 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to april.
+        ///   Looks up a localized string similar to Delete.
         /// </summary>
-        public static string CronApril {
+        public static string DeleteButton {
             get {
-                return ResourceManager.GetString("CronApril", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to august.
-        /// </summary>
-        public static string CronAugust {
-            get {
-                return ResourceManager.GetString("CronAugust", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to december.
-        /// </summary>
-        public static string CronDecember {
-            get {
-                return ResourceManager.GetString("CronDecember", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to every.
-        /// </summary>
-        public static string CronEmpty {
-            get {
-                return ResourceManager.GetString("CronEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to every day of the month.
-        /// </summary>
-        public static string CronEmptyDayOfMonth {
-            get {
-                return ResourceManager.GetString("CronEmptyDayOfMonth", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to every day of the week.
-        /// </summary>
-        public static string CronEmptyDayOfWeek {
-            get {
-                return ResourceManager.GetString("CronEmptyDayOfWeek", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to every.
-        /// </summary>
-        public static string CronEmptyMinutes {
-            get {
-                return ResourceManager.GetString("CronEmptyMinutes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to every month.
-        /// </summary>
-        public static string CronEmptyMonth {
-            get {
-                return ResourceManager.GetString("CronEmptyMonth", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to every hour.
-        /// </summary>
-        public static string CronEmptyTimeHours {
-            get {
-                return ResourceManager.GetString("CronEmptyTimeHours", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to every minute.
-        /// </summary>
-        public static string CronEmptyTimeMinutes {
-            get {
-                return ResourceManager.GetString("CronEmptyTimeMinutes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The tag %s is not supported !.
-        /// </summary>
-        public static string CronError1 {
-            get {
-                return ResourceManager.GetString("CronError1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Bad number of elements.
-        /// </summary>
-        public static string CronError2 {
-            get {
-                return ResourceManager.GetString("CronError2", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The jqueryelement should be set into jqCron settings.
-        /// </summary>
-        public static string CronError3 {
-            get {
-                return ResourceManager.GetString("CronError3", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unrecognized expression.
-        /// </summary>
-        public static string CronError4 {
-            get {
-                return ResourceManager.GetString("CronError4", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to february.
-        /// </summary>
-        public static string CronFebruary {
-            get {
-                return ResourceManager.GetString("CronFebruary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to first.
-        /// </summary>
-        public static string CronFirst {
-            get {
-                return ResourceManager.GetString("CronFirst", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to friday.
-        /// </summary>
-        public static string CronFriday {
-            get {
-                return ResourceManager.GetString("CronFriday", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to january.
-        /// </summary>
-        public static string CronJanuary {
-            get {
-                return ResourceManager.GetString("CronJanuary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to july.
-        /// </summary>
-        public static string CronJuly {
-            get {
-                return ResourceManager.GetString("CronJuly", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to june.
-        /// </summary>
-        public static string CronJune {
-            get {
-                return ResourceManager.GetString("CronJune", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to last.
-        /// </summary>
-        public static string CronLast {
-            get {
-                return ResourceManager.GetString("CronLast", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to march.
-        /// </summary>
-        public static string CronMarch {
-            get {
-                return ResourceManager.GetString("CronMarch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to may.
-        /// </summary>
-        public static string CronMay {
-            get {
-                return ResourceManager.GetString("CronMay", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to monday.
-        /// </summary>
-        public static string CronMonday {
-            get {
-                return ResourceManager.GetString("CronMonday", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to day.
-        /// </summary>
-        public static string CronNameDay {
-            get {
-                return ResourceManager.GetString("CronNameDay", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to hour.
-        /// </summary>
-        public static string CronNameHour {
-            get {
-                return ResourceManager.GetString("CronNameHour", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to minute.
-        /// </summary>
-        public static string CronNameMinute {
-            get {
-                return ResourceManager.GetString("CronNameMinute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to month.
-        /// </summary>
-        public static string CronNameMonth {
-            get {
-                return ResourceManager.GetString("CronNameMonth", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to week.
-        /// </summary>
-        public static string CronNameWeek {
-            get {
-                return ResourceManager.GetString("CronNameWeek", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to year.
-        /// </summary>
-        public static string CronNameYear {
-            get {
-                return ResourceManager.GetString("CronNameYear", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to november.
-        /// </summary>
-        public static string CronNovember {
-            get {
-                return ResourceManager.GetString("CronNovember", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to october.
-        /// </summary>
-        public static string CronOctober {
-            get {
-                return ResourceManager.GetString("CronOctober", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to saturday.
-        /// </summary>
-        public static string CronSaturday {
-            get {
-                return ResourceManager.GetString("CronSaturday", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to september.
-        /// </summary>
-        public static string CronSeptember {
-            get {
-                return ResourceManager.GetString("CronSeptember", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to sunday.
-        /// </summary>
-        public static string CronSunday {
-            get {
-                return ResourceManager.GetString("CronSunday", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to on &lt;b /&gt;.
-        /// </summary>
-        public static string CronTextDom {
-            get {
-                return ResourceManager.GetString("CronTextDom", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to on &lt;b /&gt;.
-        /// </summary>
-        public static string CronTextDow {
-            get {
-                return ResourceManager.GetString("CronTextDow", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to at &lt;b /&gt; minute(s) past the hour UTC.
-        /// </summary>
-        public static string CronTextMins {
-            get {
-                return ResourceManager.GetString("CronTextMins", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to of &lt;b /&gt;.
-        /// </summary>
-        public static string CronTextMonth {
-            get {
-                return ResourceManager.GetString("CronTextMonth", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Every &lt;b /&gt;.
-        /// </summary>
-        public static string CronTextPeriod {
-            get {
-                return ResourceManager.GetString("CronTextPeriod", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to at &lt;b /&gt;:&lt;b /&gt; UTC.
-        /// </summary>
-        public static string CronTextTime {
-            get {
-                return ResourceManager.GetString("CronTextTime", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to thursday.
-        /// </summary>
-        public static string CronThursday {
-            get {
-                return ResourceManager.GetString("CronThursday", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to tuesday.
-        /// </summary>
-        public static string CronTuesday {
-            get {
-                return ResourceManager.GetString("CronTuesday", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to wednesday.
-        /// </summary>
-        public static string CronWednesday {
-            get {
-                return ResourceManager.GetString("CronWednesday", resourceCulture);
+                return ResourceManager.GetString("DeleteButton", resourceCulture);
             }
         }
         
@@ -750,6 +363,15 @@ namespace ASC.Web.Studio.PublicResources {
         public static string EditButton {
             get {
                 return ResourceManager.GetString("EditButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty.
+        /// </summary>
+        public static string Empty {
+            get {
+                return ResourceManager.GetString("Empty", resourceCulture);
             }
         }
         
@@ -777,15 +399,6 @@ namespace ASC.Web.Studio.PublicResources {
         public static string Error {
             get {
                 return ResourceManager.GetString("Error", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You want to create a mailbox with an already existing address..
-        /// </summary>
-        public static string ErrorDuplicateMailbox {
-            get {
-                return ResourceManager.GetString("ErrorDuplicateMailbox", resourceCulture);
             }
         }
         
@@ -970,6 +583,15 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Greeting ringtones.
+        /// </summary>
+        public static string GreetingRingtones {
+            get {
+                return ResourceManager.GetString("GreetingRingtones", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Group {0} was created successfully..
         /// </summary>
         public static string GroupSelectorAddSuccess {
@@ -1006,38 +628,11 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hide.
+        ///   Looks up a localized string similar to Make sure that all user fields including first name, last name and email address are filled correctly.
         /// </summary>
-        public static string HideLink {
+        public static string ImportContactsIncorrectFields {
             get {
-                return ResourceManager.GetString("HideLink", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Logged in as {0}.
-        /// </summary>
-        public static string ImpersonateLoginMessage {
-            get {
-                return ResourceManager.GetString("ImpersonateLoginMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Login as User.
-        /// </summary>
-        public static string ImpersonateUser {
-            get {
-                return ResourceManager.GetString("ImpersonateUser", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You are going to log in to the portal on behalf of {0}.
-        /// </summary>
-        public static string ImpersonateUserConfirmationInfo {
-            get {
-                return ResourceManager.GetString("ImpersonateUserConfirmationInfo", resourceCulture);
+                return ResourceManager.GetString("ImportContactsIncorrectFields", resourceCulture);
             }
         }
         
@@ -1051,38 +646,29 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your pricing plan does not allow you to add any more users.
+        /// </summary>
+        public static string ImportUserOverlimitHeader {
+            get {
+                return ResourceManager.GetString("ImportUserOverlimitHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The selected users will be added as guests. You will be able to change their roles later in the &apos;People&apos; module..
+        /// </summary>
+        public static string ImportUserOverlimitReason {
+            get {
+                return ResourceManager.GetString("ImportUserOverlimitReason", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Incorrect IP address format.
         /// </summary>
         public static string IncorrectIPAddressFormatError {
             get {
                 return ResourceManager.GetString("IncorrectIPAddressFormatError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Incorrect metadata file type. An .xml file is required..
-        /// </summary>
-        public static string IncorrectMetadataFileType {
-            get {
-                return ResourceManager.GetString("IncorrectMetadataFileType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid certificate.
-        /// </summary>
-        public static string InvalidCertificate {
-            get {
-                return ResourceManager.GetString("InvalidCertificate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid metadata xml file.
-        /// </summary>
-        public static string InvalidMetadataXmlFile {
-            get {
-                return ResourceManager.GetString("InvalidMetadataXmlFile", resourceCulture);
             }
         }
         
@@ -1114,114 +700,6 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Active.
-        /// </summary>
-        public static string LblActive {
-            get {
-                return ResourceManager.GetString("LblActive", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Other.
-        /// </summary>
-        public static string LblOther {
-            get {
-                return ResourceManager.GetString("LblOther", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Pending.
-        /// </summary>
-        public static string LblPending {
-            get {
-                return ResourceManager.GetString("LblPending", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to LDAP Attribute Name.
-        /// </summary>
-        public static string LdapAttributeOrigin {
-            get {
-                return ResourceManager.GetString("LdapAttributeOrigin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to LDAP Group Name Attribute.
-        /// </summary>
-        public static string LdapSecurityPlaceholder {
-            get {
-                return ResourceManager.GetString("LdapSecurityPlaceholder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Certificate name does not match hostname.
-        /// </summary>
-        public static string LdapSettingsCertCnNoMatch {
-            get {
-                return ResourceManager.GetString("LdapSettingsCertCnNoMatch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Certificate expired.
-        /// </summary>
-        public static string LdapSettingsCertExpired {
-            get {
-                return ResourceManager.GetString("LdapSettingsCertExpired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No certificate  issuer chain was provided.
-        /// </summary>
-        public static string LdapSettingsCertIssuerChaining {
-            get {
-                return ResourceManager.GetString("LdapSettingsCertIssuerChaining", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Malformed certificate.
-        /// </summary>
-        public static string LdapSettingsCertMalformed {
-            get {
-                return ResourceManager.GetString("LdapSettingsCertMalformed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unrecognized Error.
-        /// </summary>
-        public static string LdapSettingsCertUnrecognizedError {
-            get {
-                return ResourceManager.GetString("LdapSettingsCertUnrecognizedError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Certificate Authority who issued the certificate is not trusted.
-        /// </summary>
-        public static string LdapSettingsCertUntrustedCa {
-            get {
-                return ResourceManager.GetString("LdapSettingsCertUntrustedCa", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Root Certificate Authority who issued the certificate is not trusted.
-        /// </summary>
-        public static string LdapSettingsCertUntrustedRoot {
-            get {
-                return ResourceManager.GetString("LdapSettingsCertUntrustedRoot", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Empty field.
         /// </summary>
         public static string LdapSettingsEmptyField {
@@ -1240,15 +718,6 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Saving has been successfully completed.
-        /// </summary>
-        public static string LdapSettingsSuccess {
-            get {
-                return ResourceManager.GetString("LdapSettingsSuccess", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to You need to read and agree with the License Agreement.
         /// </summary>
         public static string LicenseAgreementsError {
@@ -1263,15 +732,6 @@ namespace ASC.Web.Studio.PublicResources {
         public static string LicenseKeyError {
             get {
                 return ResourceManager.GetString("LicenseKeyError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Lifetime.
-        /// </summary>
-        public static string Lifetime {
-            get {
-                return ResourceManager.GetString("Lifetime", resourceCulture);
             }
         }
         
@@ -1326,6 +786,15 @@ namespace ASC.Web.Studio.PublicResources {
         public static string MailIcsCancelDescription {
             get {
                 return ResourceManager.GetString("MailIcsCancelDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Event &quot;{0}&quot; has been canceled..
+        /// </summary>
+        public static string MailIcsCancelDescriptionMerged {
+            get {
+                return ResourceManager.GetString("MailIcsCancelDescriptionMerged", resourceCulture);
             }
         }
         
@@ -1753,15 +1222,6 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A problem has occurred while trying to send receipt..
-        /// </summary>
-        public static string MailSendReceiptError {
-            get {
-                return ResourceManager.GetString("MailSendReceiptError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Event cancellation notification has been sent to attendees..
         /// </summary>
         public static string MailSentIcalCancelText {
@@ -1798,123 +1258,6 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Additional Mail.
-        /// </summary>
-        public static string MappingAdditionalMail {
-            get {
-                return ResourceManager.GetString("MappingAdditionalMail", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Additional Mobile Phone.
-        /// </summary>
-        public static string MappingAdditionalMobilePhone {
-            get {
-                return ResourceManager.GetString("MappingAdditionalMobilePhone", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Additional Phone.
-        /// </summary>
-        public static string MappingAdditionalPhone {
-            get {
-                return ResourceManager.GetString("MappingAdditionalPhone", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Profile Photo.
-        /// </summary>
-        public static string MappingAvatarAttribute {
-            get {
-                return ResourceManager.GetString("MappingAvatarAttribute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Date of Birth.
-        /// </summary>
-        public static string MappingBirthDayAttribute {
-            get {
-                return ResourceManager.GetString("MappingBirthDayAttribute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to First Name.
-        /// </summary>
-        public static string MappingFirstNameAttribute {
-            get {
-                return ResourceManager.GetString("MappingFirstNameAttribute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Sex.
-        /// </summary>
-        public static string MappingGenderAttribute {
-            get {
-                return ResourceManager.GetString("MappingGenderAttribute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Location.
-        /// </summary>
-        public static string MappingLocationAttribute {
-            get {
-                return ResourceManager.GetString("MappingLocationAttribute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Mail.
-        /// </summary>
-        public static string MappingMailAttribute {
-            get {
-                return ResourceManager.GetString("MappingMailAttribute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Primary Mobile Phone.
-        /// </summary>
-        public static string MappingMobilePhoneAttribute {
-            get {
-                return ResourceManager.GetString("MappingMobilePhoneAttribute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Second Name.
-        /// </summary>
-        public static string MappingSecondNameAttribute {
-            get {
-                return ResourceManager.GetString("MappingSecondNameAttribute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Skype.
-        /// </summary>
-        public static string MappingSkype {
-            get {
-                return ResourceManager.GetString("MappingSkype", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Title.
-        /// </summary>
-        public static string MappingTitleAttribute {
-            get {
-                return ResourceManager.GetString("MappingTitleAttribute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Me.
         /// </summary>
         public static string MeLabel {
@@ -1924,11 +1267,56 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Metadata file not transferred.
+        ///   Looks up a localized string similar to Create new milestone.
         /// </summary>
-        public static string MetadataFileNotTransferred {
+        public static string MilestoneSelectorAddText {
             get {
-                return ResourceManager.GetString("MetadataFileNotTransferred", resourceCulture);
+                return ResourceManager.GetString("MilestoneSelectorAddText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose the due date.
+        /// </summary>
+        public static string MilestoneSelectorEmptyDueDateError {
+            get {
+                return ResourceManager.GetString("MilestoneSelectorEmptyDueDateError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No milestones in this list.
+        /// </summary>
+        public static string MilestoneSelectorEmptyList {
+            get {
+                return ResourceManager.GetString("MilestoneSelectorEmptyList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose the project.
+        /// </summary>
+        public static string MilestoneSelectorEmptyProjectError {
+            get {
+                return ResourceManager.GetString("MilestoneSelectorEmptyProjectError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose the responsible.
+        /// </summary>
+        public static string MilestoneSelectorEmptyResponsibleError {
+            get {
+                return ResourceManager.GetString("MilestoneSelectorEmptyResponsibleError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Each milestone must have a title.
+        /// </summary>
+        public static string MilestoneSelectorEmptyTitleError {
+            get {
+                return ResourceManager.GetString("MilestoneSelectorEmptyTitleError", resourceCulture);
             }
         }
         
@@ -1947,6 +1335,24 @@ namespace ASC.Web.Studio.PublicResources {
         public static string MilestoneSelectorNoResult {
             get {
                 return ResourceManager.GetString("MilestoneSelectorNoResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No such person.
+        /// </summary>
+        public static string MilestoneSelectorPersonNotFoundError {
+            get {
+                return ResourceManager.GetString("MilestoneSelectorPersonNotFoundError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No such project.
+        /// </summary>
+        public static string MilestoneSelectorProjectNotFoundError {
+            get {
+                return ResourceManager.GetString("MilestoneSelectorProjectNotFoundError", resourceCulture);
             }
         }
         
@@ -2005,29 +1411,11 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error while performing operation.
-        /// </summary>
-        public static string OperationFailedError {
-            get {
-                return ResourceManager.GetString("OperationFailedError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error while executing the operation..
         /// </summary>
         public static string OperationFailedMsg {
             get {
                 return ResourceManager.GetString("OperationFailedMsg", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation has been successfully started..
-        /// </summary>
-        public static string OperationStartedMsg {
-            get {
-                return ResourceManager.GetString("OperationStartedMsg", resourceCulture);
             }
         }
         
@@ -2041,11 +1429,11 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Password protection.
+        ///   Looks up a localized string similar to People.
         /// </summary>
-        public static string PasswordProtection {
+        public static string People {
             get {
-                return ResourceManager.GetString("PasswordProtection", resourceCulture);
+                return ResourceManager.GetString("People", resourceCulture);
             }
         }
         
@@ -2131,56 +1519,11 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Memory quota has been successfully disabled..
+        ///   Looks up a localized string similar to Queue ringtones.
         /// </summary>
-        public static string QuotaDisabled {
+        public static string QueueRingtones {
             get {
-                return ResourceManager.GetString("QuotaDisabled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Memory quota has been successfully enabled..
-        /// </summary>
-        public static string QuotaEnabled {
-            get {
-                return ResourceManager.GetString("QuotaEnabled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Reading confirmed.
-        /// </summary>
-        public static string ReadingConfirmedLabel {
-            get {
-                return ResourceManager.GetString("ReadingConfirmedLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Read receipt for «{0}».
-        /// </summary>
-        public static string ReceiptSubjectLabel {
-            get {
-                return ResourceManager.GetString("ReceiptSubjectLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to confirmed receiving «{0}» message..
-        /// </summary>
-        public static string ReceiptUserLabel {
-            get {
-                return ResourceManager.GetString("ReceiptUserLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Remove.
-        /// </summary>
-        public static string RemoveButton {
-            get {
-                return ResourceManager.GetString("RemoveButton", resourceCulture);
+                return ResourceManager.GetString("QueueRingtones", resourceCulture);
             }
         }
         
@@ -2194,15 +1537,6 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Payment accepted! Your plan will be updated in a few minutes.
-        /// </summary>
-        public static string SaasTariffPaymentAccepted {
-            get {
-                return ResourceManager.GetString("SaasTariffPaymentAccepted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Same restrictions.
         /// </summary>
         public static string SameIPRestrictionError {
@@ -2212,83 +1546,11 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Save.
-        /// </summary>
-        public static string SaveButton {
-            get {
-                return ResourceManager.GetString("SaveButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The settings are successfully saved.
         /// </summary>
         public static string SavedTitle {
             get {
                 return ResourceManager.GetString("SavedTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Community.
-        /// </summary>
-        public static string SecurityMappingCommunity {
-            get {
-                return ResourceManager.GetString("SecurityMappingCommunity", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to CRM.
-        /// </summary>
-        public static string SecurityMappingCrm {
-            get {
-                return ResourceManager.GetString("SecurityMappingCrm", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Documents.
-        /// </summary>
-        public static string SecurityMappingDocuments {
-            get {
-                return ResourceManager.GetString("SecurityMappingDocuments", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Full Access.
-        /// </summary>
-        public static string SecurityMappingFullAccess {
-            get {
-                return ResourceManager.GetString("SecurityMappingFullAccess", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Mail.
-        /// </summary>
-        public static string SecurityMappingMail {
-            get {
-                return ResourceManager.GetString("SecurityMappingMail", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to People.
-        /// </summary>
-        public static string SecurityMappingPeople {
-            get {
-                return ResourceManager.GetString("SecurityMappingPeople", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Projects.
-        /// </summary>
-        public static string SecurityMappingProjects {
-            get {
-                return ResourceManager.GetString("SecurityMappingProjects", resourceCulture);
             }
         }
         
@@ -2334,6 +1596,15 @@ namespace ASC.Web.Studio.PublicResources {
         public static string SelectorContactType {
             get {
                 return ResourceManager.GetString("SelectorContactType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Due Date.
+        /// </summary>
+        public static string SelectorDueDate {
+            get {
+                return ResourceManager.GetString("SelectorDueDate", resourceCulture);
             }
         }
         
@@ -2392,11 +1663,38 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Milestones title.
+        /// </summary>
+        public static string SelectorMilestone {
+            get {
+                return ResourceManager.GetString("SelectorMilestone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Person.
         /// </summary>
         public static string SelectorPerson {
             get {
                 return ResourceManager.GetString("SelectorPerson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project.
+        /// </summary>
+        public static string SelectorProject {
+            get {
+                return ResourceManager.GetString("SelectorProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Responsible.
+        /// </summary>
+        public static string SelectorResponsible {
+            get {
+                return ResourceManager.GetString("SelectorResponsible", resourceCulture);
             }
         }
         
@@ -2446,20 +1744,11 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your request is successfully submitted. Our manager will contact you in the nearest time..
+        ///   Looks up a localized string similar to Запрос успешно отправлен. В ближайшее время с вами свяжется наш менеджер..
         /// </summary>
         public static string SendTariffRequest1 {
             get {
                 return ResourceManager.GetString("SendTariffRequest1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You sent the message and requested a read receipt:.
-        /// </summary>
-        public static string SentRequestInfoLabel {
-            get {
-                return ResourceManager.GetString("SentRequestInfoLabel", resourceCulture);
             }
         }
         
@@ -2473,74 +1762,11 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show.
-        /// </summary>
-        public static string ShowLink {
-            get {
-                return ResourceManager.GetString("ShowLink", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Show Next.
         /// </summary>
         public static string ShowNext {
             get {
                 return ResourceManager.GetString("ShowNext", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Certificate with same action type already exist.
-        /// </summary>
-        public static string SsoCertificateActionTypeError {
-            get {
-                return ResourceManager.GetString("SsoCertificateActionTypeError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Multiple Idp verification certificates are not supported. Please leave only Primary certificate..
-        /// </summary>
-        public static string SsoCertificateMultipleVerificationError {
-            get {
-                return ResourceManager.GetString("SsoCertificateMultipleVerificationError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Hide advanced settings.
-        /// </summary>
-        public static string SsoHideAdvancedSettings {
-            get {
-                return ResourceManager.GetString("SsoHideAdvancedSettings", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Incorrect metadata file type. An .xml file is required..
-        /// </summary>
-        public static string SsoMetadataFileTypeError {
-            get {
-                return ResourceManager.GetString("SsoMetadataFileTypeError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Saving has been successfully completed.
-        /// </summary>
-        public static string SsoSettingsSuccess {
-            get {
-                return ResourceManager.GetString("SsoSettingsSuccess", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Show advanced settings.
-        /// </summary>
-        public static string SsoShowAdvancedSettings {
-            get {
-                return ResourceManager.GetString("SsoShowAdvancedSettings", resourceCulture);
             }
         }
         
@@ -2554,7 +1780,7 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connect.
+        ///   Looks up a localized string similar to Подключить.
         /// </summary>
         public static string StorageButtonEnable {
             get {
@@ -2572,7 +1798,7 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CDN settings.
+        ///   Looks up a localized string similar to Настройки CDN.
         /// </summary>
         public static string StorageCdnTitle {
             get {
@@ -2581,7 +1807,7 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Storage settings.
+        ///   Looks up a localized string similar to Настройки хранилища.
         /// </summary>
         public static string StorageStorageTitle {
             get {
@@ -2635,29 +1861,20 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Today.
-        /// </summary>
-        public static string Today {
-            get {
-                return ResourceManager.GetString("Today", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unknown.
-        /// </summary>
-        public static string Unknown {
-            get {
-                return ResourceManager.GetString("Unknown", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to You are about to unsubscribe from all notifications of the &quot;{0}&quot; module. Are you sure you want to continue?.
         /// </summary>
         public static string UnsubscribeProductMessage {
             get {
                 return ResourceManager.GetString("UnsubscribeProductMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File extension error.
+        /// </summary>
+        public static string UploadHttpsFileTypeError {
+            get {
+                return ResourceManager.GetString("UploadHttpsFileTypeError", resourceCulture);
             }
         }
         
@@ -2725,51 +1942,6 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add with access rights.
-        /// </summary>
-        public static string UserSelectorAddWithAccessRights {
-            get {
-                return ResourceManager.GetString("UserSelectorAddWithAccessRights", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to All.
-        /// </summary>
-        public static string UserSelectorAll {
-            get {
-                return ResourceManager.GetString("UserSelectorAll", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Check all groups.
-        /// </summary>
-        public static string UserSelectorCheckAllGroups {
-            get {
-                return ResourceManager.GetString("UserSelectorCheckAllGroups", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Check all users.
-        /// </summary>
-        public static string UserSelectorCheckAllUsers {
-            get {
-                return ResourceManager.GetString("UserSelectorCheckAllUsers", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Check current users.
-        /// </summary>
-        public static string UserSelectorCheckCurrentUsers {
-            get {
-                return ResourceManager.GetString("UserSelectorCheckCurrentUsers", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No users in this list.
         /// </summary>
         public static string UserSelectorEmptyList {
@@ -2815,38 +1987,20 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User, Group, email.
+        ///   Looks up a localized string similar to Voice mail ringtones.
         /// </summary>
-        public static string UserSelectorSearchPlaceholder {
+        public static string VoicemailRingtones {
             get {
-                return ResourceManager.GetString("UserSelectorSearchPlaceholder", resourceCulture);
+                return ResourceManager.GetString("VoicemailRingtones", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} selected.
+        ///   Looks up a localized string similar to Waiting ringtones.
         /// </summary>
-        public static string UserSelectorSelectedCount {
+        public static string WaitingRingtones {
             get {
-                return ResourceManager.GetString("UserSelectorSelectedCount", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Show more.
-        /// </summary>
-        public static string UserSelectorShowMore {
-            get {
-                return ResourceManager.GetString("UserSelectorShowMore", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Users withouth group.
-        /// </summary>
-        public static string UserSelectorUsersWithouthGroup {
-            get {
-                return ResourceManager.GetString("UserSelectorUsersWithouthGroup", resourceCulture);
+                return ResourceManager.GetString("WaitingRingtones", resourceCulture);
             }
         }
         
@@ -2919,15 +2073,6 @@ namespace ASC.Web.Studio.PublicResources {
         public static string WizardCancelConfirmMessage {
             get {
                 return ResourceManager.GetString("WizardCancelConfirmMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Yesterday.
-        /// </summary>
-        public static string Yesterday {
-            get {
-                return ResourceManager.GetString("Yesterday", resourceCulture);
             }
         }
     }

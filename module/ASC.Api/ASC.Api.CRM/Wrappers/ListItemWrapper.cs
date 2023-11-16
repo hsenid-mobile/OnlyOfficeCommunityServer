@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,16 @@
 
 using System;
 using System.Runtime.Serialization;
-
 using ASC.CRM.Core;
 using ASC.CRM.Core.Entities;
-using ASC.Web.Core.Utility.Skins;
 using ASC.Web.CRM.Configuration;
+using ASC.Web.Core.Utility.Skins;
 
 namespace ASC.Api.CRM.Wrappers
 {
 
     #region History Category
 
-    ///<inherited>ASC.Api.CRM.Wrappers.ListItemWrapper, ASC.Api.CRM</inherited>
     [DataContract(Name = "historyCategoryBase", Namespace = "")]
     public class HistoryCategoryBaseWrapper : ListItemWrapper
     {
@@ -42,25 +40,24 @@ namespace ASC.Api.CRM.Wrappers
             if (!String.IsNullOrEmpty(listItem.AdditionalParams))
                 ImagePath = WebImageSupplier.GetAbsoluteWebPath(listItem.AdditionalParams, ProductEntryPoint.ID);
         }
-        ///<example>path to image</example>
+
         [DataMember]
         public String ImagePath { get; set; }
 
         public static HistoryCategoryBaseWrapper GetSample()
         {
             return new HistoryCategoryBaseWrapper
-            {
-                ID = 30,
-                Title = "Lunch",
-                SortOrder = 10,
-                Color = String.Empty,
-                Description = "",
-                ImagePath = "path to image"
-            };
+                {
+                    ID = 30,
+                    Title = "Lunch",
+                    SortOrder = 10,
+                    Color = String.Empty,
+                    Description = "",
+                    ImagePath = "path to image"
+                };
         }
     }
 
-    ///<inherited>ASC.Api.CRM.Wrappers.HistoryCategoryBaseWrapper, ASC.Api.CRM</inherited>
     [DataContract(Name = "historyCategory", Namespace = "")]
     public class HistoryCategoryWrapper : HistoryCategoryBaseWrapper
     {
@@ -73,29 +70,28 @@ namespace ASC.Api.CRM.Wrappers
         {
         }
 
-        ///<example>1</example>
         [DataMember(IsRequired = false, EmitDefaultValue = false)]
         public int RelativeItemsCount { get; set; }
 
         public new static HistoryCategoryWrapper GetSample()
         {
             return new HistoryCategoryWrapper
-            {
-                ID = 30,
-                Title = "Lunch",
-                SortOrder = 10,
-                Color = String.Empty,
-                Description = "",
-                ImagePath = "path to image",
-                RelativeItemsCount = 1
-            };
+                {
+                    ID = 30,
+                    Title = "Lunch",
+                    SortOrder = 10,
+                    Color = String.Empty,
+                    Description = "",
+                    ImagePath = "path to image",
+                    RelativeItemsCount = 1
+                };
         }
     }
 
     #endregion
 
     #region Deal Milestone
-    ///<inherited>ASC.Api.CRM.Wrappers.ListItemWrapper, ASC.Api.CRM</inherited>
+
     [DataContract(Name = "opportunityStagesBase", Namespace = "")]
     public class DealMilestoneBaseWrapper : ListItemWrapper
     {
@@ -114,30 +110,27 @@ namespace ASC.Api.CRM.Wrappers
             Title = dealMilestone.Title;
         }
 
-        ///<example type="int">20</example>
         [DataMember]
         public int SuccessProbability { get; set; }
 
-        ///<example type="int">0</example>
         [DataMember]
         public DealMilestoneStatus StageType { get; set; }
 
         public static DealMilestoneBaseWrapper GetSample()
         {
             return new DealMilestoneBaseWrapper
-            {
-                ID = 30,
-                Title = "Discussion",
-                SortOrder = 2,
-                Color = "#B9AFD3",
-                Description = "The potential buyer showed his/her interest and sees how your offering meets his/her goal",
-                StageType = DealMilestoneStatus.Open,
-                SuccessProbability = 20
-            };
+                {
+                    ID = 30,
+                    Title = "Discussion",
+                    SortOrder = 2,
+                    Color = "#B9AFD3",
+                    Description = "The potential buyer showed his/her interest and sees how your offering meets his/her goal",
+                    StageType = DealMilestoneStatus.Open,
+                    SuccessProbability = 20
+                };
         }
     }
 
-    ///<inherited>ASC.Api.CRM.Wrappers.DealMilestoneBaseWrapper, ASC.Api.CRM</inherited>
     [DataContract(Name = "opportunityStages", Namespace = "")]
     public class DealMilestoneWrapper : DealMilestoneBaseWrapper
     {
@@ -150,30 +143,29 @@ namespace ASC.Api.CRM.Wrappers
         {
         }
 
-        ///<example type="int">1</example>
         [DataMember(IsRequired = false, EmitDefaultValue = false)]
         public int RelativeItemsCount { get; set; }
 
         public new static DealMilestoneWrapper GetSample()
         {
             return new DealMilestoneWrapper
-            {
-                ID = 30,
-                Title = "Discussion",
-                SortOrder = 2,
-                Color = "#B9AFD3",
-                Description = "The potential buyer showed his/her interest and sees how your offering meets his/her goal",
-                StageType = DealMilestoneStatus.Open,
-                SuccessProbability = 20,
-                RelativeItemsCount = 1
-            };
+                {
+                    ID = 30,
+                    Title = "Discussion",
+                    SortOrder = 2,
+                    Color = "#B9AFD3",
+                    Description = "The potential buyer showed his/her interest and sees how your offering meets his/her goal",
+                    StageType = DealMilestoneStatus.Open,
+                    SuccessProbability = 20,
+                    RelativeItemsCount = 1
+                };
         }
     }
 
     #endregion
 
     #region Task Category
-    ///<inherited>ASC.Api.CRM.Wrappers.ListItemWrapper, ASC.Api.CRM</inherited>
+
     [DataContract(Name = "taskCategoryBase", Namespace = "")]
     public class TaskCategoryBaseWrapper : ListItemWrapper
     {
@@ -188,24 +180,22 @@ namespace ASC.Api.CRM.Wrappers
             ImagePath = WebImageSupplier.GetAbsoluteWebPath(listItem.AdditionalParams, ProductEntryPoint.ID);
         }
 
-        ///<example>path to image</example>
         [DataMember(IsRequired = false, EmitDefaultValue = false)]
         public String ImagePath { get; set; }
 
         public static TaskCategoryBaseWrapper GetSample()
         {
             return new TaskCategoryBaseWrapper
-            {
-                ID = 30,
-                Title = "Appointment",
-                SortOrder = 2,
-                Description = "",
-                ImagePath = "path to image"
-            };
+                {
+                    ID = 30,
+                    Title = "Appointment",
+                    SortOrder = 2,
+                    Description = "",
+                    ImagePath = "path to image"
+                };
         }
     }
 
-    ///<inherited>ASC.Api.CRM.Wrappers.TaskCategoryBaseWrapper, ASC.Api.CRM</inherited>
     [DataContract(Name = "taskCategory", Namespace = "")]
     public class TaskCategoryWrapper : TaskCategoryBaseWrapper
     {
@@ -218,28 +208,27 @@ namespace ASC.Api.CRM.Wrappers
         {
         }
 
-        ///<example type="int">1</example>
         [DataMember(IsRequired = false, EmitDefaultValue = false)]
         public int RelativeItemsCount { get; set; }
 
         public new static TaskCategoryWrapper GetSample()
         {
             return new TaskCategoryWrapper
-            {
-                ID = 30,
-                Title = "Appointment",
-                SortOrder = 2,
-                Description = "",
-                ImagePath = "path to image",
-                RelativeItemsCount = 1
-            };
+                {
+                    ID = 30,
+                    Title = "Appointment",
+                    SortOrder = 2,
+                    Description = "",
+                    ImagePath = "path to image",
+                    RelativeItemsCount = 1
+                };
         }
     }
 
     #endregion
 
     #region Contact Status
-    ///<inherited>ASC.Api.CRM.Wrappers.ListItemWrapper, ASC.Api.CRM</inherited>
+
     [DataContract(Name = "contactStatusBase", Namespace = "")]
     public class ContactStatusBaseWrapper : ListItemWrapper
     {
@@ -256,16 +245,15 @@ namespace ASC.Api.CRM.Wrappers
         public static ContactStatusBaseWrapper GetSample()
         {
             return new ContactStatusBaseWrapper
-            {
-                ID = 30,
-                Title = "Cold",
-                SortOrder = 2,
-                Description = ""
-            };
+                {
+                    ID = 30,
+                    Title = "Cold",
+                    SortOrder = 2,
+                    Description = ""
+                };
         }
     }
 
-    ///<inherited>ASC.Api.CRM.Wrappers.ContactStatusBaseWrapper, ASC.Api.CRM</inherited>
     [DataContract(Name = "contactStatus", Namespace = "")]
     public class ContactStatusWrapper : ContactStatusBaseWrapper
     {
@@ -278,27 +266,26 @@ namespace ASC.Api.CRM.Wrappers
         {
         }
 
-        ///<example type="int">1</example>
         [DataMember(IsRequired = false, EmitDefaultValue = false)]
         public int RelativeItemsCount { get; set; }
 
         public new static ContactStatusWrapper GetSample()
         {
             return new ContactStatusWrapper
-            {
-                ID = 30,
-                Title = "Cold",
-                SortOrder = 2,
-                Description = "",
-                RelativeItemsCount = 1
-            };
+                {
+                    ID = 30,
+                    Title = "Cold",
+                    SortOrder = 2,
+                    Description = "",
+                    RelativeItemsCount = 1
+                };
         }
     }
 
     #endregion
 
     #region Contact Type
-    ///<inherited>ASC.Api.CRM.Wrappers.ListItemWrapper, ASC.Api.CRM</inherited>
+
     [DataContract(Name = "contactTypeBase", Namespace = "")]
     public class ContactTypeBaseWrapper : ListItemWrapper
     {
@@ -315,16 +302,15 @@ namespace ASC.Api.CRM.Wrappers
         public static ContactTypeBaseWrapper GetSample()
         {
             return new ContactTypeBaseWrapper
-            {
-                ID = 30,
-                Title = "Client",
-                SortOrder = 2,
-                Description = ""
-            };
+                {
+                    ID = 30,
+                    Title = "Client",
+                    SortOrder = 2,
+                    Description = ""
+                };
         }
     }
 
-    ///<inherited>ASC.Api.CRM.Wrappers.ContactTypeBaseWrapper, ASC.Api.CRM</inherited>
     [DataContract(Name = "contactType", Namespace = "")]
     public class ContactTypeWrapper : ContactTypeBaseWrapper
     {
@@ -337,20 +323,19 @@ namespace ASC.Api.CRM.Wrappers
         {
         }
 
-        ///<example type="int">1</example>
         [DataMember(IsRequired = false, EmitDefaultValue = false)]
         public int RelativeItemsCount { get; set; }
 
         public new static ContactTypeWrapper GetSample()
         {
             return new ContactTypeWrapper
-            {
-                ID = 30,
-                Title = "Client",
-                SortOrder = 2,
-                Description = "",
-                RelativeItemsCount = 1
-            };
+                {
+                    ID = 30,
+                    Title = "Client",
+                    SortOrder = 2,
+                    Description = "",
+                    RelativeItemsCount = 1
+                };
         }
     }
 
@@ -373,26 +358,24 @@ namespace ASC.Api.CRM.Wrappers
             RelativeItemsCount = relativeItemsCount;
         }
 
-        ///<example>Tag</example>
         [DataMember(IsRequired = true, EmitDefaultValue = false)]
         public String Title { get; set; }
 
-        ///<example type="int">1</example>
         [DataMember(IsRequired = false, EmitDefaultValue = false)]
         public int RelativeItemsCount { get; set; }
 
         public static TagWrapper GetSample()
         {
             return new TagWrapper
-            {
-                Title = "Tag",
-                RelativeItemsCount = 1
-            };
+                {
+                    Title = "Tag",
+                    RelativeItemsCount = 1
+                };
         }
     }
 
     #endregion
-    ///<inherited>ASC.Api.CRM.Wrappers.ObjectWrapperBase, ASC.Api.CRM</inherited>
+
     [DataContract(Name = "listItem", Namespace = "")]
     public abstract class ListItemWrapper : ObjectWrapperBase
     {
@@ -410,19 +393,15 @@ namespace ASC.Api.CRM.Wrappers
             SortOrder = listItem.SortOrder;
         }
 
-        ///<example>Title</example>
         [DataMember(IsRequired = false, EmitDefaultValue = false)]
         public String Title { get; set; }
 
-        ///<example>Description</example>
         [DataMember(IsRequired = false, EmitDefaultValue = false)]
         public String Description { get; set; }
 
-        ///<example>#a7fc00</example>
         [DataMember(IsRequired = false, EmitDefaultValue = false)]
         public String Color { get; set; }
 
-        ///<example type="int">1</example>
         [DataMember(IsRequired = false, EmitDefaultValue = false)]
         public int SortOrder { get; set; }
     }

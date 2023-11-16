@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 using ASC.Common.Logging;
 using ASC.Data.Storage;
@@ -30,11 +29,10 @@ namespace ASC.Core.ChunkedUploader
     {
         public static readonly TimeSpan SlidingExpiration = TimeSpan.FromHours(12);
 
-        public IDataStore DataStore { get; set; }
+        private IDataStore DataStore { get; set; }
         private string Domain { get; set; }
-        public long MaxChunkUploadSize { get; private set; }
+        private long MaxChunkUploadSize { get; set; }
         private const string StoragePath = "sessions";
-        private readonly object locker = new object();
 
         public CommonChunkedUploadSessionHolder(IDataStore dataStore, string domain,
             long maxChunkUploadSize = 10 * 1024 * 1024)
@@ -70,17 +68,17 @@ namespace ASC.Core.ChunkedUploader
             DataStore.Delete(Domain, GetPathWithId(s.Id));
         }
 
-        public T Get<T>(string sessionId)
+        public CommonChunkedUploadSession Get(string sessionId)
         {
             using (var stream = DataStore.GetReadStream(Domain, GetPathWithId(sessionId)))
             {
-                return CommonChunkedUploadSession.Deserialize<T>(stream);
+                return CommonChunkedUploadSession.Deserialize(stream);
             }
         }
 
         public void Init(CommonChunkedUploadSession chunkedUploadSession)
         {
-            if (chunkedUploadSession.BytesTotal < MaxChunkUploadSize && chunkedUploadSession.BytesTotal != -1)
+            if (chunkedUploadSession.BytesTotal < MaxChunkUploadSize)
             {
                 chunkedUploadSession.UseChunks = false;
                 return;
@@ -93,19 +91,20 @@ namespace ASC.Core.ChunkedUploader
             chunkedUploadSession.UploadId = uploadId;
         }
 
-        public virtual string Finalize(CommonChunkedUploadSession uploadSession)
+        public void Finalize(CommonChunkedUploadSession uploadSession)
         {
             var tempPath = uploadSession.TempPath;
             var uploadId = uploadSession.UploadId;
-            var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag");
+            var eTags = uploadSession.GetItemOrDefault<List<string>>("ETag")
+                .Select((x, i) => new KeyValuePair<int, string>(i + 1, x))
+                .ToDictionary(x => x.Key, x => x.Value);
 
             DataStore.FinalizeChunkedUpload(Domain, tempPath, uploadId, eTags);
-            return Path.GetFileName(tempPath);
         }
 
-        public void Move(CommonChunkedUploadSession chunkedUploadSession, string newPath, bool quotaCheckFileSize = true)
+        public void Move(CommonChunkedUploadSession chunkedUploadSession, string newPath)
         {
-            DataStore.Move(Domain, chunkedUploadSession.TempPath, string.Empty, newPath, quotaCheckFileSize);
+            DataStore.Move(Domain, chunkedUploadSession.TempPath, string.Empty, newPath);
         }
 
         public void Abort(CommonChunkedUploadSession uploadSession)
@@ -123,48 +122,20 @@ namespace ASC.Core.ChunkedUploader
             }
         }
 
-        public virtual string UploadChunk(CommonChunkedUploadSession uploadSession, Stream stream, long length)
+        public void UploadChunk(CommonChunkedUploadSession uploadSession, Stream stream, long length)
         {
             var tempPath = uploadSession.TempPath;
             var uploadId = uploadSession.UploadId;
-
-            int chunkNumber;
-            int.TryParse(uploadSession.GetItemOrDefault<string>("ChunksUploaded"), out chunkNumber);
-            chunkNumber++;
+            var chunkNumber = uploadSession.GetItemOrDefault<int>("ChunksUploaded") + 1;
 
             var eTag = DataStore.UploadChunk(Domain, tempPath, uploadId, stream, MaxChunkUploadSize, chunkNumber, length);
 
-            uploadSession.Items["ChunksUploaded"] = chunkNumber.ToString();
+            uploadSession.Items["ChunksUploaded"] = chunkNumber;
             uploadSession.BytesUploaded += length;
 
-            var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
-            eTags.Add(chunkNumber, eTag);
+            var eTags = uploadSession.GetItemOrDefault<List<string>>("ETag") ?? new List<string>();
+            eTags.Add(eTag);
             uploadSession.Items["ETag"] = eTags;
-            return Path.GetFileName(tempPath);
-        }
-
-        public virtual async Task UploadChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length)
-        {
-            var tempPath = uploadSession.TempPath;
-            var uploadId = uploadSession.UploadId;
-
-            int chunkNumber;
-            lock (locker)
-            {
-                int.TryParse(uploadSession.GetItemOrDefault<string>("ChunksUploaded"), out chunkNumber);
-                chunkNumber++;
-                uploadSession.Items["ChunksUploaded"] = chunkNumber.ToString();
-                uploadSession.BytesUploaded += length;
-            }
-
-            var eTag = await DataStore.UploadChunkAsync(Domain, tempPath, uploadId, stream, MaxChunkUploadSize, chunkNumber, length);
-
-            lock (locker)
-            {
-                var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
-                eTags.Add(chunkNumber, eTag);
-                uploadSession.Items["ETag"] = eTags;
-            }
         }
 
         public Stream UploadSingleChunk(CommonChunkedUploadSession uploadSession, Stream stream, long chunkLength)
@@ -177,13 +148,11 @@ namespace ASC.Core.ChunkedUploader
                 //This is hack fixing strange behaviour of plupload in flash mode.
 
                 if (string.IsNullOrEmpty(uploadSession.ChunksBuffer))
-                {
-                    uploadSession.ChunksBuffer = TempPath.GetTempFileName();
-                }
+                    uploadSession.ChunksBuffer = Path.GetTempFileName();
 
                 using (var bufferStream = new FileStream(uploadSession.ChunksBuffer, FileMode.Append))
                 {
-                    stream.CopyTo(bufferStream);
+                    stream.StreamCopyTo(bufferStream);
                 }
 
                 uploadSession.BytesUploaded += chunkLength;

@@ -7,7 +7,7 @@
 <%@ Import Namespace="ASC.Web.Studio.ThirdParty.ImportContacts" %>
 <%@ Import Namespace="ASC.Web.Studio.UserControls.Management" %>
 <%@ Import Namespace="ASC.Web.Studio.Utility" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <%@ Register TagPrefix="sc" Namespace="ASC.Web.Studio.Controls.Common" Assembly="ASC.Web.Studio" %>
 
@@ -73,9 +73,7 @@
             <div class="checkAll">
                 <input type="checkbox" id="checkAll" />
             </div>
-            <input type="button" class="button gray" id="addAsUser" value="" />
-            <input type="button" class="button gray" id="addAsGuest" value="" />
-            <input type="button" class="button gray" id="notAdd" value="" />
+            <input type="button" class="button gray" id="deleteUserButton" value="   <%= Resource.DeleteButton %>" />
         </div>
         <div class="clearFix" id="addUserBlock">
             <div class="nameBox">
@@ -113,10 +111,16 @@
         </div>
     </div>
     <div class="desc" style="display:none;">
+        <label>
+            <input type="checkbox" id="importAsCollaborators"
+            <%= EnableInviteLink ? "" : "disabled=\"disabled\" checked=\"checked\"" %> />
+            <%= CustomNamingPeople.Substitute<Resource>("InviteUsersAsCollaborators").HtmlEncode() %>
+        </label>
+        <div class="HelpCenterSwitcher" onclick="jq(this).helper({ BlockHelperID: 'answerForHelpInviteGuests1'});"></div>
         <div class="popup_helper" id="answerForHelpInviteGuests1">
             <p>
                 <%= string.Format(CustomNamingPeople.Substitute<Resource>("NoteInviteCollaborator").HtmlEncode(), "<b>","</b>")%>
-                <% if (TenantExtra.EnableTariffSettings && TenantExtra.GetTenantQuota().ActiveUsers != Constants.MaxEveryoneCount)
+                <% if (TenantExtra.EnableTarrifSettings && TenantExtra.GetTenantQuota().ActiveUsers != LicenseReader.MaxUserCount)
                    { %>
                 <%= Resource.NotePriceCollaborator %>
                 <% } %>
@@ -127,17 +131,6 @@
                 <% } %>
             </p>
         </div>
-    </div>
-    <div class="error-container display-none">
-        <%if (IsStandalone) { %>
-        <span>
-            <%=string.Format(Resource.HowManyCanImportUsers, CustomNamingPeople.Substitute<Resource>("User").HtmlEncode(), EnableUsers) %>
-        </span>
-        <%} else { %>
-        <span>
-            <%=string.Format(Resource.HowManyCanImport, CustomNamingPeople.Substitute<Resource>("User").HtmlEncode(), EnableUsers, CustomNamingPeople.Substitute<Resource>("Guest").HtmlEncode(), EnableGuests) %>
-        </span>
-        <%} %>
     </div>
     <div class="middle-button-container" style="display:none;">
         <input type="button" id="next-step" class="button blue big impBtn" value="<%=Resource.GoToContactListBtn %>" />
@@ -166,13 +159,13 @@
                 </div>
             </div>
             <div class="middle-button-container">
-                <% if (TenantExtra.EnableTariffSettings)
+                <% if (TenantExtra.EnableTarrifSettings)
                    { %>
                 <a class="blue button medium" href="<%= TenantExtra.GetTariffPageLink() %>">
                     <%= UserControlsCommonResource.UpgradeButton %></a>
                 <span class="splitter-buttons"></span>
                 <% } %>
-                    <a id="import-limit-btn" class="<%= TenantExtra.EnableTariffSettings ? "gray" : "blue" %> button">
+                    <a id="import-limit-btn" class="<%= TenantExtra.EnableTarrifSettings ? "gray" : "blue" %> button">
                         <%= CustomNamingPeople.Substitute<Resource>("AddUsersCaption").HtmlEncode() %>
                     </a>
                     <span class="splitter-buttons"></span>
@@ -208,4 +201,5 @@
 </sc:Container>
 <div class="blockUpload display-none" id="blockProcess"></div>
 
+    <asp:PlaceHolder ID="Tariff" runat="server"></asp:PlaceHolder>
 </div>

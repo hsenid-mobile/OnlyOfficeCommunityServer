@@ -4,7 +4,7 @@
 <%@ Import Namespace="ASC.Web.Studio.Core" %>
 <%@ Import Namespace="ASC.Web.Studio.UserControls.Users.UserProfile" %>
 <%@ Import Namespace="ASC.Web.Studio.Utility" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <div id="authForm" class="auth-form">
     <% if (EnableSso)
@@ -28,7 +28,7 @@
 
     <%--password--%>
     <div class="auth-form_password">
-        <input type="password" id="pwd" class="pwdLoginTextbox <%= IsPasswordInvalid ? "error" : ""%>" maxlength="<%= PasswordSettings.LimitMaxLength %>" placeholder="<%= Resource.Password %>" autocomplete="current-password" />
+        <input type="password" id="pwd" class="pwdLoginTextbox <%= IsPasswordInvalid ? "error" : ""%>" maxlength="<%= PasswordSettings.MaxLength %>" placeholder="<%= Resource.Password %>" />
         <input type="hidden" id="passwordHash" name="passwordHash" />
     </div>
     <%--buttons--%>
@@ -52,7 +52,7 @@
             <% if (EnableLdap)
                { %>
             <div class="auth-ldap-checkbox">
-                <input type="checkbox" id="ldapPassword" checked="checked" name="ldapPassword"/>
+                <input type="checkbox" id="ldapPassword" checked="checked" />
                 <label for="ldapPassword">
                     <%= string.Format(Resource.SignInLDAP, ASC.ActiveDirectory.Base.Settings.LdapCurrentDomain.Load().CurrentDomain) %>
                 </label>
@@ -79,7 +79,7 @@
         <div id="authMessage" class="auth-form_message"><%= ErrorMessage + LoginMessage %></div>
         <% if (ThirdpartyEnable)
            { %>
-        <div id="social" <%if(!EnableSso) { %> class="disable" <%} %>>
+        <div id="social">
             <div><%= Resource.LoginWithAccount %></div>
             <asp:PlaceHolder ID="signInPlaceholder" runat="server" />
         </div>

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ var PhoneController = new function() {
             _enterPhone();
         });
 
-        PhoneController.phoneControlContainer.find("input.phoneControlInput:first").off('paste').on('paste', function(e) {
+        PhoneController.phoneControlContainer.find("input.phoneControlInput:first").unbind('paste').bind('paste', function(e) {
             setTimeout(
                 function() {
                     _enterPhone();
@@ -172,12 +172,12 @@ var PhoneController = new function() {
                 PhoneController.selectedCountryPhone = _getCountryByKey(key);
             } else {
                 PhoneController.selectedCountryPhone = _getCountryByKey(key);
-                phone_text = phone_text.replace(PhoneController.GetCountryPhoneReg(PhoneController.selectedCountryPhone.country_code), "").trim();
+                phone_text = jq.trim(phone_text.replace(PhoneController.GetCountryPhoneReg(PhoneController.selectedCountryPhone.country_code), ""));
                 phone_text = [PhoneController.selectedCountryPhone.country_code, phone_text].join("");
                 PhoneController.phoneControlContainer.find("input.phoneControlInput:first").val(phone_text);
             }
         } else {
-            phone_text = phone_text.replace(PhoneController.GetCountryPhoneReg(null), "").trim();
+            phone_text = jq.trim(phone_text.replace(PhoneController.GetCountryPhoneReg(null), ""));
             PhoneController.selectedCountryPhone = _getCountryByKey(key);
 
             phone_text = [PhoneController.selectedCountryPhone.country_code, phone_text].join("");
@@ -203,7 +203,7 @@ var PhoneController = new function() {
     };
 
     _purePhone = function () {
-        var phone_text = PhoneController.phoneControlContainer.find("input.phoneControlInput:first").val().trim();
+        var phone_text = jq.trim(PhoneController.phoneControlContainer.find("input.phoneControlInput:first").val());
         if (phone_text.length && phone_text[0] != '+') {
             phone_text = "+" + phone_text;
         }

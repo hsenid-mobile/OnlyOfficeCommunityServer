@@ -1,7 +1,7 @@
 [Unit]
 Description=ONLYOFFICE Feed Service
-After=network.target syslog.target mysqld.service redis.service
-Wants=mysqld.service redis.service
+After=network.target syslog.target mysqld.service redis-server.service
+Wants=mysqld.service redis-server.service
 
 [Service]
 Type=forking
@@ -12,6 +12,9 @@ User=onlyoffice
 Group=onlyoffice
 # Give up if ping don't get an answer
 TimeoutSec=600
+
+# Auto-Restart every 24 hours
+WatchdogSec=24h
 
 Restart=no
 PrivateTmp=false

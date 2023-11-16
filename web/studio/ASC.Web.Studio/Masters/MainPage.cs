@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,8 @@ using AjaxPro;
 
 using ASC.Common.Logging;
 using ASC.Core;
-using ASC.Core.Data;
 using ASC.Core.Users;
 using ASC.Geolocation;
-using ASC.MessagingSystem;
 using ASC.Web.Core;
 using ASC.Web.Core.Utility.Settings;
 using ASC.Web.Studio.Core;
@@ -89,20 +87,22 @@ namespace ASC.Web.Studio
                 }
                 else
                 {
+                    var refererURL = GetRefererUrl();
+                    Session["refererURL"] = refererURL;
                     var authUrl = "~/Auth.aspx";
                     if (Request.DesktopApp())
                     {
-                        authUrl += "?desktop=true";
+                        authUrl += "?desktop=" + Request["desktop"];
                     }
-                    Response.Redirect(Request.AppendRefererURL(authUrl), true);
+                    Response.Redirect(authUrl, true);
                 }
             }
 
             var user = CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID);
 
             if (!MayNotPaid
-                && TenantExtra.EnableTariffSettings
-                && (TenantStatisticsProvider.IsNotPaid())
+                && TenantExtra.EnableTarrifSettings
+                && (TenantStatisticsProvider.IsNotPaid() || TenantExtra.UpdatedWithoutLicense)
                 && WarmUp.Instance.CheckCompleted() && Request.QueryString["warmup"] != "true")
             {
                 if (TariffSettings.HidePricingPage && !user.IsAdmin())
@@ -119,14 +119,13 @@ namespace ASC.Web.Studio
             if (!MayPhoneNotActivate
                 && SecurityContext.IsAuthenticated)
             {
-
-                if (StudioSmsNotificationSettings.IsVisibleAndAvailableSettings && StudioSmsNotificationSettings.TfaEnabledForUser(user.ID)
+                if (StudioSmsNotificationSettings.IsVisibleSettings && StudioSmsNotificationSettings.Enable
                     && (string.IsNullOrEmpty(user.MobilePhone) || user.MobilePhoneActivationStatus == MobilePhoneActivationStatus.NotActivated))
                 {
                     Response.Redirect(CommonLinkUtility.GetConfirmationUrl(user.Email, ConfirmType.PhoneActivation), true);
                 }
 
-                if (TfaAppAuthSettings.IsVisibleSettings && TfaAppAuthSettings.TfaEnabledForUser(user.ID)
+                if (TfaAppAuthSettings.IsVisibleSettings && TfaAppAuthSettings.Enable
                     && !TfaAppUserSettings.EnableForUser(user.ID))
                 {
                     Response.Redirect(CommonLinkUtility.GetConfirmationUrl(user.Email, ConfirmType.TfaActivation), true);
@@ -135,11 +134,10 @@ namespace ASC.Web.Studio
 
             //check disable and public 
             var webitem = CommonLinkUtility.GetWebItemByUrl(Request.Url.ToString());
-            var parentItemID = webitem == null ? Guid.Empty : webitem.ID;
             var parentIsDisabled = false;
             if (webitem != null && webitem.IsSubItem())
             {
-                parentItemID = WebItemManager.Instance.GetParentItemID(webitem.ID);
+                var parentItemID = WebItemManager.Instance.GetParentItemID(webitem.ID);
                 parentIsDisabled = WebItemManager.Instance[parentItemID].IsDisabled();
             }
 
@@ -158,7 +156,7 @@ namespace ASC.Web.Studio
             {
                 try
                 {
-                    StatisticManager.SaveUserVisit(TenantProvider.CurrentTenantID, SecurityContext.CurrentAccount.ID, parentItemID);
+                    StatisticManager.SaveUserVisit(TenantProvider.CurrentTenantID, SecurityContext.CurrentAccount.ID, CommonLinkUtility.GetProductID());
                 }
                 catch (Exception exc)
                 {
@@ -189,6 +187,23 @@ namespace ASC.Web.Studio
             return false;
         }
 
+        private string GetRefererUrl()
+        {
+            var refererURL = Request.GetUrlRewriter().AbsoluteUri;
+            if (this is _Default)
+            {
+                refererURL = "/";
+            }
+            else if (String.IsNullOrEmpty(refererURL)
+                        || refererURL.IndexOf("Subgurim_FileUploader", StringComparison.InvariantCultureIgnoreCase) != -1
+                        || (this is ServerError))
+            {
+                refererURL = (string)Session["refererURL"];
+            }
+
+            return refererURL;
+        }
+
         private void InitInlineScript()
         {
             var scripts = HttpContext.Current.Items[Constant.AjaxID + ".pagescripts"] as ListDictionary;
@@ -212,11 +227,11 @@ namespace ASC.Web.Studio
                 var ipGeolocationInfo = new GeolocationHelper("teamlabsite").GetIPGeolocationFromHttpContext();
                 if (checkIp && ipGeolocationInfo != null && !string.IsNullOrEmpty(ipGeolocationInfo.Key))
                 {
-                    var culture = SetupInfo.GetPersonalCulture(ipGeolocationInfo.Key);
-                    if (culture.Value != null)
+                    var cultureInfo = SetupInfo.EnabledCulturesPersonal.Find(c => String.Equals(c.TwoLetterISOLanguageName, ipGeolocationInfo.Key, StringComparison.InvariantCultureIgnoreCase));
+                    if (cultureInfo != null)
                     {
 
-                        var redirectUrl = String.Format("/{0}/{1}", culture.Key, Request.Path);
+                        var redirectUrl = String.Format("/{0}/{1}", cultureInfo.TwoLetterISOLanguageName, Request.Path);
 
                         if (redirectUrl.EndsWith("Auth.aspx", StringComparison.InvariantCultureIgnoreCase))
                             redirectUrl = redirectUrl.Remove(redirectUrl.IndexOf("Auth.aspx", StringComparison.OrdinalIgnoreCase));
@@ -229,8 +244,7 @@ namespace ASC.Web.Studio
             else if (!String.IsNullOrEmpty(Request["lang"]))
             {
                 var lang = Request["lang"].Split(',')[0];
-                var cultureInfo = SetupInfo.GetPersonalCulture(lang).Value;
-
+                var cultureInfo = SetupInfo.EnabledCulturesPersonal.Find(c => String.Equals(c.TwoLetterISOLanguageName, lang, StringComparison.InvariantCultureIgnoreCase));
                 if (cultureInfo != null)
                 {
                     Thread.CurrentThread.CurrentUICulture = cultureInfo;
@@ -260,22 +274,10 @@ namespace ASC.Web.Studio
 
         private static void OutsideAuth()
         {
-            var action = MessageAction.LoginSuccess;
-            Func<int> funcLoginEvent = () => { return CookiesManager.GetLoginEventId(action); };
-            var cookie = string.Empty;
-            try
-            {
-                cookie = SecurityContext.AuthenticateMe(Constants.OutsideUser.ID, funcLoginEvent);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
+            var cookie = SecurityContext.AuthenticateMe(Constants.OutsideUser.ID);
             if (HttpContext.Current != null)
             {
                 CookiesManager.SetCookies(CookiesType.AuthKey, cookie);
-                DbLoginEventsManager.ResetCache();
             }
             else
             {

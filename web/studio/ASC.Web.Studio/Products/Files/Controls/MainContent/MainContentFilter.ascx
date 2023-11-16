@@ -3,7 +3,7 @@
 <%@ Assembly Name="ASC.Web.Files" %>
 <%@ Control Language="C#" AutoEventWireup="true" CodeBehind="MainContentFilter.ascx.cs" Inherits="ASC.Web.Files.Controls.MainContentFilter" %>
 
-<%@ Import Namespace="ASC.ElasticSearch.Core" %>
+<%@ Import Namespace="ASC.ElasticSearch" %>
 <%@ Import Namespace="ASC.Web.Core.Files" %>
 <%@ Import Namespace="ASC.Web.Files.Classes" %>
 <%@ Import Namespace="ASC.Web.Files.Core.Search" %>
@@ -14,7 +14,7 @@
 <div class="files-filter"
     data-sort="<%= FilesSettings.DefaultOrder.SortedBy %>"
     data-asc="<%= FilesSettings.DefaultOrder.IsAsc.ToString().ToLower() %>"
-    data-content="<%= SearchSettings.CanSearchByContent<FilesWrapper>().ToString().ToLower() %>">
+    data-content="<%= FactoryIndexer<FilesWrapper>.CanSearchByContent().ToString().ToLower() %>">
     <div></div>
 </div>
 
@@ -54,10 +54,10 @@
         <span><%= FilesUCResource.RemoveIsNewShort %></span>
     </li>
     <li id="mainRemoveFavorite" class="menuAction" title="<%= FilesUCResource.ButtonRemoveFavorite %>">
-        <span><%= FilesUCResource.ButtonRemoveFavorite %></span>
+        <span><%= FilesUCResource.ButtonRemoveFavoriteShort %></span>
     </li>
     <li id="mainRemoveTemplate" class="menuAction" title="<%= FilesUCResource.ButtonRemoveTemplate %>">
-        <span><%= FilesUCResource.ButtonRemoveTemplate %></span>
+        <span><%= FilesUCResource.ButtonRemoveTemplateShort %></span>
     </li>
     <li id="mainUnsubscribe" class="menuAction" title="<%= FilesUCResource.Unsubscribe %>">
         <span><%= FilesUCResource.Unsubscribe %></span>
@@ -72,10 +72,7 @@
         <span><%= FilesUCResource.ButtonEmptyTrash %></span>
     </li>
     <% } %>
-    <li id="switchViewFolder" class="normal">
-        <div id="switchToThumbnails" class="switchToThumbnails" title="<%= FilesUCResource.switchToThumbnails %>">
-            &nbsp;
-        </div>
+    <li id="switchViewFolder" class="menuSwitchViewFolder">
         <div id="switchToNormal" class="switchToNormal" title="<%= FilesUCResource.SwitchViewToNormal %>">
             &nbsp;
         </div>

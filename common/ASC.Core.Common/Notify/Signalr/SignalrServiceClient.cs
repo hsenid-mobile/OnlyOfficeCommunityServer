@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,9 @@ using System.Net;
 using System.Security.Cryptography;
 using System.ServiceModel;
 using System.Text;
-
 using ASC.Common.Logging;
 using ASC.Core.Common.Notify.Jabber;
-using ASC.Core.Common.Notify.Signalr;
 using ASC.Security.Cryptography;
-
 using Newtonsoft.Json;
 
 namespace ASC.Core.Notify.Signalr
@@ -62,7 +59,7 @@ namespace ASC.Core.Notify.Signalr
                 {
                     JabberReplaceDomain = true;
                     var q =
-                        replaceSetting.Split(new[] { "->" }, StringSplitOptions.RemoveEmptyEntries)
+                        replaceSetting.Split(new[] {"->"}, StringSplitOptions.RemoveEmptyEntries)
                             .Select(s => s.Trim().ToLowerInvariant())
                             .ToList();
                     JabberReplaceFromDomain = q.ElementAt(0);
@@ -95,7 +92,7 @@ namespace ASC.Core.Notify.Signalr
                     Text = messageText
                 };
 
-                MakeRequest("send", new { tenantId = tenant.TenantId, callerUserName, calleeUserName, message, isTenantUser });
+                MakeRequest("send", new {tenantId = tenant.TenantId, callerUserName, calleeUserName, message, isTenantUser});
             }
             catch (Exception error)
             {
@@ -117,7 +114,7 @@ namespace ASC.Core.Notify.Signalr
                     Text = chatRoomName
                 };
 
-                MakeRequest("sendInvite", new { tenantId = tenant.TenantId, calleeUserName, message });
+                MakeRequest("sendInvite", new {tenantId = tenant.TenantId, calleeUserName, message});
             }
             catch (Exception error)
             {
@@ -136,7 +133,7 @@ namespace ASC.Core.Notify.Signalr
                     tenantId = CoreContext.TenantManager.GetTenant(domain).TenantId;
                 }
 
-                MakeRequest("setState", new { tenantId, from, state });
+                MakeRequest("setState", new {tenantId, from, state});
             }
             catch (Exception error)
             {
@@ -148,7 +145,7 @@ namespace ASC.Core.Notify.Signalr
         {
             try
             {
-                MakeRequest("sendOfflineMessages", new { tenantId, callerUserName, users });
+                MakeRequest("sendOfflineMessages", new {tenantId, callerUserName, users});
             }
             catch (Exception error)
             {
@@ -164,7 +161,7 @@ namespace ASC.Core.Notify.Signalr
 
                 var tenant = CoreContext.TenantManager.GetTenant(domain);
 
-                MakeRequest("sendUnreadCounts", new { tenantId = tenant.TenantId, unreadCounts });
+                MakeRequest("sendUnreadCounts", new {tenantId = tenant.TenantId, unreadCounts});
             }
             catch (Exception error)
             {
@@ -188,7 +185,7 @@ namespace ASC.Core.Notify.Signalr
         {
             try
             {
-                MakeRequest("updateFolders", new { tenant, userId, count });
+                MakeRequest("updateFolders", new {tenant, userId, count});
             }
             catch (Exception error)
             {
@@ -196,11 +193,11 @@ namespace ASC.Core.Notify.Signalr
             }
         }
 
-        public void SendMailNotification(int tenant, string userId, MailNotificationState state)
+        public void SendMailNotification(int tenant, string userId, int state)
         {
             try
             {
-                MakeRequest("sendMailNotification", new { tenant, userId, state });
+                MakeRequest("sendMailNotification", new {tenant, userId, state});
             }
             catch (Exception error)
             {
@@ -335,7 +332,7 @@ namespace ASC.Core.Notify.Signalr
 
         private string GetMethod(string method)
         {
-            return string.Format("{0}/controller/{1}/{2}", Url.TrimEnd('/'), hub, method);
+            return string.Format("{0}/controller/{1}/{2}", Url.TrimEnd('/') , hub, method);
         }
 
         public static string CreateAuthToken(string pkey = "socketio")

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,25 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Web;
 using System.Web.UI.WebControls;
-
-using ASC.Common.Logging;
-using ASC.Core;
-using ASC.Core.Tenants;
-using ASC.Core.Users;
+using System.Linq;
 using ASC.CRM.Core;
-using ASC.CRM.Core.Dao;
 using ASC.CRM.Core.Entities;
 using ASC.MessagingSystem;
 using ASC.Web.CRM.Classes;
-using ASC.Web.CRM.Controls.Common;
-using ASC.Web.CRM.Core;
 using ASC.Web.CRM.Resources;
+using ASC.Web.CRM.Controls.Common;
+using ASC.Core;
 using ASC.Web.CRM.Services.NotifyService;
+using ASC.Web.Studio.Controls.Users;
 using ASC.Web.Studio.Core.Users;
-
+using ASC.Core.Tenants;
+using ASC.Core.Users;
+using System.Text;
+using ASC.Common.Logging;
+using ASC.CRM.Core.Dao;
+using ASC.Web.CRM.Core;
 using Autofac;
 
 #endregion
@@ -123,7 +122,7 @@ namespace ASC.Web.CRM.Controls.Deals
                     cntrlPrivatePanel.SelectedUsers = CRMSecurity.GetAccessSubjectTo(TargetDeal);
             }
 
-            var usersWhoHasAccess = new List<string> { CustomNamingPeople.Substitute<CRMCommonResource>("CurrentUser").HtmlEncode(), CRMDealResource.ResponsibleDeal };
+            var usersWhoHasAccess = new List<string> { CustomNamingPeople.Substitute<CRMCommonResource>("CurrentUser"), CRMDealResource.ResponsibleDeal };
 
             cntrlPrivatePanel.UsersWhoHasAccess = usersWhoHasAccess;
             cntrlPrivatePanel.DisabledUsers = new List<Guid> { SecurityContext.CurrentAccount.ID };
@@ -181,7 +180,7 @@ namespace ASC.Web.CRM.Controls.Deals
                             bidValue = 0;
 
                         deal.BidValue = bidValue;
-                        deal.BidType = (BidType)Enum.Parse(typeof(BidType), Request["bidType"]);
+                        deal.BidType = (BidType) Enum.Parse(typeof(BidType), Request["bidType"]);
 
                         if (deal.BidType != BidType.FixedBid)
                         {
@@ -224,7 +223,7 @@ namespace ASC.Web.CRM.Controls.Deals
                         if (_isPrivate)
                         {
                             _selectedUsersWithoutCurUsr = Request.Form["selectedPrivateUsers"]
-                                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)
                                 .Select(item => new Guid(item)).Where(i => i != CurrentAccountID).Distinct().ToList();
 
                             foreach (var uID in _selectedUsersWithoutCurUsr)
@@ -293,7 +292,7 @@ namespace ASC.Web.CRM.Controls.Deals
                     #region Members
 
                     var dealMembers = !String.IsNullOrEmpty(Request["selectedMembersID"])
-                        ? Request["selectedMembersID"].Split(new[] { ',' }).Select(
+                        ? Request["selectedMembersID"].Split(new[] {','}).Select(
                             id => Convert.ToInt32(id)).Where(id => id != deal.ContactID).ToList()
                         : new List<int>();
 

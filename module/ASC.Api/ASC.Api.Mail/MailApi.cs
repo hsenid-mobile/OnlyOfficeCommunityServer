@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,40 +19,31 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
-using System.Linq;
-
 using ASC.Api.Attributes;
 using ASC.Api.Impl;
 using ASC.Api.Interfaces;
-using ASC.Common.Caching;
 using ASC.Common.Logging;
 using ASC.Common.Threading;
 using ASC.Core;
 using ASC.Mail.Core;
-using ASC.Mail.Core.Dao.Expressions.Mailbox;
-using ASC.Mail.Core.Engine;
 using ASC.Mail.Core.Engine.Operations.Base;
-using ASC.Mail.Core.Entities;
 using ASC.Web.Mail.Resources;
 
 namespace ASC.Api.Mail
 {
-    ///<summary>
-    /// Mail API.
-    ///</summary>
-    ///<name>mail</name>
     public partial class MailApi : IApiEntryPoint
     {
         private readonly ApiContext _context;
 
         private EngineFactory _engineFactory;
 
-        private UserActionEngine _actionEngine;
-
         private ILog _log;
 
         public const int DEFAULT_PAGE_SIZE = 25;
 
+        ///<summary>
+        /// Api name entry
+        ///</summary>
         public string Name
         {
             get { return "mail"; }
@@ -60,17 +51,12 @@ namespace ASC.Api.Mail
 
         private EngineFactory MailEngineFactory
         {
-            get { return _engineFactory ?? (_engineFactory = new EngineFactory(TenantId, Username, Logger)); }
-        }
-
-        private UserActionEngine ActionEngine
-        {
-            get { return _actionEngine ?? (_actionEngine = new UserActionEngine(TenantId, Username, MailEngineFactory)); }
+            get { return _engineFactory ?? (_engineFactory = new EngineFactory(TenantId, Username)); }
         }
 
         private ILog Logger
         {
-            get { return _log ?? (_log = LogManager.GetLogger("ASC.Api.Mail")); }
+            get { return _log ?? (_log = LogManager.GetLogger("ASC.Api")); }
         }
 
         private static int TenantId
@@ -105,8 +91,8 @@ namespace ASC.Api.Mail
             get
             {
                 var count = 20;
-                if (ConfigurationManagerExtension.AppSettings["mail.autocomplete-max-count"] == null)
-                    return count;
+                if(ConfigurationManagerExtension.AppSettings["mail.autocomplete-max-count"] == null) 
+                   return count;
 
                 int.TryParse(ConfigurationManagerExtension.AppSettings["mail.autocomplete-max-count"], out count);
                 return count;
@@ -139,16 +125,12 @@ namespace ASC.Api.Mail
         }
 
         /// <summary>
-        /// Returns all the running mail operations.
+        /// Returns all Mail runnung operations (only complex)
         /// </summary>
-        /// <path>api/2.0/mail/operations</path>
-        /// <httpMethod>GET</httpMethod>
-        /// <collection>list</collection>
         /// <short>
-        /// Get running mail operations
+        /// Get all Mail running complex operations
         /// </short>
-        /// <category>Operations</category>
-        /// <returns type="ASC.Mail.Core.Engine.Operations.Base.MailOperationStatus, ASC.Mail">List of running mail operations</returns>
+        /// <returns>list of MailOperationResult</returns>
         [Read("operations")]
         public List<MailOperationStatus> GetMailOperations()
         {
@@ -157,16 +139,13 @@ namespace ASC.Api.Mail
         }
 
         /// <summary>
-        /// Returns a status of the mail operation with the ID specified in the request.
+        /// Returns Mail complex operation status
         /// </summary>
         /// <short>
-        /// Get a mail operation status
+        /// Get Mail complex operation status
         /// </short>
-        /// <category>Operations</category>
-        /// <param type="System.String, System" method="url" name="operationId">Operation ID</param>
-        /// <returns type="ASC.Mail.Core.Engine.Operations.Base.MailOperationStatus, ASC.Mail">Mail operation status</returns>
-        /// <path>api/2.0/mail/operations/{operationId}</path>
-        /// <httpMethod>GET</httpMethod>
+        /// <param name="operationId">Id of operation</param>
+        /// <returns>MailOperationResult</returns>
         [Read("operations/{operationId}")]
         public MailOperationStatus GetMailOperation(string operationId)
         {
@@ -174,12 +153,10 @@ namespace ASC.Api.Mail
         }
 
         /// <summary>
-        /// Translates a mail operation status.
+        /// Method for translation mail operation statuses
         /// </summary>
-        /// <short>Translate a mail operation status</short>
-        /// <category>Operations</category>
-        /// <param type="ASC.Common.Threading.DistributedTask, ASC.Common.Threading" name="op">Distributed task instance</param>
-        /// <returns>Translated status</returns>
+        /// <param name="op">instance of DistributedTask</param>
+        /// <returns>translated status text</returns>
         private static string TranslateMailOperationStatus(DistributedTask op)
         {
             var type = op.GetProperty<MailOperationType>(MailOperation.OPERATION_TYPE);
@@ -188,26 +165,26 @@ namespace ASC.Api.Mail
             switch (type)
             {
                 case MailOperationType.DownloadAllAttachments:
-                {
-                    var progress = op.GetProperty<MailOperationDownloadAllAttachmentsProgress>(MailOperation.PROGRESS);
-                    switch (progress)
                     {
-                        case MailOperationDownloadAllAttachmentsProgress.Init:
-                            return MailApiResource.SetupTenantAndUserHeader;
-                        case MailOperationDownloadAllAttachmentsProgress.GetAttachments:
-                            return MailApiResource.GetAttachmentsHeader;
-                        case MailOperationDownloadAllAttachmentsProgress.Zipping:
-                            return MailApiResource.ZippingAttachmentsHeader;
-                        case MailOperationDownloadAllAttachmentsProgress.ArchivePreparation:
-                            return MailApiResource.PreparationArchiveHeader;
-                        case MailOperationDownloadAllAttachmentsProgress.CreateLink:
-                            return MailApiResource.CreatingLinkHeader;
-                        case MailOperationDownloadAllAttachmentsProgress.Finished:
-                            return MailApiResource.FinishedHeader;
-                        default:
-                            return status;
+                        var progress = op.GetProperty<MailOperationDownloadAllAttachmentsProgress>(MailOperation.PROGRESS);
+                        switch (progress)
+                        {
+                            case MailOperationDownloadAllAttachmentsProgress.Init:
+                                return MailApiResource.SetupTenantAndUserHeader;
+                            case MailOperationDownloadAllAttachmentsProgress.GetAttachments:
+                                return MailApiResource.GetAttachmentsHeader;
+                            case MailOperationDownloadAllAttachmentsProgress.Zipping:
+                                return MailApiResource.ZippingAttachmentsHeader;
+                            case MailOperationDownloadAllAttachmentsProgress.ArchivePreparation:
+                                return MailApiResource.PreparationArchiveHeader;
+                            case MailOperationDownloadAllAttachmentsProgress.CreateLink:
+                                return MailApiResource.CreatingLinkHeader;
+                            case MailOperationDownloadAllAttachmentsProgress.Finished:
+                                return MailApiResource.FinishedHeader;
+                            default:
+                                return status;
+                        }
                     }
-                }
                 case MailOperationType.RemoveMailbox:
                 {
                     var progress = op.GetProperty<MailOperationRemoveMailboxProgress>(MailOperation.PROGRESS);

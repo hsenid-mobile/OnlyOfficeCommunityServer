@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,27 +18,25 @@
 using System;
 using System.Text;
 using System.Web;
-
 using AjaxPro;
-
+using ASC.Blogs.Core.Resources;
 using ASC.Core;
 using ASC.Notify.Model;
 using ASC.Notify.Recipients;
-using ASC.Web.Community.Modules.Blogs.Core.Resources;
-using ASC.Web.Community.Resources;
 using ASC.Web.Studio.Utility;
+using ASC.Web.Community.Resources;
 
 namespace ASC.Web.Community.Blogs
 {
     [AjaxNamespace("Subscriber")]
     public class Subscriber
     {
-        private readonly ISubscriptionProvider _subscriptionProvider;
-        private readonly IRecipientProvider _recipientProvider;
+        private ISubscriptionProvider _subscriptionProvider;
+        private IRecipientProvider _recipientProvider;
 
         public IDirectRecipient IAmAsRecipient
         {
-            get { return (IDirectRecipient)_recipientProvider.GetRecipient(SecurityContext.CurrentAccount.ID.ToString()); }
+            get { return (IDirectRecipient) _recipientProvider.GetRecipient(SecurityContext.CurrentAccount.ID.ToString()); }
         }
 
 

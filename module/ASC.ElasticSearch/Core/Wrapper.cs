@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,7 +230,7 @@ namespace ASC.ElasticSearch
                 .Select(r => ToLowerCamelCase(r.Name))
                 .ToList();
 
-            if (this is WrapperWithDoc && SearchSettings.CanSearchByContent(GetType()))
+            if (this is WrapperWithDoc)
             {
                 result.Add("document.attachment.content");
             }
@@ -283,7 +283,7 @@ namespace ASC.ElasticSearch
 
                 if (arr != null)
                 {
-                    subQuery.Where(Exp.In(con.Key, new ArrayList(arr).ToArray()));
+                    subQuery.Where(Exp.In(con.Key, arr));
                 }
                 else
                 {

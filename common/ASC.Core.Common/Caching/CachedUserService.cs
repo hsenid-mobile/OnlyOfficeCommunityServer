@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-
 using ASC.Common.Caching;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
@@ -38,9 +37,13 @@ namespace ASC.Core.Caching
         private readonly TrustInterval trustInterval;
         private int getchanges;
 
+
         public TimeSpan CacheExpiration { get; set; }
+
         public TimeSpan DbExpiration { get; set; }
+
         public TimeSpan PhotoExpiration { get; set; }
+
 
         public CachedUserService(IUserService service)
         {
@@ -55,10 +58,10 @@ namespace ASC.Core.Caching
             PhotoExpiration = TimeSpan.FromMinutes(10);
 
             cacheNotify = AscCache.Notify;
-            cacheNotify.Subscribe<UserInfoCacheItem>((u, a) => InvalidateCache(u));
-            cacheNotify.Subscribe<UserPhotoCacheItem>((p, a) => cache.Remove(p.Key));
-            cacheNotify.Subscribe<GroupCacheItem>((g, a) => InvalidateCache());
-            cacheNotify.Subscribe<UserGroupRefCacheItem>((r, a) => UpdateUserGroupRefCache(r, a == CacheNotifyAction.Remove));
+            cacheNotify.Subscribe<UserInfo>((u, a) => InvalidateCache(u));
+            cacheNotify.Subscribe<UserPhoto>((p, a) => cache.Remove(p.Key));
+            cacheNotify.Subscribe<Group>((g, a) => InvalidateCache());
+            cacheNotify.Subscribe<UserGroupRef>((r, a) => UpdateUserGroupRefCache(r, a == CacheNotifyAction.Remove));
         }
 
 
@@ -85,16 +88,6 @@ namespace ASC.Core.Caching
                 users.TryGetValue(id, out u);
                 return u;
             }
-        }
-
-        public UserInfo GetUser(int tenant, string email)
-        {
-            return service.GetUser(tenant, email);
-        }
-
-        public UserInfo GetUserByUserName(int tenant, string userName)
-        {
-            return service.GetUserByUserName(tenant, userName);
         }
 
         /// <summary>
@@ -128,22 +121,17 @@ namespace ASC.Core.Caching
             return service.GetUserByPasswordHash(tenant, login, passwordHash);
         }
 
-        public IEnumerable<UserInfo> GetUsersAllTenants(IEnumerable<string> userIds)
-        {
-            return service.GetUsersAllTenants(userIds);
-        }
-
         public UserInfo SaveUser(int tenant, UserInfo user)
         {
             user = service.SaveUser(tenant, user);
-            cacheNotify.Publish(new UserInfoCacheItem { ID = user.ID, Tenant = user.Tenant }, CacheNotifyAction.Any);
+            cacheNotify.Publish(user, CacheNotifyAction.InsertOrUpdate);
             return user;
         }
 
         public void RemoveUser(int tenant, Guid id)
         {
             service.RemoveUser(tenant, id);
-            cacheNotify.Publish(new UserInfoCacheItem { Tenant = tenant, ID = id }, CacheNotifyAction.Any);
+            cacheNotify.Publish(new UserInfo { Tenant = tenant, ID = id }, CacheNotifyAction.Remove);
         }
 
         public byte[] GetUserPhoto(int tenant, Guid id)
@@ -160,7 +148,7 @@ namespace ASC.Core.Caching
         public void SetUserPhoto(int tenant, Guid id, byte[] photo)
         {
             service.SetUserPhoto(tenant, id, photo);
-            cacheNotify.Publish(new UserPhotoCacheItem { Key = GetUserPhotoCacheKey(tenant, id) }, CacheNotifyAction.Remove);
+            cacheNotify.Publish(new UserPhoto { Key = GetUserPhotoCacheKey(tenant, id) }, CacheNotifyAction.Remove);
         }
 
         public DateTime GetUserPasswordStamp(int tenant, Guid id)
@@ -197,24 +185,19 @@ namespace ASC.Core.Caching
         public Group SaveGroup(int tenant, Group group)
         {
             group = service.SaveGroup(tenant, group);
-            cacheNotify.Publish(new GroupCacheItem { ID = group.Id }, CacheNotifyAction.Any);
+            cacheNotify.Publish(group, CacheNotifyAction.InsertOrUpdate);
             return group;
         }
 
         public void RemoveGroup(int tenant, Guid id)
         {
             service.RemoveGroup(tenant, id);
-            cacheNotify.Publish(new GroupCacheItem { ID = id }, CacheNotifyAction.Any);
+            cacheNotify.Publish(new Group { Id = id }, CacheNotifyAction.Remove);
         }
 
 
         public IDictionary<string, UserGroupRef> GetUserGroupRefs(int tenant, DateTime from)
         {
-            if (CoreContext.Configuration.Personal)
-            {
-                return new Dictionary<string, UserGroupRef>();
-            }
-
             GetChangesFromDb();
 
             var key = GetRefCacheKey(tenant);
@@ -233,7 +216,7 @@ namespace ASC.Core.Caching
         public UserGroupRef SaveUserGroupRef(int tenant, UserGroupRef r)
         {
             r = service.SaveUserGroupRef(tenant, r);
-            cacheNotify.Publish((UserGroupRefCacheItem)r, CacheNotifyAction.InsertOrUpdate);
+            cacheNotify.Publish(r, CacheNotifyAction.InsertOrUpdate);
             return r;
         }
 
@@ -242,7 +225,7 @@ namespace ASC.Core.Caching
             service.RemoveUserGroupRef(tenant, userId, groupId, refType);
 
             var r = new UserGroupRef(userId, groupId, refType) { Tenant = tenant };
-            cacheNotify.Publish((UserGroupRefCacheItem)r, CacheNotifyAction.Remove);
+            cacheNotify.Publish(r, CacheNotifyAction.Remove);
         }
 
         public void InvalidateCache()
@@ -250,7 +233,7 @@ namespace ASC.Core.Caching
             InvalidateCache(null);
         }
 
-        private void InvalidateCache(UserInfoCacheItem userInfo)
+        private void InvalidateCache(UserInfo userInfo)
         {
             if (CoreContext.Configuration.Personal && userInfo != null)
             {
@@ -386,6 +369,7 @@ namespace ASC.Core.Caching
             }
         }
 
+
         private static string GetUserPhotoCacheKey(int tenant, Guid userId)
         {
             return tenant.ToString() + "userphoto" + userId.ToString();
@@ -410,44 +394,11 @@ namespace ASC.Core.Caching
             return tenant.ToString() + USERS + userId;
         }
 
-        public IEnumerable<string> GetDavUserEmails(int tenant)
-        {
-            return service.GetDavUserEmails(tenant);
-        }
 
         [Serializable]
         class UserPhoto
         {
             public string Key { get; set; }
         }
-
-
     }
-
-    public class UserPhotoCacheItem
-    {
-        public string Key { get; set; }
-    }
-
-    public class UserInfoCacheItem
-    {
-        public Guid ID { get; set; }
-        public int Tenant { get; set; }
-    }
-
-    public class UserGroupRefCacheItem
-    {
-        public string UserId { get; set; }
-        public string GroupId { get; set; }
-        public bool Removed { get; set; }
-        public string RefType { get; set; }
-        public Int64 LastModified { get; set; }
-        public Int32 Tenant { get; set; }
-    }
-
-    class GroupCacheItem
-    {
-        public Guid ID { get; set; }
-    }
-
 }

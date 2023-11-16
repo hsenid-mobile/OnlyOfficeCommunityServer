@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 */
 
 
+using ASC.Core;
+using ASC.Files.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,15 +24,12 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 
-using ASC.Core;
-using ASC.Files.Core;
-
 namespace ASC.Web.Files.Services.WCFService
 {
     public class FileEntrySerializer
     {
         private static readonly IDictionary<Type, XmlObjectSerializer> serializers = new Dictionary<Type, XmlObjectSerializer>();
-        private static readonly bool oldMonoSerializer = false;
+        private static bool oldMonoSerializer = false;
 
 
         static FileEntrySerializer()

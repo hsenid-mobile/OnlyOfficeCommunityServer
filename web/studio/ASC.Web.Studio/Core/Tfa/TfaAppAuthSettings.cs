@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 
 using System;
 using System.Runtime.Serialization;
-
 using ASC.Core.Common.Settings;
 
 namespace ASC.Web.Studio.Core.TFA
 {
     [Serializable]
     [DataContract]
-    public class TfaAppAuthSettings : TfaSettingsBase<TfaAppAuthSettings>
+    public class TfaAppAuthSettings : BaseSettings<TfaAppAuthSettings>
     {
         public override Guid ID
         {
@@ -33,24 +32,20 @@ namespace ASC.Web.Studio.Core.TFA
 
         public override ISettings GetDefault()
         {
-            return new TfaAppAuthSettings();
+            return new TfaAppAuthSettings { EnableSetting = false, };
         }
+
+        [DataMember(Name = "Enable")]
+        public bool EnableSetting { get; set; }
+
 
         public static bool Enable
         {
             get { return Load().EnableSetting; }
             set
             {
-                TfaAppAuthSettings settings;
-                if (value)
-                {
-                    settings = Load();
-                    settings.EnableSetting = value;
-                }
-                else
-                {
-                    settings = new TfaAppAuthSettings();
-                }
+                var settings = Load();
+                settings.EnableSetting = value;
                 settings.Save();
             }
         }
@@ -58,13 +53,6 @@ namespace ASC.Web.Studio.Core.TFA
         public static bool IsVisibleSettings
         {
             get { return SetupInfo.IsVisibleSettings<TfaAppAuthSettings>(); }
-        }
-
-        public static bool TfaEnabledForUser(Guid userGuid)
-        {
-            var settings = Load();
-
-            return settings.TfaEnabledForUserBase(settings, userGuid);
         }
     }
 }

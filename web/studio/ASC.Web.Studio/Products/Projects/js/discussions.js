@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ ASC.Projects.Discussions = (function($) {
     var baseObject = ASC.Projects,
         resources = baseObject.Resources,
         messageResource = resources.MessageResource,
-        ProjectsJSResource = resources.ProjectsJSResource,
+        projectsJsResource = resources.ProjectsJSResource,
         filter = baseObject.ProjectsAdvansedFilter,
         currentProject,
         handler;
@@ -72,8 +72,8 @@ ASC.Projects.Discussions = (function($) {
         }
 
         self.baseInit({
-            elementNotFoundError: ProjectsJSResource.DiscussionNotFound,
-            moduleTitle: ProjectsJSResource.DiscussionsModule
+            elementNotFoundError: projectsJsResource.DiscussionNotFound,
+            moduleTitle: projectsJsResource.DiscussionsModule
         },
         {
             pagination: "discussionsKeyForPagination",
@@ -165,7 +165,7 @@ ASC.Projects.Discussions = (function($) {
 
     var unbindListEvents = function () {
         if (!isInit) return;
-        $discussionsList.off();
+        $discussionsList.unbind();
         teamlab.unbind(handler);
     };
 
@@ -282,7 +282,7 @@ ASC.Projects.DiscussionDetails = (function ($) {
             "subscribeModule",
             $discussionParticipantsContainer,
             '#subscribers');
-        documentsTab = new Tab(resources.ProjectsCommonResource.DocsModuleTitle,
+        documentsTab = new Tab(resources.CommonResource.DocsModuleTitle,
             function() { return discussion.files.length; },
             "documentsModule",
             $fileContainer,
@@ -317,7 +317,7 @@ ASC.Projects.DiscussionDetails = (function ($) {
         jq("#descriptionTab").show();
 
         if (isAddCommentHash && isVisibleSelector()) {
-            jq("#add_comment_btn").trigger("click");
+            jq("#add_comment_btn").click();
         }
 
         hideLoading();
@@ -469,9 +469,6 @@ ASC.Projects.DiscussionDetails = (function ($) {
         CommentsManagerObj.moduleName = "projects_Message";
         CommentsManagerObj.comments = jq.base64.encode(JSON.stringify(discussion.comments));
         CommentsManagerObj.objectID = "common";
-        CommentsManagerObj.onLoadComplete = function () {
-            window.CKEDITOR_mentionsFeed = ASC.Projects.Master.Team;
-        }
         CommentsManagerObj.Init();
         CommentsManagerObj.objectID = discussion.id;
         jq("#hdnObjectID").val(discussion.id);
@@ -527,7 +524,7 @@ ASC.Projects.DiscussionDetails = (function ($) {
         }
 
         var isSubscribed = subscribers.some(function (item) { return item.id === teamlab.profile.id; });
-        menuItems.push(new ActionMenuItem("da_follow", isSubscribed ? resources.ProjectsCommonResource.UnSubscribeOnNewComment : resources.ProjectsCommonResource.SubscribeOnNewComment, daSubscribeHandler));
+        menuItems.push(new ActionMenuItem("da_follow", isSubscribed ? resources.CommonResource.UnSubscribeOnNewComment : resources.CommonResource.SubscribeOnNewComment, daSubscribeHandler));
 
         return { menuItems: menuItems };
     }
@@ -545,7 +542,7 @@ ASC.Projects.DiscussionDetails = (function ($) {
     };
 
     function daCreateTaskHandler() {
-        jq("body").trigger("click");
+        jq("body").click();
         showLoading();
         teamlab.addPrjTaskByMessage({}, projId, discussionId, {
             success: function (params, task) {
@@ -683,7 +680,7 @@ ASC.Projects.DiscussionAction = (function ($) {
 
     var $fileContainer, $discussionParticipantsContainer, $manageParticipantsSelector, $discussionParticipants,
         $discussionPreviewContainer, $discussionTitleContainer, $discussionTitleContainerInput, $discussionPreviewButton,
-        $discussionProjectSelect, $discussionProjectContainer, $discussionTextContainer, $discussionActionButton;
+        $discussionProjectSelect, $discussionProjectContainer, $discussionTextContainer;
 
     var common, attachments, teamlab, loadingBanner;
     var resources = ASC.Projects.Resources;
@@ -732,7 +729,7 @@ ASC.Projects.DiscussionAction = (function ($) {
             }
         }
 
-        jq('[id$=discussionTitle]').trigger("focus");
+        jq('[id$=discussionTitle]').focus();
 
         var participantIds = [];
         $discussionParticipantsContainer.find(itemsDisplayListClass).each(function () {
@@ -774,12 +771,12 @@ ASC.Projects.DiscussionAction = (function ($) {
             $manageParticipantsSelector.useradvancedSelector("unselect", [$li.attr('guid')]);
         });
 
-        jq('#hideDiscussionPreviewButton').on("click", function () {
+        jq('#hideDiscussionPreviewButton').click(function () {
             $discussionPreviewContainer.hide();
         });
 
-        $discussionTitleContainer.find('input').on("keyup", function () {
-            if (jq(this).val().trim() !== '') {
+        $discussionTitleContainer.find('input').keyup(function () {
+            if (jq.trim(jq(this).val()) !== '') {
                 $discussionTitleContainer.removeClass(requiredFieldErrorClass);
             }
         });
@@ -826,15 +823,15 @@ ASC.Projects.DiscussionAction = (function ($) {
 
     function initButtons() {
         var data = {
-            action: discussion ? resources.ProjectsCommonResource.SaveChanges : resources.MessageResource.AddDiscussion,
+            action: discussion ? resources.CommonResource.SaveChanges : resources.MessageResource.AddDiscussion,
             disable: discussion ? "" : "disable"
         };
 
-        jq.tmpl("discussion_buttons", data).insertBefore(jq(".mainPageContent .layout-bottom-spacer"));
+        jq.tmpl("discussion_buttons", data).appendTo(jq(".mainPageContent"));
 
         $discussionPreviewButton = $("#discussionPreviewButton");
         $discussionPreviewContainer = $("#discussionPreviewContainer");
-        $discussionPreviewButton.on("click", function () {
+        $discussionPreviewButton.click(function () {
             if ($discussionPreviewButton.hasClass(disableClass)) return;
 
             var takeThis = this;
@@ -864,21 +861,21 @@ ASC.Projects.DiscussionAction = (function ($) {
         });
 
         var $discussionCancelButton = $('#discussionCancelButton');
-        $discussionCancelButton.on("click", function () {
+        $discussionCancelButton.click(function () {
             if ($discussionCancelButton.hasClass(disableClass)) return;
             window.onbeforeunload = null;
             document.location.replace(location.pathname.substring(0, location.pathname.lastIndexOf("/") + 1));
         });
 
-        $discussionActionButton = $('#discussionActionButton');
-        $discussionActionButton.on("click", function () {
+        var $discussionActionButton = $('#discussionActionButton');
+        $discussionActionButton.click(function () {
             if ($discussionActionButton.hasClass(disableClass)) return;
             $discussionProjectContainer.removeClass(requiredFieldErrorClass);
             $discussionTitleContainer.removeClass(requiredFieldErrorClass);
             $discussionTextContainer.removeClass(requiredFieldErrorClass);
 
             var projectid = projectId ? projectId : $discussionProjectSelect.attr("data-id");
-            var title = $discussionTitleContainerInput.val().trim();
+            var title = jq.trim($discussionTitleContainerInput.val());
             var content = common.ckEditor.getData();
 
             var isError = false;
@@ -892,7 +889,7 @@ ASC.Projects.DiscussionAction = (function ($) {
                 isError = true;
             }
 
-            if (!content.trim().length) {
+            if (!jq.trim(content).length) {
                 $discussionTextContainer.addClass(requiredFieldErrorClass);
                 isError = true;
             }
@@ -940,7 +937,7 @@ ASC.Projects.DiscussionAction = (function ($) {
         jq('#errorAllParticipantsProject').hide();
 
         getTeam({}, item.id);
-        $discussionTitleContainerInput.trigger("focus");
+        $discussionTitleContainerInput.focus();
     };
 
     function initProjectsCombobox() {
@@ -986,18 +983,16 @@ ASC.Projects.DiscussionAction = (function ($) {
     };
 
     function lockDiscussionActionPageElements() {
-        $discussionActionButton.addClass(disableClass);
-        $discussionProjectSelect.prop(disabledClass, true).addClass(disabledClass);
-        $discussionTitleContainerInput.prop(readonlyAttr, true).addClass(disabledClass);
-        jq('iframe[id^=ctl00_ctl00]').contents().find('iframe').contents().find('#fckbodycontent').prop(readonlyAttr, true).addClass(disabledClass);
+        $discussionProjectSelect.attr(disabledClass, disabledClass).addClass(disabledClass);
+        $discussionTitleContainerInput.attr(readonlyAttr, readonlyAttr).addClass(disabledClass);
+        jq('iframe[id^=ctl00_ctl00]').contents().find('iframe').contents().find('#fckbodycontent').attr(readonlyAttr, readonlyAttr).addClass(disabledClass);
         loader(true);
     };
 
     function unlockDiscussionActionPageElements() {
-        $discussionActionButton.removeClass(disableClass);
-        $discussionProjectSelect.prop(disabledClass, false).removeClass(disabledClass);
-        $discussionTitleContainerInput.prop(readonlyAttr, false).removeClass(disabledClass);
-        jq('iframe[id^=ctl00_ctl00]').contents().find('iframe').contents().find('#fckbodycontent').prop(readonlyAttr, false).removeClass(disabledClass);
+        $discussionProjectSelect.removeAttr(disabledClass).removeClass(disabledClass);
+        $discussionTitleContainerInput.removeAttr(readonlyAttr).removeClass(disabledClass);
+        jq('iframe[id^=ctl00_ctl00]').contents().find('iframe').contents().find('#fckbodycontent').removeAttr(readonlyAttr).removeClass(disabledClass);
         loader(false);
     };
 
@@ -1062,7 +1057,7 @@ ASC.Projects.DiscussionAction = (function ($) {
 
         var fileContainerTitle = {
             id: switcherId,
-            title: resources.ProjectsCommonResource.DocsModuleTitle,
+            title: resources.CommonResource.DocsModuleTitle,
             state: 0
         };
 

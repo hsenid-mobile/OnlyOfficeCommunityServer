@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Web;
 using System.Web.UI;
-
 using ASC.Web.Core.Utility;
 
 namespace ASC.Web.Studio.UserControls.Common
@@ -26,7 +25,6 @@ namespace ASC.Web.Studio.UserControls.Common
     public partial class SharingSettings : UserControl
     {
         public bool EnableShareMessage;
-        public Control FormFillingControl;
         public bool IsPopup = true;
 
         public static string Location
@@ -41,11 +39,6 @@ namespace ASC.Web.Studio.UserControls.Common
 
             _sharingDialogContainer.Options.IsPopup = IsPopup;
             _sharingDialogContainer.Header.Visible = IsPopup;
-
-            if (FormFillingControl != null)
-            {
-                FormFillingHolder.Controls.Add(FormFillingControl);
-            }
         }
     }
 }

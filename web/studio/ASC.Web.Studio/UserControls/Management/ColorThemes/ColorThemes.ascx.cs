@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI;
-
-using ASC.Web.Core.Utility;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
+using ASC.Web.Core.Utility;
+using Resources;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -35,17 +33,16 @@ namespace ASC.Web.Studio.UserControls.Management
         protected List<PortalColorTheme> ColorThemesList { get; set; }
 
         protected string ChosenTheme { get; set; }
-        protected string ChosenMode { get; set; }
 
         protected string HelpLink { get; set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             Page.RegisterBodyScripts("~/UserControls/Management/ColorThemes/js/colorthemes.js")
-                .RegisterStyle("~/UserControls/Management/ColorThemes/css/colorthemes.less");
+                .RegisterStyle("~/UserControls/Management/ColorThemes/css/colorthemes.css");
 
             ChosenTheme = ColorThemesSettings.GetColorThemesSettings();
-            ChosenMode = ModeThemeSettings.GetModeThemesSettings().ModeThemeName.ToString();
+
             ColorThemesList = new List<PortalColorTheme>
                 {
                     new PortalColorTheme
@@ -79,11 +76,6 @@ namespace ASC.Web.Studio.UserControls.Management
                             Value = "bright-blue"
                         }
                 };
-            if(ChosenMode == "dark")
-            {
-                Regex darkReplace = new Regex(@"([a-z]+-)");
-                ChosenTheme = darkReplace.Replace(ChosenTheme, "", 1);
-            }
 
             HelpLink = CommonLinkUtility.GetHelpLink();
         }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,14 @@ namespace ASC.Common.Data.AdoProxy
         private readonly ProxyContext context;
         private bool disposed;
 
-        public DbCommandProxy(DbCommand command, ProxyContext ctx, DbConnectionProxy dbConnectionProxy)
+
+        public DbCommandProxy(DbCommand command, ProxyContext ctx)
         {
             if (command == null) throw new ArgumentNullException("command");
             if (ctx == null) throw new ArgumentNullException("ctx");
 
             this.command = command;
             context = ctx;
-            DbConnectionProxy = dbConnectionProxy;
         }
 
 
@@ -61,11 +61,10 @@ namespace ASC.Common.Data.AdoProxy
             set { command.CommandType = value; }
         }
 
-        protected DbConnectionProxy DbConnectionProxy;
         protected override DbConnection DbConnection
         {
-            get { return DbConnectionProxy != null ? DbConnectionProxy : (DbConnectionProxy = new DbConnectionProxy(command.Connection, context)); }
-            set { command.Connection = value is DbConnectionProxy ? value : (DbConnectionProxy = new DbConnectionProxy(value, context)); }
+            get { return new DbConnectionProxy(command.Connection, context); }
+            set { command.Connection = value is DbConnectionProxy ? value : new DbConnectionProxy(value, context); }
         }
 
         protected override DbParameter CreateDbParameter()
@@ -75,7 +74,7 @@ namespace ASC.Common.Data.AdoProxy
 
         public override int ExecuteNonQuery()
         {
-            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, "ExecuteNonQuery", dur, DbConnectionProxy.GetThreadId())))
+            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, "ExecuteNonQuery", dur)))
             {
                 return command.ExecuteNonQuery();
             }
@@ -83,7 +82,7 @@ namespace ASC.Common.Data.AdoProxy
 
         protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
-            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, string.Format("ExecuteReader({0})", behavior), dur , DbConnectionProxy.GetThreadId())))
+            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, string.Format("ExecuteReader({0})", behavior), dur)))
             {
                 return command.ExecuteReader(behavior);
             }
@@ -91,7 +90,7 @@ namespace ASC.Common.Data.AdoProxy
 
         public override object ExecuteScalar()
         {
-            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, "ExecuteScalar", dur, DbConnectionProxy.GetThreadId())))
+            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, "ExecuteScalar", dur)))
             {
                 return command.ExecuteScalar();
             }
@@ -109,7 +108,7 @@ namespace ASC.Common.Data.AdoProxy
 
         protected override System.Data.Common.DbTransaction DbTransaction
         {
-            get { return command.Transaction == null ? null : new DbTransactionProxy(command.Transaction, context, DbConnectionProxy.GetThreadId()); }
+            get { return command.Transaction == null ? null : new DbTransactionProxy(command.Transaction, context); }
             set { command.Transaction = value is DbTransactionProxy ? ((DbTransactionProxy)value).Transaction : value; }
         }
 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,22 +50,24 @@ var LoginHistory = function() {
             createReport();
             return;
         }
-        showLoader();
-       
+
         if (!ASC.SocketIO || ASC.SocketIO.disabled()) {
             getData(getDataCallback);
             return;
         }
+        showLoader();
+
         socket = ASC.SocketIO.Factory.counters
-            .on('connect', function () {
+            .on('connect', function() {
                 isDataRequested || getData(getAllDataCallback);
             })
-            .on('connect_error', function () {
+            .on('connect_error', function() {
                 isDataRequested || getData(getDataCallback);
             })
             .on('renderOnlineUsers', renderOnlineUsers)
             .on('renderOnlineUser', renderOnlineUser)
             .on('renderOfflineUser', renderOfflineUser);
+            
     }
 
     function getDataCallback(err, data) {
@@ -145,7 +147,7 @@ var LoginHistory = function() {
             $events.appendTo($eventsList.find('tbody'));
             $eventsBox.show();
             $eventsListCount.text(lastEvents.length);
-            $downloadReportBtn.show().on("click", createReport);
+            $downloadReportBtn.show().click(createReport);
         } else {
             $emptyScreen.show();
         }
@@ -158,7 +160,7 @@ var LoginHistory = function() {
             var $input = $(this);
             $input.val($input.val().replace(/[^\d]+/g, ''));
         });
-        $saveSettingsBtn.on("click", saveSettings);
+        $saveSettingsBtn.click(saveSettings);
     }
 
     function renderOnlineUsers(usersDictionary) {
@@ -204,9 +206,6 @@ var LoginHistory = function() {
     }
 
     function createReport() {
-        if (jq(this).hasClass("disable")) {
-            return false;
-        }
         $generateText.show();
         showLoader();
 
@@ -215,10 +214,6 @@ var LoginHistory = function() {
     }
 
     function saveSettings() {
-        if (jq(this).hasClass("disable"))
-        {
-            return;
-        }
         var val = parseInt($lifetimeInput.val());
 
         if (isNaN(val) || val <= 0 || val > auditSettings.maxLifeTime) {
@@ -244,7 +239,7 @@ var LoginHistory = function() {
         $generateText.hide();
         hideLoader();
 
-        toastr.error(ASC.Resources.Master.ResourceJS.CreateReportError);
+        toastr.error(ASC.Resources.Master.Resource.CreateReportError);
     }
 
     function getUsers(usersDictionary) {
@@ -297,11 +292,11 @@ var LoginHistory = function() {
     }
 
     function showSuccessMessage() {
-        toastr.success(ASC.Resources.Master.ResourceJS.SuccessfullySaveSettingsMessage);
+        toastr.success(ASC.Resources.Master.Resource.SuccessfullySaveSettingsMessage);
     }
 
     function showErrorMessage() {
-        toastr.error(ASC.Resources.Master.ResourceJS.CommonJSErrorMsg);
+        toastr.error(ASC.Resources.Master.Resource.CommonJSErrorMsg);
     }
 
     return {

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ namespace ASC.Web.Core.Files
     {
         public const string FilesBaseVirtualPath = "~/Products/Files/";
         public const string EditorPage = "DocEditor.aspx";
-        public const string OpenPrivatePage = "OpenPrivate.aspx";
         private static readonly string FilesUploaderURL = ConfigurationManagerExtension.AppSettings["files.uploader.url"] ?? "~";
 
         public static string FilesBaseAbsolutePath
@@ -51,8 +50,6 @@ namespace ASC.Web.Core.Files
         public const string OutType = "outputtype";
         public const string AuthKey = "stream_auth";
         public const string Anchor = "anchor";
-        public const string LinkId = "linkid";
-        public const string FolderShareKey = "share";
 
         public static string FileHandlerPath
         {
@@ -233,11 +230,6 @@ namespace ASC.Web.Core.Files
             get { return FileHandlerPath + "?" + Action + "=download&" + FileId + "={0}"; }
         }
 
-        public static string FileViewUrlString
-        {
-            get { return FileHandlerPath + "?" + Action + "=view&" + FileId + "={0}"; }
-        }
-
         public static string GetFileDownloadUrl(object fileId)
         {
             return GetFileDownloadUrl(fileId, 0, string.Empty);
@@ -288,26 +280,6 @@ namespace ASC.Web.Core.Files
             return string.Format(FileWebEditorUrlString, HttpUtility.UrlEncode(fileId.ToString()));
         }
 
-        public static string FileCustomProtocolEditorUrlString
-        {
-            get { return "oo-office:" + CommonLinkUtility.GetFullAbsolutePath(FileWebEditorUrlString); }
-        }
-
-        public static string GetFileCustomProtocolEditorUrl(object fileId)
-        {
-            return string.Format(FileCustomProtocolEditorUrlString, HttpUtility.UrlEncode(fileId.ToString()));
-        }
-
-        public static string OpenPrivateString
-        {
-            get { return FilesBaseAbsolutePath + OpenPrivatePage + "?" + FileId + "={0}"; }
-        }
-
-        public static string GetOpenPrivate(object fileId)
-        {
-            return string.Format(OpenPrivateString, HttpUtility.UrlEncode(fileId.ToString()));
-        }
-
         public static string GetFileWebEditorTryUrl(FileType fileType)
         {
             return FilesBaseAbsolutePath + EditorPage + "?" + TryParam + "=" + fileType;
@@ -356,19 +328,7 @@ namespace ASC.Web.Core.Files
             return FileRedirectPreviewUrlString + "&" + (isFile ? FileId : FolderId) + "=" + HttpUtility.UrlEncode(enrtyId.ToString());
         }
 
-        public static string FileThumbnailUrlString
-        {
-            get { return FileHandlerPath + "?" + Action + "=thumb&" + FileId + "={0}"; }
-        }
-
-        public static string GetFileThumbnailUrl(object fileId, int fileVersion)
-        {
-            return string.Format(FileThumbnailUrlString, HttpUtility.UrlEncode(fileId.ToString()))
-                   + (fileVersion > 0 ? "&" + Version + "=" + fileVersion : string.Empty);
-        }
-
-
-        public static string GetInitiateUploadSessionUrl(object folderId, object fileId, string fileName, long contentLength, bool encrypted, string linkId)
+        public static string GetInitiateUploadSessionUrl(object folderId, object fileId, string fileName, long contentLength, bool encrypted)
         {
             var queryString = string.Format("?initiate=true&{0}={1}&fileSize={2}&tid={3}&userid={4}&culture={5}&encrypted={6}",
                                             FileTitle,
@@ -384,17 +344,6 @@ namespace ASC.Web.Core.Files
 
             if (folderId != null)
                 queryString = queryString + "&" + FolderId + "=" + HttpUtility.UrlEncode(folderId.ToString());
-
-            if (!string.IsNullOrEmpty(linkId))
-            {
-                queryString = queryString + "&" + LinkId + "=" + HttpUtility.UrlEncode(InstanceCrypto.Encrypt(linkId));
-            }
-
-            var shareKey = HttpContext.Current?.Request[FolderShareKey];
-            if (!string.IsNullOrEmpty(shareKey))
-            {
-                queryString = queryString + "&" + FolderShareKey + "=" + shareKey;
-            }
 
             return CommonLinkUtility.GetFullAbsolutePath(GetFileUploaderHandlerVirtualPath() + queryString);
         }

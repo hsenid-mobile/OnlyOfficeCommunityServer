@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ var SharingSettingsManager = function (elementId, sharingData) {
 
     jq(function () {
         if (elementId != undefined) {
-            jq("#" + elementId).on("click", function () {
+            jq("#" + elementId).click(function () {
                 _manager.ShowDialog();
             });
         }
@@ -202,6 +202,7 @@ var SharingSettingsManager = function (elementId, sharingData) {
     };
 
     var changeItemAction = function (itemId, actionId) {
+        changeStatus(true);
         var act = null;
 
         for (var i = 0; i < _workData.actions.length; i++) {
@@ -218,11 +219,10 @@ var SharingSettingsManager = function (elementId, sharingData) {
                 break;
             }
         }
-
-        changeStatus(true);
     };
 
     var removeItem = function (itemId) {
+        changeStatus(true);
         for (var i = 0; i < _workData.items.length; i++) {
             if (_workData.items[i].id == itemId) {
                 if (_workData.items[i].canEdit === false || _workData.items[i].hideRemove) {
@@ -242,13 +242,11 @@ var SharingSettingsManager = function (elementId, sharingData) {
         jq("#sharingSettingsItems div.sharingItem.tintMedium").removeClass("tintMedium");
         jq("#sharingSettingsItems div.sharingItem:even").addClass("tintMedium");
         jq(".sharing-empty").toggle(_workData.items.length <= 1);
-
-        changeStatus(true);
-
         return true;
     };
 
     var addUsers = function (event, users) {
+        changeStatus(true);
         var selectedIds = jq(users).map(function (j, user) {
             return user.id;
         }).toArray();
@@ -270,7 +268,7 @@ var SharingSettingsManager = function (elementId, sharingData) {
         var newItemId;
         jq(users).each(function (j, user) {
             if (jq.inArray(user.id, selectedIds) != -1) {
-                addUserItem(user);
+                addUserItem(user.id, user.title);
                 newItemId = newItemId || user.id;
             }
         });
@@ -280,27 +278,23 @@ var SharingSettingsManager = function (elementId, sharingData) {
         jq(".sharing-empty").toggle(_workData.items.length <= 1);
     };
 
-    var addUserItem = function (user) {
+    var addUserItem = function (userId, userName) {
+        changeStatus(true);
         var defAct = null;
-        var actions = clone(_workData.actions);
-        for (var i = 0; i < actions.length; i++) {
-            if (actions[i].defaultUserAction) {
-                defAct = actions[i];
+        for (var i = 0; i < _workData.actions.length; i++) {
+            if (_workData.actions[i].defaultUserAction) {
+                defAct = _workData.actions[i];
                 break;
             }
-            if (actions[i].defaultAction) {
-                defAct = actions[i];
-            }
-            if (user.isVisitor && actions[i].hideForVisitor) {
-                actions[i].disabled = true;
+            if (_workData.actions[i].defaultAction) {
+                defAct = _workData.actions[i];
             }
         }
-
-        var newItem = { id: user.id, name: user.title, selectedAction: defAct, isGroup: false, canEdit: true };
+        var newItem = { id: userId, name: userName, selectedAction: defAct, isGroup: false, canEdit: true };
         _workData.items.push(newItem);
 
-        jq("#sharingSettingsItems").append(jq.tmpl("sharingListTemplate", { items: [newItem], actions: actions }));
-        jq("#studio_sharingSettingsDialog .action select:last").tlcombobox({ parent: "#sharingSettingsItems" });
+        jq("#sharingSettingsItems").append(jq.tmpl("sharingListTemplate", { items: [newItem], actions: _workData.actions }));
+        jq("#studio_sharingSettingsDialog .action select:last").tlcombobox();
 
         var latUserLink = jq("#studio_sharingSettingsDialog .userLink:last");
         var id = latUserLink.attr("id");
@@ -310,11 +304,10 @@ var SharingSettingsManager = function (elementId, sharingData) {
 
         jq("#sharingSettingsItems div.sharingItem.tintMedium").removeClass("tintMedium");
         jq("#sharingSettingsItems div.sharingItem:even").addClass("tintMedium");
-
-        changeStatus(true);
     };
 
     var addGroups = function (event, groups) {
+        changeStatus(true);
         var selectedIds = jq(groups).map(function (j, group) {
             return group.id;
         }).toArray();
@@ -347,6 +340,7 @@ var SharingSettingsManager = function (elementId, sharingData) {
     };
 
     var addGroupItem = function (groupId, groupName) {
+        changeStatus(true);
         var defAct = null;
         for (var i = 0; i < _workData.actions.length; i++) {
             if (_workData.actions[i].defaultGroupAction) {
@@ -361,12 +355,10 @@ var SharingSettingsManager = function (elementId, sharingData) {
         _workData.items.push(newItem);
 
         jq("#sharingSettingsItems").append(jq.tmpl("sharingListTemplate", { items: [newItem], actions: _workData.actions }));
-        jq("#studio_sharingSettingsDialog .action select:last").tlcombobox({ parent: "#sharingSettingsItems" });
+        jq("#studio_sharingSettingsDialog .action select:last").tlcombobox();
 
         jq("#sharingSettingsItems div.sharingItem.tintMedium").removeClass("tintMedium");
         jq("#sharingSettingsItems div.sharingItem:even").addClass("tintMedium");
-
-        changeStatus(true);
     };
 
     var reDrawItems = function () {
@@ -379,7 +371,7 @@ var SharingSettingsManager = function (elementId, sharingData) {
         }
 
         jq("#studio_sharingSettingsDialog .action select").each(function () {
-            jq(this).tlcombobox({ parent: "#sharingSettingsItems" });
+            jq(this).tlcombobox();
         });
 
         shareUserSelector.useradvancedSelector("reset");
@@ -452,7 +444,7 @@ var SharingSettingsManager = function (elementId, sharingData) {
         jq(".sharing-changed-buttons").toggleClass("display-none", !value);
 
         if (_manager.OnChange != null) {
-            _manager.OnChange(_changed, _workData);
+            _manager.OnChange(_changed);
         }
     };
 
@@ -464,6 +456,7 @@ var SharingSettingsManager = function (elementId, sharingData) {
     };
 
     this.UpdateSharingData = function (data, link) {
+        changeStatus(false);
         _data = data;
         _workData = clone(data);
 
@@ -476,8 +469,6 @@ var SharingSettingsManager = function (elementId, sharingData) {
         } else {
             jq("#shareGetLink").hide();
         }
-
-        changeStatus(false);
     };
 
     this.GetSharingData = function () {
@@ -513,7 +504,7 @@ var SharingSettingsManager = function (elementId, sharingData) {
                 });
         }
 
-        PopupKeyUpActionProvider.EnterAction = PopupKeyUpActionProvider.CtrlEnterAction = "jq(\".sharing-save-button:visible\").trigger('click');";
+        PopupKeyUpActionProvider.EnterAction = PopupKeyUpActionProvider.CtrlEnterAction = "jq(\".sharing-save-button:visible\").click();";
     };
 
     this.SaveAndCloseDialog = function () {

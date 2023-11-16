@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 
 using System;
 using System.IO;
-
-using ASC.Common;
 using ASC.Common.Logging;
 using ASC.Core.ChunkedUploader;
 
@@ -39,8 +37,8 @@ namespace ASC.Data.Storage
 
             this.source = source;
             this.destination = destination;
-            maxChunkUploadSize = 10 * 1024 * 1024;
-            chunksize = 5 * 1024 * 1024;
+            maxChunkUploadSize = 10*1024*1024;
+            chunksize = 5*1024*1024;
         }
 
         public void CopyFile(string srcDomain, string srcPath, string destDomain, string destPath)

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,15 +159,13 @@ namespace ASC.Web.Projects.Classes
             var filterJson = JsonConvert.SerializeObject(template.Filter);
 
             var userCulture = CoreContext.UserManager.GetUsers(template.CreateBy).GetCulture();
-            var timeInterval = GetIntervarl(template.Filter);
             var reportInfoJson = JsonConvert.SerializeObject(new Dictionary<string, object>
             {
                 { "Title", report.ReportInfo.Title },
                 { "CreatedText", ReportResource.ReportCreated },
                 { "CreatedAt", TenantUtil.DateTimeNow().ToString("M/d/yyyy", CultureInfo.InvariantCulture) },
                 { "CreatedBy", ProjectsFilterResource.By + " " + CoreContext.UserManager.GetUsers(template.CreateBy).DisplayUserName(false) },
-                { "DateFormat", userCulture.DateTimeFormat.ShortDatePattern },
-                { "TimeInterval", timeInterval }
+                { "DateFormat", userCulture.DateTimeFormat.ShortDatePattern }
             });
 
             var tmpFileName = DocbuilderReportsUtility.TmpFileName;
@@ -200,36 +198,6 @@ namespace ASC.Web.Projects.Classes
             return ExtendedReportType.BuildDocbuilderReport(Filter).ToList();
         }
 
-        private static string GetIntervarl(TaskFilter taskFilter)
-        {
-            var type = taskFilter.TimeInterval;
-            switch (type)
-            {
-                case ReportTimeInterval.Absolute:
-                    return null;
-                case ReportTimeInterval.Today:
-                    return ReportResource.Today;
-                case ReportTimeInterval.Yesterday:
-                    return ReportResource.Yesterday;
-                case ReportTimeInterval.CurrWeek:
-                    return ReportResource.ThisWeek;
-                case ReportTimeInterval.PrevWeek:
-                    return ReportResource.LastWeek;
-                case ReportTimeInterval.CurrMonth:
-                    return ReportResource.ThisMonth;
-                case ReportTimeInterval.PrevMonth:
-                    return ReportResource.LastMonth;
-                case ReportTimeInterval.CurrYear:
-                    return ReportResource.ThisYear;
-                case ReportTimeInterval.PrevYear:
-                    return ReportResource.LastYear;
-                case ReportTimeInterval.Relative:
-                    return string.Format(ReportResource.CustomInterval, taskFilter.FromDate.ToString("M/d/yyyy", CultureInfo.InvariantCulture), taskFilter.ToDate.ToString("M/d/yyyy", CultureInfo.InvariantCulture));
-            }
-            return null;
-        }
-
-
         private void PrepareFilter(int templateID)
         {
             if (templateID != 0 && !Filter.FromDate.Equals(DateTime.MinValue))
@@ -240,17 +208,17 @@ namespace ASC.Web.Projects.Classes
                 {
                     case ReportType.TasksByUsers:
                     case ReportType.TasksByProjects:
-                    {
-                        Filter.FromDate = TenantUtil.DateTimeNow().Date.AddDays(-interval);
-                        Filter.ToDate = TenantUtil.DateTimeNow().Date;
-                    }
-                    break;
+                        {
+                            Filter.FromDate = TenantUtil.DateTimeNow().Date.AddDays(-interval);
+                            Filter.ToDate = TenantUtil.DateTimeNow().Date;
+                        }
+                        break;
                     case ReportType.MilestonesNearest:
-                    {
-                        Filter.FromDate = TenantUtil.DateTimeNow().Date;
-                        Filter.ToDate = TenantUtil.DateTimeNow().Date.AddDays(interval);
-                    }
-                    break;
+                        {
+                            Filter.FromDate = TenantUtil.DateTimeNow().Date;
+                            Filter.ToDate = TenantUtil.DateTimeNow().Date.AddDays(interval);
+                        }
+                        break;
                 }
             }
         }
@@ -499,8 +467,8 @@ namespace ASC.Web.Projects.Classes
 
             using (var scope = DIHelper.Resolve())
             {
-                var projects = scope.Resolve<EngineFactory>().ProjectEngine
-                    .GetByFilterForReport(filter)
+                var result = scope.Resolve<EngineFactory>().ProjectEngine
+                    .GetByFilter(filter)
                     .Select(r => new object[]
                     {
                         r.Title, CoreContext.UserManager.GetUsers(r.Responsible).DisplayUserName(false),
@@ -508,14 +476,7 @@ namespace ASC.Web.Projects.Classes
                         r.MilestoneCount, r.TaskCount, r.ParticipantCount
                     });
 
-                var result = projects.OrderBy(r => (string)r[1]).ToList();
-
-                if (result.Count() == 0)
-                {
-                    return result;
-                }
-
-                result.Insert(0, scope.Resolve<EngineFactory>().ProjectEngine.GetByFilterCountForReport(filter));
+                result = result.OrderBy(r => (string)r[1]);
 
                 return result;
             }
@@ -533,10 +494,7 @@ namespace ASC.Web.Projects.Classes
                     GrammaticalResource.MilestoneGenitivePlural,
                     GrammaticalResource.TaskGenitivePlural,
                     ReportResource.Participiants,
-                    LocalizedEnumConverter.ConvertToString(ProjectStatus.Open),
-                    ReportResource.ProjectsCreated,
-                    ReportResource.ProjectsPaused,
-                    ReportResource.ProjectsClosed
+                    LocalizedEnumConverter.ConvertToString(ProjectStatus.Open)
                 };
             }
         }
@@ -568,7 +526,7 @@ namespace ASC.Web.Projects.Classes
 
         public override IEnumerable<object[]> BuildDocbuilderReport(TaskFilter filter)
         {
-            return base.BuildDocbuilderReport(filter).Where(r => r.Count() != 2 && (int)r[3] == 0);
+            return base.BuildDocbuilderReport(filter).Where(r => (int)r[3] == 0);
         }
 
         public override ReportInfo ReportInfo
@@ -595,7 +553,7 @@ namespace ASC.Web.Projects.Classes
 
         public override IEnumerable<object[]> BuildDocbuilderReport(TaskFilter filter)
         {
-            return base.BuildDocbuilderReport(filter).Where(r => r.Count() != 2 && (int)r[4] == 0);
+            return base.BuildDocbuilderReport(filter).Where(r => (int)r[4] == 0);
         }
 
         public override ReportInfo ReportInfo
@@ -1244,9 +1202,7 @@ namespace ASC.Web.Projects.Classes
                     TaskResource.Tasks,
                     MilestoneResource.Milestones,
                     MessageResource.Messages,
-                    ProjectsCommonResource.Total,
-                    ProjectsCommonResource.AverageProject,
-                    TaskResource.AverageTask
+                    ProjectsCommonResource.Total
                 };
             }
         }

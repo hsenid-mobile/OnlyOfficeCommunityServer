@@ -1,5 +1,5 @@
 <%@ Control Language="C#" AutoEventWireup="true" CodeBehind="CookieSettings.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Management.CookieSettings" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <% if (Enabled)
    { %>

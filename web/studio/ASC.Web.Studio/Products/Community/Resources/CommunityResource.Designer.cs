@@ -88,6 +88,69 @@ namespace ASC.Web.Community.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Send Your Greetings.
+        /// </summary>
+        public static string BirthdayCongratulateLinkTitle {
+            get {
+                return ResourceManager.GetString("BirthdayCongratulateLinkTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remind about the birthday.
+        /// </summary>
+        public static string BirthdayRemindLinkTitle {
+            get {
+                return ResourceManager.GetString("BirthdayRemindLinkTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reminder enabled.
+        /// </summary>
+        public static string BirthdayRemindReadyLinkTitle {
+            get {
+                return ResourceManager.GetString("BirthdayRemindReadyLinkTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Birthdays.
+        /// </summary>
+        public static string Birthdays {
+            get {
+                return ResourceManager.GetString("Birthdays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No birthdays for the nearest dates.
+        /// </summary>
+        public static string BirthdaysEmptyUpcomingTitle {
+            get {
+                return ResourceManager.GetString("BirthdaysEmptyUpcomingTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Today is the birthday.
+        /// </summary>
+        public static string BirthdaysTodayTitle {
+            get {
+                return ResourceManager.GetString("BirthdaysTodayTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nearest dates.
+        /// </summary>
+        public static string BirthdaysUpcomingTitle {
+            get {
+                return ResourceManager.GetString("BirthdaysUpcomingTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Blogs.
         /// </summary>
         public static string Blogs {
@@ -124,11 +187,20 @@ namespace ASC.Web.Community.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create.
+        ///   Looks up a localized string similar to Create New.
         /// </summary>
         public static string CreateNew {
             get {
                 return ResourceManager.GetString("CreateNew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dashboard.
+        /// </summary>
+        public static string Dashboard {
+            get {
+                return ResourceManager.GetString("Dashboard", resourceCulture);
             }
         }
         
@@ -187,7 +259,7 @@ namespace ASC.Web.Community.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create a group chat or mass mailings in Talk..
+        ///   Looks up a localized string similar to Create a group chat or a mass mailings in Talk..
         /// </summary>
         public static string DashboardKeepYourTeamPostedFirstLine {
             get {
@@ -196,11 +268,11 @@ namespace ASC.Web.Community.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Configure notifications about shared docs and deadlines..
+        ///   Looks up a localized string similar to Configure notifications about shared docs, deadlines and teammates&apos; birthdays..
         /// </summary>
-        public static string DashboardKeepYourTeamPostedSecondLineNew {
+        public static string DashboardKeepYourTeamPostedSecondLine {
             get {
-                return ResourceManager.GetString("DashboardKeepYourTeamPostedSecondLineNew", resourceCulture);
+                return ResourceManager.GetString("DashboardKeepYourTeamPostedSecondLine", resourceCulture);
             }
         }
         
@@ -246,6 +318,15 @@ namespace ASC.Web.Community.Resources {
         public static string DashboardShareNewsAndKnowledgeThirdLine {
             get {
                 return ResourceManager.GetString("DashboardShareNewsAndKnowledgeThirdLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {!Users}.
+        /// </summary>
+        public static string Employees {
+            get {
+                return ResourceManager.GetString("Employees", resourceCulture);
             }
         }
         
@@ -340,6 +421,42 @@ namespace ASC.Web.Community.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exit.
+        /// </summary>
+        public static string Logout {
+            get {
+                return ResourceManager.GetString("Logout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Community.
+        /// </summary>
+        public static string MainPageTitle {
+            get {
+                return ResourceManager.GetString("MainPageTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Messages.
+        /// </summary>
+        public static string Messages {
+            get {
+                return ResourceManager.GetString("Messages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to My Profile.
+        /// </summary>
+        public static string MyProfile {
+            get {
+                return ResourceManager.GetString("MyProfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New Pages.
         /// </summary>
         public static string NewPages {
@@ -354,6 +471,15 @@ namespace ASC.Web.Community.Resources {
         public static string News {
             get {
                 return ResourceManager.GetString("News", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Online.
+        /// </summary>
+        public static string Online {
+            get {
+                return ResourceManager.GetString("Online", resourceCulture);
             }
         }
         
@@ -403,7 +529,7 @@ namespace ASC.Web.Community.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Blog post.
+        ///   Looks up a localized string similar to Post.
         /// </summary>
         public static string Post {
             get {
@@ -489,6 +615,15 @@ namespace ASC.Web.Community.Resources {
         public static string Subscribed {
             get {
                 return ResourceManager.GetString("Subscribed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tags.
+        /// </summary>
+        public static string Tags {
+            get {
+                return ResourceManager.GetString("Tags", resourceCulture);
             }
         }
         

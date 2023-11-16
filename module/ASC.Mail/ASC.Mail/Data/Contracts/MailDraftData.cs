@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System.Collections.Generic;
-
 using ASC.Mail.Data.Contracts.Base;
 using ASC.Mail.Enums;
 
@@ -28,7 +27,6 @@ namespace ASC.Mail.Data.Contracts
         public bool IsAutoreplied { get; set; }
         public bool RequestReceipt { get; set; }
         public bool RequestRead { get; set; }
-        public bool IsReceipt { get; set; }
 
         public MailDraftData(int id, MailBoxData mailBoxData, string from, List<string> to, List<string> cc,
             List<string> bcc,

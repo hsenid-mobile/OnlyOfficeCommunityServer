@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-
 using ASC.Core;
 using ASC.Web.Core.Client.Bundling;
 using ASC.Web.Files.Classes;
@@ -29,8 +28,7 @@ namespace ASC.Web.Files.Masters
         {
             AddSource(ResolveUrl,
                       "~/js/third-party/jquery/jquery.core.js",
-                      "~/js/asc/core/localstorage.js",
-                      "~/js/asc/core/asc.files.utility.js"
+                      "~/js/asc/core/localstorage.js"
                 );
 
             AddSource(PathProvider.GetFileStaticRelativePath,

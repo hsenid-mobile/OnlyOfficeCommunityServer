@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Projects.Core.Domain;
 
@@ -35,8 +34,6 @@ namespace ASC.Projects.Core.DataInterfaces
 
         List<Milestone> GetByStatus(int projectId, MilestoneStatus milestoneStatus);
 
-        List<Milestone> GetRecentMilestones(int offset, int max, params int[] projects);
-
         List<Milestone> GetUpcomingMilestones(int offset, int max, params int[] projects);
 
         List<Milestone> GetLateMilestones(int offset, int max);
@@ -50,7 +47,7 @@ namespace ASC.Projects.Core.DataInterfaces
         List<Tuple<Guid, int, int>> GetByFilterCountForReport(TaskFilter filter, bool isAdmin, bool checkAccess);
 
         List<object[]> GetInfoForReminder(DateTime deadline);
-
+        
         Milestone GetById(int id);
 
         List<Milestone> GetById(int[] id);

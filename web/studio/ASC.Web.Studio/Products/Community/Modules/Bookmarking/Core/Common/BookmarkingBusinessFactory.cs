@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,55 +15,67 @@
 */
 
 
-using System;
-
-using ASC.Common.Caching;
-using ASC.Core;
+using System.Web;
 
 namespace ASC.Bookmarking.Common
 {
 
-    public static class BookmarkingBusinessFactory
-    {
-        private static readonly ICache CacheAsc = AscCache.Memory;
-        public static T GetObjectFromSession<T>() where T : class, new()
-        {
-            T obj;
-            var key = typeof(T).ToString() + SecurityContext.CurrentAccount.ID.ToString();
-            obj = CacheAsc.Get<T>(key);
-            if (obj == null)
+	public static class BookmarkingBusinessFactory
+	{
+		public static T GetObjectFromSession<T>() where T : class, new()
+		{
+		    T obj;
+			var key = typeof(T).ToString();
+            if (HttpContext.Current.Session != null)
             {
-                obj = new T();
-                CacheAsc.Insert(key, obj, TimeSpan.FromMinutes(15));
+                obj = (T) HttpContext.Current.Session[key];
+                if (obj == null)
+                {
+                    obj = new T();
+                    HttpContext.Current.Session[key] = obj;
+                }
             }
-            return obj;
-
-        }
+            else
+            {
+                obj = (T)HttpContext.Current.Items[key];
+                if (obj == null)
+                {
+                    obj = new T();
+                    HttpContext.Current.Items[key] = obj;
+                }
+            }
+		    return obj;
+		}
 
         public static void UpdateObjectInSession<T>(T obj) where T : class, new()
         {
-            var key = typeof(T).ToString() + SecurityContext.CurrentAccount.ID.ToString();
-            CacheAsc.Insert(key, obj, TimeSpan.FromMinutes(15));
-        }
-
-        public static void UpdateDisplayMode(BookmarkDisplayMode mode)
-        {
-            var key = typeof(BookmarkDisplayMode).Name + SecurityContext.CurrentAccount.ID.ToString();
-
-            CacheAsc.Insert(key, mode, TimeSpan.FromMinutes(15));
-        }
-
-        public static BookmarkDisplayMode GetDisplayMode()
-        {
-            var key = typeof(BookmarkDisplayMode).Name + SecurityContext.CurrentAccount.ID.ToString();
-
-            var value = CacheAsc.Get<object>(key);
-            if (value != null)
+            var key = typeof(T).ToString();
+            if (HttpContext.Current.Session != null)
             {
-                return (BookmarkDisplayMode)value;
+                HttpContext.Current.Session[key] = obj;
             }
-
-            return BookmarkDisplayMode.AllBookmarks;
+            else
+            {
+                HttpContext.Current.Items[key] = obj;
+            }
         }
-    }
+
+	    public static void UpdateDisplayMode(BookmarkDisplayMode mode)
+	    {
+	        var key = typeof (BookmarkDisplayMode).Name;
+
+	        if (HttpContext.Current != null && HttpContext.Current.Session != null)
+	            HttpContext.Current.Session.Add(key, mode);
+	    }
+
+	    public static BookmarkDisplayMode GetDisplayMode()
+	    {
+	        var key = typeof (BookmarkDisplayMode).Name;
+
+	        if (HttpContext.Current != null && HttpContext.Current.Session != null)
+	            return (BookmarkDisplayMode) HttpContext.Current.Session[key];
+
+	        return BookmarkDisplayMode.AllBookmarks;
+	    }
+	}
 }

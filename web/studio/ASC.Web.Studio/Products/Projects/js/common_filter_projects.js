@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,17 +200,17 @@ ASC.Projects.ProjectsAdvansedFilter = (function () {
                 {
                     store: true,
                     anykey: true,
-                    hintDefaultDisable: false,
+                    hintDefaultDisable: true,
                     colcount: 3,
                     anykeytimeout: 1000,
                     filters: settings.filters,
                     sorters: settings.sorters
                 }
             )
-            .off('setfilter')
-            .off('resetfilter')
-            .on('setfilter', onSetFilter)
-            .on('resetfilter', onResetFilter);
+            .unbind('setfilter')
+            .unbind('resetfilter')
+            .bind('setfilter', onSetFilter)
+            .bind('resetfilter', onResetFilter);
     };
 
     function clear() {
@@ -400,7 +400,7 @@ ASC.Projects.ProjectsAdvansedFilter = (function () {
                     break;
                 case meTasksCreatorFilter:
                 case tasksCreatorFilter:
-                    data.creator = getIdOrValue(params);
+                    data.creator = id;
                     anchor = changeParamValue(anchor, tasksCreatorFilter, data.creator);
                     break;
                 case meAuthorFilter:
@@ -1514,7 +1514,7 @@ ASC.Projects.ProjectsAdvansedFilter = (function () {
             personHashmark,
             groupBy,
             currentProjectId ? teamForFilter : null,
-            currentProjectId ? { value: currentUserId } : { id: currentUserId });
+            { id: currentUserId });
     }
 
     function pushFilterItemGroup(visible, filters, group, groupBy) {

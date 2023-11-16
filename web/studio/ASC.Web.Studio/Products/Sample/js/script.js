@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,13 +79,13 @@ ASC.Sample.PageScript = (function () {
                 }
             ]
         })
-        .on("setfilter", function (evt, $container, filter, filterparams, filters) {
+        .bind("setfilter", function (evt, $container, filter, filterparams, filters) {
             renderFilterContent(filters);
         })
-        .on("resetfilter", function (evt, $container, filter, filters) {
+        .bind("resetfilter", function (evt, $container, filter, filters) {
             renderFilterContent(filters);
         })
-        .on("resetallfilters", function () {
+        .bind("resetallfilters", function () {
             jq("#peopleFilterContent").html("");
         });
     };
@@ -159,7 +159,7 @@ ASC.Sample.PageScript = (function () {
     function initElementsPage() {
         if (!jq("#select").length) return;
         
-        jq("#select").tlCombobox({ "align": "left"});
+        jq("#select").tlCombobox();
 
         jq.dropdownToggle({
             switcherSelector: "#dropdownBtn",

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ window.accountsPanel = (function($) {
             return;
         }
 
-        $('#accountsPanel .accounts a').off('click.accountsPanel').on('click.accountsPanel', function() {
+        $('#accountsPanel .accounts a').unbind('click.accountsPanel').bind('click.accountsPanel', function() {
             var accountEmail = $(this).text();
             var account = accountsManager.getAccountByAddress(accountEmail);
             if (!account) {

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,25 +32,21 @@ namespace ASC.Common.Data.AdoProxy
 
         public string SqlParameters { get; private set; }
 
-        public int SqlThread { get; private set; }
 
-
-        public ExecutedEventArgs(string method, TimeSpan duration, int sqlThread = 0)
-            : this(method, duration, null, sqlThread)
+        public ExecutedEventArgs(string method, TimeSpan duration)
+            : this(method, duration, null)
         {
 
         }
 
-        public ExecutedEventArgs(string method, TimeSpan duration, DbCommand command, int sqlThread = 0)
+        public ExecutedEventArgs(string method, TimeSpan duration, DbCommand command)
         {
             SqlMethod = method;
             Duration = duration;
-            SqlThread = sqlThread;
-
             if (command != null)
             {
                 Sql = command.CommandText;
-
+                
                 if (0 < command.Parameters.Count)
                 {
                     var stringBuilder = new StringBuilder();

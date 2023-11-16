@@ -1,9 +1,0 @@
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.Migration.dll.config
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.Migration.xml
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.Migration.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.Migration.pdb
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage.Migration\obj\Debug\ASC.Data.Storage.Migration.csproj.AssemblyReference.cache
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage.Migration\obj\Debug\ASC.Data.Storage.Migration.csproj.CoreCompileInputs.cache
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage.Migration\obj\Debug\ASC.Data.Storage.Migration.csproj.CopyComplete
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage.Migration\obj\Debug\ASC.Data.Storage.Migration.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage.Migration\obj\Debug\ASC.Data.Storage.Migration.pdb

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
 using ASC.ElasticSearch;
 using ASC.Projects.Core.Domain;
 using ASC.Web.Projects.Core.Search;
@@ -26,7 +26,6 @@ using ASC.Web.Projects.Core.Search;
 namespace ASC.Web.Projects.Test
 {
     using ASC.Core;
-
     using NUnit.Framework;
 
     [TestFixture]
@@ -40,8 +39,8 @@ namespace ASC.Web.Projects.Test
         {
             Projects = new List<Project>
             {
-                CreateProject("Project for testing search fedor", "Description"),
-                CreateProject("Another Project for testing search fedor", "Another Description")
+                CreateProject("Project for testing search фёдор", "Description"),
+                CreateProject("Another Project for testing search фёдор", "Another Description")
             };
         }
 
@@ -138,7 +137,7 @@ namespace ASC.Web.Projects.Test
         public void ProjectMultiProps()
         {
             List<int> result;
-            FactoryIndexer<ProjectsWrapper>.TrySelectIds(s => s.Match(r => r.Title, "Project").Match(r => r.Description, "Description"), out result);
+            FactoryIndexer<ProjectsWrapper>.TrySelectIds(s => s.Match(r => r.Title, "Project").Match(r=> r.Description, "Description"), out result);
 
             foreach (var prj in Projects)
             {
@@ -311,7 +310,7 @@ namespace ASC.Web.Projects.Test
 
             FactoryIndexer<ProjectsWrapper>.Update(new ProjectsWrapper { Id = proj.ID, Title = "QWERTY" }, true, r => r.Title);
             FactoryIndexer<ProjectsWrapper>.Update(new ProjectsWrapper { Id = proj.ID, LastModifiedOn = DateTime.UtcNow }, true, r => r.LastModifiedOn);
-            FactoryIndexer<ProjectsWrapper>.Update(new ProjectsWrapper { Id = proj.ID, TenantId = 10 }, true, r => r.TenantId);
+            FactoryIndexer<ProjectsWrapper>.Update(new ProjectsWrapper { Id = proj.ID, TenantId = 10}, true, r => r.TenantId);
             FactoryIndexer<ProjectsWrapper>.Update(new ProjectsWrapper { Id = proj.ID, TenantId = 5, Title = "Tenant" }, true, r => r.TenantId, r => r.Title);
 
             FactoryIndexer<ProjectsWrapper>.TrySelectIds(s => s.MatchAll(searchText), out result);
@@ -334,7 +333,7 @@ namespace ASC.Web.Projects.Test
             Assert.AreEqual(result.Count, 3);
 
             var newTitle = "QWERTY";
-            FactoryIndexer<ProjectsWrapper>.Update(new ProjectsWrapper { Title = "QWERTY" }, r => r.In(t => t.Id, new[] { proj1.ID, proj2.ID }), true, r => r.Title);
+            FactoryIndexer<ProjectsWrapper>.Update(new ProjectsWrapper { Title = "QWERTY" }, r=> r.In(t => t.Id, new [] { proj1.ID, proj2.ID}),true, r => r.Title);
 
             FactoryIndexer<ProjectsWrapper>.TrySelectIds(s => s.MatchAll(newTitle), out result);
             Assert.AreEqual(result.Count, 2);
@@ -382,7 +381,7 @@ namespace ASC.Web.Projects.Test
             FactoryIndexer<ProjectsWrapper>.Delete(r => r.Match(a => a.Title, searchText));
 
             CoreContext.TenantManager.SetCurrentTenant(tenant.TenantId);
-            SecurityContext.CurrentUser = tenant.OwnerId;;
+            SecurityContext.AuthenticateMe(tenant.OwnerId);
 
             FactoryIndexer<ProjectsWrapper>.TrySelectIds(s => s.MatchAll(searchText), out result);
             CollectionAssert.IsEmpty(result);
@@ -504,8 +503,8 @@ namespace ASC.Web.Projects.Test
             yield return new TestCaseData("search").SetName(action + " search");
             yield return new TestCaseData("Description").SetName(action + " Description");
             yield return new TestCaseData("pRoJeCt").SetName(action + " pRoJeCt");
-            yield return new TestCaseData("fedor").SetName(action + " fedor");
-            yield return new TestCaseData("fedor").SetName(action + " fedor");
+            yield return new TestCaseData("фёдор").SetName(action + " фёдор");
+            yield return new TestCaseData("федор").SetName(action + " федор");
         }
 
         public static IEnumerable WildCardTestCases(string action)

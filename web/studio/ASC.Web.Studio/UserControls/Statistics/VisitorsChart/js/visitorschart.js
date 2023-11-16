@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@
     function managePeriodFilter(toggle) {
         if (toggle === true) {
             $('#periodSelection').removeClass('disabled');
-            $('#startDate input').prop("disabled", false);
-            $('#endDate input').prop("disabled", false);
+            $('#startDate input').removeAttr('disabled');
+            $('#endDate input').removeAttr('disabled');
         } else {
             $('#periodSelection').addClass('disabled');
-            $('#startDate input').prop('disabled', true);
-            $('#endDate input').prop('disabled', true);
+            $('#startDate input').attr('disabled', 'disabled');
+            $('#endDate input').attr('disabled', 'disabled');
         }
     }
 
@@ -158,7 +158,7 @@
 
     $(document).ready(function () {
         $('#visitorsChartCanvas')
-          .on("plothover", function (evt, pos, item) {
+          .bind("plothover", function (evt, pos, item) {
               if (item) {
                   if (!displayDates.hasOwnProperty(item.datapoint[0])) {
                       return;
@@ -168,18 +168,9 @@
                     '<div class="info">' + item.datapoint[1] + ' ' + window.ASC.Resources.visitsLabel + '</div>';
                   ASC.Common.toolTip.show(content, function () {
                       var $this = $(this);
-                      var width = $this.outerWidth(true);
-                      var height = $this.outerHeight(true);
-                      var top = item.pageY - height - 5;
-                      var left = item.pageX + 5;
-
-                      if (width + left > document.body.scrollWidth) {
-                          left = item.pageX - width - 5;
-                      }
-
                       $this.css({
-                          left: left,
-                          top: top
+                          left: item.pageX + 5,
+                          top: item.pageY - $this.outerHeight(true) - 5
                       });
                   });
               } else {
@@ -238,7 +229,7 @@
           .datepicker("option", "minDate", minDate)
           .datepicker("option", "maxDate", defaultToDate);
 
-        $('#visitorsFilter').on("click", function(evt) {
+        $('#visitorsFilter').click(function(evt) {
             var $target = $(evt.target);
             if ($target.is('li.filter') && !$target.is('li.filter.selected')) {
                 changeFilter($target.attr('id'));
@@ -247,7 +238,7 @@
 
         changeFilter('filterBy3Months');
 
-        $(window).on("resize resizeWinTimerWithMaxDelay", function () {
+        $(window).bind("resize resizeWinTimerWithMaxDelay", function () {
             var plot = jq("#visitorsChartCanvas").data("plot");
             if (typeof (plot) !== "undefined") {
                 try {

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,11 @@
 */
 
 
-using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Web;
-
 using ASC.Common.Logging;
-using ASC.Core;
 using ASC.MessagingSystem.DbSender;
 
 
@@ -48,57 +45,57 @@ namespace ASC.MessagingSystem
 
         public static void Send(HttpRequest request, MessageAction action)
         {
-            SendRequestMessage(request, null, null,  action, null);
+            SendRequestMessage(request, null, action, null);
         }
 
         public static void Send(HttpRequest request, MessageAction action, string d1)
         {
-            SendRequestMessage(request, null, null, action, null, d1);
+            SendRequestMessage(request, null, action, null, d1);
         }
 
         public static void Send(HttpRequest request, MessageAction action, string d1, string d2)
         {
-            SendRequestMessage(request, null, null, action, null, d1, d2);
+            SendRequestMessage(request, null, action, null, d1, d2);
         }
 
         public static void Send(HttpRequest request, MessageAction action, string d1, string d2, string d3)
         {
-            SendRequestMessage(request, null, null, action, null, d1, d2, d3);
+            SendRequestMessage(request, null, action, null, d1, d2, d3);
         }
 
         public static void Send(HttpRequest request, MessageAction action, string d1, string d2, string d3, string d4)
         {
-            SendRequestMessage(request, null, null, action, null, d1, d2, d3, d4);
+            SendRequestMessage(request, null, action, null, d1, d2, d3, d4);
         }
 
         public static void Send(HttpRequest request, MessageAction action, IEnumerable<string> d1, string d2)
         {
-            SendRequestMessage(request, null, null, action, null, string.Join(", ", d1), d2);
+            SendRequestMessage(request, null, action, null, string.Join(", ", d1), d2);
         }
 
         public static void Send(HttpRequest request, MessageAction action, string d1, IEnumerable<string> d2)
         {
-            SendRequestMessage(request, null, null,  action, null, d1, string.Join(", ", d2));
+            SendRequestMessage(request, null, action, null, d1, string.Join(", ", d2));
         }
 
         public static void Send(HttpRequest request, MessageAction action, string d1, string d2, IEnumerable<string> d3)
         {
-            SendRequestMessage(request, null, null, action, null, d1, d2, string.Join(", ", d3));
+            SendRequestMessage(request, null, action, null, d1, d2, string.Join(", ", d3));
         }
 
         public static void Send(HttpRequest request, MessageAction action, IEnumerable<string> d1)
         {
-            SendRequestMessage(request, null, null, action, null, string.Join(", ", d1));
+            SendRequestMessage(request, null, action, null, string.Join(", ", d1));
         }
 
         public static void Send(HttpRequest request, string loginName, MessageAction action)
         {
-            SendRequestMessage(request, loginName, null, action, null);
+            SendRequestMessage(request, loginName, action, null);
         }
 
         public static void Send(HttpRequest request, string loginName, MessageAction action, string d1)
         {
-            SendRequestMessage(request, loginName, null, action, null, d1);
+            SendRequestMessage(request, loginName, action, null, d1);
         }
 
         #endregion
@@ -107,67 +104,62 @@ namespace ASC.MessagingSystem
 
         public static void Send(HttpRequest request, MessageAction action, MessageTarget target)
         {
-            SendRequestMessage(request, null, null, action, target);
-        }
-
-        public static void Send(HttpRequest request, DateTime? dateTime, MessageAction action, MessageTarget target, string d1)
-        {
-            SendRequestMessage(request, null, dateTime, action, target, d1);
+            SendRequestMessage(request, null, action, target);
         }
 
         public static void Send(HttpRequest request, MessageAction action, MessageTarget target, string d1)
         {
-            SendRequestMessage(request, null, null, action, target, d1);
+            SendRequestMessage(request, null, action, target, d1);
         }
 
         public static void Send(HttpRequest request, MessageAction action, MessageTarget target, string d1, string d2)
         {
-            SendRequestMessage(request, null, null, action, target, d1, d2);
+            SendRequestMessage(request, null, action, target, d1, d2);
         }
 
         public static void Send(HttpRequest request, MessageAction action, MessageTarget target, string d1, string d2, string d3)
         {
-            SendRequestMessage(request, null, null, action, target, d1, d2, d3);
+            SendRequestMessage(request, null, action, target, d1, d2, d3);
         }
 
         public static void Send(HttpRequest request, MessageAction action, MessageTarget target, string d1, string d2, string d3, string d4)
         {
-            SendRequestMessage(request, null, null, action, target, d1, d2, d3, d4);
+            SendRequestMessage(request, null, action, target, d1, d2, d3, d4);
         }
 
         public static void Send(HttpRequest request, MessageAction action, MessageTarget target, IEnumerable<string> d1, string d2)
         {
-            SendRequestMessage(request, null,null, action, target, string.Join(", ", d1), d2);
+            SendRequestMessage(request, null, action, target, string.Join(", ", d1), d2);
         }
 
         public static void Send(HttpRequest request, MessageAction action, MessageTarget target, string d1, IEnumerable<string> d2)
         {
-            SendRequestMessage(request, null, null, action, target, d1, string.Join(", ", d2));
+            SendRequestMessage(request, null, action, target, d1, string.Join(", ", d2));
         }
 
         public static void Send(HttpRequest request, MessageAction action, MessageTarget target, string d1, string d2, IEnumerable<string> d3)
         {
-            SendRequestMessage(request, null, null, action, target, d1, d2, string.Join(", ", d3));
+            SendRequestMessage(request, null, action, target, d1, d2, string.Join(", ", d3));
         }
 
         public static void Send(HttpRequest request, MessageAction action, MessageTarget target, IEnumerable<string> d1)
         {
-            SendRequestMessage(request, null, null, action, target, string.Join(", ", d1));
+            SendRequestMessage(request, null, action, target, string.Join(", ", d1));
         }
 
         public static void Send(HttpRequest request, string loginName, MessageAction action, MessageTarget target)
         {
-            SendRequestMessage(request, loginName, null, action, target);
+            SendRequestMessage(request, loginName, action, target);
         }
 
-        public static void Send(HttpRequest request, string loginName, MessageAction action, MessageTarget target, params string[] description)
+        public static void Send(HttpRequest request, string loginName, MessageAction action, MessageTarget target, string d1)
         {
-            SendRequestMessage(request, loginName, null, action, target, description);
+            SendRequestMessage(request, loginName, action, target, d1);
         }
 
         #endregion
 
-        private static void SendRequestMessage(HttpRequest request, string loginName, DateTime? dateTime, MessageAction action, MessageTarget target, params string[] description)
+        private static void SendRequestMessage(HttpRequest request, string loginName, MessageAction action, MessageTarget target, params string[] description)
         {
             if (sender == null) return;
 
@@ -177,7 +169,7 @@ namespace ASC.MessagingSystem
                 return;
             }
 
-            var message = MessageFactory.Create(request, loginName, dateTime,  action, target, description);
+            var message = MessageFactory.Create(request, loginName, action, target, description);
             if (!MessagePolicy.Check(message)) return;
 
             sender.Send(message);
@@ -187,27 +179,27 @@ namespace ASC.MessagingSystem
 
         public static void Send(MessageUserData userData, Dictionary<string, string> httpHeaders, MessageAction action)
         {
-            SendHeadersMessage(userData, httpHeaders, action, null, null);
+            SendHeadersMessage(userData, httpHeaders, action, null);
         }
 
         public static void Send(Dictionary<string, string> httpHeaders, MessageAction action)
         {
-            SendHeadersMessage(null, httpHeaders, action, null, null);
+            SendHeadersMessage(null, httpHeaders, action, null);
         }
 
         public static void Send(Dictionary<string, string> httpHeaders, MessageAction action, string d1)
         {
-            SendHeadersMessage(null, httpHeaders, action, null, null, d1);
+            SendHeadersMessage(null, httpHeaders, action, null, d1);
         }
 
         public static void Send(Dictionary<string, string> httpHeaders, MessageAction action, IEnumerable<string> d1)
         {
-            SendHeadersMessage(null, httpHeaders, action, null, null, d1 != null ? d1.ToArray() : null);
+            SendHeadersMessage(null, httpHeaders, action, null, d1 != null ? d1.ToArray() : null);
         }
 
-        public static void Send(MessageUserData userData, Dictionary<string, string> httpHeaders, MessageAction action, MessageTarget target, string initiator, params string[] description)
+        public static void Send(MessageUserData userData, Dictionary<string, string> httpHeaders, MessageAction action, MessageTarget target)
         {
-            SendHeadersMessage(userData, httpHeaders, action, target, initiator, description);
+            SendHeadersMessage(userData, httpHeaders, action, target);
         }
 
         #endregion
@@ -216,26 +208,26 @@ namespace ASC.MessagingSystem
 
         public static void Send(Dictionary<string, string> httpHeaders, MessageAction action, MessageTarget target)
         {
-            SendHeadersMessage(null, httpHeaders, action, target, null);
+            SendHeadersMessage(null, httpHeaders, action, target);
         }
 
         public static void Send(Dictionary<string, string> httpHeaders, MessageAction action, MessageTarget target, string d1)
         {
-            SendHeadersMessage(null, httpHeaders, action, target, null, d1);
+            SendHeadersMessage(null, httpHeaders, action, target, d1);
         }
 
         public static void Send(Dictionary<string, string> httpHeaders, MessageAction action, MessageTarget target, IEnumerable<string> d1)
         {
-            SendHeadersMessage(null, httpHeaders, action, target, null, d1 != null ? d1.ToArray() : null);
+            SendHeadersMessage(null, httpHeaders, action, target, d1 != null ? d1.ToArray() : null);
         }
 
         #endregion
 
-        private static void SendHeadersMessage(MessageUserData userData, Dictionary<string, string> httpHeaders, MessageAction action, MessageTarget target, string initiator, params string[] description)
+        private static void SendHeadersMessage(MessageUserData userData, Dictionary<string, string> httpHeaders, MessageAction action, MessageTarget target, params string[] description)
         {
             if (sender == null) return;
 
-            var message = MessageFactory.Create(userData, httpHeaders, action, target, initiator, description);
+            var message = MessageFactory.Create(userData, httpHeaders, action, target, description);
             if (!MessagePolicy.Check(message)) return;
 
             sender.Send(message);
@@ -273,21 +265,10 @@ namespace ASC.MessagingSystem
         {
             if (sender == null) return;
 
-            var message = MessageFactory.Create(request, initiator, null, action, target, description);
+            var message = MessageFactory.Create(request, initiator, action, target, description);
             if (!MessagePolicy.Check(message)) return;
 
             sender.Send(message);
-        }
-
-        public static int SendLoginMessage(HttpRequest request, MessageUserData userData, MessageAction action)
-        {
-            if (sender == null) return 0;
-
-            var message = MessageFactory.Create(request, userData, action);
-            if (!MessagePolicy.Check(message)) return 0;
-
-            var id = sender.Send(message);
-            return id;
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-
 using ASC.Common.Data.Sql.Expressions;
 
 namespace ASC.Common.Data.Sql
@@ -135,7 +134,7 @@ namespace ASC.Common.Data.Sql
             return sql.ToString();
         }
 
-        public IEnumerable<object> GetParameters()
+        public object[] GetParameters()
         {
             var parameters = new List<object>();
             columns.ForEach(column => parameters.AddRange(column.GetParameters()));
@@ -148,7 +147,7 @@ namespace ASC.Common.Data.Sql
             if (where != Exp.Empty) parameters.AddRange(where.GetParameters());
             if (having != Exp.Empty) parameters.AddRange(having.GetParameters());
             unions.ForEach(u => parameters.AddRange(u.Query.GetParameters()));
-            return parameters;
+            return parameters.ToArray();
         }
 
         #endregion
@@ -236,7 +235,7 @@ namespace ASC.Common.Data.Sql
 
         public SqlQuery Select(params string[] columns)
         {
-            this.columns.AddRange(columns.Select(r => (SqlIdentifier)r));
+            this.columns.AddRange(columns.Select(r => (SqlIdentifier) r));
             return this;
         }
 

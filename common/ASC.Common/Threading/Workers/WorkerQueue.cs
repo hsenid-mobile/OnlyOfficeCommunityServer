@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-
 using ASC.Common.Logging;
 
-using LogManager = ASC.Common.Logging.BaseLogManager;
 
 namespace ASC.Common.Threading.Workers
 {
     public class WorkerQueue<T>
     {
-        private static readonly ILog log = LogManager.GetLogger("ASC.WorkerQueue");
+        private static ILog log = LogManager.GetLogger("ASC.WorkerQueue");
 
         private readonly ICollection<WorkItem<T>> items = new List<WorkItem<T>>();
         private readonly List<Thread> threads = new List<Thread>();
@@ -127,7 +125,7 @@ namespace ASC.Common.Threading.Workers
             if (started)
             {
                 started = false;
-
+                
                 stopEvent.Set();
                 waitEvent.Set();
 
@@ -146,7 +144,7 @@ namespace ASC.Common.Threading.Workers
             if (started)
             {
                 started = false;
-
+                
                 stopEvent.Set();
                 waitEvent.Set();
 
@@ -223,8 +221,8 @@ namespace ASC.Common.Threading.Workers
             if (!started)
             {
                 started = true;
-                action = starter;
-
+                action = starter; 
+                
                 stopEvent.Reset();
                 waitEvent.Reset();
 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,14 @@ using ASC.Common.Caching;
 using ASC.Common.Web;
 using ASC.Core;
 using ASC.Core.Common.Notify;
-using ASC.ElasticSearch;
 using ASC.Notify;
 using ASC.Notify.Patterns;
 using ASC.Notify.Recipients;
 using ASC.Web.Community.Product;
-using ASC.Web.Community.Search;
 using ASC.Web.Core.Users;
-using ASC.Web.Studio.Core.Notify;
 using ASC.Web.Studio.Utility;
+using ASC.ElasticSearch;
+using ASC.Web.Community.Search;
 
 namespace ASC.Blogs.Core
 {
@@ -164,7 +163,7 @@ namespace ASC.Blogs.Core
         {
             if (query.SearchText != null)
                 return SearchPosts(query.SearchText, new PagingQuery(query));
-
+            
             return
                 _storage.GetPostDao()
                         .Select(
@@ -241,11 +240,13 @@ namespace ASC.Blogs.Core
                             new TagValue(Constants.TagURL,
                                          CommonLinkUtility.GetFullAbsolutePath(
                                              Constants.ViewBlogPageUrl +
-                                             "?blogid=" + post.ID.ToString()))
+                                             "?blogid=" + post.ID.ToString())),
+                            GetReplyToTag(Guid.Empty, post)
                         };
 
                     NotifyClient.SendNoticeAsync(
                         Constants.NewPost,
+                        null,
                         null,
                         tags.ToArray());
 
@@ -253,6 +254,7 @@ namespace ASC.Blogs.Core
                     NotifyClient.SendNoticeAsync(
                         Constants.NewPostByAuthor,
                         post.UserID.ToString(),
+                        null,
                         tags.ToArray());
 
                     NotifyClient.EndSingleRecipientEvent("asc_blog");
@@ -263,7 +265,7 @@ namespace ASC.Blogs.Core
                 }
             }
             if (!notifyComments) return;
-
+            
             var subscriptionProvider = NotifySource.GetSubscriptionProvider();
 
             subscriptionProvider.Subscribe(
@@ -325,7 +327,7 @@ namespace ASC.Blogs.Core
                 NotifyClient.BeginSingleRecipientEvent("asc_blog_c");
                 NotifyClient.AddInterceptor(initiatorInterceptor);
 
-                var tags = new ITagValue[]
+                var tags = new List<ITagValue>
                     {
                         new TagValue(Constants.TagPostSubject, post.Title),
                         new TagValue(Constants.TagPostPreview, post.GetPreviewText(500)),
@@ -333,28 +335,17 @@ namespace ASC.Blogs.Core
                         new TagValue(Constants.TagUserURL, CommonLinkUtility.GetFullAbsolutePath(CommonLinkUtility.GetUserProfile(comment.UserID))),
                         new TagValue(Constants.TagDate, string.Format("{0:d} {0:t}", comment.Datetime)),
                         new TagValue(Constants.TagCommentBody, comment.Content),
+
                         new TagValue(Constants.TagURL, CommonLinkUtility.GetFullAbsolutePath(Constants.ViewBlogPageUrl + "?blogid=" + post.ID.ToString())),
-                        new TagValue(Constants.TagCommentURL, CommonLinkUtility.GetFullAbsolutePath(Constants.ViewBlogPageUrl + "?blogid=" + post.ID.ToString() + "#container_" + comment.ID.ToString()))
+                        new TagValue(Constants.TagCommentURL, CommonLinkUtility.GetFullAbsolutePath(Constants.ViewBlogPageUrl + "?blogid=" + post.ID.ToString() + "#container_" + comment.ID.ToString())),
+                        GetReplyToTag(comment.ID, post)
                     };
 
-                var mentionedUsers = MentionProvider.GetMentionedUsers(comment.Content);
-                var mentionedUserIds = mentionedUsers.Select(u => u.ID.ToString());
-
-                var provider = _notifySource.GetSubscriptionProvider();
-
-                var objectID = post.ID.ToString();
-
-                var recipients = provider
-                    .GetRecipients(Constants.NewComment, objectID)
-                    .Where(r => !mentionedUserIds.Contains(r.ID))
-                    .ToArray();
-
-                NotifyClient.SendNoticeToAsync(Constants.NewComment, objectID, recipients, false, tags);
-
-                if (mentionedUsers.Length > 0)
-                {
-                    NotifyClient.SendNoticeToAsync(Constants.MentionForPostComment, objectID, mentionedUsers, false, tags);
-                }
+                NotifyClient.SendNoticeAsync(
+                    Constants.NewComment,
+                    post.ID.ToString(),
+                    null,
+                    tags.ToArray());
 
                 NotifyClient.EndSingleRecipientEvent("asc_blog_c");
             }
@@ -375,6 +366,11 @@ namespace ASC.Blogs.Core
                                  GetRecipient(SecurityContext.CurrentAccount.ID.ToString())
                     );
             }
+        }
+
+        private static TagValue GetReplyToTag(Guid commentId, Post post)
+        {
+            return ReplyToTagProvider.Comment("blog", post.ID.ToString(), commentId.ToString());
         }
 
         private void SaveComment(Comment comment)

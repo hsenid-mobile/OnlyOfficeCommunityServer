@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,7 @@ namespace ASC.ActiveDirectory.Base.Expressions
         {
         }
 
-        public string Name
-        {
+        public string Name {
             get { return _attributeName; }
         }
 
@@ -124,7 +123,7 @@ namespace ASC.ActiveDirectory.Base.Expressions
             var expressionString = "({0}{1}{2}{3})";
             expressionString = string.Format(expressionString,
                 //positive or negative
-                (((int)_op & 0x010000) == 0x010000 || _negative) ? "!" : "", _attributeName, sop,
+                (((int) _op & 0x010000) == 0x010000 || _negative) ? "!" : "", _attributeName, sop, 
                 EscapeLdapSearchFilter(_attributeValue));
 
             return expressionString;
@@ -134,8 +133,8 @@ namespace ASC.ActiveDirectory.Base.Expressions
         /// Escapes the LDAP search filter to prevent LDAP injection attacks.
         /// </summary>
         /// <param name="searchFilter">The search filter.</param>
-        /// <see href="https://blogs.oracle.com/shankar/entry/what_is_ldap_injection" />
-        /// <see href="http://msdn.microsoft.com/en-us/library/aa746475.aspx" />
+        /// <see cref="https://blogs.oracle.com/shankar/entry/what_is_ldap_injection" />
+        /// <see cref="http://msdn.microsoft.com/en-us/library/aa746475.aspx" />
         /// <returns>The escaped search filter.</returns>
         private static string EscapeLdapSearchFilter(string searchFilter)
         {

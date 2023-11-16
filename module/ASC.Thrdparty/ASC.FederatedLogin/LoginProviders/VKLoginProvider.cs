@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Web;
-
-using ASC.Core.Common.Configuration;
 using ASC.FederatedLogin.Helpers;
 using ASC.FederatedLogin.Profile;
-
 using Newtonsoft.Json.Linq;
 
 namespace ASC.FederatedLogin.LoginProviders
@@ -68,7 +65,7 @@ namespace ASC.FederatedLogin.LoginProviders
         {
         }
 
-        public VKLoginProvider(string name, int order, Dictionary<string, Prop> props, Dictionary<string, Prop> additional = null)
+        public VKLoginProvider(string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
             : base(name, order, props, additional)
         {
         }
@@ -138,13 +135,13 @@ namespace ASC.FederatedLogin.LoginProviders
             if (vkProfiles.Count == 0) throw new Exception("Failed to correctly process the response");
 
             var profile = new LoginProfile
-            {
-                Id = vkProfiles[0].id,
-                FirstName = vkProfiles[0].first_name,
-                LastName = vkProfiles[0].last_name,
+                {
+                    Id = vkProfiles[0].id,
+                    FirstName = vkProfiles[0].first_name,
+                    LastName = vkProfiles[0].last_name,
 
-                Provider = ProviderConstants.VK,
-            };
+                    Provider = ProviderConstants.VK,
+                };
 
             return profile;
         }

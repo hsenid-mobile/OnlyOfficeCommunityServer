@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 
@@ -32,7 +31,7 @@ namespace ASC.VoipService.Dao
             TenantID = tenantID;
         }
 
-        protected IDbManager GetDb()
+        protected DbManager GetDb()
         {
             return new DbManager(dbid);
         }

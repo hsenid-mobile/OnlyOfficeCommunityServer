@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using ASC.ActiveDirectory.Base.Data;
 using ASC.ActiveDirectory.Base.Expressions;
 using ASC.ActiveDirectory.Base.Settings;
@@ -90,8 +89,7 @@ namespace ASC.ActiveDirectory.Base
                     if (!members.Any())
                         return false;
 
-                    if (members.Any(member => memberString.Equals(member, StringComparison.InvariantCultureIgnoreCase)
-                        || member.Equals(domainUser.DistinguishedName, StringComparison.InvariantCultureIgnoreCase)))
+                    if (members.Any(member => memberString.Equals(member, StringComparison.InvariantCultureIgnoreCase)))
                         return true;
                 }
             }
@@ -107,7 +105,7 @@ namespace ASC.ActiveDirectory.Base
         {
             if (passwordBytes == null || passwordBytes.Length == 0)
                 return string.Empty;
-
+            
             string password;
             try
             {

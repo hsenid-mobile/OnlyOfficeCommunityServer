@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,14 @@
 */
 
 
-using System;
-using System.Diagnostics;
-using System.Runtime.Serialization;
-using System.Text;
-
 using ASC.Web.Core.Files;
 using ASC.Web.Files.Services.WCFService;
 using ASC.Web.Files.Utils;
 using ASC.Web.Studio.Core;
+using System;
+using System.Diagnostics;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace ASC.Files.Core
 {
@@ -45,9 +44,7 @@ namespace ASC.Files.Core
 
         [EnumMember] IsFavorite = 0x20,
 
-        [EnumMember] IsTemplate = 0x40,
-
-        [EnumMember] IsFillFormDraft = 0x80
+        [EnumMember] IsTemplate = 0x40
     }
 
     [Serializable]
@@ -64,7 +61,6 @@ namespace ASC.Files.Core
             FileEntryType = FileEntryType.File;
         }
 
-        [DataMember(Name = "fid")]
         public object FolderID { get; set; }
 
         [DataMember(Name = "version")]
@@ -168,7 +164,7 @@ namespace ASC.Files.Core
                 if (value)
                     _status |= FileStatus.IsNew;
                 else
-                    _status &= ~FileStatus.IsNew;
+                    _status ^= FileStatus.IsNew;
             }
         }
 
@@ -180,7 +176,7 @@ namespace ASC.Files.Core
                 if (value)
                     _status |= FileStatus.IsFavorite;
                 else
-                    _status &= ~FileStatus.IsFavorite;
+                    _status ^= FileStatus.IsFavorite;
             }
         }
 
@@ -192,27 +188,12 @@ namespace ASC.Files.Core
                 if (value)
                     _status |= FileStatus.IsTemplate;
                 else
-                    _status &= ~FileStatus.IsTemplate;
-            }
-        }
-
-        public bool IsFillFormDraft
-        {
-            get { return (_status & FileStatus.IsFillFormDraft) == FileStatus.IsFillFormDraft; }
-            set
-            {
-                if (value)
-                    _status |= FileStatus.IsFillFormDraft;
-                else
-                    _status &= ~FileStatus.IsFillFormDraft;
+                    _status ^= FileStatus.IsTemplate;
             }
         }
 
         [DataMember(EmitDefaultValue = false, Name = "encrypted")]
         public bool Encrypted { get; set; }
-
-        [DataMember(Name = "thumbnail_status")]
-        public Thumbnail ThumbnailStatus { get; set; }
 
         public ForcesaveType Forcesave { get; set; }
 

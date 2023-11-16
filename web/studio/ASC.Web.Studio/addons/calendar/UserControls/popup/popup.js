@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -355,8 +355,8 @@
 					self._createUIBlocker();
 				}
 				self._uiBlocker
-						.off("click", self._tryClose)
-						.on("click", {thisObj:self}, self._tryClose)
+						.unbind("click", self._tryClose)
+						.bind("click", {thisObj:self}, self._tryClose)
 						.show();
 			}
 		},
@@ -426,10 +426,10 @@
 
 			if (t._closeOnMouseleave) {
 				t.element
-						.on("mouseenter", function() {t._stopCloseTimer();})
-						.on("mouseleave", function() {t.close();});
+						.mouseenter(function() {t._stopCloseTimer();})
+						.mouseleave(function() {t.close();});
 			} else {
-				$(window.document).on("mousedown", t, t._outerClick);
+				$(window.document).bind("mousedown", t, t._outerClick);
 			}
 
             $.each(t.options.items, function(i,_item) {
@@ -441,7 +441,7 @@
 								htmlEscape(_item.cssClass) : "") + "'>" +
 							htmlEscape(typeof _item === "string" ? _item : _item.label) +
 						"</div>")
-							.on("click", {itemIndex: i, item: _item}, function(e) {t._itemClick(e);})
+							.click({itemIndex: i, item: _item}, function(e) {t._itemClick(e);})
 							.appendTo(t.element);
 				}
             });
@@ -458,13 +458,13 @@
 
 		_itemClick: function(event) {
 			this.close();
-			var hasClickHandler = typeof event.data.item.click === "function";
+			var hasClickHandler = $.isFunction(event.data.item.click);
 			if (typeof event.data.item === "string" || !hasClickHandler) {
 				this._trigger("itemClick", event, event.data);
 			} else {
 				if (hasClickHandler) {
 					event.data.item.click.call(this.element[0], event, event.data);
-					if (typeof event.data.item.toggle === "function") {
+					if ($.isFunction(event.data.item.toggle)) {
 						event.data.item.toggle.call(this.element[0], event, event.data);
 						this.element
 								.find(".item:eq(" + event.data.itemIndex + ")")
@@ -498,13 +498,13 @@
 		},
 
 		destroy: function() {
-			$(window.document).off("mousedown",this, this._outerClick);
+			$(window.document).unbind("mousedown", this._outerClick);
 			// call the base destroy function
 			popupBase.destroy.call(this);
 		},
 
 		click: function(itemNo) {
-			this.element.find(".item:eq(" + itemNo + ")").trigger("click");
+			this.element.find(".item:eq(" + itemNo + ")").click();
 		}
 
 	};
@@ -583,17 +583,17 @@
 
 			t._table = 
 					$('<table border="0" cellspacing="0" cellpadding="0">' + tbody + '</table>')
-					.on("click", function(ev) {t._cellClick(ev);});
+					.click(function(ev) {t._cellClick(ev);});
 
 			t._previewIcon = t._table.find("tr:last .icon");
 
-			t._table.find("td:not(.remainder)").on("mouseenter", function(ev) {t._cellHover(ev);});
+			t._table.find("td:not(.remainder)").hover(function(ev) {t._cellHover(ev);});
 
-			t._input = t._table.find("input").on("keyup", function(ev) {t._keyUp(ev);});
+			t._input = t._table.find("input").keyup(function(ev) {t._keyUp(ev);});
 
 			t.element.append(t._table);
 
-			t.element.on("keyup", function(ev) {t._checkEscKey(ev);});
+			t.element.keyup(function(ev) {t._checkEscKey(ev);});
 		},
 
 		_parseColor: function(c) {
@@ -723,7 +723,7 @@
 
 			var c = this._parseColor(this.options.selectedColor);
 			this._input.val(c ? c.color : "");
-			this._input.trigger("focus");
+			this._input.focus();
 
 			this._updatePreviewIcon(this._input.val());
 		}

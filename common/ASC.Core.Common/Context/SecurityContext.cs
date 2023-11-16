@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,11 @@ using System.Security.Authentication;
 using System.Security.Principal;
 using System.Threading;
 using System.Web;
-
 using ASC.Common.Logging;
 using ASC.Common.Security;
 using ASC.Common.Security.Authentication;
 using ASC.Common.Security.Authorizing;
 using ASC.Core.Billing;
-using ASC.Core.Data;
 using ASC.Core.Security.Authentication;
 using ASC.Core.Security.Authorizing;
 using ASC.Core.Tenants;
@@ -40,6 +38,11 @@ namespace ASC.Core
     {
         private static readonly ILog log = LogManager.GetLogger("ASC.Core");
 
+
+        public static IAccount CurrentAccount
+        {
+            get { return Principal.Identity is IAccount ? (IAccount)Principal.Identity : Configuration.Constants.Guest; }
+        }
 
         public static bool IsAuthenticated
         {
@@ -55,7 +58,8 @@ namespace ASC.Core
             PermissionResolver = new PermissionResolver(azManager);
         }
 
-        public static string AuthenticateMe(string login, string passwordHash, Func<int> funcLoginEvent = null)
+
+        public static string AuthenticateMe(string login, string passwordHash)
         {
             if (login == null) throw new ArgumentNullException("login");
             if (passwordHash == null) throw new ArgumentNullException("passwordHash");
@@ -63,7 +67,7 @@ namespace ASC.Core
             var tenantid = CoreContext.TenantManager.GetCurrentTenant().TenantId;
             var u = CoreContext.UserManager.GetUsersByPasswordHash(tenantid, login, passwordHash);
 
-            return AuthenticateMe(new UserAccount(u, tenantid), funcLoginEvent);
+            return AuthenticateMe(new UserAccount(u, tenantid));
         }
 
         public static bool AuthenticateMe(string cookie)
@@ -75,7 +79,6 @@ namespace ASC.Core
                 int indexTenant;
                 DateTime expire;
                 int indexUser;
-                int loginEventId;
 
                 if (cookie.Equals("Bearer", StringComparison.InvariantCulture))
                 {
@@ -89,7 +92,7 @@ namespace ASC.Core
                     }
                     log.InfoFormat("Empty Bearer cookie: {0} {1}", ipFrom, address);
                 }
-                else if (CookieStorage.DecryptCookie(cookie, out tenant, out userid, out indexTenant, out expire, out indexUser, out loginEventId))
+                else if (CookieStorage.DecryptCookie(cookie, out tenant, out userid, out indexTenant, out expire, out indexUser))
                 {
                     if (tenant != CoreContext.TenantManager.GetCurrentTenant().TenantId)
                     {
@@ -115,12 +118,7 @@ namespace ASC.Core
                             return false;
                         }
 
-                        if (!DbLoginEventsManager.IsActiveLoginEvent(tenant, userid, loginEventId))
-                        {
-                            return false;
-                        }
-
-                        CurrentAccount = new UserAccount(new UserInfo { ID = userid }, tenant);
+                        AuthenticateMe(new UserAccount(new UserInfo { ID = userid }, tenant));
                         return true;
                     }
                     catch (InvalidCredentialException ice)
@@ -135,7 +133,7 @@ namespace ASC.Core
                     }
                     catch (Exception err)
                     {
-                        log.ErrorFormat("Authenticate error: cookie {0}, tenant {1}, userid {2}: {3}",
+                        log.ErrorFormat("Authenticate error: cookie {0}, tenant {1}, userid {2}: {5}",
                                         cookie, tenant, userid, err);
                     }
                 }
@@ -155,86 +153,57 @@ namespace ASC.Core
             return false;
         }
 
-        public static string AuthenticateMe(Guid userId, Func<int> funcLoginEvent = null)
+        public static string AuthenticateMe(IAccount account)
         {
-            var account = CoreContext.Authentication.GetAccountByID(userId);
-            return AuthenticateMe(account, funcLoginEvent);
-        }
+            if (account == null || account.Equals(Configuration.Constants.Guest)) throw new InvalidCredentialException("account");
 
-        private static string AuthenticateMe(IAccount account, Func<int> funcLoginEvent)
-        {
-            CurrentAccount = account;
-
+            var roles = new List<string> { Role.Everyone };
             string cookie = null;
+
+
+            if (account is ISystemAccount && account.ID == Configuration.Constants.CoreSystem.ID)
+            {
+                roles.Add(Role.System);
+            }
 
             if (account is IUserAccount)
             {
-                int loginEventId = 0;
-                if (funcLoginEvent != null)
-                {
-                    loginEventId = funcLoginEvent();
-                }
+                var u = CoreContext.UserManager.GetUsers(account.ID);
 
-                cookie = CookieStorage.EncryptCookie(CoreContext.TenantManager.GetCurrentTenant().TenantId, account.ID, loginEventId);
+                if (u.ID == Users.Constants.LostUser.ID)
+                {
+                    throw new InvalidCredentialException("Invalid username or password.");
+                }
+                if (u.Status != EmployeeStatus.Active)
+                {
+                    throw new SecurityException("Account disabled.");
+                }
+                // for LDAP users only
+                if (u.Sid != null)
+                {
+                    if (!CoreContext.TenantManager.GetTenantQuota(CoreContext.TenantManager.GetCurrentTenant().TenantId).Ldap)
+                    {
+                        throw new BillingException("Your tariff plan does not support this option.", "Ldap");
+                    }
+                }
+                if (CoreContext.UserManager.IsUserInGroup(u.ID, Users.Constants.GroupAdmin.ID))
+                {
+                    roles.Add(Role.Administrators);
+                }
+                roles.Add(Role.Users);
+
+                account = new UserAccount(u, CoreContext.TenantManager.GetCurrentTenant().TenantId);
+                cookie = CookieStorage.EncryptCookie(CoreContext.TenantManager.GetCurrentTenant().TenantId, account.ID);
             }
+
+            Principal = new GenericPrincipal(account, roles.ToArray());
 
             return cookie;
         }
 
-        public static IAccount CurrentAccount
+        public static string AuthenticateMe(Guid userId)
         {
-            get { return Principal.Identity is IAccount ? (IAccount)Principal.Identity : Configuration.Constants.Guest; }
-            set
-            {
-                var account = value;
-                if (account == null || account.Equals(Configuration.Constants.Guest)) throw new InvalidCredentialException("account");
-
-                var roles = new List<string> { Role.Everyone };
-
-                if (account is ISystemAccount && account.ID == Configuration.Constants.CoreSystem.ID)
-                {
-                    roles.Add(Role.System);
-                }
-
-                if (account is IUserAccount)
-                {
-                    var u = CoreContext.UserManager.GetUsers(account.ID);
-
-                    if (u.ID == Users.Constants.LostUser.ID)
-                    {
-                        throw new InvalidCredentialException("Invalid username or password.");
-                    }
-                    if (u.Status != EmployeeStatus.Active)
-                    {
-                        throw new SecurityException("Account disabled.");
-                    }
-                    // for LDAP users only
-                    if (u.Sid != null)
-                    {
-                        if (!(CoreContext.Configuration.Standalone || CoreContext.TenantManager.GetTenantQuota(CoreContext.TenantManager.GetCurrentTenant().TenantId).Ldap))
-                        {
-                            throw new BillingException("Your tariff plan does not support this option.", "Ldap");
-                        }
-                    }
-                    if (CoreContext.UserManager.IsUserInGroup(u.ID, Users.Constants.GroupAdmin.ID))
-                    {
-                        roles.Add(Role.Administrators);
-                    }
-                    roles.Add(Role.Users);
-
-                    account = new UserAccount(u, CoreContext.TenantManager.GetCurrentTenant().TenantId);
-                }
-
-                Principal = new GenericPrincipal(account, roles.ToArray());
-            }
-        }
-
-        public static Guid CurrentUser
-        {
-            set
-            {
-                CurrentAccount = CoreContext.Authentication.GetAccountByID(value);
-            }
+            return AuthenticateMe(CoreContext.Authentication.GetAccountByID(userId));
         }
 
         public static void Logout()

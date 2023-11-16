@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 
 using System.Collections.Generic;
-
 using ASC.Web.Core.ModuleManagement.Common;
 using ASC.Web.Studio.Core.Users;
-using ASC.Web.Studio.PublicResources;
+using Resources;
 
 namespace ASC.Web.Studio.Core.Search
 {
@@ -29,7 +28,7 @@ namespace ASC.Web.Studio.Core.Search
         {
             if (x.Name == y.Name)
                 return 0;
-            if (y.Name == CustomNamingPeople.Substitute<Resource>("Employees"))
+            if(y.Name == CustomNamingPeople.Substitute<Resource>("Employees"))
                 return 1;
             return -1;
         }

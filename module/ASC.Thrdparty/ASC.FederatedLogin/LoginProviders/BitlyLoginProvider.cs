@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,30 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Globalization;
+using System.Net;
+using System.Xml.Linq;
+using System.Xml.XPath;
 using ASC.Core.Common.Configuration;
-using ASC.FederatedLogin.Helpers;
-
-using Newtonsoft.Json.Linq;
 
 namespace ASC.FederatedLogin.LoginProviders
 {
     public class BitlyLoginProvider : Consumer, IValidateKeysProvider
     {
-        private static string BitlyToken
+        private static string BitlyClientId
         {
-            get { return Instance["bitlyToken"]; }
+            get { return Instance["bitlyClientId"]; }
         }
 
-        private readonly static string BitlyUrl = "https://api-ssl.bitly.com/v4/shorten";
+        private static string BitlyClientSecret
+        {
+            get { return Instance["bitlyClientSecret"]; }
+        }
+
+        private static string BitlyUrl
+        {
+            get { return Instance["bitlyUrl"]; }
+        }
 
         private static BitlyLoginProvider Instance
         {
@@ -41,7 +49,7 @@ namespace ASC.FederatedLogin.LoginProviders
 
         public BitlyLoginProvider() { }
 
-        public BitlyLoginProvider(string name, int order, Dictionary<string, Prop> props, Dictionary<string, Prop> additional = null)
+        public BitlyLoginProvider(string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
             : base(name, order, props, additional)
         {
         }
@@ -62,26 +70,36 @@ namespace ASC.FederatedLogin.LoginProviders
         {
             get
             {
-                return !String.IsNullOrEmpty(BitlyToken);
+                return !String.IsNullOrEmpty(BitlyClientId) &&
+                       !String.IsNullOrEmpty(BitlyClientSecret) &&
+                       !String.IsNullOrEmpty(BitlyUrl);
             }
         }
 
         public static String GetShortenLink(String shareLink)
         {
-            var data = string.Format("{{\"long_url\":\"{0}\"}}", shareLink);
-            var headers = new Dictionary<string, string>
+            var uri = new Uri(shareLink);
+
+            var bitly = string.Format(BitlyUrl, BitlyClientId, BitlyClientSecret, Uri.EscapeDataString(uri.ToString()));
+            XDocument response;
+            try
             {
-                {"Authorization" ,"Bearer " + BitlyToken}
-            };
+                response = XDocument.Load(bitly);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException(e.Message, e);
+            }
 
-            var response = RequestHelper.PerformRequest(BitlyUrl, "application/json", "POST", data, headers);
+            var status = response.XPathSelectElement("/response/status_code").Value;
+            if (status != ((int)HttpStatusCode.OK).ToString(CultureInfo.InvariantCulture))
+            {
+                throw new InvalidOperationException(status);
+            }
 
-            var parser = JObject.Parse(response);
-            if (parser == null) return null;
+            var data = response.XPathSelectElement("/response/data/url");
 
-            var link = parser.Value<string>("link");
-
-            return link;
+            return data.Value;
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,13 @@ namespace ASC.ElasticSearch
 {
     public class BaseIndexer<T> : IIndexer where T : Wrapper, new()
     {
-        private static bool IsExist;
-        private static readonly object Locker = new object();
+        private static volatile bool IsExist;
+        private static object Locker = new object();
         private static readonly ILog Logger = LogManager.GetLogger("ASC.Indexer");
         private static readonly ICacheNotify Notify;
         private static CancellationTokenSource Cts;
 
-        private const int QueryLimit = 10000;
+        private const int QueryLimit = 1000;
 
         private const string Alias = "_table";
 
@@ -78,14 +78,14 @@ namespace ASC.ElasticSearch
 
         internal void Index(T data, bool immediately = true)
         {
-            if (!BeforeIndex(data)) return;
+            BeforeIndex(data);
 
             Client.Instance.Index(data, idx => GetMeta(idx, data, immediately));
         }
 
         internal void Index(List<T> data, bool immediately = true)
         {
-            if (!CheckExist(data[0])) return;
+            CreateIfNotExist(data[0]);
 
             if (typeof(T).IsSubclassOf(typeof(WrapperWithDoc)))
             {
@@ -109,35 +109,24 @@ namespace ASC.ElasticSearch
                     else
                     {
                         var dLength = wwd.Document.Data.Length;
-                        if (dLength >= Settings.Default.MaxContentLength)
+                        if (dLength >= Settings.Default.MemoryLimit)
                         {
                             try
                             {
                                 Index(t, immediately);
                             }
-                            catch (ElasticsearchClientException e)
-                            {
-                                if (e.Response.HttpStatusCode == 429)
-                                {
-                                    throw;
-                                }
-                                Logger.Error(e);
-                            }
                             catch (Exception e)
                             {
-                                Logger.Error(e);
+                                LogManager.GetLogger("ASC").Error(e);
                             }
-                            finally
-                            {
-                                wwd.Document.Data = null;
-                                wwd.Document = null;
-                                data[i] = null;
-                                GC.Collect();
-                            }
+
+                            wwd.Document.Data = null;
+                            wwd.Document = null;
+                            GC.Collect();
                             continue;
                         }
 
-                        if (currentLength + dLength < Settings.Default.MaxContentLength)
+                        if (currentLength + dLength < Settings.Default.MemoryLimit)
                         {
                             portion.Add(t);
                             currentLength += dLength;
@@ -151,8 +140,8 @@ namespace ASC.ElasticSearch
 
                     if (runBulk)
                     {
-                        var portion1 = portion.ToList();
-                        Client.Instance.Bulk(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
+                        var portion1 = portion;
+                        Client.Instance.Bulk(r => r.IndexMany(portion1, GetMeta));
                         for (var j = portionStart; j < i; j++)
                         {
                             var doc = data[j] as WrapperWithDoc;
@@ -161,7 +150,6 @@ namespace ASC.ElasticSearch
                                 doc.Document.Data = null;
                                 doc.Document = null;
                             }
-                            data[j] = null;
                         }
 
                         portionStart = i;
@@ -182,126 +170,27 @@ namespace ASC.ElasticSearch
             }
         }
 
-        internal async Task IndexAsync(List<T> data, bool immediately = true)
-        {
-            if (!CheckExist(data[0])) return;
-
-            if (typeof(T).IsSubclassOf(typeof(WrapperWithDoc)))
-            {
-                var currentLength = 0L;
-                var portion = new List<T>();
-                var portionStart = 0;
-
-                for (var i = 0; i < data.Count; i++)
-                {
-                    var t = data[i];
-                    var runBulk = i == data.Count - 1;
-
-                    await BeforeIndexAsync(t).ConfigureAwait(false);
-
-                    var wwd = t as WrapperWithDoc;
-
-                    if (wwd == null || wwd.Document == null || string.IsNullOrEmpty(wwd.Document.Data))
-                    {
-                        portion.Add(t);
-                    }
-                    else
-                    {
-                        var dLength = wwd.Document.Data.Length;
-                        if (dLength >= Settings.Default.MaxContentLength)
-                        {
-                            try
-                            {
-                                Index(t, immediately);
-                            }
-                            catch (ElasticsearchClientException e)
-                            {
-                                if (e.Response.HttpStatusCode == 429)
-                                {
-                                    throw;
-                                }
-                                Logger.Error(e);
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error(e);
-                            }
-                            finally
-                            {
-                                wwd.Document.Data = null;
-                                wwd.Document = null;
-                                data[i] = null;
-                                GC.Collect();
-                            }
-                            continue;
-                        }
-
-                        if (currentLength + dLength < Settings.Default.MaxContentLength)
-                        {
-                            portion.Add(t);
-                            currentLength += dLength;
-                        }
-                        else
-                        {
-                            runBulk = true;
-                            i--;
-                        }
-                    }
-
-                    if (runBulk)
-                    {
-                        var portion1 = portion.ToList();
-                        await Client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
-                        for (var j = portionStart; j < i; j++)
-                        {
-                            var doc = data[j] as WrapperWithDoc;
-                            if (doc != null && doc.Document != null)
-                            {
-                                doc.Document.Data = null;
-                                doc.Document = null;
-                            }
-                            data[j] = null;
-                        }
-
-                        portionStart = i;
-                        portion = new List<T>();
-                        currentLength = 0L;
-                        GC.Collect();
-                    }
-                }
-            }
-            else
-            {
-                foreach (var item in data)
-                {
-                    BeforeIndex(item);
-                }
-
-                await Client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta));
-            }
-        }
-
         internal void Update(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
         {
-            if (!CheckExist(data)) return;
+            CreateIfNotExist(data);
             Client.Instance.Update(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, immediately, fields));
         }
 
         internal void Update(T data, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
         {
-            if (!CheckExist(data)) return;
+            CreateIfNotExist(data);
             Client.Instance.Update(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, action, fields, immediately));
         }
 
         internal void Update(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true, params Expression<Func<T, object>>[] fields)
         {
-            if (!CheckExist(data)) return;
+            CreateIfNotExist(data);
             Client.Instance.UpdateByQuery(GetDescriptorForUpdate(data, expression, tenantId, immediately, fields));
         }
 
         internal void Update(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
         {
-            if (!CheckExist(data)) return;
+            CreateIfNotExist(data);
             Client.Instance.UpdateByQuery(GetDescriptorForUpdate(data, expression, tenantId, action, fields, immediately));
         }
 
@@ -411,7 +300,7 @@ namespace ASC.ElasticSearch
 
         async Task IIndexer.ReIndex()
         {
-            while (Launcher.IsStarted && Launcher.Indexing.Contains(Wrapper.IndexName))
+            while (Launcher.IsStarted && Launcher.Indexing == Wrapper.IndexName)
             {
                 await Task.Delay(10000);
             }
@@ -422,7 +311,7 @@ namespace ASC.ElasticSearch
 
         private void Clear()
         {
-            using (var db = new DbManager("default"))
+            using (var db = DbManager.FromHttpContext("default"))
             {
                 db.ExecuteNonQuery(new SqlDelete("webstudio_index").Where("index_name", Wrapper.IndexName));
             }
@@ -435,72 +324,46 @@ namespace ASC.ElasticSearch
 
         void IIndexer.IndexAll()
         {
-            var now = DateTime.UtcNow;
+            var idColumn = Wrapper.GetColumnName(ColumnTypeEnum.Id, Alias);
+            var tenantIdColumn = Wrapper.GetColumnName(ColumnTypeEnum.TenantId, Alias);
+            var lastModifiedColumn = Wrapper.GetColumnName(ColumnTypeEnum.LastModified, Alias);
 
             DateTime lastIndexed;
 
-            using (var db = new DbManager("default"))
+            using (var db = DbManager.FromHttpContext("default"))
             {
                 lastIndexed = db.ExecuteScalar<DateTime>(new SqlQuery("webstudio_index").Select("last_modified").Where("index_name", Wrapper.IndexName));
             }
 
-            if (lastIndexed.Equals(DateTime.MinValue))
-            {
-                CreateIfNotExist(new T());
-            }
-
-            var meta = Count(lastIndexed);
+            var meta = Count(idColumn, tenantIdColumn, lastModifiedColumn, lastIndexed);
             Logger.DebugFormat("Index: {0},Count {1},Max: {2},Min: {3}", IndexName, meta.Item1, meta.Item2, meta.Item3);
 
-            var ids = new List<long>() { meta.Item3 };
-            ids.AddRange(Ids(lastIndexed));
-            ids.Add(meta.Item2);
-
-            Logger.DebugFormat("Index: {0},iterations total {1}", IndexName, ids.Count);
-
-            var j = 0;
-            var tasks = new List<Task>();
-
-            for (var i = 0; i < ids.Count - 1; i++)
+            if (meta.Item1 != 0)
             {
-                if (Settings.Default.Threads == 1)
+                var step = (meta.Item2 - meta.Item3 + 1) / meta.Item1;
+
+                if (step == 0)
                 {
-                    IndexAllGetData(ids[i], ids[i + 1], lastIndexed);
+                    step = 1;
                 }
-                else
+
+                if (step < QueryLimit)
                 {
-                    tasks.Add(IndexAllGetDataAsync(ids[i], ids[i + 1], lastIndexed));
-                    j++;
-                    if (j >= Settings.Default.Threads || i == ids.Count - 2)
-                    {
-                        Task.WaitAll(tasks.ToArray());
-                        GC.Collect();
-                        Logger.DebugFormat("Index: {0},iteration:{1}", IndexName, i);
-                        tasks = new List<Task>();
-                        j = 0;
-                    }
+                    step = QueryLimit;
+                }
+
+                for (var i = meta.Item3; i <= meta.Item2; i += step)
+                {
+                    IndexAllGetData(i, step, idColumn, tenantIdColumn, lastModifiedColumn, lastIndexed);
                 }
             }
 
-            using (var db = new DbManager("default"))
+            using (var db = DbManager.FromHttpContext("default"))
             {
-                db.ExecuteNonQuery(
-                    new SqlInsert("webstudio_index", true)
-                    .InColumnValue("index_name", Wrapper.IndexName)
-                    .InColumnValue("last_modified", now)
-                    );
+                db.ExecuteNonQuery(new SqlInsert("webstudio_index", true).InColumnValue("index_name", Wrapper.IndexName));
             }
 
             Logger.DebugFormat("index completed {0}", Wrapper.IndexName);
-        }
-
-        long IIndexer.Count()
-        {
-            var meta = Count(DateTime.MinValue);
-
-            Logger.DebugFormat("Index: {0}, TotalCount {1}", IndexName, meta.Item1);
-
-            return meta.Item1;
         }
 
         internal IReadOnlyCollection<T> Select(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId = false)
@@ -521,30 +384,15 @@ namespace ASC.ElasticSearch
             return result.Documents;
         }
 
-        private bool BeforeIndex(T data)
+        private void BeforeIndex(T data)
         {
-            if (!CheckExist(data)) return false;
+            CreateIfNotExist(data);
 
             var wrapperWithDoc = data as WrapperWithDoc;
             if (wrapperWithDoc != null)
             {
-                wrapperWithDoc.InitDocument(SearchSettings.CanIndexByContent<T>(data.TenantId));
+                wrapperWithDoc.InitDocument(SearchSettings.LoadForTenant(data.TenantId).CanSearchByContent<T>());
             }
-
-            return true;
-        }
-
-        private async Task<bool> BeforeIndexAsync(T data)
-        {
-            if (!CheckExist(data)) return false;
-
-            var wrapperWithDoc = data as WrapperWithDoc;
-            if (wrapperWithDoc != null)
-            {
-                await wrapperWithDoc.InitDocumentAsync(SearchSettings.CanIndexByContent<T>(data.TenantId)).ConfigureAwait(false);
-            }
-
-            return true;
         }
 
         private void CreateIfNotExist(T data)
@@ -948,141 +796,81 @@ namespace ASC.ElasticSearch
             return descriptor.GetDescriptorForUpdate(this, GetScriptForUpdate(data, action, fields), immediately);
         }
 
-        private void IndexAllGetData(long start, long stop, DateTime lastIndexed)
+        private void IndexAllGetData(long start, long step, string idColumn, string tenantIdColumn, string lastModifiedColumn, DateTime lastIndexed)
         {
-            try
-            {
-                var convertedData = GetDataFromDb(start, stop, lastIndexed);
+            List<Wrapper> data;
 
-                FactoryIndexer<T>.Index(convertedData);
-            }
-            catch (Exception e)
-            {
-                Logger.Error(e);
-                throw;
-            }
-        }
-
-        private async Task IndexAllGetDataAsync(long start, long stop, DateTime lastIndexed)
-        {
-            try
-            {
-                var convertedData = GetDataFromDb(start, stop, lastIndexed);
-
-                await FactoryIndexer<T>.IndexAsync(convertedData).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                Logger.Error(e);
-                throw;
-            }
-        }
-
-        private List<T> GetDataFromDb(long start, long stop, DateTime lastIndexed)
-        {
-            var idColumn = Wrapper.GetColumnName(ColumnTypeEnum.Id, Alias);
-
-            List<object[]> data;
-
-            var dataQuery = GetBaseQuery(lastIndexed)
+            var dataQuery = new SqlQuery(Wrapper.Table + " " + Alias)
                 .Select(Wrapper.GetColumnNames(Alias))
-                .Where(Exp.Between(idColumn, start, stop));
-
-            AddJoins(Wrapper, dataQuery, Alias);
-
-            using (var db = new DbManager("default", 1800000))
-            {
-                db.ExecuteNonQuery("SET SESSION group_concat_max_len = 4294967295;");
-                data = db.ExecuteList(dataQuery);
-            }
-
-            var converter = Wrapper.GetDataConverter();
-            return data.Select(r => (T)converter(r)).ToList();
-        }
-
-        private Tuple<long, long, long> Count(DateTime lastIndexed)
-        {
-            var idColumn = Wrapper.GetColumnName(ColumnTypeEnum.Id, Alias);
-
-            using (var db = new DbManager("default", 1800000))
-            {
-                var dataQuery = GetBaseQuery(lastIndexed)
-                    .Select(idColumn)
-                    .OrderBy(idColumn, true)
-                    .SetMaxResults(1);
-
-                var minid = db.ExecuteList(dataQuery).Select(r => Convert.ToInt64(r[0])).FirstOrDefault();
-
-                dataQuery = GetBaseQuery(lastIndexed)
-                    .Select(idColumn)
-                    .OrderBy(idColumn, false)
-                    .SetMaxResults(1);
-
-                var maxid = db.ExecuteList(dataQuery).Select(r => Convert.ToInt64(r[0])).FirstOrDefault();
-
-                dataQuery = GetBaseQuery(lastIndexed)
-                    .SelectCount();
-
-                var count = db.ExecuteList(dataQuery).Select(r => Convert.ToInt64(r[0])).FirstOrDefault();
-
-                return new Tuple<long, long, long>(count, maxid, minid);
-            }
-        }
-
-        private List<long> Ids(DateTime lastIndexed)
-        {
-            var idColumn = Wrapper.GetColumnName(ColumnTypeEnum.Id, Alias);
-            long start = 0;
-            var result = new List<long>();
-            using (var db = new DbManager("default", 1800000))
-            {
-                while (true)
-                {
-                    var dataQuery = GetBaseQuery(lastIndexed)
-                        .Select(idColumn)
-                        .Where(Exp.Ge(idColumn, start))
-                        .OrderBy(idColumn, true)
-                        .SetFirstResult(QueryLimit)
-                        .SetMaxResults(1);
-
-                    var id = db.ExecuteList(dataQuery).Select(r => Convert.ToInt64(r[0])).FirstOrDefault();
-                    if (id != 0)
-                    {
-                        start = id;
-                        result.Add(id);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                return result;
-            }
-        }
-
-        private SqlQuery GetBaseQuery(DateTime lastIndexed)
-        {
-            var dataQuery = new SqlQuery(Wrapper.Table + " " + Alias);
-            var tenantIdColumn = Wrapper.GetColumnName(ColumnTypeEnum.TenantId, Alias);
-            var lastModifiedColumn = Wrapper.GetColumnName(ColumnTypeEnum.LastModified, Alias);
+                .Where(Exp.Between(idColumn, start, start + step));
 
             if (!string.IsNullOrEmpty(tenantIdColumn))
             {
                 dataQuery.InnerJoin("tenants_tenants t", Exp.EqColumns(tenantIdColumn, "t.id"))
-                    .Where("t.status", TenantStatus.Active)
-                    .Where(!Exp.Like("t.alias", "nctautotest", SqlLike.StartWith));
+                    .Where("t.status", (int)TenantStatus.Active);
             }
 
-
             Wrapper.AddConditions(Alias, dataQuery);
+
+            AddJoins(Wrapper, dataQuery, Alias);
 
             if (!DateTime.MinValue.Equals(lastIndexed))
             {
                 dataQuery.Where(Exp.Gt(lastModifiedColumn, lastIndexed));
             }
 
-            return dataQuery;
+            using (var db = new DbManager("default", 1800000))
+            {
+                db.ExecuteNonQuery("SET SESSION group_concat_max_len = 4294967295;");
+                data = db.ExecuteList(dataQuery).ConvertAll(Wrapper.GetDataConverter());
+            }
+
+            try
+            {
+                FactoryIndexer<T>.Index(data.Cast<T>().ToList());
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+                throw;
+            }
+        }
+
+        private Tuple<long, long, long> Count(string idColumn, string tenantIdColumn, string lastModifiedColumn, DateTime lastIndexed)
+        {
+            using (var db = new DbManager("default", 1800000))
+            {
+                var dataQuery = new SqlQuery(Wrapper.Table + " " + Alias)
+                    .SelectCount()
+                    .SelectMax(idColumn)
+                    .SelectMin(idColumn);
+
+                if (!string.IsNullOrEmpty(tenantIdColumn))
+                {
+                    dataQuery.InnerJoin("tenants_tenants t", Exp.EqColumns(tenantIdColumn, "t.id"))
+                        .Where("t.status", TenantStatus.Active);
+                }
+
+                Wrapper.AddConditions(Alias, dataQuery);
+
+                if (!DateTime.MinValue.Equals(lastIndexed))
+                {
+                    dataQuery.Where(Exp.Gt(lastModifiedColumn, lastIndexed));
+                }
+
+                try
+                {
+                    var data = db.ExecuteList(dataQuery).ConvertAll(r => new Tuple<long, long, long>(Convert.ToInt64(r[0]), Convert.ToInt64(r[1]), Convert.ToInt64(r[2])));
+
+                    return data.FirstOrDefault();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e);
+                    throw;
+                }
+
+            }
         }
     }
 

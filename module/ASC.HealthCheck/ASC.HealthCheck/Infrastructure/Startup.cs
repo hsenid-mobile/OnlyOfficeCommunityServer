@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,16 @@
 */
 
 
-using System;
-
+using ASC.Core;
 using ASC.HealthCheck.Classes;
 using ASC.HealthCheck.Settings;
-
+using log4net;
+using Microsoft.Owin.Hosting;
+using Owin;
+using System;
+using System.Configuration;
+using System.Net.Http.Headers;
+using System.Web.Http;
 using TMResourceData;
 
 namespace ASC.HealthCheck.Infrastructure
@@ -31,7 +36,10 @@ namespace ASC.HealthCheck.Infrastructure
 
         public static void StartService()
         {
-            DBResourceManager.PatchAssemblies();
+            if (ConfigurationManager.AppSettings["resources.from-db"] == "true")
+            {
+                DBResourceManager.PatchAssemblies();
+            }
             var url = HealthCheckCfgSectionHandler.Instance.Url;
 
             log.DebugFormat("StartSevice: RunHealthCheckService. url: {0}", url);

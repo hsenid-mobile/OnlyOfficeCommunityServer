@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,12 @@ namespace ASC.Common.Data.Sql.Expressions
             return string.Format("if({0}, ?, ?)", _condition.ToString(dialect));
         }
 
-        public override IEnumerable<object> GetParameters()
+        public override object[] GetParameters()
         {
             var parameters = new List<object>();
             parameters.AddRange(_condition.GetParameters());
-            parameters.AddRange(new[] { _trueValue, _falseValue });
-            return parameters;
+            parameters.AddRange(new[] {_trueValue, _falseValue});
+            return parameters.ToArray();
         }
     }
 }

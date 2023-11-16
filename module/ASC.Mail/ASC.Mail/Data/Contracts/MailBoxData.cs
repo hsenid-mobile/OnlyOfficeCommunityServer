@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Mail;
 using System.Runtime.Serialization;
-
 using ASC.Common.Logging;
 using ASC.FederatedLogin;
 using ASC.FederatedLogin.Helpers;
@@ -29,7 +28,6 @@ using ASC.Mail.Authorization;
 using ASC.Mail.Data.Imap;
 using ASC.Mail.Enums;
 using ASC.Mail.Utils;
-
 using Newtonsoft.Json;
 
 namespace ASC.Mail.Data.Contracts
@@ -46,7 +44,6 @@ namespace ASC.Mail.Data.Contracts
 
         public int TenantId { get; set; }
 
-        ///<example name="id">1</example>
         [DataMember(Name = "id")]
         public int MailBoxId { get; set; }
 
@@ -61,7 +58,6 @@ namespace ASC.Mail.Data.Contracts
         [IgnoreDataMember]
         public MailAddress EMail { get; set; }
 
-        ///<example name="email">email.only.com</example>
         [DataMember(Name = "email")]
         public string EMailView
         {
@@ -75,23 +71,18 @@ namespace ASC.Mail.Data.Contracts
             }
         }
 
-        ///<example name="name">name</example>
         [DataMember(Name = "name")]
         public string Name { get; set; }
 
-        ///<example name="account">account</example>
         [DataMember(Name = "account")]
         public string Account { get; set; }
 
-        ///<example name="password">password</example>
         [DataMember(Name = "password")]
         public string Password { get; set; }
 
-        ///<example name="server">server</example>
         [DataMember(Name = "server")]
         public string Server { get; set; }
 
-        ///<example name="smtp_server">smtp_server</example>
         [DataMember(Name = "smtp_server")]
         public string SmtpServer { get; set; }
 
@@ -109,22 +100,17 @@ namespace ASC.Mail.Data.Contracts
             set { SmtpPortStr = value.ToString(CultureInfo.InvariantCulture); }
         }
 
-        ///<example name="smtp_port">smtp_port</example>
         [DataMember(Name = "smtp_port")]
         public string SmtpPortStr { get; set; }
 
-        ///<example name="smtp_account">smtp_account</example>
         [DataMember(Name = "smtp_account")]
         public string SmtpAccount { get; set; }
 
-        ///<example name="smtp_password">smtp_password</example>
         [DataMember(Name = "smtp_password")]
         public string SmtpPassword { get; set; }
 
-        ///<example name="smtp_auth">smtp_auth</example>
         [DataMember(Name = "smtp_auth")]
-        public bool SmtpAuth
-        {
+        public bool SmtpAuth {
             get { return SmtpAuthentication != SaslMechanism.None; }
         }
 
@@ -142,23 +128,18 @@ namespace ASC.Mail.Data.Contracts
             set { PortStr = value.ToString(CultureInfo.InvariantCulture); }
         }
 
-        ///<example name="port">port</example>
         [DataMember(Name = "port")]
         public string PortStr { get; set; }
 
-        ///<example type="int" name="incoming_encryption_type">1</example>
         [DataMember(Name = "incoming_encryption_type")]
-        public EncryptionType Encryption { get; set; }
+        public EncryptionType Encryption { get; set;}
 
-        ///<example type="int" name="outcoming_encryption_type">2</example>
         [DataMember(Name = "outcoming_encryption_type")]
         public EncryptionType SmtpEncryption { get; set; }
 
-        ///<example type="int" name="auth_type_in">2</example>
         [DataMember(Name = "auth_type_in")]
         public SaslMechanism Authentication { get; set; }
 
-        ///<example type="int" name="auth_type_smtp">2</example>
         [DataMember(Name = "auth_type_smtp")]
         public SaslMechanism SmtpAuthentication { get; set; }
 
@@ -197,21 +178,21 @@ namespace ASC.Mail.Data.Contracts
         /// </summary>
 // ReSharper disable InconsistentNaming
         public const int DefaultServerLoginDelay = 30;
-        // ReSharper restore InconsistentNaming
+// ReSharper restore InconsistentNaming
 
         /// <summary>
         /// Limiting the period of time when limiting download emails
         /// </summary>
-        // ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
         public const Int64 DefaultMailLimitedTimeDelta = 25920000000000; // 30 days;
-                                                                         // ReSharper restore InconsistentNaming
+// ReSharper restore InconsistentNaming
 
         /// <summary>
         /// Default begin timestamp loading emails
         /// </summary>
-        // ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
         public const Int64 DefaultMailBeginTimestamp = 622933632000000000; // 01/01/1975 00:00:00
-                                                                           // ReSharper restore InconsistentNaming
+// ReSharper restore InconsistentNaming
 
         public int AuthorizeTimeoutInMilliseconds
         {
@@ -222,18 +203,14 @@ namespace ASC.Mail.Data.Contracts
 
         private OAuth20Token _token;
 
-        ///<example name="imap">true</example>
         [DataMember(Name = "imap")]
         public bool Imap { get; set; }
 
-        ///<example name="begin_date">2020-10-01T17:04:32.0000000</example>
         [DataMember(Name = "begin_date")]
         public DateTime BeginDate { get; set; }
 
-        ///<example name="is_oauth">true</example>
         [DataMember(Name = "is_oauth")]
-        public bool IsOAuth
-        {
+        public bool IsOAuth {
             get { return !string.IsNullOrEmpty(_oAuthToken); }
         }
 
@@ -241,8 +218,7 @@ namespace ASC.Mail.Data.Contracts
         public byte OAuthType { get; set; }
 
         [IgnoreDataMember]
-        public string OAuthToken
-        {
+        public string OAuthToken {
             get { return _oAuthToken; }
             set
             {
@@ -256,7 +232,7 @@ namespace ASC.Mail.Data.Contracts
                 {
                     try
                     {
-                        if ((AuthorizationServiceType)OAuthType != AuthorizationServiceType.Google)
+                        if((AuthorizationServiceType)OAuthType != AuthorizationServiceType.Google)
                             return;
 
                         // If it is old refresh token then change to oAuthToken
@@ -308,10 +284,8 @@ namespace ASC.Mail.Data.Contracts
         [IgnoreDataMember]
         public bool AccessTokenRefreshed { get; set; }
 
-        ///<example name="restrict">true</example>
         [DataMember(Name = "restrict")]
-        public bool Restrict
-        {
+        public bool Restrict {
             get { return !(BeginDate.Equals(MailBeginTimestamp)); }
         }
 
@@ -344,15 +318,13 @@ namespace ASC.Mail.Data.Contracts
                 catch (Exception)
                 {
                     // skip
-                }
+                }                
             }
         }
 
-        ///<example name="email_in_folder">email_in_folder</example>
         [DataMember(Name = "email_in_folder")]
         public string EMailInFolder { get; set; }
 
-        ///<example name="is_teamlab">is_teamlab</example>
         [DataMember(Name = "is_teamlab")]
         public bool IsTeamlab { get; set; }
 
@@ -388,7 +360,7 @@ namespace ASC.Mail.Data.Contracts
         public MailBoxData(int tenant, string user, int mailboxId, string name,
             MailAddress email, string account, string password, string server,
             EncryptionType encryption, SaslMechanism authentication, bool imap,
-            string smtpAccount, string smtpPassword, string smtpServer,
+            string smtpAccount, string smtpPassword, string smtpServer, 
             EncryptionType smtpEncryption, SaslMechanism smtpAuthentication,
             byte oAuthType, string oAuthToken)
         {
@@ -429,7 +401,7 @@ namespace ASC.Mail.Data.Contracts
 
             ServerLoginDelay = DefaultServerLoginDelay;
             BeginDate = MailBeginTimestamp;
-
+           
             ImapIntervals = new Dictionary<string, ImapFolderUids>();
         }
 

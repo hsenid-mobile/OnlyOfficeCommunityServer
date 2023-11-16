@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,8 @@ var defineBodyMediaClass = function () {
     // init jQuery Datepicker
     if (jQuery && jQuery.datepicker) {
         jQuery.datepicker.setDefaults({
-            changeMonth: true,
-            changeYear: true,
+            //changeMonth: true,
+            //changeYear: true,
             prevText: "",
             nextText: "",
             firstDay: ASC.Resources.Master.FirstDay,
@@ -94,7 +94,7 @@ var defineBodyMediaClass = function () {
             dayNamesMin: ASC.Resources.Master.DayNames,
             dayNamesShort: ASC.Resources.Master.DayNames,
             dayNames: ASC.Resources.Master.DayNamesFull,
-            monthNamesShort: ASC.Resources.Master.MonthNamesFull,
+            monthNamesShort: ASC.Resources.Master.MonthNames,
             monthNames: ASC.Resources.Master.MonthNamesFull
         });
     }
@@ -133,8 +133,8 @@ var defineBodyMediaClass = function () {
     Teamlab.init();
 
     // init LoadingBanner
-    LoadingBanner.strLoading = ASC.Resources.Master.ResourceJS.LoadingProcessing;
-    LoadingBanner.strDescription = ASC.Resources.Master.ResourceJS.LoadingDescription;
+    LoadingBanner.strLoading = ASC.Resources.Master.Resource.LoadingProcessing;
+    LoadingBanner.strDescription = ASC.Resources.Master.Resource.LoadingDescription;
 
     // init image zoom
     StudioManager.initImageZoom();
@@ -149,7 +149,7 @@ var defineBodyMediaClass = function () {
     jq.blockUI.defaults.overlayCSS = {};
     jq.blockUI.defaults.fadeOut = 0;
     jq.blockUI.defaults.fadeIn = 0;
-    jq.blockUI.defaults.message = "<div class=\"loader-text-block\">" + ASC.Resources.Master.ResourceJS.LoadingPleaseWait + "</div>";
+    jq.blockUI.defaults.message = "<div class=\"loader-text-block\">" + ASC.Resources.Master.Resource.LoadingPleaseWait + "</div>";
 
     if (jq("#studio_sidePanel").length) {
         LeftMenuManager.init(StudioManager.getBasePathToModule(), jq(".menu-list .menu-item.sub-list, .menu-list>.menu-item.sub-list>.menu-sub-list>.menu-sub-item"));
@@ -164,45 +164,17 @@ var defineBodyMediaClass = function () {
 
     var isDesktop = jq("body").hasClass("desktop");
 
-    if (ASC.Resources.Master.ModeThemeSettings.AutoDetect == true) {
-        var window_theme = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (window_theme == true && ASC.Resources.Master.ModeThemeSettings.ModeThemeName != 1) {
-            SetThemeMode("dark");
-            return;
-        }
-        if (window_theme == false && ASC.Resources.Master.ModeThemeSettings.ModeThemeName != 0) {
-            SetThemeMode("light");
-            return;
-        }
-    }
-
-    function SetThemeMode(theme) {
-        Teamlab.setModeTheme(null, theme, true, {
-            success: function (params, response) {
-                jq.cookies.set("mode_theme_key", theme, { path: '/' });
-                window.location.reload(true);
-            }
-        });
-    };
-
     // init RenderPromoBar
     if (ASC.Resources.Master.SetupInfoNotifyAddress &&
         ASC.Resources.Master.IsAuthenticated == true &&
         ASC.Resources.Master.ApiResponsesMyProfile.response && 
         ASC.Resources.Master.ShowPromotions) {
 
-        StudioManager.addPendingRequest(function () {
-            Teamlab.getBarPromotions({}, isDesktop, {
-                success: function (params, content) {
-                    try {
-                        if (content) {
-                            eval(content);
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
-            });
+        Teamlab.getBarPromotions({}, isDesktop, {
+            success: function(params, content) {
+                if (content)
+                    eval(content);
+            }
         });
     }
 
@@ -218,18 +190,11 @@ var defineBodyMediaClass = function () {
         !ASC.Resources.Master.ApiResponsesMyProfile.response.isOutsider &&
         ASC.Resources.Master.ShowTips) {
 
-        StudioManager.addPendingRequest(function () {
-            Teamlab.getBarTips({}, isDesktop, {
-                success: function (params, content) {
-                    try {
-                        if (content) {
-                            eval(content);
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
-            });
+        Teamlab.getBarTips({}, isDesktop, {
+            success: function (params, content) {
+                if (content)
+                    eval(content);
+            }
         });
     }
 
@@ -246,7 +211,7 @@ var defineBodyMediaClass = function () {
         }
     });
 
-    jq("#commonLogout").on("click", function() {
+    jq("#commonLogout").click(function() {
         if (typeof SmallChat != "undefined" && SmallChat.logoutEvent) {
             SmallChat.logoutEvent();
         }
@@ -342,10 +307,18 @@ var defineBodyMediaClass = function () {
             /***resizable left navigation menu***/
             if (jq(".mainPageTableSidePanel").length == 1) {
                 setResizableMaxWidth();
+                if (jq("#studioPageContent").width() < jq(".mainPageTable.with-mainPageTableSidePanel").width() ||
+                    jq(".mainPageTable.with-mainPageTableSidePanel .mainPageContent").outerWidth() < mainPageContentMinOuterW) {
+                    jq("#studio_sidePanel").width(sidePanelMinW);
+                    jq(".mainPageTableSidePanel").width(sidePanelMinW);
+                }
             }
             /******/
 
             jq(window).trigger("resizeWinTimer", null);
+
+            jq("table.mainPageTable").tlBlock('resize');
+
 
             jq("div.advansed-filter").each(function () {
                 jq(this).advansedFilter('resize');
@@ -358,6 +331,8 @@ var defineBodyMediaClass = function () {
             defineBodyMediaClass();
 
             jq(window).trigger("resizeWinTimerWithMaxDelay", null);
+
+            jq("table.mainPageTable").tlBlock('resize');
         }, 91));
     });
 
@@ -370,7 +345,7 @@ var defineBodyMediaClass = function () {
         pageContent.find(".studio-action-panel, .popup_helper, .advanced-selector-container").hide();
         jq("#studioPageContent main .menu-small.active").removeClass("active");
         jq("#studioPageContent main .entity-menu.active").removeClass("active");
-        jq('#ui-datepicker-div, .asc-popupmenu, body>ul.ui-autocomplete').hide();
+        jq('#ui-datepicker-div, .asc-popupmenu').hide();
     };
 
     navContent.on("scroll", function() {
@@ -392,8 +367,10 @@ var defineBodyMediaClass = function () {
 })();
 
 
+jq("table.mainPageTable").tlBlock();
+
 //hack for resizing filter
-setTimeout("jq(window).trigger('resize')", 500);
+setTimeout("jq(window).resize()", 500);
 
 jq(window).one("resize", function () {
     clearTimeout(jq.data(this, 'resizeWinTimer'));

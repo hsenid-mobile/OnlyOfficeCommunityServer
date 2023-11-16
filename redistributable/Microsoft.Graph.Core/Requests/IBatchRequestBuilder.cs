@@ -15,13 +15,13 @@ namespace Microsoft.Graph.Core.Requests
         /// Builds the request.
         /// </summary>
         /// <returns>The built request.</returns>
-        IBatchRequest Request();
+        new IBatchRequest Request();
 
         /// <summary>
         /// Builds the request.
         /// </summary>
         /// <param name="options">The query and header options for the request.</param>
         /// <returns>The built request.</returns>
-        IBatchRequest Request(IEnumerable<Option> options);
+        new IBatchRequest Request(IEnumerable<Option> options);
     }
 }

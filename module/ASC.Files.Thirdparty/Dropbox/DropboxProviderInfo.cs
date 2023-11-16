@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Web;
-
 using ASC.Common.Caching;
 using ASC.Common.Web;
 using ASC.Core;
 using ASC.FederatedLogin;
-using ASC.FederatedLogin.Helpers;
-using ASC.FederatedLogin.LoginProviders;
 using ASC.Files.Core;
-
 using Dropbox.Api.Files;
 
 namespace ASC.Files.Thirdparty.Dropbox
@@ -36,7 +32,7 @@ namespace ASC.Files.Thirdparty.Dropbox
     [DebuggerDisplay("{CustomerTitle}")]
     public class DropboxProviderInfo : IProviderInfo, IDisposable
     {
-        private OAuth20Token _token;
+        private readonly OAuth20Token _token;
         private readonly FolderType _rootFolderType;
         private readonly DateTime _createOn;
 
@@ -154,24 +150,8 @@ namespace ASC.Files.Thirdparty.Dropbox
         {
             var dropboxStorage = new DropboxStorage();
 
-            CheckToken();
-
             dropboxStorage.Open(_token);
             return dropboxStorage;
-        }
-
-        private void CheckToken()
-        {
-            if (_token == null) throw new UnauthorizedAccessException("Cannot create Dropbox session with given token");
-            if (_token.IsExpired)
-            {
-                _token = OAuth20TokenHelper.RefreshToken<DropboxLoginProvider>(_token);
-
-                using (var dbDao = new CachedProviderAccountDao(CoreContext.TenantManager.GetCurrentTenant().TenantId, FileConstant.DatabaseId))
-                {
-                    dbDao.UpdateProviderInfo(ID, new AuthData(token: _token.ToJson()));
-                }
-            }
         }
 
 

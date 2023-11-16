@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 // ReSharper disable InconsistentNaming
 
 using System.Collections.Generic;
-
 using ASC.Mail.Core.DbSchema.Interfaces;
 
 namespace ASC.Mail.Core.DbSchema.Tables
@@ -65,7 +64,6 @@ namespace ASC.Mail.Core.DbSchema.Tables
             public const string ChainId = "chain_id";
             public const string ChainDate = "chain_date";
             public const string LastModified = "time_modified";
-            public const string ReadRequestStatus = "read_request_status";
         }
 
         public string Name
@@ -103,18 +101,17 @@ namespace ASC.Mail.Core.DbSchema.Tables
                 Columns.IsForwarded,
                 Columns.Stream,
                 Columns.Folder,
-                Columns.FolderRestore,
+                Columns.FolderRestore, 
                 Columns.Spam,
                 Columns.IsRemoved,
                 Columns.TimeModified,
-                Columns.MimeMessageId,
-                Columns.MimeInReplyTo,
+                Columns.MimeMessageId, 
+                Columns.MimeInReplyTo, 
                 Columns.ChainId,
                 Columns.ChainDate,
                 Columns.IsTextBodyOnly,
-                Columns.HasParseError,
-                Columns.CalendarUid,
-                Columns.ReadRequestStatus
+                Columns.HasParseError, 
+                Columns.CalendarUid
             };
         }
     }

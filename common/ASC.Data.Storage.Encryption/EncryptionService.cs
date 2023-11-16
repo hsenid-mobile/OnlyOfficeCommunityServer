@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,10 @@
 
 
 using ASC.Common.Threading.Progress;
-using ASC.Core.Common.Contracts;
-using ASC.Core.Encryption;
 
 namespace ASC.Data.Storage.Encryption
 {
-    class EncryptionService : IEncryptionService, IHealthCheckService
+    class EncryptionService : IEncryptionService
     {
         public void Start(EncryptionSettings encryptionSettings, string serverRootPath)
         {
@@ -39,15 +37,5 @@ namespace ASC.Data.Storage.Encryption
         {
             EncryptionWorker.Stop();
         }
-
-        public HealthCheckResponse CheckHealth()
-        {
-            return HealthCheckResult.ToResponse(new HealthCheckResult
-            {
-                Message = "Service Encryption is OK! Warning: Method is not implement. Always return the Healthy status",
-                Status = HealthStatus.Healthy
-            });
-        }
-
     }
 }

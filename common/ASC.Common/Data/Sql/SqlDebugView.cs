@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace ASC.Common.Data.Sql
@@ -32,7 +30,7 @@ namespace ASC.Common.Data.Sql
             get { return GetSqlWithParameters(); }
         }
 
-        public IEnumerable<object> Parameters
+        public object[] Parameters
         {
             get { return instruction.GetParameters(); }
         }
@@ -49,14 +47,12 @@ namespace ASC.Common.Data.Sql
             var parameters = instruction.GetParameters();
             var sb = new StringBuilder();
             var i = 0;
-            var sqlParts = sql.Split('?');
-            var pCount = parameters.Count();
-
-            foreach (var p in parameters)
+            foreach (var part in sql.Split('?'))
             {
-                sb.Append(sqlParts[i]);
-                if (i < pCount)
+                sb.Append(part);
+                if (i < parameters.Length)
                 {
+                    var p = parameters[i];
                     if (p == null)
                     {
                         sb.Append("null");

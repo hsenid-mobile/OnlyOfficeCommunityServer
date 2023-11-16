@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 
 using System;
 using System.Web.UI;
-
 using ASC.Web.Core.Client.Bundling;
-using ASC.Web.Core.Utility;
 using ASC.Web.People.Masters.ClientScripts;
 using ASC.Web.People.UserControls;
 using ASC.Web.Studio.UserControls.Users;
@@ -40,8 +38,6 @@ namespace ASC.Web.People.Masters
             //ControlHolder.Controls.Add(new ImportUsersWebControl());
             ControlHolder.Controls.Add(LoadControl(ResendInvitesControl.Location));
 
-            ControlHolder.Controls.Add(LoadControl(Studio.UserControls.Management.TariffLimitExceed.Location));
-
             Master
                 .AddClientScript(
                     new ClientSettingsResources(),
@@ -52,10 +48,10 @@ namespace ASC.Web.People.Masters
         private void InitScripts()
         {
             Master
-                .AddStaticStyles(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark ? GetStaticDarkStyleSheet() : GetStaticStyleSheet())
+                .AddStaticStyles(GetStaticStyleSheet())
                 .AddStaticBodyScripts(GetStaticJavaScript())
                 .RegisterInlineScript(
-                    "jQuery(document.body).children('form').on('submit', function() { return false; });");
+                    "jQuery(document.body).children('form').bind('submit', function() { return false; });");
         }
 
         public ScriptBundleData GetStaticJavaScript()
@@ -78,16 +74,9 @@ namespace ASC.Web.People.Masters
         public StyleBundleData GetStaticStyleSheet()
         {
             return (StyleBundleData)
-                                new StyleBundleData("people", "people")
-                                    .AddSource(ResolveUrl,
-                                        "~/Products/People/App_Themes/default/css/people.master.less");
-        }
-        public StyleBundleData GetStaticDarkStyleSheet()
-        {
-            return (StyleBundleData)
-                new StyleBundleData("dark-people", "people")
+                new StyleBundleData("people", "people")
                     .AddSource(ResolveUrl,
-                        "~/Products/People/App_Themes/dark/dark-people.master.less");
+                        "~/Products/People/App_Themes/default/css/people.master.less");
         }
     }
 }

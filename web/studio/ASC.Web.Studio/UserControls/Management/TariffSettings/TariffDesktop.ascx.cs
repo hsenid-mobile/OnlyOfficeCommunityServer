@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Web;
 using System.Web.UI;
-
 using ASC.Core;
 using ASC.Web.Core.WhiteLabel;
 
@@ -35,7 +34,7 @@ namespace ASC.Web.Studio.UserControls.Management
 
         protected string LogoPath
         {
-            get { return String.Format("/TenantLogo.ashx?logotype={0}&general={1}&dependsontheme=true", (int)WhiteLabelLogoTypeEnum.Dark, (!TenantLogoManager.IsRetina(Request)).ToString().ToLower()); }
+            get { return String.Format("/TenantLogo.ashx?logotype={0}&general={1}", (int)WhiteLabelLogoTypeEnum.Dark, (!TenantLogoManager.IsRetina(Request)).ToString().ToLower()); }
         }
 
         protected void Page_Load(object sender, EventArgs e)

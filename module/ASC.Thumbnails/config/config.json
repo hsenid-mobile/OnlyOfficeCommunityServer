@@ -9,7 +9,7 @@
             "width": 384,
             "height": 288
           },
-          "timeout": 30000,
+          "timeout": 5000,
           "zoomFactor": 0.3
     }
 }

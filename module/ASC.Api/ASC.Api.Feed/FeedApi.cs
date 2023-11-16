@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
 */
 
 
-using System;
-using System.Linq;
-
 using ASC.Api.Attributes;
 using ASC.Api.Impl;
 using ASC.Api.Interfaces;
@@ -27,18 +24,16 @@ using ASC.Core.Tenants;
 using ASC.Feed;
 using ASC.Feed.Data;
 using ASC.Specific;
+using System;
+using System.Linq;
 
 namespace ASC.Api.Feed
 {
-    /// <summary>
-    /// Feed API.
-    /// </summary>
-    /// <name>feed</name>
     public class FeedApi : IApiEntryPoint
     {
         private const string newFeedsCountCacheKey = "newfeedscount";
         private readonly ICache newFeedsCountCache = AscCache.Memory;
-
+        
         private static string GetNewFeedsCountKey()
         {
             return newFeedsCountCacheKey + SecurityContext.CurrentAccount.ID;
@@ -56,15 +51,6 @@ namespace ASC.Api.Feed
             this.context = context;
         }
 
-        ///<summary>
-        ///Opens feeds for reading.
-        ///</summary>
-        ///<short>
-        ///Read feeds
-        ///</short>
-        /// <path>api/2.0/feed/read</path>
-        /// <httpMethod>PUT</httpMethod>
-        /// <returns></returns>
         [Update("/read")]
         public void Read()
         {
@@ -72,21 +58,6 @@ namespace ASC.Api.Feed
             newFeedsCountCache.Remove(GetNewFeedsCountKey());
         }
 
-        ///<summary>
-        ///Returns a list of feeds that are filtered by the parameters specified in the request.
-        ///</summary>
-        ///<short>
-        ///Get feeds
-        ///</short>
-        /// <param type="System.String, System" name="product">Product which feeds you want to read</param>
-        /// <param type="ASC.Specific.ApiDateTime, ASC.Specific" name="from">Time from which the feeds should be displayed</param>
-        /// <param type="ASC.Specific.ApiDateTime, ASC.Specific" name="to">Time until which the feeds should be displayed</param>
-        /// <param type="System.Nullable{System.Guid}, System" name="author">Author whose feeds you want to read</param>
-        /// <param type="System.Nullable{System.Boolean}, System" name="onlyNew">Displays only fresh feeds</param>
-        /// <param type="ASC.Specific.ApiDateTime, ASC.Specific" name="timeReaded">Time when the feeds were read</param>
-        /// <returns>List of filtered feeds</returns>
-        /// <path>api/2.0/feed/filter</path>
-        /// <httpMethod>GET</httpMethod>
         [Read("/filter")]
         public object GetFeed(
             string product,
@@ -97,14 +68,14 @@ namespace ASC.Api.Feed
             ApiDateTime timeReaded)
         {
             var filter = new FeedApiFilter
-            {
-                Product = product,
-                Offset = (int)context.StartIndex,
-                Max = (int)context.Count - 1,
-                Author = author ?? Guid.Empty,
-                SearchKeys = context.FilterValues,
-                OnlyNew = onlyNew.HasValue && onlyNew.Value
-            };
+                {
+                    Product = product,
+                    Offset = (int)context.StartIndex,
+                    Max = (int)context.Count - 1,
+                    Author = author ?? Guid.Empty,
+                    SearchKeys = context.FilterValues,
+                    OnlyNew = onlyNew.HasValue && onlyNew.Value
+                };
 
             if (from != null && to != null)
             {
@@ -149,18 +120,9 @@ namespace ASC.Api.Feed
                 .ToList();
 
             context.SetDataPaginated();
-            return new { feeds, readedDate };
+            return new {feeds, readedDate};
         }
 
-        ///<summary>
-        ///Returns a number of fresh feeds.
-        ///</summary>
-        ///<short>
-        ///Count fresh feeds
-        ///</short>
-        ///<returns>Number of fresh feeds</returns>
-        /// <path>api/2.0/feed/newfeedscount</path>
-        /// <httpMethod>GET</httpMethod>
         [Read("/newfeedscount")]
         public object GetFreshNewsCount()
         {

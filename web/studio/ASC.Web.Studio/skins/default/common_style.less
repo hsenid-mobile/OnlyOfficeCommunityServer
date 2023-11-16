@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 @import "../base.less";
-@import "params.less";
 /*******************************************************************************
    link styles
 *******************************************************************************/
@@ -42,6 +41,7 @@ span.addUserLink {
     &:after {
         color: #83888d;
         content: "+";
+        cursor: pointer;
         display: block;
         font-size: 22px;
         font-weight: 800;
@@ -65,10 +65,10 @@ span.addUserLink {
     width: 8px;
     position: relative;
 
-    &:after {
+    &:after{
         border-left: 4px solid transparent;
         border-right: 4px solid transparent;
-        border-top: 4px solid @sort-down;
+        border-top: 4px solid #212121;
         content: "";
         display: block;
         height: 0;
@@ -80,7 +80,7 @@ span.addUserLink {
     }
 }
 .sort-down-gray:after {
-    border-top-color: @sort-down-gray;
+    border-top-color: #83888C;
 }
 /*******************************************************************************
    Splitters
@@ -99,11 +99,11 @@ span.addUserLink {
 *******************************************************************************/
 
 .userMiniPhoto {
-    border: solid 1px @borderColor2;
+    border: solid 1px #C7C7C7;
 }
 .userPhoto {
     display: block;
-    border: solid 1px @borderColor2;
+    border: solid 1px #C7C7C7;
 }
 
 /*******************************************************************************
@@ -111,17 +111,17 @@ span.addUserLink {
 *******************************************************************************/
 
 .popupContainerClass, .mainContainerClass .popupContainerClass {
-    background: none repeat scroll 0 0 @body-color;
-    border: 1px solid @borderColor;
+    background: none repeat scroll 0 0 #ffffff;
+    border: 1px solid #D1D1D1;
 }
 
 .popupContainerClass .containerHeaderBlock,
 .mainContainerClass .popupContainerClass .containerHeaderBlock,
 .importAreaBlock .containerHeaderBlock {
     vertical-align: middle;
-    background: @popupContainerHeaderBlock;
+    background: #E2E2E2;
     padding: 9px 23px 9px 24px;
-    color: @textColor;
+    color: #333333;
     font-size: 18px;
     font-weight: normal;
     .borderRadiusTop(5px);
@@ -136,20 +136,20 @@ span.addUserLink {
     vertical-align: middle;
 }
 
-.popupContainerClass .containerHeaderBlock .popupCancel .cancelButton,
-.mainContainerClass .popupContainerClass .containerHeaderBlock .popupCancel .cancelButton,
+.popupContainerClass .containerHeaderBlock .popupCancel .cancelButton, 
+.mainContainerClass .popupContainerClass .containerHeaderBlock .popupCancel .cancelButton, 
 .popupContainerClass .cancelButton {
     font-size: 28px;
-    color: @textColor;
+    color: #333;
     cursor: pointer;
-    margin-left: 10px;
+	margin-left: 10px;
 }
 
 .popupContainerClass .containerBodyBlock,
 .mainContainerClass .popupContainerClass .containerBodyBlock {
-    background-color: @body-color;
+    background-color: #FFF;
     padding: 19px 24px 24px 24px;
-    color: @textColor;
+    color: #333;
     font-size: 12px;
     font-weight: normal;
     text-decoration: none;
@@ -159,7 +159,7 @@ span.addUserLink {
 }
 
 .popupContainerClass .containerBodyBlock .exclamation {
-    background-image: url("images/exclamation.svg");
+    background-image: url("images/exclamation.png");
     height: 100px;
     width: 100px;
 }
@@ -168,7 +168,7 @@ span.addUserLink {
 *******************************************************************************/
     .loader-container,
     .popupContainerClass .loader-popup {
-        background: url("images/@{loader-gif-16}") no-repeat scroll 0 0 transparent;
+        background: url("images/loader_16.gif") no-repeat scroll 0 0 transparent;
         color: #999999;
         font-size: 11px;
         line-height: 18px;
@@ -187,24 +187,21 @@ span.addUserLink {
     }
 
     .error-region {
-        background: url("imagescss/toast_icon01.png") no-repeat scroll 7px 6px @notify-panel-error-bg;
-        border: @notify-panel-error-bor;
+        background: url("imagescss/toast_icon01.png") no-repeat scroll 7px 6px #ffbfaa;
     }
 
     .success-region {
-        background: url("imagescss/toast_icon02.png") no-repeat scroll 7px 6px @notify-panel-succes-bg;
-        border: @notify-panel-succes-bor;
+        background: url("imagescss/toast_icon02.png") no-repeat scroll 7px 6px #cae796;
     }
 
     .info-region {
-        background: url("imagescss/toast_icon01.png") no-repeat scroll 7px 6px @notify-panel-info-bg;
-        border: @notify-panel-info-bor;
+        background: url("imagescss/toast_icon01.png") no-repeat scroll 7px 6px #f5e1a2;
     }
 }
 
 .error-container {
     background: url("imagescss/toast_icon01.png") no-repeat scroll 5px 0px #f5e1a2;
-    color: @textColor;
+    color: #333;
     position: absolute;
     padding: 4px 0;
     top:-29px;
@@ -214,7 +211,7 @@ span.addUserLink {
 
 .success-container {
     background: url("imagescss/toast_icon02.png") no-repeat scroll 5px 0px #cbea95;
-    color: @textColor;
+    color: #333;
     position: absolute;
     padding: 4px 0;
     top:-29px;
@@ -227,18 +224,8 @@ span.addUserLink {
 }
 
 .error-popup {
-    background: url("imagescss/toast_icon01.png") no-repeat scroll 7px 6px @error-popup-col;
-    color: @textColor;
-    font-size: 12px;
-    padding: 9px 10px 9px 35px;
-    position: relative;
-    border: @error-popup-bor;
-}
-
-
-.read-confirmation-popup {
-    background: url('images/svg/mail/letter.svg') no-repeat scroll 10px 9px #d0eaf5;
-    color: @textColor;
+    background: url("imagescss/toast_icon01.png") no-repeat scroll 7px 6px #f5e1a2;
+    color: #333;
     font-size: 12px;
     padding: 9px 10px 9px 35px;
     position: relative;
@@ -246,7 +233,7 @@ span.addUserLink {
 
 .success-popup {
     background-color: #cbea95;
-    color: @textColor;
+    color: #333;
     font-size: 12px;
     padding: 9px 10px;
     position: relative;
@@ -262,7 +249,7 @@ span.addUserLink {
         background-position: 7px 2px;
     }
 }
-.close-info-popup, .close-info-popup:hover {
+.close-info-popup, .close-info-popup:hover  {
     cursor: pointer;
     width: 10px;
     height: 10px;
@@ -271,7 +258,7 @@ span.addUserLink {
     top: 50%;
     margin-top: -4px;
     right: 9px;
-    color: @error-popup-close-col;
+    color: #9E9C61;
     text-decoration: none;
     font-size: 20px;
     font-weight: 700;
@@ -279,7 +266,7 @@ span.addUserLink {
 
 /*------------------Container----------------------*/
 .mainContainerClass {
-    background-color: @bodyColor2;
+    background-color: White;
 
     a.delete {
         float: left;
@@ -288,7 +275,7 @@ span.addUserLink {
 
     .containerHeaderBlock {
         overflow: hidden;
-        color: @textColor;
+        color: #333333;
         font-size: 24px;
         vertical-align: middle;
         max-width: 974px;
@@ -321,6 +308,7 @@ span.addUserLink {
     }
 
     .containerBodyBlock {
+        color: #333333;
         font-size: 12px;
         font-weight: normal;
         text-decoration: none;
@@ -369,7 +357,7 @@ span.addUserLink {
 }
 
 .even {
-    background-color: @body-color;
+    background-color: #fff;
 }
 
 /*--------------------Table in container------------------------------*/
@@ -422,7 +410,7 @@ table.tableBase {
         }
 
         tr:hover {
-            background-color: @hoverTable;
+            background-color: #E5E5E5;
 
             a {
                 text-decoration: underline;
@@ -431,13 +419,13 @@ table.tableBase {
 
         tr.selected,
         tr.selected:hover {
-            background-color: @activeTable;
+            background-color: #f2f2f2;
         }
 
             tr:hover img,
             tr.selected img,
             tr.selected:hover img {
-                background-color: @body-color;
+                background-color: #fff;
             }
     }
 
@@ -449,23 +437,23 @@ table.tableBase {
 
 /*---------------Side panels ----------*/
 .studioSideBox {
-    border: 1px solid @borderColor2;
+    border: 1px solid #C7C7C7;
     .borderRadius(10px);
     margin-bottom: 20px;
     padding: 10px;
 }
 .studioSideBoxContent {
-    background-color: @body-color;
+    background-color: #ffffff;
 }
 .studioSideBoxBody {
     padding-top: 5px;
     padding-bottom: 10px;
 }
 .studioSideBoxHeader {
-    color: @textColor;
+    color: #333333;
     font-size: 18px;
     padding-bottom: 10px;
-    border-bottom: solid 1px @borderColor2;
+    border-bottom: solid 1px #c7c7c7;
 }
 
 /*---------------Template for borders---------------*/
@@ -581,19 +569,14 @@ table.tableBase {
 
 /*---------------modal dialog-------------------------*/
 div.blockMsg {
-    background-color: @body-color;
+    background-color: #fff;
     border: 1px solid #afb2b7;
-    color: @textColor;
+    color: #333;
     left: 50%;
     padding: 10px 15px;
     text-align: center;
     top: 40%;
     .borderRadius(5px);
-}
-
-.ui-datepicker.ui-widget.ui-widget-content.ui-helper-clearfix.ui-corner-all.blockMsg {
-    width: 18em;
-    padding: 5px 10px;
 }
 
 @media (max-height: 800px) {
@@ -622,8 +605,8 @@ div.blockMsg {
 }
 
 .employeeFilterInputFocus, .employeeFilterInputGreyed {
-    background-color: @body-color;
-    border: 0px solid @bodyColor2;
+    background-color: #FFFFFF;
+    border: 0px solid White;
     color: #434341;
     font-size: 12px;
     width: 285px;
@@ -655,7 +638,7 @@ input[type="text"].employeeFilterInputFocus {
 /*--------------FCKEditor----------------------*/
 .asccut {
     background-color: #D2D2D2;
-    border: 1px dotted @textColor;
+    border: 1px dotted #333333;
     display: block;
 }
 
@@ -713,8 +696,8 @@ input[type="text"].employeeFilterInputFocus {
     cursor: pointer;
     padding: 0px;
     margin: 0px;
-    border: solid 1px @borderColor2;
-    background-color: @body-color;
+    border: solid 1px #c7c7c7;
+    background-color: #ffffff;
 }
 .tagAutocompleteSelectedItem {
     background-color: #edf6fd;
@@ -750,7 +733,7 @@ input[type="text"].employeeFilterInputFocus {
 }
 /* Progress bar style*/
 .asc-progress-wrapper {
-    background-color: @progress-wrapper;
+    background-color: #d1d1d1;
     height: 14px;
     overflow: hidden;
     .borderRadius(2px);
@@ -774,7 +757,7 @@ progress {
 }
 @-moz-document url-prefix() {
 progress {
-    background-color: @borderColor;
+    background-color: #d1d1d1;
     border: none;
     border-radius: 2px;
 }
@@ -787,7 +770,7 @@ progress {
     }
 
     &::-webkit-progress-bar {
-        background-color: @borderColor;
+        background-color: #d1d1d1;
         border-radius: 2px;
     }
 
@@ -806,22 +789,22 @@ progress {
     max-height: 200px;
     overflow-y: auto;
     overflow-x: hidden;
-    border: 1px solid @borderColor !important;
+    border: 1px solid #D1D1D1 !important;
     border-top: none !important;
 
     .ui-menu-item {
         list-style: none;
-        border-bottom: 1px solid @borderColor !important;
-        background-color: @body-color !important;
+        border-bottom: 1px solid #D1D1D1 !important;
+        background-color: #FFFFFF !important;
 
         .ui-state-hover, .ui-state-active {
-            background-color: @hoverTable !important;
+            background-color: #E5E5E5 !important;
             border: none !important;
             margin: 0 !important;
         }
 
         a, a:hover {
-            color: @ui-autocomplete-a-col;
+            color: black;
             display: block;
             padding: 3px;
             text-decoration: none;
@@ -841,21 +824,13 @@ progress {
     background-image: url('images/svg/crm/calendar.svg');
     background-position: 75px center;
     background-repeat: no-repeat;
-    border: 1px solid @text-edit-calendar;
+    border: 1px solid #AFB2B7;
     font-size: 11px;
     height: 18px;
     line-height: 18px;
     width: 70px;
     padding-right: 18px;
     padding-left: 5px;
-    background-color: @back-ground-text;
-    color: @bg-a-activate;
-
-    &.disabled,
-    &:disabled {
-        background-color: @disabled;
-        color: @textEditCalendarDisabled;
-    }
 }
 
 /*************************************************************
@@ -920,7 +895,7 @@ span.requiredErrorText {
     font-size: 12px;
 
     .headerPanelSmall {
-        color: @textColor;
+        color: #333;
         margin: 0 0 5px;
         padding: 3px 0 1px 0;
     }
@@ -932,7 +907,7 @@ span.requiredErrorText {
         vertical-align: middle;
         background-repeat: no-repeat;
         padding: 0px 10px 10px 20px !important;
-        color: @email-warning !important;
+        color: #666668 !important;
         background: url('imagescss/expl_16.png') 0 0 no-repeat transparent !important;
 
         .description {
@@ -946,8 +921,8 @@ span.requiredErrorText {
             margin-top: 5px;
             padding: 0px !important;
             text-decoration: none;
-            color: @bg-a-activate !important;
-            border-bottom: dotted 1px @bg-a-activate;
+            color: #000 !important;
+            border-bottom: dotted 1px #000;
         }
     }
 
@@ -971,8 +946,8 @@ body > div.loadingBanner {
     z-index: 256;
 
     .loader-block {
-        background-color: @body-color;
-        background-image: url("images/@{loader-gif-16}");
+        background-color: #FFFFFF;
+        background-image: url("images/loader_16.gif");
         background-position: 10px 50%;
         background-repeat: no-repeat;
         border: 1px solid #CACACA;
@@ -1038,7 +1013,7 @@ div.hintDescriptionPanel.help_bottom  {
 .reportTypeRow img { margin-bottom: -1px; cursor:pointer;}
 
 .borderBaseShadow {
-    border: solid 1px @borderColor;
+    border: solid 1px #D1D1D1;
 }
 
 
@@ -1060,6 +1035,10 @@ div.hintDescriptionPanel.help_bottom  {
 .profile-container {
     &.my {
         margin: 0 0 0 288px;
+    }
+
+    .borderBase {
+        border: 0;
     }
 }
 
@@ -1145,7 +1124,7 @@ input[type=number] {
 }
 
 .settings-help-block {
-    color: @settings-help-block-p;
+    color: #787878;
     display: inline-block;
     float: left;
     font-size: 11px;
@@ -1159,7 +1138,7 @@ input[type=number] {
     &:after {
         background-color: #83888d;
         .borderRadius(18px);
-        color: @body-color;
+        color: #ffffff;
         content: "?";
         font-family: "Open Sans",sans-serif;
         display: inline-block;
@@ -1178,7 +1157,7 @@ input[type=number] {
     }
 
     p {
-        color: @settings-help-block-p;
+        color: #787878;
         font-size: 11px;
         margin: 0;
     }
@@ -1199,17 +1178,6 @@ body.media-width-0-1200 .settings-help-block {
 .disable {
     .settings-help-block {
         background: url('imagescss/exclamation.png') no-repeat left top;
-
-        div, p, span {
-            color: @textColor;
-        }
-
-        a,
-        a:visited,
-        a:hover,
-        a:active {
-            color: #116d9d;
-        }
     }
 
     .settings-help-block::after {
@@ -1261,9 +1229,9 @@ body.media-width-0-1200 .settings-help-block {
     padding: 0;
     position: relative;
 }
-.link-with-entity:after {
+.link-with-entity:after{
     background: url("images/link_16.png") no-repeat center center transparent;
-    color: @textColor;
+    color: #333333;
     content: " ";
     display: block;
     height: 16px;
@@ -1279,9 +1247,9 @@ body.media-width-0-1200 .settings-help-block {
 welcome popup for Collaborator
 *******************************************************************************/
 .welcome-to-teamlab-with-logo {
-    background: url("imagescss/welcometo_logo.svg") 0 0 no-repeat;
+    background: url("imagescss/welcometo_logo.png") 0 0 no-repeat;
     padding-left: 116px;
-    color: @textColor;
+    color: #333;
 
     .welcome {
         font-size: 14px;
@@ -1338,7 +1306,7 @@ welcome popup for Collaborator
     z-index: 300;
 }
 .progress-dialog {
-    border: 1px solid @borderColor;
+    border: 1px solid #D1D1D1;
     display: none;
     margin-top: 16px;
     width: 500px;
@@ -1353,8 +1321,8 @@ welcome popup for Collaborator
 }
 
 .progress-dialog-header {
-    background-color: @bg-progress-dialog-header;
-    color: @textColor;
+    background-color: #E2E2E2;
+    color: #333333;
     font-size: 18px;
     line-height: 32px;
     padding: 4px 24px;
@@ -1365,7 +1333,7 @@ welcome popup for Collaborator
     margin: 12px 4px 10px 4px;
 }
 .progress-dialog-body {
-    background-color: @body-color;
+    background-color: #FFFFFF;
     padding: 0 24px 16px;
 }
 .progress-dialog .actions-container.maximize {
@@ -1432,7 +1400,7 @@ welcome popup for Collaborator
     }
 
     .progress-label {
-        color: @body-color;
+        color: #FFFFFF;
         float: left;
         font-size: 10px;
         margin-left: -100px;
@@ -1478,7 +1446,7 @@ welcome popup for Collaborator
     &.close {
         height: 14px;
         width: 14px;
-        color: @textColor;
+        color: #333;
         font-size: 26px;
         font-weight: 500;
         line-height: 10px;
@@ -1492,11 +1460,11 @@ welcome popup for Collaborator
 
     &.minimize {
         border-top: 2px solid transparent;
-        border-bottom: 2px solid @textColor;
+        border-bottom: 2px solid #333;
     }
 
     &.maximize {
-        border-top: 2px solid @textColor;
+        border-top: 2px solid #333;
         border-bottom: 2px solid transparent;
     }
 }
@@ -1556,7 +1524,7 @@ welcome popup for Collaborator
 }
 
 .loader32 {
-    background: url("images/@{loader-gif-32}") center center no-repeat @body-color;
+    background: url("images/loader_32.gif") center center no-repeat #fff;
 }
 
 /* Set min-height for Ipad */
@@ -1572,16 +1540,16 @@ welcome popup for Collaborator
 
 ::-webkit-scrollbar { background: transparent; width: 16px; height: 16px; }
 ::-webkit-scrollbar-button { display: none; }
-::-webkit-scrollbar-track { background: #F5F5F5; border-style: solid; border-color: transparent; border-width: 4px; border-radius: 6px; background-clip: content-box; }
-::-webkit-scrollbar-thumb { background: #BFBFBF; border-style: solid; border-color: transparent; border-width: 4px; border-radius: 6px; background-clip: content-box; }
-::-webkit-scrollbar-thumb:hover { background: #A7A7A7; border-style: solid; border-color: transparent; border-width: 4px; border-radius: 6px; background-clip: content-box; }
+::-webkit-scrollbar-track { background: #F5F5F5; border-style: solid; border-color: transparent; border-width: 0px 4px; border-radius: 6px; background-clip: content-box; }
+::-webkit-scrollbar-thumb { background: #BFBFBF; border-style: solid; border-color: transparent; border-width: 0px 4px; border-radius: 6px; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: #A7A7A7; border-style: solid; border-color: transparent; border-width: 0px 4px; border-radius: 6px; background-clip: content-box; }
 ::-webkit-scrollbar-corner { background: inherit; }
 
 .webkit-scrollbar::-webkit-scrollbar { background: transparent; width: 16px; height: 16px; }
 .webkit-scrollbar::-webkit-scrollbar-button { display: none; }
-.webkit-scrollbar::-webkit-scrollbar-track { background: #F5F5F5; border-style: solid; border-color: transparent; border-width: 4px; border-radius: 6px; background-clip: content-box; }
-.webkit-scrollbar::-webkit-scrollbar-thumb { background: #BFBFBF; border-style: solid; border-color: transparent; border-width: 4px; border-radius: 6px; background-clip: content-box; }
-.webkit-scrollbar::-webkit-scrollbar-thumb:hover { background: #A7A7A7; border-style: solid; border-color: transparent; border-width: 4px; border-radius: 6px; background-clip: content-box; }
+.webkit-scrollbar::-webkit-scrollbar-track { background: #F5F5F5; border-style: solid; border-color: transparent; border-width: 0px 4px; border-radius: 6px; background-clip: content-box; }
+.webkit-scrollbar::-webkit-scrollbar-thumb { background: #BFBFBF; border-style: solid; border-color: transparent; border-width: 0px 4px; border-radius: 6px; background-clip: content-box; }
+.webkit-scrollbar::-webkit-scrollbar-thumb:hover { background: #A7A7A7; border-style: solid; border-color: transparent; border-width: 0px 4px; border-radius: 6px; background-clip: content-box; }
 .webkit-scrollbar::-webkit-scrollbar-corner { background: inherit; }
 
 /*******************************************************************************
@@ -1679,18 +1647,8 @@ body.media-width-0-1250 {
 *******************************************************************************/
 
 #studio_emailPwdReminder {
-    margin-top: 16px;
+    margin-top: 15px;
     width: 100%;
-}
-
-#pswdRecoveryInfoText {
-    padding: 0 0 0 32px;
-    margin: 8px 0 0 0;
-    background-image: url(images/svg/exclamation.svg);
-    background-repeat: no-repeat;
-    background-position: 0 0px;
-    font-size: 11px;
-    line-height: 13px;
 }
 
 /*******************************************************************************
@@ -1700,7 +1658,7 @@ body.media-width-0-1250 {
 .ldap-lock::after,
 .ldap-lock-big::after {
     content: "LDAP";
-    background-color: @ldap-color;
+    background-color: #FADB8F;
     border-radius: 2px;
 }
 

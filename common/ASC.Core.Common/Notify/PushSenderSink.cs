@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,105 +16,72 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
-
-using ASC.Core.Common.Notify.FireBase.Dao;
-using ASC.Core.Notify.Senders;
-using ASC.Core.Tenants;
+using ASC.Common.Logging;
+using ASC.Core.Common.Notify.Push;
+using ASC.Core.Configuration;
 using ASC.Notify.Messages;
 using ASC.Notify.Sinks;
 
-using Newtonsoft.Json;
-
-namespace ASC.Core.Notify
+namespace ASC.Core.Common.Notify
 {
     class PushSenderSink : Sink
     {
-        private readonly string senderName = ASC.Core.Configuration.Constants.NotifyPushSenderSysName;
-        private readonly INotifySender sender;
-
-        public PushSenderSink(INotifySender sender)
-        {
-            if (sender == null) throw new ArgumentNullException("sender");
-
-            this.sender = sender;
-        }
+        private readonly ILog _log = LogManager.GetLogger("ASC");
+        private bool configured = true;
 
 
         public override SendResponse ProcessMessage(INoticeMessage message)
         {
             try
             {
-                var result = SendResult.OK;
-                var user = CoreContext.UserManager.GetUsers(new Guid(message.Recipient.ID));
-                var username = user.UserName;
-                if (string.IsNullOrEmpty(username))
+                var notification = new PushNotification
+                    {
+                        Module = GetTagValue<PushModule>(message, PushConstants.PushModuleTagName),
+                        Action = GetTagValue<PushAction>(message, PushConstants.PushActionTagName),
+                        Item = GetTagValue<PushItem>(message, PushConstants.PushItemTagName),
+                        ParentItem = GetTagValue<PushItem>(message, PushConstants.PushParentItemTagName),
+                        Message = message.Body,
+                        ShortMessage = message.Subject
+                    };
+
+                if (configured)
                 {
-                    result = SendResult.IncorrectRecipient;
+                    try
+                    {
+                        using (var pushClient = new PushServiceClient())
+                        {
+                            pushClient.EnqueueNotification(
+                                CoreContext.TenantManager.GetCurrentTenant().TenantId,
+                                message.Recipient.ID,
+                                notification,
+                                new List<string>());
+                        }
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        configured = false;
+                        _log.Debug("push sender endpoint is not configured!");
+                    }
                 }
                 else
                 {
-                    var fromTag = message.Arguments.FirstOrDefault(x => x.Tag == "MessageFrom");
-                    var productID = message.Arguments.FirstOrDefault(x => x.Tag == "__ProductID");
-                    var originalUrl = message.Arguments.FirstOrDefault(x => x.Tag == "DocumentURL");
-
-                    var folderId = message.Arguments.FirstOrDefault(x => x.Tag == "FolderId");
-                    var rootFolderId = message.Arguments.FirstOrDefault(x => x.Tag == "FolderParentId");
-                    var rootFolderType = message.Arguments.FirstOrDefault(x => x.Tag == "FolderRootFolderType");
-                  
-                    NotifyData notifyData = new NotifyData()
-                    {
-                        Email = user.Email,
-                        Portal = CoreContext.TenantManager.GetCurrentTenant().TenantDomain,
-                        OriginalUrl = originalUrl != null && originalUrl.Value != null ? originalUrl.Value.ToString() : "",
-                        Folder = new NotifyFolderData
-                        {
-                            Id = folderId != null && folderId.Value != null ? folderId.Value.ToString() : "",
-                            ParentId = rootFolderId != null && rootFolderId.Value != null ? rootFolderId.Value.ToString() : "",
-                            RootFolderType = rootFolderType != null && rootFolderType.Value != null ? (int)rootFolderType.Value : 0
-                        },
-                    };
-
-                    var msg = (NoticeMessage)message;
-
-                    if (msg.ObjectID.StartsWith("file_"))
-                    {
-                        var documentTitle = message.Arguments.FirstOrDefault(x => x.Tag == "DocumentTitle");
-                        var documentExtension = message.Arguments.FirstOrDefault(x => x.Tag == "DocumentExtension");
-
-                        notifyData.File = new NotifyFileData()
-                        {
-                            Id = msg.ObjectID.Substring(5),
-                            Title = documentTitle != null && documentTitle.Value != null ? documentTitle.Value.ToString() : "",
-                            Extension = documentExtension != null && documentExtension.Value != null ? documentExtension.Value.ToString() : ""
-
-                        };
-                    }
-                    var jsonNotifyData = JsonConvert.SerializeObject(notifyData);
-                    var tenant = CoreContext.TenantManager.GetCurrentTenant(false);
-
-                    var m = new NotifyMessage
-                    {
-                        To = username,
-                        Subject = fromTag != null && fromTag.Value != null ? fromTag.Value.ToString() : message.Subject,
-                        ContentType = message.ContentType,
-                        Content = message.Body,
-                        Sender = senderName,
-                        CreationDate = DateTime.UtcNow,
-                        ProductID = fromTag != null && fromTag.Value != null ? productID.Value.ToString() : null,
-                        ObjectID = msg.ObjectID,
-                        Tenant = tenant == null ? Tenant.DEFAULT_TENANT : tenant.TenantId,
-                        Data = jsonNotifyData
-                    };
-
-                    sender.Send(m);
+                    _log.Debug("push sender endpoint is not configured!");
                 }
-                return new SendResponse(message, senderName, result);
+
+                return new SendResponse(message, Constants.NotifyPushSenderSysName, SendResult.OK);
             }
-            catch (Exception ex)
+            catch (Exception error)
             {
-                return new SendResponse(message, senderName, ex);
+                return new SendResponse(message, Constants.NotifyPushSenderSysName, error);
             }
+        }
+
+        private T GetTagValue<T>(INoticeMessage message, string tagName)
+        {
+            var tag = message.Arguments.FirstOrDefault(arg => arg.Tag == tagName);
+            return tag != null ? (T)tag.Value : default(T);
         }
     }
 }

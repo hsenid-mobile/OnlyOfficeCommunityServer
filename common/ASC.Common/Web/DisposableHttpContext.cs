@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,7 @@ namespace ASC.Common.Web
 
         public DisposableHttpContext(HttpContext ctx)
         {
-            if (ctx == null)
-            {
-                throw new ArgumentNullException();
-            }
-
+            if (ctx == null) throw new ArgumentNullException();
             this.ctx = ctx;
         }
 
@@ -44,31 +40,19 @@ namespace ASC.Common.Web
         {
             get
             {
-                if (HttpContext.Current == null)
-                {
-                    throw new NotSupportedException("Avaliable in web request only.");
-                }
-
+                if (HttpContext.Current == null) throw new NotSupportedException("Avaliable in web request only.");
                 return new DisposableHttpContext(HttpContext.Current);
             }
         }
 
         public object this[string key]
         {
-            get { return Items.ContainsKey(key.ToLowerInvariant()) ? Items[key.ToLowerInvariant()] : null; }
+            get { return Items.ContainsKey(key) ? Items[key] : null; }
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException();
-                }
-
-                if (!(value is IDisposable))
-                {
-                    throw new ArgumentException("Only IDisposable may be added!");
-                }
-
-                Items[key.ToLowerInvariant()] = (IDisposable)value;
+                if (value == null) throw new ArgumentNullException();
+                if (!(value is IDisposable)) throw new ArgumentException("Only IDisposable may be added!");
+                Items[key] = (IDisposable) value;
             }
         }
 
@@ -76,7 +60,7 @@ namespace ASC.Common.Web
         {
             get
             {
-                var table = (Dictionary<string, IDisposable>)ctx.Items[key];
+                var table = (Dictionary<string, IDisposable>) ctx.Items[key];
                 if (table == null)
                 {
                     table = new Dictionary<string, IDisposable>(1);
@@ -94,9 +78,15 @@ namespace ASC.Common.Web
         {
             if (!_isDisposed)
             {
-                foreach (var item in Items.Values)
+                foreach (IDisposable item in Items.Values)
                 {
-                    item.Dispose();
+                    try
+                    {
+                        item.Dispose();
+                    }
+                    catch
+                    {
+                    }
                 }
                 _isDisposed = true;
             }

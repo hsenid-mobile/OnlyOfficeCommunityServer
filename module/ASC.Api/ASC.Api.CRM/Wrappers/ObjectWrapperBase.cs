@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ namespace ASC.Api.CRM.Wrappers
     [DataContract(Namespace = "")]
     public class ObjectWrapperBase
     {
-        ///<example name="id" type="int">1234</example>
         [DataMember(Name = "id")]
         public int ID { get; set; }
 

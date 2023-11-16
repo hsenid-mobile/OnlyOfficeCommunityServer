@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
 */
 
 
-using System.Collections.Generic;
-
 namespace ASC.Common.Data.Sql.Expressions
 {
     public class LGExp : Exp
@@ -27,7 +25,7 @@ namespace ASC.Common.Data.Sql.Expressions
 
         public LGExp(string column, object value, bool equal)
         {
-            this.column = (SqlIdentifier)column;
+            this.column = (SqlIdentifier) column;
             this.value = value;
             this.equal = equal;
         }
@@ -39,9 +37,9 @@ namespace ASC.Common.Data.Sql.Expressions
                        : string.Format("{0} <{1} ?", column.ToString(dialect), equal ? "=" : string.Empty);
         }
 
-        public override IEnumerable<object> GetParameters()
+        public override object[] GetParameters()
         {
-            return new[] { value };
+            return new[] {value};
         }
     }
 }

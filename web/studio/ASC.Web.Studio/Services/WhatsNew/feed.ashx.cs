@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ using System.Text;
 using System.Web;
 using System.Web.Services;
 using System.Xml;
-
 using ASC.Core;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
@@ -85,9 +84,9 @@ namespace ASC.Web.Studio.Services.WhatsNew
                     new Uri(CommonLinkUtility.GetFullAbsolutePath(f.ItemUrl)),
                     f.Id,
                     new DateTimeOffset(TenantUtil.DateTimeToUtc(f.CreatedDate)))
-                {
-                    PublishDate = f.CreatedDate,
-                };
+                    {
+                        PublishDate = f.CreatedDate,
+                    };
                 if (f.Author != null && f.Author.UserInfo != null)
                 {
                     var u = f.Author.UserInfo;

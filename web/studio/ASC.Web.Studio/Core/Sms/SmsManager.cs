@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 
 
 using System;
-
 using ASC.Core;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
-using ASC.MessagingSystem;
 using ASC.Web.Core;
 using ASC.Web.Core.Sms;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Common;
 using ASC.Web.Studio.Utility;
+using Resources;
 
 namespace ASC.Web.Studio.Core.SMS
 {
@@ -43,14 +41,14 @@ namespace ASC.Web.Studio.Core.SMS
             user.MobilePhoneActivationStatus = MobilePhoneActivationStatus.NotActivated;
             if (SecurityContext.IsAuthenticated)
             {
-                CoreContext.UserManager.SaveUserInfo(user, syncCardDav: true);
+                CoreContext.UserManager.SaveUserInfo(user);
             }
             else
             {
                 try
                 {
-                    SecurityContext.CurrentAccount = ASC.Core.Configuration.Constants.CoreSystem;
-                    CoreContext.UserManager.SaveUserInfo(user, syncCardDav: true);
+                    SecurityContext.AuthenticateMe(ASC.Core.Configuration.Constants.CoreSystem);
+                    CoreContext.UserManager.SaveUserInfo(user);
                 }
                 finally
                 {
@@ -58,7 +56,7 @@ namespace ASC.Web.Studio.Core.SMS
                 }
             }
 
-            if (StudioSmsNotificationSettings.TfaEnabledForUser(user.ID))
+            if (StudioSmsNotificationSettings.Enable)
             {
                 PutAuthCode(user, false);
             }
@@ -70,7 +68,7 @@ namespace ASC.Web.Studio.Core.SMS
         {
             if (user == null || Equals(user, Constants.LostUser)) throw new Exception(Resource.ErrorUserNotFound);
 
-            if (!StudioSmsNotificationSettings.IsVisibleAndAvailableSettings || !StudioSmsNotificationSettings.TfaEnabledForUser(user.ID)) throw new MethodAccessException();
+            if (!StudioSmsNotificationSettings.IsVisibleSettings || !StudioSmsNotificationSettings.Enable) throw new MethodAccessException();
 
             var mobilePhone = SmsSender.GetPhoneValueDigits(user.MobilePhone);
 
@@ -84,11 +82,10 @@ namespace ASC.Web.Studio.Core.SMS
             }
         }
 
-        public static void ValidateSmsCode(UserInfo user, string code, bool isEntryPoint = false)
+        public static void ValidateSmsCode(UserInfo user, string code)
         {
-
-            if (!StudioSmsNotificationSettings.IsVisibleAndAvailableSettings
-                || !StudioSmsNotificationSettings.TfaEnabledForUser(user.ID))
+            if (!StudioSmsNotificationSettings.IsVisibleSettings
+                || !StudioSmsNotificationSettings.Enable)
             {
                 return;
             }
@@ -111,8 +108,8 @@ namespace ASC.Web.Studio.Core.SMS
 
             if (!SecurityContext.IsAuthenticated)
             {
-                var action = isEntryPoint ? MessageAction.LoginSuccessViaApiSms : MessageAction.LoginSuccessViaSms;
-                CookiesManager.AuthenticateMeAndSetCookies(user.Tenant, user.ID, action);
+                var cookiesKey = SecurityContext.AuthenticateMe(user.ID);
+                CookiesManager.SetCookies(CookiesType.AuthKey, cookiesKey);
             }
 
             if (user.MobilePhoneActivationStatus == MobilePhoneActivationStatus.NotActivated)

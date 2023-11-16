@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,15 @@
 */
 
 
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Notify.Config;
 using ASC.Notify.Messages;
-
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace ASC.Notify
@@ -92,7 +90,7 @@ namespace ASC.Notify
                                 AutoSubmitted = (string)r[11]
                             });
 
-                    var u = new SqlUpdate("notify_info").Set("state", MailSendingState.Sending).Where(Exp.In("notify_id", messages.Keys.ToList()));
+                    var u = new SqlUpdate("notify_info").Set("state", MailSendingState.Sending).Where(Exp.In("notify_id", messages.Keys));
                     db.ExecuteNonQuery(u);
                     tx.Commit();
 
@@ -144,7 +142,7 @@ namespace ASC.Notify
         }
 
 
-        private IDbManager GetDb()
+        private DbManager GetDb()
         {
             return new DbManager(dbid);
         }

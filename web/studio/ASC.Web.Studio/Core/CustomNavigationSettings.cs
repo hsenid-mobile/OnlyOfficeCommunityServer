@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-
 using ASC.Core.Common.Settings;
 
 namespace ASC.Web.Studio.Core
@@ -26,7 +25,7 @@ namespace ASC.Web.Studio.Core
     [Serializable]
     [DataContract]
     public class CustomNavigationSettings : BaseSettings<CustomNavigationSettings>
-    {
+    {       
         [DataMember]
         public List<CustomNavigationItem> Items { get; set; }
 
@@ -43,33 +42,26 @@ namespace ASC.Web.Studio.Core
 
     [Serializable]
     [DataContract]
-    public class CustomNavigationItem
+    public class CustomNavigationItem 
     {
-        ///<example>00000000-0000-0000-0000-000000000000</example>
         [DataMember]
         public Guid Id { get; set; }
 
-        ///<example>Label</example>
         [DataMember]
         public string Label { get; set; }
 
-        ///<example>Url</example>
         [DataMember]
         public string Url { get; set; }
 
-        ///<example>data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkAgMAAAANjH3HAAAADFBMVEUAAADJycnJycnJycmiuNtHAAAAA3RSTlMAf4C\/aSLHAAAAyElEQVR4Xu3NsQ3CMBSE4YubFB4ilHQegdGSjWACvEpGoEyBYiL05AdnXUGHolx10lf82MmOpfLeo5UoJUhBlpKkRCnhUy7b9XCWkqQMUkYlXVHSf8kTvkHKqKQrSnopg5SRxTMklLmS1MwaSWpmCSQ1MyOzWGZCYrEMEFksA4QqlAFuJJYBcCKxjM3FMySeIfEMC2dMOONCGZZgmdr1ly3TSrJMK9EyJBaaGrHQikYstAiJZRYSyiQEdyg5S8Evckih\/YPscsdej0H6dc0TYw4AAAAASUVORK5CYII=</example>
         [DataMember]
         public string BigImg { get; set; }
 
-        ///<example>data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8\/9hAAAAUUlEQVR4AWMY\/KC5o\/cAEP9HxxgKcSpCGELYADyu2E6mAQjNxBlAWPNxkHdwGkBIM3KYYDUAr2ZCAE+oH8eujrAXDsA0k2EAAtDXAGLx4MpsADUgvkRKUlqfAAAAAElFTkSuQmCC</example>
         [DataMember]
         public string SmallImg { get; set; }
 
-        ///<example>true</example>
         [DataMember]
         public bool ShowInMenu { get; set; }
 
-        ///<example>true</example>
         [DataMember]
         public bool ShowOnHomePage { get; set; }
 

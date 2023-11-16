@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,25 +20,22 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
-
 using ASC.Common.Data.Sql;
 
 namespace ASC.Common.Data
 {
     public interface IDbManager : IDisposable
     {
-        DbCommand Command { get; }
         DbConnection Connection { get; }
         string DatabaseId { get; }
         bool InTransaction { get; }
-        bool IsDisposed { get; }
 
         IDbTransaction BeginTransaction();
 
         IDbTransaction BeginTransaction(IsolationLevel isolationLevel);
 
         IDbTransaction BeginTransaction(bool nestedIfAlreadyOpen);
-
+        
         List<object[]> ExecuteList(string sql, params object[] parameters);
 
         List<object[]> ExecuteList(ISqlInstruction sql);
@@ -52,8 +49,6 @@ namespace ASC.Common.Data
         T ExecuteScalar<T>(ISqlInstruction sql);
 
         int ExecuteNonQuery(string sql, params object[] parameters);
-
-        Task<int> ExecuteNonQueryAsync(string sql, params object[] parameters);
 
         int ExecuteNonQuery(ISqlInstruction sql);
 

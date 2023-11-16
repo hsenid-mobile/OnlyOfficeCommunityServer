@@ -1,9 +1,0 @@
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Common.dll.config
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Common.xml
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Common.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Common.pdb
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Common\obj\Debug\ASC.Common.csproj.AssemblyReference.cache
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Common\obj\Debug\ASC.Common.csproj.CoreCompileInputs.cache
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Common\obj\Debug\ASC.Common.csproj.CopyComplete
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Common\obj\Debug\ASC.Common.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Common\obj\Debug\ASC.Common.pdb

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@
 using System;
 using System.Web;
 using System.Web.UI;
-
 using ASC.Core;
 using ASC.Data.Storage;
 using ASC.Web.Studio.Controls.Common;
-using ASC.Web.Studio.PublicResources;
+using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Utility;
+using Resources;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -32,29 +32,24 @@ namespace ASC.Web.Studio.UserControls.Management
     {
         public const string Location = "~/UserControls/Management/AuditTrail/AuditTrail.ascx";
 
-        public string TariffPageLink { get; set; }
-
         protected void Page_Load(object sender, EventArgs e)
         {
-            TariffPageLink = TenantExtra.GetTariffPageLink();
+            if (CoreContext.Configuration.Standalone || !SetupInfo.IsVisibleSettings(ManagementType.AuditTrail.ToString()))
+            {
+                Response.Redirect(CommonLinkUtility.GetDefault(), true);
+                return;
+            }
+
             Page.RegisterBodyScripts("~/UserControls/Management/AuditTrail/js/audittrail.js")
                 .RegisterStyle("~/UserControls/Management/AuditTrail/css/audittrail.less");
 
             var emptyScreenControl = new EmptyScreenControl
             {
-                ImgSrc = WebPath.GetPath("UserControls/Management/AuditTrail/img/audit_trail_empty_screen.svg"),
+                ImgSrc = WebPath.GetPath("UserControls/Management/AuditTrail/img/audit_trail_empty_screen.jpg"),
                 Header = AuditResource.AuditTrailEmptyScreenHeader,
                 Describe = AuditResource.AuditTrailEmptyScreenDscr
             };
             emptyScreenHolder.Controls.Add(emptyScreenControl);
-        }
-
-        protected bool EnableAuditTrail
-        {
-            get
-            {
-                return CoreContext.Configuration.Standalone || TenantExtra.GetTenantQuota().Audit;
-            }
         }
     }
 }

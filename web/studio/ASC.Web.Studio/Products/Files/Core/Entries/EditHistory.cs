@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
-
 using ASC.Core;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Resources;
-
 using Newtonsoft.Json.Linq;
 
 namespace ASC.Files.Core
@@ -67,14 +65,14 @@ namespace ASC.Files.Core
                                           {
                                               var jUser = jChange.Value<JObject>("user");
                                               return new EditHistoryChanges
-                                              {
-                                                  Date = jChange.Value<string>("created"),
-                                                  Author = new EditHistoryAuthor
                                                   {
-                                                      Id = jUser.Value<string>("id") ?? "",
-                                                      Name = jUser.Value<string>("name"),
-                                                  },
-                                              };
+                                                      Date = jChange.Value<string>("created"),
+                                                      Author = new EditHistoryAuthor
+                                                          {
+                                                              Id = new Guid(jUser.Value<string>("id") ?? Guid.Empty.ToString()),
+                                                              Name = jUser.Value<string>("name"),
+                                                          },
+                                                  };
                                           })
                                       .ToList();
                     return changes;
@@ -105,7 +103,7 @@ namespace ASC.Files.Core
     [DebuggerDisplay("{Id} {Name}")]
     public class EditHistoryAuthor
     {
-        [DataMember(Name = "id")] public string Id;
+        [DataMember(Name = "id")] public Guid Id;
 
         private string _name;
 
@@ -114,15 +112,11 @@ namespace ASC.Files.Core
         {
             get
             {
-                var idInternal = Guid.Empty;
-                if (!Guid.TryParse(Id, out idInternal))
-                    return _name;
-
                 UserInfo user;
                 return
-                    idInternal.Equals(Guid.Empty)
-                    || idInternal.Equals(ASC.Core.Configuration.Constants.Guest.ID)
-                    || (user = CoreContext.UserManager.GetUsers(idInternal)).Equals(Constants.LostUser)
+                    Id.Equals(Guid.Empty)
+                    || Id.Equals(ASC.Core.Configuration.Constants.Guest.ID)
+                    || (user = CoreContext.UserManager.GetUsers(Id)).Equals(Constants.LostUser)
                         ? string.IsNullOrEmpty(_name)
                               ? FilesCommonResource.Guest
                               : _name
@@ -160,8 +154,6 @@ namespace ASC.Files.Core
     {
         [DataMember(Name = "changesUrl", EmitDefaultValue = false)] public string ChangesUrl;
 
-        [DataMember(Name = "fileType")] public string FileType;
-
         [DataMember(Name = "key")] public string Key;
 
         [DataMember(Name = "previous", EmitDefaultValue = false)] public EditHistoryUrl Previous;
@@ -177,8 +169,6 @@ namespace ASC.Files.Core
     [DebuggerDisplay("{Key} - {Url}")]
     public class EditHistoryUrl
     {
-        [DataMember(Name = "fileType")] public string FileType;
-
         [DataMember(Name = "key")] public string Key;
 
         [DataMember(Name = "url")] public string Url;

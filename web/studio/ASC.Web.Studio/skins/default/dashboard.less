@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,9 @@
 */
 
 
-@import "params.less";
-
 .backdrop
 {
-    background-color: @backdrop-bg;
+    background-color: #000;
     bottom: 0;
     filter: alpha(opacity=80);
     left: 0;
@@ -32,7 +30,7 @@
 
 .dashboard-center-box {
     padding: 40px;
-    background-color: @bg-dashboard;
+    background-color: #FFF;
     left: 50%;
     position: absolute;
     top: 10%;
@@ -42,7 +40,7 @@
 }
 
 .dashboard-center-box .close {
-    color: @border-button-default;
+    color: #C4C4C4;
     cursor: pointer;
     display: inline-block;
     float: right;
@@ -88,7 +86,6 @@
         font-size: 27px;
         font-weight: 600;
         margin: 18px 0;
-        color: @bg-dashboard-title;
     }
 
     a.link {
@@ -110,13 +107,13 @@
 .dashboard-center-box.community {
     .content .module-block {
         .img.share-news-and-knowledge {
-            background-image: url("images/dashboard/share-news-and-knowledge.svg");
+            background-image: url("images/dashboard/share-news-and-knowledge.png");
         }
         .img.discuss-with-team {
-            background-image: url("images/dashboard/discuss-with-team.svg");
+            background-image: url("images/dashboard/discuss-with-team.png");
         }
         .img.keep-your-team-posted {
-            background-image: url("images/dashboard/keep-your-team-posted.svg");
+            background-image: url("images/dashboard/keep-your-team-posted.png");
         }
     }
 }
@@ -124,16 +121,16 @@
 .dashboard-center-box.crm {
     .content .module-block {
         .img.create-clients-database {
-            background-image: url("images/dashboard/create-clients-database.svg");
+            background-image: url("images/dashboard/create-clients-database.png");
         }
         .img.track-sales {
-            background-image: url("images/dashboard/track-sales.svg");
+            background-image: url("images/dashboard/track-sales.png");
         }
         .img.communicate-with-clients {
-            background-image: url("images/dashboard/communicate-with-clients.svg");
+            background-image: url("images/dashboard/communicate-with-clients.png");
         }
         .img.customize-your-crm {
-            background-image: url("images/dashboard/customize-your-crm.svg");
+            background-image: url("images/dashboard/customize-your-crm.png");
         }
     }
 }
@@ -141,72 +138,16 @@
 .dashboard-center-box.files {
     .content .module-block {
         .img.work-with-office-docs {
-            background-image: url("images/dashboard/work-with-office-docs.svg");
+            background-image: url("images/dashboard/work-with-office-docs.png");
         }
         .img.share-files {
-            background-image: url("images/dashboard/share-files.svg");
+            background-image: url("images/dashboard/share-files.png");
         }
         .img.make-co-editing-comfy {
-            background-image: url("images/dashboard/make-co-editing-comfy.svg");
+            background-image: url("images/dashboard/make-co-editing-comfy.png");
         }
         .img.use-more-collaboration-tools {
-            background-image: url("images/dashboard/use-more-collaboration-tools.svg");
-        }
-    }
-}
-
-.dashboard-center-box.welcome {
-    .module-block h1 {
-        text-align: center;
-        font-size: 28px;
-        line-height: 32px;
-        font-weight: 600;
-        margin: 0 0 32px 0;
-    }
-
-    .content {
-        height: 362px;
-    }
-
-    .module-block .img {
-        background-position: 10px 0;
-        padding: 0;
-        width: 180px;
-    }
-
-    .module-block .text {
-        width: 420px;
-    }
-
-    .module-block .text b {
-        font-weight: 600;
-    }
-
-    .module-block .title {
-        font-size: 22px;
-        font-weight: 600;
-        margin: 0 0 18px 0;
-    }
-
-    .content .module-block {
-        .img.tailored-cloud {
-            background-image: url("images/dashboard/tailored-cloud.svg");
-        }
-
-        .img.ultimate-security {
-            background-image: url("images/dashboard/ultimate-security.svg");
-        }
-
-        .img.integration-with-infrastructure {
-            background-image: url("images/dashboard/integration-with-infrastructure.svg");
-        }
-
-        .img.apps-you-need {
-            background-image: url("images/dashboard/apps-you-need.svg");
-        }
-
-        .img.creating-business-cloud {
-            background-image: url("images/dashboard/creating-business-cloud.svg");
+            background-image: url("images/dashboard/use-more-collaboration-tools.png");
         }
     }
 }
@@ -335,9 +276,5 @@
         float: left;
         height: 260px;
         position: relative;
-
-        &:focus {
-            outline: none;
-        }
     }
 }

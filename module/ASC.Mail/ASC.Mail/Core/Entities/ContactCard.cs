@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.Mail.Enums;
 
 namespace ASC.Mail.Core.Entities
@@ -60,7 +59,7 @@ namespace ASC.Mail.Core.Entities
                             ContactId = id,
                             Tenant = tenant,
                             User = user,
-                            Type = (int)ContactInfoType.Email,
+                            Type = (int) ContactInfoType.Email,
                             Data = emails[i],
                             IsPrimary = isPrimary
                         });
@@ -80,7 +79,7 @@ namespace ASC.Mail.Core.Entities
                             ContactId = id,
                             Tenant = tenant,
                             User = user,
-                            Type = (int)ContactInfoType.Phone,
+                            Type = (int) ContactInfoType.Phone,
                             Data = phoneNumbers[i],
                             IsPrimary = isPrimary
                         });

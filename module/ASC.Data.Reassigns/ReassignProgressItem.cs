@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,16 @@
 using System;
 using System.Collections.Generic;
 using System.Web;
-
 using ASC.Common.Threading.Progress;
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.MessagingSystem;
-using ASC.Web.Core.Users;
 using ASC.Web.CRM.Core;
+using ASC.Web.Core.Users;
 using ASC.Web.Files.Services.WCFService;
 using ASC.Web.Projects.Core.Engine;
 using ASC.Web.Studio.Core.Notify;
-
 using Autofac;
-
 using CrmDaoFactory = ASC.CRM.Core.Dao.DaoFactory;
 
 namespace ASC.Data.Reassigns
@@ -49,25 +46,12 @@ namespace ASC.Data.Reassigns
         private readonly IFileStorageService _docService;
         private readonly ProjectsReassign _projectsReassign;
 
-        ///<example type="int">123124</example>
         public object Id { get; set; }
-
-        ///<example type="int">1</example>
         public object Status { get; set; }
-
-        ///<example>error</example>
         public object Error { get; set; }
-
-        ///<example type="double">55.5</example>
         public double Percentage { get; set; }
-
-        ///<example>false</example>
         public bool IsCompleted { get; set; }
-
-        ///<example>f528a377-b268-4cdb-8209-91d0fa1417c2</example>
         public Guid FromUser { get { return _fromUserId; } }
-
-        ///<example>f528a377-b268-4cdb-8209-91d0fa1417ca</example>
         public Guid ToUser { get { return _toUserId; } }
 
         public ReassignProgressItem(HttpContext context, int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool deleteProfile)
@@ -101,7 +85,7 @@ namespace ASC.Data.Reassigns
                 Status = ProgressStatus.Started;
 
                 CoreContext.TenantManager.SetCurrentTenant(_tenantId);
-                SecurityContext.CurrentAccount = Core.Configuration.Constants.CoreSystem;
+                SecurityContext.AuthenticateMe(Core.Configuration.Constants.CoreSystem);
 
                 logger.InfoFormat("reassignment of data from {0} to {1}", _fromUserId, _toUserId);
 
@@ -148,7 +132,7 @@ namespace ASC.Data.Reassigns
             {
                 logger.Info("data reassignment is complete");
                 IsCompleted = true;
-                SecurityContext.CurrentUser = _currentUserId;
+                SecurityContext.AuthenticateMe(_currentUserId);
             }
         }
 
@@ -169,7 +153,7 @@ namespace ASC.Data.Reassigns
 
             if (_httpHeaders != null)
                 MessageService.Send(_httpHeaders, MessageAction.UserDataReassigns, MessageTarget.Create(_fromUserId),
-                                    new[] { fromUserName, toUserName });
+                                    new[] {fromUserName, toUserName});
             else
                 MessageService.Send(_context.Request, MessageAction.UserDataReassigns, MessageTarget.Create(_fromUserId),
                                     fromUserName, toUserName);
@@ -194,7 +178,7 @@ namespace ASC.Data.Reassigns
 
             if (_httpHeaders != null)
                 MessageService.Send(_httpHeaders, MessageAction.UserDeleted, MessageTarget.Create(_fromUserId),
-                                    new[] { userName });
+                                    new[] {userName});
             else
                 MessageService.Send(_context.Request, MessageAction.UserDeleted, MessageTarget.Create(_fromUserId),
                                     userName);

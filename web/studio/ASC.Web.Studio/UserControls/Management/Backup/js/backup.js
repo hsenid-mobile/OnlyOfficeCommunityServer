@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,8 @@ window.BackupManager = new function() {
 
     var $saveSettingsBtn = $view.find('#saveSettingsBtn');
 
+    var $spaceExceedMessage = jq("#spaceExceedMessage");
+
     var storageTypes = {
         Temp: "4",
         Docs: "0",
@@ -74,70 +76,64 @@ window.BackupManager = new function() {
         Consumers: "5"
     }
 
-    var displayNoneClass = "display-none", withErrorClass = "with-error", disable = "disable";
-
-    var ResourceJS = ASC.Resources.Master.ResourceJS;
+    var displayNoneClass = "display-none", withErrorClass = "withError", disable = "disable";
+    var resource = ASC.Resources.Master.Resource;
 
     function init() {
+        checkSizeAvailable();
 
         showLoader();
 
         initFolderSelector();
         initMaxStoredCopiesCount();
 
-        async.parallel([
-            function (cb) {
-                Teamlab.getAmazonS3Regions(null, {
-                    success: function (_, response) {
-                        cb(null, response);
-                    },
-                    error: function (_, errors) {
-                        cb(errors[0]);
+        Teamlab.getBackupSchedule({},
+        {
+            success: function (params, response) {
+                initAutoBackupSchedule(response);
+                bind$Events();
+
+                hideLoader();
+                Teamlab.getBackupProgress({},
+                {
+                    success: function (params, data) {
+                        processBackupResponseContinue(data);
                     }
                 });
             },
-            function (cb) {
-                Teamlab.getBackupStorages(null, {
-                    success: function (_, response) {
-                        cb(null, response);
-                    },
-                    error: function (_, errors) {
-                        cb(errors[0]);
-                    }
-                });
-            },
-            function (cb) {
-                Teamlab.getBackupSchedule(null, {
-                    success: function (_, response) {
-                        cb(null, response);
-                    },
-                    error: function (_, errors) {
-                        cb(errors[0]);
-                    }
-                });
+            error: function (params, errors) {
+                toastr.error(errors[0]);
             }
-        ], function (error, results) {
-            hideLoader();
-
-            if (error) {
-                toastr.error(error);
-                return;
-            }
-
-            window.ConsumerStorageSettings.initS3Regions(results[0]);
-
-            initConsumerStorages(results[1]);
-
-            initAutoBackupSchedule(results[2]);
-
-            bind$Events();
-
-            Teamlab.getBackupProgress(null, {
-                success: function (_, response) {
-                    processBackupResponseContinue(response);
-                }
-            });
         });
+
+        Teamlab.getBackupStorages({},
+        {
+            success: function (params, response) {
+                initConsumerStorages(response);
+            },
+            error: function (params, errors) {
+                toastr.error(errors[0]);
+            }
+        });
+    }
+
+    function checkSizeAvailable() {
+        var disable = !!$startBackupBtn.data('locked');
+        if ($spaceExceedMessage.length) {
+            var status = $spaceExceedMessage.data("status");
+            if (status == "NotAvailable" || $backupWithMailCheck.is(":checked")) {
+                $spaceExceedMessage.show();
+                disable = true;
+            } else {
+                $spaceExceedMessage.hide();
+            }
+        }
+        $startBackupBtn.toggleClass("disable", disable);
+
+        jq("#autoBackupOn").attr("disabled", disable);
+        if (disable && !jq("#autoBackupOn").is(":checked")) {
+            jq("#saveSettingsBtn, #autoBackuSettingsBlock").remove();
+        }
     }
 
     function initFolderSelector() {
@@ -151,7 +147,7 @@ window.BackupManager = new function() {
                     .removeAttr('title')
                     .removeClass('disabled')
                     .find(':radio')
-                    .prop('disabled', false);
+                    .attr('disabled', false);
             };
             ASC.Files.FileSelector.createThirdPartyTree();
         };
@@ -213,27 +209,18 @@ window.BackupManager = new function() {
             }
             $hours.val(scheduleTime.hour);
 
-            
+            $autoBackupOn.prop('checked', true);
             $autoBackupSettingsStoragesBox.find('input[value="' + storage.name + '"]').prop('checked', true);
 
             $autoBackupSettingsWithMailCheck.prop('checked', withMail);
             $maxStoredCopiesCount.val(maxStoredCopiesCount);
 
-            if (!$autoBackupSettingsBox.hasClass(disable)) {
-                $autoBackuSettingsBlock.show();
-                $autoBackupOn.prop('checked', true);
-            } else {
-                $autoBackupOff.prop('checked', true);
-            }
+            $autoBackuSettingsBlock.show();
             $view.show();
         } else {
             autoBackupInitOff = true;
             $autoBackupOff.prop('checked', true);
             $view.show();
-        }
-
-        if (!$autoBackupSettingsBox.hasClass(disable)) {
-            $saveSettingsBtn.removeClass(disable);
         }
     }
 
@@ -268,7 +255,7 @@ window.BackupManager = new function() {
         $startBackupBtn.on('click', startBackup);
         $saveSettingsBtn.on('click', saveSettings);
 
-        $backupStoragesBox.find('input[name=backupStorageSelector]:checked').trigger("change");
+        $backupWithMailCheck.click(checkSizeAvailable);
     }
 
     function showTeamlabStorageFolderPop() {
@@ -283,21 +270,11 @@ window.BackupManager = new function() {
         };
 
         if ($(this).is($backupTeamlabStorageFolderSelectorBtn)) {
-            ASC.Files.FileSelector.openDialog({
-                folderId: backupStorageFolderId,
-                onlyFolder: true,
-                thirdParty: $backupThirdPartyStorage.is(':checked'),
-                scrolled: true
-            });
-            ASC.Files.FileSelector.setTitle(ResourceJS.SelectFolder);
+            ASC.Files.FileSelector.openDialog(backupStorageFolderId, true, $backupThirdPartyStorage.is(':checked'));
+            ASC.Files.FileSelector.setTitle(resource.SelectFolder);
         } else {
-            ASC.Files.FileSelector.openDialog({
-                folderId: autoBackupSettingsStorageFolderId,
-                onlyFolder: true,
-                thirdParty: $autoBackupSettingsThirdPartyStorage.is(':checked'),
-                scrolled: true
-            });
-            ASC.Files.FileSelector.setTitle(ResourceJS.SelectFolder);
+            ASC.Files.FileSelector.openDialog(autoBackupSettingsStorageFolderId, true, $autoBackupSettingsThirdPartyStorage.is(':checked'));
+            ASC.Files.FileSelector.setTitle(resource.SelectFolder);
         }
     }
 
@@ -305,25 +282,55 @@ window.BackupManager = new function() {
         if (!storages.length) return;
 
         var $input = $view.find("#backupConsumerStorage,#scheduleConsumerStorage");
-        $input.prop("disabled", false);
+        $input.removeAttr("disabled");
         $input.parent("li").removeClass("disabled");
 
         var $backupConsumerStorageSettingsBox = $view.find("#backupConsumerStorageSettingsBox");
         var selectedConsumer = storages.find(function (item) { return item.isSet }) || storages[1];
-        initConsumerStorage($backupConsumerStorageSettingsBox, $startBackupBtn, selectedConsumer, storages, "backup");
+        initConsumerStorage($backupConsumerStorageSettingsBox, selectedConsumer, storages);
 
         var $backupConsumerStorageScheduleSettingsBox = $view.find("#backupConsumerStorageScheduleSettingsBox");
         selectedConsumer = storages.find(function (item) { return item.current }) || selectedConsumer;
-        initConsumerStorage($backupConsumerStorageScheduleSettingsBox, $saveSettingsBtn, selectedConsumer, storages, "schedule");
-        window.ConsumerStorageSettings.setProps($backupConsumerStorageScheduleSettingsBox.find(".storage[data-id='" + selectedConsumer.id + "']"), selectedConsumer);
+        initConsumerStorage($backupConsumerStorageScheduleSettingsBox, selectedConsumer, storages);
+        for (var i = 0; i < selectedConsumer.properties.length; i++) {
+            var prop = selectedConsumer.properties[i];
+            $backupConsumerStorageScheduleSettingsBox.find("[data-id='" + prop.title + "']").val(prop.value);
+        }
     }
 
-    function initConsumerStorage($box, $btn, selectedConsumer, storages, settingName) {
-        var tmplData = window.ConsumerStorageSettings.getTmplData({ storages: storages }, settingName);
+    function initConsumerStorage($box, selectedConsumer, storages) {
+        var textBoxClass = ".textBox";
+        var textEditClass = ".textEdit";
 
-        $box.html(jq.tmpl("consumerSettingsTmpl", tmplData));
+        $box.html(jq.tmpl("consumerSettingsTmpl", { storages: storages, selectedConsumer: selectedConsumer }));
+        $box.off("change" + textEditClass).on("change" + textEditClass, textEditClass, function () {
+            $box.find(textBoxClass).val('');
 
-        window.ConsumerStorageSettings.bindEvents($box, $btn, selectedConsumer);
+            var newVal = jq(this).find(":selected").val();
+            $box.find(textBoxClass).removeClass(withErrorClass);
+            $box.find("div[data-id]").addClass(displayNoneClass);
+            $box.find("[data-id='" + newVal + "']").removeClass(displayNoneClass);
+            $startBackupBtn.addClass(disable);
+        });
+        $box.find("select option[value='" + selectedConsumer.id + "']").attr("selected", "selected");
+        $box.find("select");
+        $box.off("input" + textBoxClass).on("input" + textBoxClass, textBoxClass, function () {
+            var $self = $(this);
+            var $siblings = Array.from($self.siblings());
+            $siblings.push(this);
+
+            $self.removeClass(withErrorClass);
+
+            function notEmpty(item) {
+                return item.value.length > 0;
+            }
+
+            if ($siblings.every(notEmpty)) {
+                $startBackupBtn.removeClass(disable);
+            } else {
+                $startBackupBtn.addClass(disable);
+            }
+        });
     }
 
     function toggleAutoBackupSettingsBlock() {
@@ -333,7 +340,7 @@ window.BackupManager = new function() {
             
             if (autoBackupInitOff) {
                 autoBackupInitOff = false;
-                $autoBackupSettingsTeamlabStorage.trigger("click");
+                $autoBackupSettingsTeamlabStorage.click();
             }
         } else {
             $autoBackuSettingsBlock.hide();
@@ -358,7 +365,17 @@ window.BackupManager = new function() {
         var $backupConsumerStorageSettingsBox = $box.find('.consumerStorageSettingsBox');
         $teamlabStorageFolderSelectorBox.addClass(displayNoneClass);
         $backupConsumerStorageSettingsBox.addClass(displayNoneClass);
-        $startBackupBtn.removeClass(disable);
+
+        if ($spaceExceedMessage.length) {
+            var status = $spaceExceedMessage.data("status");
+            if (status == "NotAvailable") {
+                $startBackupBtn.addClass(disable);
+            } else {
+                $startBackupBtn.removeClass(disable);
+            }
+        } else {
+            $startBackupBtn.removeClass(disable);
+        }
 
         switch (storage) {
             case storageTypes.Docs:
@@ -409,7 +426,7 @@ window.BackupManager = new function() {
             storageParams: []
         };
 
-        $box.find('.teamlabStorageFolderSelector').removeClass(withErrorClass);
+        $box.find('.teamlabStorageFolderSelector').removeClass('with-error');
 
         switch (storage.storageType) {
             case storageTypes.Docs:
@@ -418,23 +435,32 @@ window.BackupManager = new function() {
                 var val = $path.attr('data-folderid');
                 storage.storageParams.push({ key: "folderId", value: val });
                 if (!val) {
-                    $path.addClass(withErrorClass);
+                    $path.addClass('with-error');
                     return false;
                 }
 
                 break;
             case storageTypes.Consumers:
-                var $consumerSettings = $box.find(".consumerStorageSettingsBox");
-                var selectedConsumer = $consumerSettings.find(".comboBoxStorage").val();
-                var $selectedConsumer = $consumerSettings.find(".storage[data-id=" + selectedConsumer + "]");
-
-                storage.storageParams = window.ConsumerStorageSettings.getProps($selectedConsumer);
-
-                if (!storage.storageParams) {
-                    return false;
+                var isError;
+                var $selectedConsumer = $box.find('.consumerStorageSettingsBox');
+                var selectedConsumer = $selectedConsumer.find('.textEdit :selected').val();
+                var $settings = $selectedConsumer.find('div[data-id="' + selectedConsumer + '"] .textBox');
+                storage.storageParams.push({ key: "module", value: selectedConsumer });
+                var settingsLength = $settings.length;
+                for (var i = 0; i < settingsLength; i++) {
+                    var $item = $($settings[i]);
+                    if (!$item.val()) {
+                        $item.addClass(withErrorClass);
+                        isError = true;
+                    }
+                    else {
+                        storage.storageParams.push({ key: $item.attr("data-id"), value: $item.val() });
+                    }
                 }
 
-                storage.storageParams.unshift({ key: "module", value: selectedConsumer });
+                if (isError) {
+                    return false;
+                }
                 break;
         }
 
@@ -484,7 +510,7 @@ window.BackupManager = new function() {
                 $backupResultLink.attr('href', response.link);
                 $backupResultLinkBox.show();
             }
-            toastr.success(ResourceJS.BackupMakeCopySuccess);
+            toastr.success(resource.BackupMakeCopySuccess);
             return;
         }
 
@@ -507,7 +533,7 @@ window.BackupManager = new function() {
                     $backupProgressBox.hide();
                     LoadingBanner.hideLoaderBtn($backupBox);
                     lockBackupBox(false);
-                    toastr.error(ResourceJS.CommonJSErrorMsg);
+                    toastr.error(resource.CommonJSErrorMsg);
                 },
                 max_request_attempts: 1
             });
@@ -522,7 +548,7 @@ window.BackupManager = new function() {
         $backupTeamlabStorageFolderSelectorBtn.toggleClass(disable, locked);
         $startBackupBtn.data('locked', locked);
         $startBackupBtn.toggleClass(disable, locked);
-        $saveSettingsBtn.toggleClass(disable, locked);
+        jq("#saveSettingsBtn").toggleClass(disable, locked);
 
         if (!$backupThirdPartyStorageSelectorBox.is('.disabled')) {
             $backupThirdPartyStorage.prop('disabled', locked);
@@ -602,8 +628,8 @@ window.BackupManager = new function() {
     }
 
     function onCompleteCreateShedule() {
-        $autoBackupSettingsBox.find('.' + withErrorClass).removeClass(withErrorClass);
-        toastr.success(ResourceJS.SuccessfullySaveSettingsMessage);
+        $autoBackupSettingsBox.find('.with-error').removeClass('with-error');
+        toastr.success(resource.SuccessfullySaveSettingsMessage);
         LoadingBanner.hideLoaderBtn($autoBackupSettingsBox);
     }
 

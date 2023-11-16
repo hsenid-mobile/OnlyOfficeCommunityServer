@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ ASC.Projects.SettingsManager = (function () {
         projects = ASC.Projects,
         common,
         defResources = projects.Resources.Statuses,
-        masterResource = ASC.Resources.Master.ResourceJS,
+        masterResource = ASC.Resources.Master.Resource,
         fileSelector,
         folder,
         statuses,
@@ -28,7 +28,7 @@ ASC.Projects.SettingsManager = (function () {
         modules,
         baseFolder = ASC.Files.Constants.FOLDER_ID_MY_FILES,
         resources = projects.Resources,
-        ProjectsCommonResource = resources.ProjectsCommonResource,
+        commonResource = resources.CommonResource,
         projectsFilterResource = resources.ProjectsFilterResource;
 
     var $settings,
@@ -132,15 +132,15 @@ ASC.Projects.SettingsManager = (function () {
         var $input = jq(".custom-status[data-type=" + statusType + "] input");
 
         if (state.enabled) {
-            $input.prop(disabled, false);
+            $input.removeAttr(disabled);
         } else {
-            $input.prop(disabled, true);
+            $input.attr(disabled, disabled);
             $input[0].checked = false;
         }
         if (state.on) {
-            $input.prop(checked, true);
+            $input.attr(checked, checked);
         } else {
-            $input.prop(checked, false);
+            $input.removeAttr(checked);
         }
     }
 
@@ -243,7 +243,7 @@ ASC.Projects.SettingsManager = (function () {
         var $startModule = jq("#startModule");
 
         $startModule.advancedSelector({
-            height: 30 * 4, //magic: itemsCount*itemHeight
+            height: 26 * 4, //magic: itemsCount*itemHeight
             itemsSelectedIds: [currentModule.StartModuleType],
             onechosen: true,
             showSearch: false,
@@ -279,7 +279,7 @@ ASC.Projects.SettingsManager = (function () {
                     .removeAttr('title')
                     .removeClass('disabled')
                     .find(':radio')
-                    .prop('disabled', false);
+                    .attr('disabled', false);
             };
             fileSelector.createThirdPartyTree();
         };
@@ -314,7 +314,7 @@ ASC.Projects.SettingsManager = (function () {
             return;
         }
 
-        fileSelector.openDialog({ folderId: folder, onlyFolder: true, thirdParty: false });
+        fileSelector.openDialog(folder, true, false);
     }
 
     function showEntityMenu(selectedActionCombobox) {
@@ -323,11 +323,11 @@ ASC.Projects.SettingsManager = (function () {
 
         var ActionMenuItem = projects.ActionMenuItem;
         var menuItems = [
-            new ActionMenuItem("status_edit", ProjectsCommonResource.Edit, saEditHandler.bind(null, status), "edit")
+            new ActionMenuItem("status_edit", commonResource.Edit, saEditHandler.bind(null, status), "edit")
         ];
 
         if (status.id > 0) {
-            menuItems.push(new ActionMenuItem("status_delete", ProjectsCommonResource.Delete, saDeleteHandler.bind(null, status), "delete"));
+            menuItems.push(new ActionMenuItem("status_delete", commonResource.Delete, saDeleteHandler.bind(null, status), "delete"));
         }
 
         return { menuItems: menuItems };
@@ -347,7 +347,7 @@ ASC.Projects.SettingsManager = (function () {
                 IsPopup: true
             },
             header: {
-                data: { title: status.id === 0 ? ProjectsCommonResource.CustomStatusNew : ProjectsCommonResource.Edit },
+                data: { title: status.id === 0 ? commonResource.CustomStatusNew : commonResource.Edit },
                 title: "projects_common_popup_header"
             }
             ,
@@ -357,7 +357,7 @@ ASC.Projects.SettingsManager = (function () {
             }
         }));
 
-        PopupKeyUpActionProvider.EnterAction = "jq('.commonPopupContent .blue').trigger('click');";
+        PopupKeyUpActionProvider.EnterAction = "jq('.commonPopupContent .blue').click();";
 
         StudioBlockUIManager.blockUI($commonPopupContainer, 400);
 
@@ -433,7 +433,7 @@ ASC.Projects.SettingsManager = (function () {
         }
 
         $uploadButton.on(clickEvent, function (e) {
-            $uploadButtonInput.trigger("click");
+            $uploadButtonInput.click();
             e.stopPropagation();
         });
 

@@ -1,6 +1,6 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Import.aspx.cs" Inherits="ASC.Web.Studio.ThirdParty.ImportContacts.Import" %>
 
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -52,6 +52,10 @@
             background: #ffffff url("image/google.png") no-repeat center center;
         }
 
+        .buttons div.yahoo {
+            background: #ffffff url("image/yahoo.png") no-repeat center center;
+        }
+
     </style>
 </head>
 <body>
@@ -61,6 +65,13 @@
                { %>
             <div class="google" onclick="window.master.open('<%= ASC.Web.Studio.ThirdParty.ImportContacts.Google.Location %>');"
                 title="<%= Resource.ImportFromGoogle %>">
+            </div>
+            <% } %>
+
+            <% if (ASC.Web.Studio.ThirdParty.ImportContacts.Yahoo.Enable)
+               { %>
+            <div class="yahoo" onclick="window.master.open('<%= ASC.Web.Studio.ThirdParty.ImportContacts.Yahoo.Location %>');"
+                title="<%= Resource.ImportFromYahoo %>">
             </div>
             <% } %>
         </div>

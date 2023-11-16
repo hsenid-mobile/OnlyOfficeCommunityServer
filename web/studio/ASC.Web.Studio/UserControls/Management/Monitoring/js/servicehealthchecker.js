@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ ServiceHealthCheckerManager = new function () {
             setTimeout(arguments.callee, UPDATE_TABLE_TIMEOUT);
         }, UPDATE_TABLE_TIMEOUT);
 
-        jq('#clearCacheBtn').on("click", clearCacheBtnCallback);
+        jq('#clearCacheBtn').click(clearCacheBtnCallback);
     };
 
     function updateServiceStatusTable() {
@@ -51,18 +51,18 @@ ServiceHealthCheckerManager = new function () {
         row.removeClass('__close');
         button.removeClass('__play');
         button.removeClass('__update');
-        button.off();
+        button.unbind();
         button.removeClass('disable');
 
         if (service.status == STATUS_RUNNING) {
             button.addClass('__update');
-            button.on("click", function () {
+            button.click(function () {
                 restartService(service.name);
             });
             row.addClass('__open');
         } else if (service.status == STATUS_STOPPED) {
             button.addClass('__play');
-            button.on("click", function() {
+            button.click(function() {
                 startService(service.name);
             });
             row.addClass('__close');

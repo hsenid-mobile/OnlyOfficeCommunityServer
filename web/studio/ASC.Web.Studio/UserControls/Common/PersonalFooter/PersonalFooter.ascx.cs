@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ using System.Configuration;
 using System.Web;
 using System.Web.UI;
 
-using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Utility;
 
 namespace ASC.Web.Studio.UserControls.Common.PersonalFooter
@@ -41,15 +40,8 @@ namespace ASC.Web.Studio.UserControls.Common.PersonalFooter
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
-            {
-                Page.RegisterStyle("~/UserControls/Common/PersonalFooter/css/dark-personalfooter.less");
-            }
-            else
-            {
-                Page.RegisterStyle("~/UserControls/Common/PersonalFooter/css/personalfooter.less");
-            }
-            Page.RegisterBodyScripts("~/UserControls/Common/PersonalFooter/js/personalfooter.js");
+            Page.RegisterStyle("~/UserControls/Common/PersonalFooter/css/personalfooter.less")
+                .RegisterBodyScripts("~/UserControls/Common/PersonalFooter/js/personalfooter.js");
 
             HelpLink = GetHelpLink();
         }

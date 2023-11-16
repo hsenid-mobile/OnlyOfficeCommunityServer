@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,13 +75,13 @@ window.ASC.Desktop = (function () {
                         if (!message) {
                             switch (e.opType) {
                                 case 0:
-                                    message = ASC.Files.FilesJSResource.DesktopMessageDownloading;
+                                    message = ASC.Files.FilesJSResources.DesktopMessageDownloading;
                                     break;
                                 case 1:
-                                    message = ASC.Files.FilesJSResource.DesktopMessageEncrypting;
+                                    message = ASC.Files.FilesJSResources.DesktopMessageEncrypting;
                                     break;
                                 default:
-                                    message = ASC.Resources.Master.ResourceJS.LoadingProcessing;
+                                    message = ASC.Resources.Master.Resource.LoadingProcessing;
                             }
                         }
                         //var modal = e.block === true;
@@ -104,11 +104,6 @@ window.ASC.Desktop = (function () {
                     case "encryptionKeys":
                         {
                             setEncryptionKeys(params);
-                            break;
-                        }
-                    case "updateEncryptionKeys":
-                        {
-                            setEncryptionKeys(params, true);
                             break;
                         }
                     case "relogin":
@@ -178,10 +173,6 @@ window.ASC.Desktop = (function () {
                 return "*" + format;
             }).toArray().join(" ");
 
-            if (!!filter.length) {
-                filter = "(" + filter + ")";
-            }
-
             window.AscDesktopEditor.cloudCryptoCommand("upload",
                 {
                     "cryptoEngineId": "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}",
@@ -204,7 +195,7 @@ window.ASC.Desktop = (function () {
 
     //request
 
-    var setEncryptionKeys = function (encryptionKeys, update) {
+    var setEncryptionKeys = function (encryptionKeys) {
         if (!encryptionKeys.publicKey || !encryptionKeys.privateKeyEnc) {
             ASC.Files.UI.displayInfoPanel("Empty encryption keys", true);
             return;
@@ -213,7 +204,6 @@ window.ASC.Desktop = (function () {
         if (typeof Teamlab !== "undefined") {
             Teamlab.setEncryptionKeys({},
                 {
-                    update: !!update,
                     publicKey: encryptionKeys.publicKey,
                     privateKeyEnc: encryptionKeys.privateKeyEnc
                 },

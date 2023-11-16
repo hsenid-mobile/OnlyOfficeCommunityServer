@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ namespace ASC.Web.Core.Client.Bundling
         private static readonly string s3privatekey;
         private static readonly string s3bucket;
         private static readonly string s3region;
-        private static readonly bool successInitialized = false;
+        private static bool successInitialized = false;
         private static int work = 0;
 
 
@@ -201,7 +201,7 @@ namespace ASC.Web.Core.Client.Bundling
                                     }
 
                                     var cache = TimeSpan.FromDays(365);
-                                    request.Headers.CacheControl = string.Format("public, max-age={0}", (int)cache.TotalSeconds);
+                                    request.Headers.CacheControl = string.Format("public, maxage={0}", (int)cache.TotalSeconds);
                                     request.Headers.ExpiresUtc = DateTime.UtcNow.Add(cache);
                                     request.Headers["x-amz-meta-etag"] = checksum;
 

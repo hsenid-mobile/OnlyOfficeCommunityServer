@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,10 @@ using System.Linq;
 using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
-
 using ASC.Common.Caching;
 using ASC.Common.Logging;
 using ASC.Common.Module;
 using ASC.ElasticSearch.Service;
-
 using Autofac;
 
 namespace ASC.ElasticSearch
@@ -37,17 +35,12 @@ namespace ASC.ElasticSearch
         private static Timer timer;
         private static TimeSpan Period { get { return TimeSpan.FromMinutes(Settings.Default.Period); } }
         private static ILog logger;
-        private static readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        private static CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
         internal static ServiceHost Searcher { get; private set; }
         internal static bool IsStarted { get; private set; }
-        internal static List<string> Indexing { get; private set; }
+        internal static string Indexing { get; private set; }
         internal static DateTime? LastIndexed { get; private set; }
-
-        static Launcher()
-        {
-            Indexing = new List<string>();
-        }
 
         public void Start()
         {
@@ -86,7 +79,6 @@ namespace ASC.ElasticSearch
                 CheckIfChange();
             }, cancellationTokenSource.Token, TaskCreationOptions.LongRunning);
 
-            task.ConfigureAwait(false);
             task.Start();
         }
 
@@ -106,9 +98,8 @@ namespace ASC.ElasticSearch
                     if (!IsStarted) return;
 
                     logger.DebugFormat("Product check {0}", product.IndexName);
-                    Indexing.Add(product.IndexName);
+                    Indexing = product.IndexName;
                     product.Check();
-                    Indexing.Remove(product.IndexName);
                 }
                 catch (Exception e)
                 {
@@ -118,77 +109,65 @@ namespace ASC.ElasticSearch
             });
 
             IsStarted = false;
-            Indexing.Clear();
+            Indexing = null;
 
             timer = new Timer(_ => IndexAll(), null, TimeSpan.Zero, TimeSpan.Zero);
         }
 
         private static void IndexAll(bool reindex = false)
         {
-            try
+            timer.Change(-1, -1);
+            IsStarted = true;
+
+            var generic = typeof(BaseIndexer<>);
+            var products = FactoryIndexer.Builder.Resolve<IEnumerable<Wrapper>>()
+                .Select(r => (IIndexer)Activator.CreateInstance(generic.MakeGenericType(r.GetType()), r))
+                .ToList();
+
+            if (reindex)
             {
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
-                IsStarted = true;
-
-                var generic = typeof(BaseIndexer<>);
-                var products = FactoryIndexer.Builder.Resolve<IEnumerable<Wrapper>>()
-                    .Select(r => (IIndexer)Activator.CreateInstance(generic.MakeGenericType(r.GetType()), r))
-                    .ToList();
-
-                if (reindex)
-                {
-                    Parallel.ForEach(products, product =>
-                    {
-                        try
-                        {
-                            if (!IsStarted) return;
-
-                            logger.DebugFormat("Product reindex {0}", product.IndexName);
-                            product.ReIndex();
-                        }
-                        catch (Exception e)
-                        {
-                            logger.Error(e);
-                            logger.ErrorFormat("Product reindex {0}", product.IndexName);
-                        }
-                    });
-                }
-
-                Parallel.ForEach(products, product =>
+                products.ForEach(product =>
                 {
                     try
                     {
                         if (!IsStarted) return;
 
-                        logger.DebugFormat("Product {0}", product.IndexName);
-                        Indexing.Add(product.IndexName);
-                        product.IndexAll();
-                        Indexing.Remove(product.IndexName);
+                        logger.DebugFormat("Product reindex {0}", product.IndexName);
+                        product.ReIndex();
                     }
                     catch (Exception e)
                     {
                         logger.Error(e);
-                        logger.ErrorFormat("Product {0}", product.IndexName);
+                        logger.ErrorFormat("Product reindex {0}", product.IndexName);
                     }
                 });
-
-                timer.Change(Period, Period);
-                LastIndexed = DateTime.UtcNow;
-                IsStarted = false;
-                Indexing.Clear();
             }
-            catch (Exception e)
+
+            products.ForEach(product =>
             {
-                logger.Fatal("IndexAll", e);
-                throw;
-            }
+                try
+                {
+                    if (!IsStarted) return;
 
+                    logger.DebugFormat("Product {0}", product.IndexName);
+                    Indexing = product.IndexName;
+                    product.IndexAll();
+                }
+                catch (Exception e)
+                {
+                    logger.Error(e);
+                    logger.ErrorFormat("Product {0}", product.IndexName);
+                }
+            });
+
+            timer.Change(Period, Period);
+            LastIndexed = DateTime.UtcNow;
+            IsStarted = false;
+            Indexing = null;
         }
 
         public void Stop()
         {
-            logger.Debug("Stop");
-
             if (Searcher != null)
             {
                 Searcher.Close();

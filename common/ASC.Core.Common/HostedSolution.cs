@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Security;
-
 using ASC.Core.Billing;
 using ASC.Core.Data;
 using ASC.Core.Security.Authentication;
@@ -152,6 +151,7 @@ namespace ASC.Core
             tenant.OwnerId = user.ID;
             tenant = tenantService.SaveTenant(tenant);
 
+            settingsManager.SaveSettings(new TenantAnalyticsSettings { Analytics = ri.Analytics }, tenant.TenantId);
             settingsManager.SaveSettings(new TenantControlPanelSettings { LimitedAccess = ri.LimitedControlPanel }, tenant.TenantId);
         }
 
@@ -175,10 +175,10 @@ namespace ASC.Core
         {
             if (user == null) return null;
 
-            var tenantSettings = settingsManager.LoadSettingsFor<TenantCookieSettings>(tenantId, Guid.Empty, false);
+            var tenantSettings = settingsManager.LoadSettingsFor<TenantCookieSettings>(tenantId, Guid.Empty);
             var expires = tenantSettings.IsDefault() ? DateTime.UtcNow.AddYears(1) : DateTime.UtcNow.AddMinutes(tenantSettings.LifeTime);
-            var userSettings = settingsManager.LoadSettingsFor<TenantCookieSettings>(tenantId, user.ID, false);
-            return CookieStorage.EncryptCookie(tenantId, user.ID, tenantSettings.Index, expires, userSettings.Index, 0);
+            var userSettings = settingsManager.LoadSettingsFor<TenantCookieSettings>(tenantId, user.ID);
+            return CookieStorage.EncryptCookie(tenantId, user.ID, tenantSettings.Index, expires, userSettings.Index);
         }
 
         public Tariff GetTariff(int tenant, bool withRequestToPaymentSystem = true)
@@ -186,19 +186,9 @@ namespace ASC.Core
             return tariffService.GetTariff(tenant, withRequestToPaymentSystem);
         }
 
-        public TenantQuotaSettings GetTenantQuotaSettings(int tenantId)
-        {
-            return settingsManager.LoadSettingsFor<TenantQuotaSettings>(tenantId, Guid.Empty, false);
-        }
-        
         public TenantQuota GetTenantQuota(int tenant)
         {
             return clientTenantManager.GetTenantQuota(tenant);
-        }
-
-        public List<TenantQuotaRow> FindTenantQuotaRows(int tenant)
-        {
-            return clientTenantManager.FindTenantQuotaRows(tenant);
         }
 
         public IEnumerable<TenantQuota> GetTenantQuotas()
@@ -230,10 +220,6 @@ namespace ASC.Core
             tariffService.SaveButton(tariffId, partnerId, buttonUrl);
         }
 
-        public IEnumerable<UserInfo> FindUsers(IEnumerable<string> userIds)
-        {
-            return userService.GetUsersAllTenants(userIds);
-        }
 
         private Tenant AddRegion(Tenant tenant)
         {

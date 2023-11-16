@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,6 @@
 */
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web;
-
 using ASC.Core;
 using ASC.CRM.Core;
 using ASC.Web.Core.Utility.Skins;
@@ -28,6 +22,11 @@ using ASC.Web.CRM.Classes;
 using ASC.Web.CRM.Configuration;
 using ASC.Web.CRM.Resources;
 using ASC.Web.Studio.Core.Users;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Web;
 
 namespace ASC.Web.CRM.Controls.Common
 {
@@ -76,7 +75,7 @@ namespace ASC.Web.CRM.Controls.Common
             ImportStartingPanelDescriptionLabel = CRMContactResource.ImportStartingPanelDescription;
             ImportStartingPanelButtonLabel = CRMContactResource.ImportStartingPanelButton;
 
-            ImportImgSrc = WebImageSupplier.GetAbsoluteWebPath("import_contacts.svg", ProductEntryPoint.ID);
+            ImportImgSrc = WebImageSupplier.GetAbsoluteWebPath("import_contacts.png", ProductEntryPoint.ID);
 
             Page.RegisterClientScript(new Masters.ClientScripts.ImportFromCSVViewDataContacts());
             RegisterClientScriptHelper.DataUserSelectorListView(Page, "_ImportContactsManager", null);
@@ -99,7 +98,7 @@ namespace ASC.Web.CRM.Controls.Common
             ImportStartingPanelDescriptionLabel = CRMDealResource.ImportStartingPanelDescription;
             ImportStartingPanelButtonLabel = CRMDealResource.ImportStartingPanelButton;
 
-            ImportImgSrc = WebImageSupplier.GetAbsoluteWebPath("import-opportunities.svg", ProductEntryPoint.ID);
+            ImportImgSrc = WebImageSupplier.GetAbsoluteWebPath("import-opportunities.png", ProductEntryPoint.ID);
 
             Page.RegisterClientScript(new Masters.ClientScripts.ImportFromCSVViewDataDeals());
 
@@ -107,9 +106,9 @@ namespace ASC.Web.CRM.Controls.Common
             privatePanel.CheckBoxLabel = CRMDealResource.PrivatePanelCheckBoxLabel;
             privatePanel.IsPrivateItem = false;
 
-            var usersWhoHasAccess = new List<string> { CustomNamingPeople.Substitute<CRMCommonResource>("CurrentUser").HtmlEncode() };
+            var usersWhoHasAccess = new List<string> {CustomNamingPeople.Substitute<CRMCommonResource>("CurrentUser")};
             privatePanel.UsersWhoHasAccess = usersWhoHasAccess;
-            privatePanel.DisabledUsers = new List<Guid> { SecurityContext.CurrentAccount.ID };
+            privatePanel.DisabledUsers = new List<Guid> {SecurityContext.CurrentAccount.ID};
             privatePanel.HideNotifyPanel = true;
             _phPrivatePanel.Controls.Add(privatePanel);
         }
@@ -128,7 +127,7 @@ namespace ASC.Web.CRM.Controls.Common
             ImportStartingPanelDescriptionLabel = CRMTaskResource.ImportStartingPanelDescription;
             ImportStartingPanelButtonLabel = CRMTaskResource.ImportStartingPanelButton;
 
-            ImportImgSrc = WebImageSupplier.GetAbsoluteWebPath("import-tasks.svg", ProductEntryPoint.ID);
+            ImportImgSrc = WebImageSupplier.GetAbsoluteWebPath("import-tasks.png", ProductEntryPoint.ID);
 
             Page.RegisterClientScript(new Masters.ClientScripts.ImportFromCSVViewDataTasks());
         }
@@ -147,18 +146,18 @@ namespace ASC.Web.CRM.Controls.Common
             ImportStartingPanelDescriptionLabel = CRMCasesResource.ImportStartingPanelDescription;
             ImportStartingPanelButtonLabel = CRMCasesResource.ImportStartingPanelButton;
 
-            ImportImgSrc = WebImageSupplier.GetAbsoluteWebPath("import-cases.svg", ProductEntryPoint.ID);
+            ImportImgSrc = WebImageSupplier.GetAbsoluteWebPath("import-cases.png", ProductEntryPoint.ID);
 
             Page.RegisterClientScript(new Masters.ClientScripts.ImportFromCSVViewDataCases());
-
+            
             var privatePanel = (PrivatePanel)Page.LoadControl(PrivatePanel.Location);
             privatePanel.CheckBoxLabel = CRMCasesResource.PrivatePanelCheckBoxLabel;
             privatePanel.IsPrivateItem = false;
 
-            var usersWhoHasAccess = new List<string> { CustomNamingPeople.Substitute<CRMCommonResource>("CurrentUser").HtmlEncode() };
+            var usersWhoHasAccess = new List<string> {CustomNamingPeople.Substitute<CRMCommonResource>("CurrentUser")};
 
             privatePanel.UsersWhoHasAccess = usersWhoHasAccess;
-            privatePanel.DisabledUsers = new List<Guid> { SecurityContext.CurrentAccount.ID };
+            privatePanel.DisabledUsers = new List<Guid> {SecurityContext.CurrentAccount.ID};
             privatePanel.HideNotifyPanel = true;
             _phPrivatePanel.Controls.Add(privatePanel);
         }

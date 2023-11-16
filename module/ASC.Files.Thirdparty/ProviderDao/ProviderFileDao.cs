@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,11 @@
 */
 
 
+using ASC.Files.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-
-using ASC.Files.Core;
-
 using File = ASC.Files.Core.File;
 
 namespace ASC.Files.Thirdparty.ProviderDao
@@ -51,7 +48,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
                 var result = fileDao.GetFile(selector.ConvertId(fileId));
 
                 if (result != null && !Default.IsMatch(fileId))
-                    SetSharedProperty(new[] { result });
+                    SetSharedProperty(new[] {result});
 
                 return result;
             }
@@ -66,7 +63,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
                 var result = fileDao.GetFile(selector.ConvertId(fileId), fileVersion);
 
                 if (result != null && !Default.IsMatch(fileId))
-                    SetSharedProperty(new[] { result });
+                    SetSharedProperty(new[] {result});
 
                 return result;
             }
@@ -80,7 +77,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
                 var result = fileDao.GetFile(selector.ConvertId(parentId), title);
 
                 if (result != null && !Default.IsMatch(parentId))
-                    SetSharedProperty(new[] { result });
+                    SetSharedProperty(new[] {result});
 
                 return result;
             }
@@ -110,7 +107,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
             }
         }
 
-        public List<File> GetFiles(IEnumerable<object> fileIds)
+        public List<File> GetFiles(object[] fileIds)
         {
             var result = Enumerable.Empty<File>();
 
@@ -126,7 +123,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
                                                 {
                                                     using (var fileDao = selectorLocal.GetFileDao(matchedId.FirstOrDefault()))
                                                     {
-                                                        return fileDao.GetFiles(matchedId.Select(selectorLocal.ConvertId).ToList());
+                                                        return fileDao.GetFiles(matchedId.Select(selectorLocal.ConvertId).ToArray());
                                                     }
                                                 }
                     )
@@ -136,7 +133,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
             return result.ToList();
         }
 
-        public List<File> GetFilesFiltered(IEnumerable<object> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
+        public List<File> GetFilesFiltered(object[] fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
         {
             var result = Enumerable.Empty<File>();
 
@@ -152,7 +149,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
                                         {
                                             using (var fileDao = selectorLocal.GetFileDao(matchedId.FirstOrDefault()))
                                             {
-                                                return fileDao.GetFilesFiltered(matchedId.Select(selectorLocal.ConvertId).ToList(),
+                                                return fileDao.GetFilesFiltered(matchedId.Select(selectorLocal.ConvertId).ToArray(),
                                                     filterType, subjectGroup, subjectID, searchText, searchInContent);
                                             }
                                         })
@@ -307,14 +304,10 @@ namespace ASC.Files.Thirdparty.ProviderDao
 
         public void DeleteFile(object fileId)
         {
-            DeleteFile(fileId, Guid.Empty);
-        }
-        public void DeleteFile(object fileId, Guid ownerId)
-        {
             var selector = GetSelector(fileId);
             using (var fileDao = selector.GetFileDao(fileId))
             {
-                fileDao.DeleteFile(selector.ConvertId(fileId), ownerId);
+                fileDao.DeleteFile(selector.ConvertId(fileId));
             }
         }
 
@@ -414,14 +407,13 @@ namespace ASC.Files.Thirdparty.ProviderDao
             }
         }
 
-        public File UploadChunk(ChunkedUploadSession uploadSession, Stream chunkStream, long chunkLength)
+        public void UploadChunk(ChunkedUploadSession uploadSession, Stream chunkStream, long chunkLength)
         {
             using (var fileDao = GetFileDao(uploadSession.File))
             {
                 uploadSession.File = ConvertId(uploadSession.File);
                 fileDao.UploadChunk(uploadSession, chunkStream, chunkLength);
             }
-            return uploadSession.File;
         }
 
         public void AbortUploadSession(ChunkedUploadSession uploadSession)
@@ -460,7 +452,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
 
         #region Only in TMFileDao
 
-        public void ReassignFiles(IEnumerable<object> fileIds, Guid newOwnerId)
+        public void ReassignFiles(object[] fileIds, Guid newOwnerId)
         {
             foreach (var selector in GetSelectors())
             {
@@ -473,13 +465,13 @@ namespace ASC.Files.Thirdparty.ProviderDao
                 {
                     using (var fileDao = selectorLocal.GetFileDao(matchedId.FirstOrDefault()))
                     {
-                        fileDao.ReassignFiles(matchedId.Select(selectorLocal.ConvertId).ToList(), newOwnerId);
+                        fileDao.ReassignFiles(matchedId.Select(selectorLocal.ConvertId).ToArray(), newOwnerId);
                     }
                 }
             }
         }
 
-        public List<File> GetFiles(IEnumerable<object> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
+        public List<File> GetFiles(object[] parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
         {
             var result = Enumerable.Empty<File>();
 
@@ -495,7 +487,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
                                                 {
                                                     using (var fileDao = selectorLocal.GetFileDao(matchedId.FirstOrDefault()))
                                                     {
-                                                        return fileDao.GetFiles(matchedId.Select(selectorLocal.ConvertId).ToList(),
+                                                        return fileDao.GetFiles(matchedId.Select(selectorLocal.ConvertId).ToArray(),
                                                             filterType, subjectGroup, subjectID, searchText, searchInContent);
                                                     }
                                                 }));
@@ -567,95 +559,6 @@ namespace ASC.Files.Thirdparty.ProviderDao
             using (var fileDao = selector.GetFileDao(fileId))
             {
                 return fileDao.ContainChanges(selector.ConvertId(fileId), fileVersion);
-            }
-        }
-
-        public void SaveThumbnail(File file, Stream thumbnail)
-        {
-            var fileId = file.ID;
-            var selector = GetSelector(fileId);
-            file.ID = selector.ConvertId(fileId);
-
-            using (var fileDao = selector.GetFileDao(fileId))
-            {
-                fileDao.SaveThumbnail(file, thumbnail);
-                file.ID = fileId; //Restore
-            }
-        }
-
-        public Stream GetThumbnail(File file)
-        {
-            var fileId = file.ID;
-            var selector = GetSelector(fileId);
-            file.ID = selector.ConvertId(fileId);
-
-            using (var fileDao = selector.GetFileDao(fileId))
-            {
-                var stream = fileDao.GetThumbnail(file);
-                file.ID = fileId; //Restore
-                return stream;
-            }
-        }
-
-        public async Task<Stream> GetFileStreamAsync(File file)
-        {
-            var fileId = file.ID;
-            var selector = GetSelector(fileId);
-            file.ID = selector.ConvertId(fileId);
-
-            using (var fileDao = selector.GetFileDao(fileId))
-            {
-                var stream = await fileDao.GetFileStreamAsync(file);
-                file.ID = fileId; //Restore
-                return stream;
-            }
-        }
-
-        public async Task<bool> IsExistOnStorageAsync(File file)
-        {
-            var fileId = file.ID;
-            var selector = GetSelector(fileId);
-            file.ID = selector.ConvertId(fileId);
-
-            using (var fileDao = selector.GetFileDao(fileId))
-            {
-                var isExist = await fileDao.IsExistOnStorageAsync(file).ConfigureAwait(true);
-                return isExist;
-            }
-        }
-
-        public EntryProperties GetProperties(object fileId)
-        {
-            var selector = GetSelector(fileId);
-            using (var fileDao = selector.GetFileDao(fileId))
-            {
-                return fileDao.GetProperties(selector.ConvertId(fileId));
-            }
-        }
-
-        public void SaveProperties(object fileId, EntryProperties entryProperties)
-        {
-            var selector = GetSelector(fileId);
-            using (var fileDao = selector.GetFileDao(fileId))
-            {
-                fileDao.SaveProperties(selector.ConvertId(fileId), entryProperties);
-            }
-        }
-
-        public async Task UploadChunkAsync(ChunkedUploadSession uploadSession, Stream chunkStream, long chunkLength)
-        {
-            using (var fileDao = GetFileDao(uploadSession.File))
-            {
-                uploadSession.File = ConvertId(uploadSession.File);
-                await fileDao.UploadChunkAsync(uploadSession, chunkStream, chunkLength);
-            }
-        }
-
-        public File FinalizeUploadSession(ChunkedUploadSession uploadSession)
-        {
-            using (var fileDao = GetFileDao(uploadSession.File))
-            {
-               return fileDao.FinalizeUploadSession(uploadSession);
             }
         }
 

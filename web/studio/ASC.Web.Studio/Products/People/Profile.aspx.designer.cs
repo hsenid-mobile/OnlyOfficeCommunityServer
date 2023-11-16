@@ -7,13 +7,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.People
-{
-
-
-    public partial class Profile
-    {
-
+namespace ASC.Web.People {
+    
+    
+    public partial class Profile {
+        
         /// <summary>
         /// actionsHolder control.
         /// </summary>
@@ -22,7 +20,7 @@ namespace ASC.Web.People
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder actionsHolder;
-
+        
         /// <summary>
         /// CommonContainerHolder control.
         /// </summary>
@@ -31,7 +29,7 @@ namespace ASC.Web.People
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder CommonContainerHolder;
-
+        
         /// <summary>
         /// _phSubscriptionView control.
         /// </summary>
@@ -40,7 +38,7 @@ namespace ASC.Web.People
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder _phSubscriptionView;
-
+        
         /// <summary>
         /// _phTipsSettingsView control.
         /// </summary>
@@ -49,14 +47,5 @@ namespace ASC.Web.People
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder _phTipsSettingsView;
-
-        /// <summary>
-        /// _phConnectionsView control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder _phConnectionsView;
     }
 }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,12 @@
 
 using System;
 using System.Text.RegularExpressions;
-
 using ASC.Common.Caching;
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
-using ASC.Core;
-using ASC.Files.Core.Security;
 using ASC.Security.Cryptography;
 using ASC.Web.Files.Core;
-
 using Autofac;
 
 namespace ASC.Files.Core.Data
@@ -35,6 +31,7 @@ namespace ASC.Files.Core.Data
     {
         protected int TenantID { get; private set; }
         protected readonly ICache cache = AscCache.Default;
+        protected IDbManager dbManager { get; private set; }
         protected ILifetimeScope scope { get; private set; }
 
 
@@ -42,6 +39,7 @@ namespace ASC.Files.Core.Data
         {
             TenantID = tenantID;
             scope = DIHelper.Resolve();
+            dbManager = scope.Resolve<IDbManager>();
         }
 
         public void Dispose()
@@ -77,7 +75,7 @@ namespace ASC.Files.Core.Data
             return table.Substring(table.IndexOf(" ")).Trim() + "." + tenant;
         }
 
-        protected SqlQuery GetFileQuery(Exp where, bool checkShared = true, bool checkDenyActions = true)
+        protected SqlQuery GetFileQuery(Exp where, bool checkShared = true)
         {
             return Query("files_file f")
                 .Select("f.id")
@@ -96,20 +94,7 @@ namespace ASC.Files.Core.Data
                 .Select("f.comment")
                 .Select("f.encrypted")
                 .Select("f.forcesave")
-                .Select("f.thumb")
-                .Select(GetIsLinked())
-                .Select(checkDenyActions ? GetEntryDenyQuery(FileEntryType.File) : new SqlQuery().Select("''"))
                 .Where(where);
-        }
-
-        protected SqlQuery GetIsLinked()
-        {
-            return new SqlQuery("files_link l")
-                .Select("1")
-                .Where(Exp.EqColumns("l.tenant_id", "f.tenant_id")
-                    & Exp.EqColumns("l.linked_id", "f.id")
-                    & Exp.Eq("l.linked_for", SecurityContext.CurrentAccount.ID.ToString()))
-                .SetMaxResults(1);
         }
 
         protected SqlQuery GetRootFolderType(string parentFolderColumnName)
@@ -147,20 +132,8 @@ namespace ASC.Files.Core.Data
             var result = Query("files_security s")
                 .SelectCount()
                 .Where(Exp.EqColumns("s.entry_id", "cast(f.id as char)"))
-                .Where("s.entry_type", (int)type)
-                .Where(!Exp.Eq("s.subject_type", SubjectType.Restriction))
+                .Where("s.entry_type", (int) type)
                 .SetMaxResults(1);
-
-            return result;
-        }
-
-        protected SqlQuery GetEntryDenyQuery(FileEntryType type)
-        {
-            var result = Query("files_security s")
-                .Select("group_concat(s.subject)")
-                .Where(Exp.EqColumns("s.entry_id", "cast(f.id as char)"))
-                .Where("s.entry_type", (int)type)
-                .Where("s.subject_type", SubjectType.Restriction);
 
             return result;
         }
@@ -210,27 +183,20 @@ namespace ASC.Files.Core.Data
             }
             else
             {
-                var query = Query("files_thirdparty_id_mapping")
+                result = dbManager.ExecuteScalar<String>(
+                    Query("files_thirdparty_id_mapping")
                         .Select("id")
-                        .Where(Exp.Eq("hash_id", id));
-
-                using (var dbManager = new DbManager(FileConstant.DatabaseId))
-                {
-                    result = dbManager.ExecuteScalar<string>(query);
-                }
+                        .Where(Exp.Eq("hash_id", id))
+                    );
             }
 
             if (saveIfNotExist)
             {
-                var query =
+                dbManager.ExecuteNonQuery(
                     Insert("files_thirdparty_id_mapping")
                         .InColumnValue("id", id)
-                        .InColumnValue("hash_id", result);
-
-                using (var dbManager = new DbManager(FileConstant.DatabaseId))
-                {
-                    dbManager.ExecuteNonQuery(query);
-                }
+                        .InColumnValue("hash_id", result)
+                    );
             }
 
             return result;
@@ -244,34 +210,6 @@ namespace ASC.Files.Core.Data
         public static Exp BuildSearch(string column, string text, SqlLike like = SqlLike.AnyWhere)
         {
             return Exp.Like(string.Format("lower({0})", column), text.ToLower().Trim().Replace("%", "\\%").Replace("_", "\\_"), like);
-        }
-
-        public void SetEntryDenyProperties(FileEntry entry, string securityActions)
-        {
-            if (string.IsNullOrEmpty(securityActions))
-            {
-                return;
-            }
-
-            var items = securityActions.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var item in items)
-            {
-                if (!Guid.TryParse(item, out Guid action))
-                {
-                    continue;
-                }
-
-                if (action.Equals(FileConstant.DenyDownloadId))
-                {
-                    entry.DenyDownload = true;
-                }
-
-                if (action.Equals(FileConstant.DenySharingId))
-                {
-                    entry.DenySharing = true;
-                }
-            }
         }
     }
 }

@@ -7,13 +7,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Files.Controls
-{
-
-
-    public partial class MainButton
-    {
-
+namespace ASC.Web.Files.Controls {
+    
+    
+    public partial class MainButton {
+        
         /// <summary>
         /// CreateMenuHolder control.
         /// </summary>

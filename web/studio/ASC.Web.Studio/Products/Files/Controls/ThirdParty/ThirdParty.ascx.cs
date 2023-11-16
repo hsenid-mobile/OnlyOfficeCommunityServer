@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
 */
 
 
-using System;
-using System.Web.UI;
-
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Resources;
 using ASC.Web.Studio.Controls.Common;
 using ASC.Web.Studio.Utility;
+using System;
+using System.Web.UI;
 
 namespace ASC.Web.Files.Controls
 {
@@ -44,13 +43,13 @@ namespace ASC.Web.Files.Controls
             thirdpartyToDocuSignHelperDialog.Options.IsPopup = true;
 
             EmptyScreenThirdParty.Controls.Add(new EmptyScreenControl
-            {
-                ID = "emptyThirdPartyContainer",
-                ImgSrc = PathProvider.GetImagePath("empty_screen_my.svg"),
-                Header = FilesUCResource.ThirdPartyConnectAccounts,
-                HeaderDescribe = FilesUCResource.EmptyScreenThirdPartyDscr,
-                ButtonHTML = string.Format(@"<div class=""account-connect""><a class=""link dotline plus"">{0}</a></div>", FilesUCResource.AddAccount)
-            });
+                {
+                    ID = "emptyThirdPartyContainer",
+                    ImgSrc = PathProvider.GetImagePath("empty_screen_my.png"),
+                    Header = FilesUCResource.ThirdPartyConnectAccounts,
+                    HeaderDescribe = FilesUCResource.EmptyScreenThirdPartyDscr,
+                    ButtonHTML = string.Format(@"<div class=""account-connect""><a class=""link dotline plus"">{0}</a></div>", FilesUCResource.AddAccount)
+                });
 
             var docuSignSelectorContainer = (Tree)LoadControl(Tree.Location);
             docuSignSelectorContainer.ID = "docuSignFolderSelector";

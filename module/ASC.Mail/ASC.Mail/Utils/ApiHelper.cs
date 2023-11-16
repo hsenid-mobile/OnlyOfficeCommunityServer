@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Authentication;
 using System.Web;
-
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Billing;
@@ -33,14 +33,9 @@ using ASC.Mail.Exceptions;
 using ASC.Mail.Extensions;
 using ASC.Specific;
 using ASC.Web.Core;
-
-using Ical.Net.CalendarComponents;
-
-using MimeKit;
-
+using DotNetOpenAuth.Messaging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
 using RestSharp;
 
 namespace ASC.Mail.Utils
@@ -61,7 +56,6 @@ namespace ASC.Mail.Utils
         /// Constructor of class ApiHelper
         /// </summary>
         /// <param name="scheme">Uri.UriSchemeHttps or Uri.UriSchemeHttp</param>
-        /// <param name="log"></param>
         /// <exception cref="ApiHelperException">Exception happens when scheme is invalid.</exception>>
         public ApiHelper(string scheme, ILog log = null)
         {
@@ -122,8 +116,8 @@ namespace ASC.Mail.Utils
         {
             Setup();
 
-            _log.DebugFormat("Execute request url: baseUrl='{0}' resourceUrl='{1}' token='{2}'",
-                BaseUrl.Uri.ToString(),
+            _log.DebugFormat("Execute request url: baseUrl='{0}' resourceUrl='{1}' token='{2}'", 
+                BaseUrl.Uri.ToString(), 
                 request.Resource,
                 Token);
 
@@ -333,11 +327,11 @@ namespace ASC.Mail.Utils
 
         public List<string> SearchPeopleEmails(string term, int startIndex, int count)
         {
-            var request = new RestRequest("people/filter.json", Method.GET);
+            var request = new RestRequest("people/filter.json?filterValue={FilterValue}&StartIndex={StartIndex}&Count={Count}", Method.GET);
 
-            request.AddParameter("FilterValue", term)
-                .AddParameter("StartIndex", startIndex)
-                .AddParameter("Count", count);
+            request.AddParameter("FilterValue", term, ParameterType.UrlSegment)
+                .AddParameter("StartIndex", startIndex.ToString(), ParameterType.UrlSegment)
+                .AddParameter("Count", count.ToString(), ParameterType.UrlSegment);
 
             var response = Execute(request);
 
@@ -432,7 +426,7 @@ namespace ASC.Mail.Utils
         public object UploadToCrm(Stream fileStream, string filename, string contentType,
                                       CrmContactData entity)
         {
-            if (entity == null)
+            if(entity == null)
                 throw new ArgumentNullException("entity");
 
             var request = new RestRequest("crm/{entityType}/{entityId}/files/upload.json", Method.POST);
@@ -514,33 +508,13 @@ namespace ASC.Mail.Utils
             }
         }
 
-        public void UploadIcsToCalendar(int calendarId, Stream fileStream, string filename, string contentType, CalendarEvent eventObj, IEnumerable<MimeEntity> mimeAttachments, List<MailAttachmentData> mailAttachments)
+        public void UploadIcsToCalendar(int calendarId, Stream fileStream, string filename, string contentType)
         {
-            var request = new RestRequest("calendar/importFromAggregator.json", Method.POST);
+            var request = new RestRequest("calendar/import.json", Method.POST);
 
             request.AddParameter("calendarId", calendarId);
 
             request.AddFile(filename, fileStream.CopyTo, filename, fileStream.Length, contentType);
-
-            foreach (var attachment in eventObj.Attachments)
-            {
-                if (attachment.Uri.AbsoluteUri.StartsWith("cid:", StringComparison.OrdinalIgnoreCase))
-                {
-                    var contentId = attachment.Uri.AbsoluteUri.Replace("cid:", "");
-                    var mimeEntity = mimeAttachments.FirstOrDefault(a => a.ContentId == contentId);
-
-                    if (mimeEntity != null)
-                    {
-                        var file = mailAttachments.FirstOrDefault(a => a.fileName == mimeEntity.ContentDisposition.FileName);
-
-                        if (file != null)
-                        {
-                            file.dataStream.Position = 0;
-                            request.AddFile(contentId, file.dataStream.CopyTo, string.Format("{0}/{1}", contentId, file.fileName), file.dataStream.Length, file.contentType);
-                        }
-                    }
-                }
-            }
 
             var response = Execute(request);
 

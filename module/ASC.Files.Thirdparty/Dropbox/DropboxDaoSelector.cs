@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
-
 using ASC.Core;
 using ASC.Files.Core;
 using ASC.Files.Core.Security;
@@ -85,11 +84,11 @@ namespace ASC.Files.Thirdparty.Dropbox
                 var providerInfo = GetProviderInfo(Convert.ToInt32(match.Groups["id"].Value));
 
                 return new DropboxInfo
-                {
-                    Path = match.Groups["path"].Value,
-                    DropboxProviderInfo = providerInfo,
-                    PathPrefix = "dropbox-" + match.Groups["id"].Value
-                };
+                    {
+                        Path = match.Groups["path"].Value,
+                        DropboxProviderInfo = providerInfo,
+                        PathPrefix = "dropbox-" + match.Groups["id"].Value
+                    };
             }
             throw new ArgumentException("Id is not a Dropbox id");
         }
@@ -119,7 +118,7 @@ namespace ASC.Files.Thirdparty.Dropbox
                 }
                 catch (InvalidOperationException)
                 {
-                    throw new ProviderInfoArgumentException("Provider id not found or you have no access");
+                    throw new ArgumentException("Provider id not found or you have no access");
                 }
             }
             return info;

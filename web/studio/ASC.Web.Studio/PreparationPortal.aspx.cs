@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
 */
 
 
-using System;
 using System.Collections.Specialized;
 using System.Text;
 using System.Web;
-
 using AjaxPro;
-
+using Resources;
+using System;
 using ASC.Web.Core;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Common;
 
 namespace ASC.Web.Studio
@@ -40,10 +38,9 @@ namespace ASC.Web.Studio
 
             var type = Request["type"] ?? "";
 
-            switch (type)
-            {
-                //Migration
-                case "0":
+            switch (type){ 
+               //Migration
+                case "0" :
                     Title = Resource.TransferPortalTitle;
                     break;
                 //Backup

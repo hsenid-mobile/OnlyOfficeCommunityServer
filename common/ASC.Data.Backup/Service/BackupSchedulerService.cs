@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
 */
 
 
-using System;
-using System.Linq;
-using System.Threading;
-
-using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Data.Backup.Storage;
+using System;
+using System.Linq;
+using System.Threading;
+using ASC.Common.Logging;
 
 namespace ASC.Data.Backup.Service
 {
@@ -85,24 +84,17 @@ namespace ASC.Data.Backup.Service
                         }
                         try
                         {
-                            if (CoreContext.Configuration.Standalone || CoreContext.TenantManager.GetTenantQuota(schedule.TenantId).AutoBackup)
+                            var tariff = CoreContext.PaymentManager.GetTariff(schedule.TenantId);
+                            if (tariff.State < TariffState.Delay)
                             {
-                                var tariff = CoreContext.PaymentManager.GetTariff(schedule.TenantId);
-                                if (tariff.State < TariffState.Delay)
-                                {
-                                    schedule.LastBackupTime = DateTime.UtcNow;
-                                    backupRepostory.SaveBackupSchedule(schedule);
-                                    log.DebugFormat("Start scheduled backup: {0}, {1}, {2}, {3}", schedule.TenantId, schedule.BackupMail, schedule.StorageType, schedule.StorageBasePath);
-                                    BackupWorker.StartScheduledBackup(schedule);
-                                }
-                                else
-                                {
-                                    log.DebugFormat("Skip portal {0} not paid", schedule.TenantId);
-                                }
+                                schedule.LastBackupTime = DateTime.UtcNow;
+                                backupRepostory.SaveBackupSchedule(schedule);
+                                log.DebugFormat("Start scheduled backup: {0}, {1}, {2}, {3}", schedule.TenantId, schedule.BackupMail, schedule.StorageType, schedule.StorageBasePath);
+                                BackupWorker.StartScheduledBackup(schedule);
                             }
                             else
                             {
-                                log.DebugFormat("Skip portal {0} haven't access", schedule.TenantId);
+                                log.DebugFormat("Skip portal {0} not paid", schedule.TenantId);
                             }
                         }
                         catch (Exception error)

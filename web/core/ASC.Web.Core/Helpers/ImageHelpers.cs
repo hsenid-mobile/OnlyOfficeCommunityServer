@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
 */
 
 
-using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
-
 using ASC.Data.Storage;
+using System;
 
 namespace ASC.Web.Studio.Helpers
 {
@@ -112,11 +111,11 @@ namespace ASC.Web.Studio.Helpers
 
     public class ThumbnailGenerator
     {
-        readonly bool _crop = false;
-        readonly int _width;
-        readonly int _heigth;
-        readonly int _widthPreview;
-        readonly int _heightPreview;
+        bool _crop = false;
+        int _width;
+        int _heigth;
+        int _widthPreview;
+        int _heightPreview;
 
         public IDataStore store
         {
@@ -343,7 +342,7 @@ namespace ASC.Web.Studio.Helpers
         {
             try
             {
-                using (var stream = store.GetReadStream(path))
+                using(var stream = store.GetReadStream(path))
                 using (var image = Image.FromStream(stream))
                 {
                     if (back)

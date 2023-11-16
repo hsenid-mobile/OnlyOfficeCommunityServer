@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ ASC.CRM.ListCasesView = (function() {
         jq("#casesHeaderMenu, #caseList, #tableForCasesNavigation").hide();
         jq("#caseFilterContainer").show();
         ASC.CRM.Common.hideExportButtons();
-        jq("#mainSelectAllCases").prop("disabled", true);
+        jq("#mainSelectAllCases").attr("disabled", true);
         jq("#casesEmptyScreen").hide();
         jq("#emptyContentForCasesFilter").show();
     };
@@ -188,7 +188,7 @@ ASC.CRM.ListCasesView = (function() {
 
         jq("#caseActionMenu .editCaseLink").attr("href", jq.format("Cases.aspx?id={0}&action=manage", caseID));
 
-        jq("#caseActionMenu .deleteCaseLink").off("click").on("click", function() {
+        jq("#caseActionMenu .deleteCaseLink").unbind("click").bind("click", function() {
             jq("#caseActionMenu").hide();
             jq("#caseTable .entity-menu.active").removeClass("active");
 
@@ -197,7 +197,7 @@ ASC.CRM.ListCasesView = (function() {
 
         jq("#caseActionMenu .showProfileLink").attr("href", jq.format("Cases.aspx?id={0}", caseID));
 
-        jq("#caseActionMenu .showProfileLinkNewTab").off("click").on("click", function () {
+        jq("#caseActionMenu .showProfileLinkNewTab").unbind("click").bind("click", function () {
             jq("#caseActionMenu").hide();
             jq("#caseTable .entity-menu.active").removeClass("active");
             window.open(jq.format("Cases.aspx?id={0}", caseID), "_blank");
@@ -205,7 +205,7 @@ ASC.CRM.ListCasesView = (function() {
 
         if (ASC.CRM.Data.IsCRMAdmin === true || Teamlab.profile.id == caseItem.createdBy.id) {
             jq("#caseActionMenu .setPermissionsLink").show();
-            jq("#caseActionMenu .setPermissionsLink").off("click").on("click", function() {
+            jq("#caseActionMenu .setPermissionsLink").unbind("click").bind("click", function() {
                 jq("#caseActionMenu").hide();
                 jq("#caseTable .entity-menu.active").removeClass("active");
 
@@ -282,7 +282,7 @@ ASC.CRM.ListCasesView = (function() {
             jq("#caseList").show();
             jq("#caseTable tbody tr").remove();
             jq("#tableForCasesNavigation").show();
-            jq("#mainSelectAllCases").prop("disabled", true);
+            jq("#mainSelectAllCases").attr("disabled", true);
             ASC.CRM.Common.hideExportButtons();
 
             ASC.CRM.ListCasesView.Total = parseInt(jq("#totalCasesOnPage").text()) || 0;
@@ -303,7 +303,7 @@ ASC.CRM.ListCasesView = (function() {
         ASC.CRM.Common.showExportButtons();
         jq("#caseFilterContainer").show();
         _resizeFilter();
-        jq("#mainSelectAllCases").prop("disabled", false);
+        jq("#mainSelectAllCases").removeAttr("disabled");
         var selectedIDs = new Array();
         for (var i = 0, n = ASC.CRM.ListCasesView.selectedItems.length; i < n; i++) {
             selectedIDs.push(ASC.CRM.ListCasesView.selectedItems[i].id);
@@ -461,9 +461,9 @@ ASC.CRM.ListCasesView = (function() {
     };
 
     var _lockMainActions = function() {
-        jq("#casesHeaderMenu .menuActionDelete").removeClass("unlockAction").off("click");
-        jq("#casesHeaderMenu .menuActionAddTag").removeClass("unlockAction").off("click");
-        jq("#casesHeaderMenu .menuActionPermissions").removeClass("unlockAction").off("click");
+        jq("#casesHeaderMenu .menuActionDelete").removeClass("unlockAction").unbind("click");
+        jq("#casesHeaderMenu .menuActionAddTag").removeClass("unlockAction").unbind("click");
+        jq("#casesHeaderMenu .menuActionPermissions").removeClass("unlockAction").unbind("click");
     };
 
     var _checkForLockMainActions = function() {
@@ -495,7 +495,7 @@ ASC.CRM.ListCasesView = (function() {
     var _renderTagElement = function(tag) {
         var $tagElem = jq("<a></a>").addClass("dropdown-item")
                         .text(ASC.CRM.Common.convertText(tag.title, false))
-                        .on("click", function() {
+                        .bind("click", function() {
                             _addThisTag(this);
                         });
         jq("#addTagCasesDialog ul.dropdown-content").append(jq("<li></li>").append($tagElem));
@@ -540,7 +540,7 @@ ASC.CRM.ListCasesView = (function() {
         });
 
 
-        jq("body").off("contextmenu").on("contextmenu", function(event) {
+        jq("body").unbind("contextmenu").bind("contextmenu", function(event) {
             var e = jq.fixEvent(event);
 
             if (typeof e == "undefined" || !e) {
@@ -693,7 +693,7 @@ ASC.CRM.ListCasesView = (function() {
 
 
         LoadingBanner.hideLoaderBtn("#setPermissionsCasesPanel");
-        jq("#setPermissionsCasesPanel .setPermissionsLink").off("click").on("click", function() {
+        jq("#setPermissionsCasesPanel .setPermissionsLink").unbind("click").bind("click", function() {
             _setPermissions(params);
         });
         PopupKeyUpActionProvider.EnableEsc = false;
@@ -745,7 +745,7 @@ ASC.CRM.ListCasesView = (function() {
 
         jq("#tableForCasesNavigation select:first")
             .val(entryCountOnPage)
-            .on("change", function () {
+            .change(function () {
                 ASC.CRM.ListCasesView.changeCountOfRows(this.value);
             })
             .tlCombobox();
@@ -757,7 +757,7 @@ ASC.CRM.ListCasesView = (function() {
         ASC.CRM.ListCasesView.advansedFilter = jq("#casesAdvansedFilter")
             .advansedFilter({
                 anykey      : false,
-                hintDefaultDisable: false,
+                hintDefaultDisable: true,
                 maxfilters  : -1,
                 maxlength   : "100",
                 store       : true,
@@ -808,8 +808,8 @@ ASC.CRM.ListCasesView = (function() {
                             { id: "title", title: ASC.CRM.Resources.CRMCommonResource.Title, dsc: false, def: true }
                             ]
             })
-            .on("setfilter", ASC.CRM.ListCasesView.setFilter)
-            .on("resetfilter", ASC.CRM.ListCasesView.resetFilter);
+            .bind("setfilter", ASC.CRM.ListCasesView.setFilter)
+            .bind("resetfilter", ASC.CRM.ListCasesView.resetFilter);
     };
 
     var _initEmptyScreen = function () {
@@ -928,7 +928,7 @@ ASC.CRM.ListCasesView = (function() {
 
             _initScrolledGroupMenu();
 
-            jq("#menuCreateNewTask").on("click", function () { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
+            jq("#menuCreateNewTask").bind("click", function () { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
 
             ASC.CRM.ListCasesView.initConfirmationPanelForDelete();
 
@@ -938,7 +938,18 @@ ASC.CRM.ListCasesView = (function() {
             jq(".containerBodyBlock").children(".loader-page").show();
 
             _initFilter();
+            /*tracking events*/
 
+            ASC.CRM.ListCasesView.advansedFilter.one("adv-ready", function () {
+                var crmAdvansedFilterContainer = jq("#casesAdvansedFilter .advansed-filter-list");
+                crmAdvansedFilterContainer.find("li[data-id='opened'] .inner-text").trackEvent(ga_Categories.cases, ga_Actions.filterClick, 'opened_status');
+                crmAdvansedFilterContainer.find("li[data-id='closed'] .inner-text").trackEvent(ga_Categories.cases, ga_Actions.filterClick, 'closed_status');
+                crmAdvansedFilterContainer.find("li[data-id='tags'] .inner-text").trackEvent(ga_Categories.cases, ga_Actions.filterClick, 'with_tags');
+
+                jq("#casesAdvansedFilter .btn-toggle-sorter").trackEvent(ga_Categories.cases, ga_Actions.filterClick, "sort");
+                jq("#casesAdvansedFilter .advansed-filter-input").trackEvent(ga_Categories.cases, ga_Actions.filterClick, "search_text", "enter");
+            });
+            
             ASC.CRM.PartialExport.init(ASC.CRM.ListCasesView.advansedFilter, "case");
         },
 
@@ -1063,7 +1074,7 @@ ASC.CRM.ListCasesView = (function() {
         showConfirmationPanelForDelete: function(title, caseID, isListView) {
             jq("#confirmationDeleteOneCasePanel .confirmationAction>b").text(jq.format(ASC.CRM.Resources.CRMJSResource.DeleteCaseConfirmMessage, Encoder.htmlDecode(title)));
 
-            jq("#confirmationDeleteOneCasePanel .middle-button-container>.button.blue.middle").off("click").on("click", function () {
+            jq("#confirmationDeleteOneCasePanel .middle-button-container>.button.blue.middle").unbind("click").bind("click", function () {
                 ASC.CRM.ListCasesView.deleteCase(caseID, isListView);
             });
             PopupKeyUpActionProvider.EnableEsc = false;
@@ -1083,7 +1094,7 @@ ASC.CRM.ListCasesView = (function() {
                             LoadingBanner.strLoading = ASC.CRM.Resources.CRMJSResource.DeleteCaseInProgress;
                             LoadingBanner.showLoaderBtn("#confirmationDeleteOneCasePanel");
 
-                            jq("#crm_caseMakerDialog input, #crm_caseMakerDialog select, #crm_caseMakerDialog textarea").prop("disabled", true);
+                            jq("#crm_caseMakerDialog input, #crm_caseMakerDialog select, #crm_caseMakerDialog textarea").attr("disabled", true);
                             LoadingBanner.strLoading = ASC.CRM.Resources.CRMJSResource.DeleteCaseInProgress;
                             LoadingBanner.showLoaderBtn("#crm_caseMakerDialog");
                         },
@@ -1164,10 +1175,10 @@ ASC.CRM.CasesActionView = (function() {
                 if (objName == "casesContactSelector") {
                     jq("#selector_" + window.casesContactSelector.ObjName).children("div:first").children("div[id^='item_']").remove();
                     jq("#membersCasesSelectorsContainer").prev('dt').addClass("crm-headerHiddenToggledBlock");
-                    jq(window).off("contactSelectorIsReady", casesContactSelectorReady);
+                    jq(window).unbind("contactSelectorIsReady", casesContactSelectorReady);
                 }
             };
-            jq(window).on("contactSelectorIsReady", casesContactSelectorReady);
+            jq(window).bind("contactSelectorIsReady", casesContactSelectorReady);
         }
 
         window["casesContactSelector"] = new ASC.CRM.ContactSelector.ContactSelector("casesContactSelector",
@@ -1206,7 +1217,7 @@ ASC.CRM.CasesActionView = (function() {
         window.casesContactSelector.SelectItemEvent = _addContactToCase;
         ASC.CRM.ListContactView.removeMember = _removeContactFromCase;
 
-        jq(window).on("deleteContactFromSelector", function (event, $itemObj, objName) {
+        jq(window).bind("deleteContactFromSelector", function (event, $itemObj, objName) {
             if (jq("#selector_" + window.casesContactSelector.ObjName).children("div:first").children("div[id^='item_']").length == 1) {
                 jq("#membersCasesSelectorsContainer").prev('dt').addClass("crm-headerHiddenToggledBlock");
             }
@@ -1310,7 +1321,7 @@ ASC.CRM.CasesActionView = (function() {
 
             initFields();
 
-            jq("#menuCreateNewTask").on("click", function () { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
+            jq("#menuCreateNewTask").bind("click", function () { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
 
             ASC.CRM.ListCasesView.initConfirmationPanelForDelete();
             if (ASC.CRM.Data.IsCRMAdmin === true) {
@@ -1351,7 +1362,7 @@ ASC.CRM.CasesActionView = (function() {
             var caseID = parseInt(jq.getURLParam("id"));
             if (!isNaN(caseID) && jq("#deleteCaseButton").length == 1) {
                 var caseTitle = jq("#deleteCaseButton").attr("caseTitle");
-                jq("#deleteCaseButton").off("click").on("click", function() {
+                jq("#deleteCaseButton").unbind("click").bind("click", function() {
                     ASC.CRM.ListCasesView.showConfirmationPanelForDelete(caseTitle, caseID, false);
                 });
             }
@@ -1388,7 +1399,7 @@ ASC.CRM.CasesActionView = (function() {
                 if (jq("#crm_caseMakerDialog .casePrivatePanel").length == 1) {
                     if (!jq("#isPrivate").is(":checked")) {
                         window.SelectedUsers.IDs = new Array();
-                        jq("#notifyPrivate").prop("checked", false);
+                        jq("#notifyPrivate").removeAttr("checked");
                     }
 
                     jq("#isPrivateCase").val(jq("#isPrivate").is(":checked"));
@@ -1609,9 +1620,6 @@ ASC.CRM.CasesDetailsView = (function() {
                     success: function(params) {
                         window.Attachments.deleteFileFromLayout(params.fileId);
                         //ASC.CRM.Common.changeCountInTab("delete", "files");
-                    },
-                    error: function (params, error) {
-                        toastr.error(ASC.CRM.Resources.CRMJSResource.ErrorMassage_SecurityException_DeleteEditingFile);
                     }
                 });
             }
@@ -1644,7 +1652,7 @@ ASC.CRM.CasesDetailsView = (function() {
         if (window.caseResponsibleIDs.length != 0) {
             params.taskResponsibleSelectorUserIDs = window.caseResponsibleIDs;
         }
-        jq("#menuCreateNewTask").on("click", function() {
+        jq("#menuCreateNewTask").bind("click", function() {
             ASC.CRM.TaskActionView.showTaskPanel(0, window.entityData.type, window.entityData.id, null, params);
         });
         ASC.CRM.ListTaskView.bindEmptyScrBtnEvent(params);
@@ -1689,7 +1697,7 @@ ASC.CRM.CasesDetailsView = (function() {
         window.casesContactSelector.SelectItemEvent = ASC.CRM.CasesDetailsView.addMemberToCase;
         ASC.CRM.ListContactView.removeMember = ASC.CRM.CasesDetailsView.removeMemberFromCase;
 
-        jq(window).on("getContactsFromApi", function(event, contacts) {
+        jq(window).bind("getContactsFromApi", function(event, contacts) {
             var contactLength = contacts.length;
             if (contactLength == 0) {
                 jq("#emptyCaseParticipantPanel.display-none").removeClass("display-none");

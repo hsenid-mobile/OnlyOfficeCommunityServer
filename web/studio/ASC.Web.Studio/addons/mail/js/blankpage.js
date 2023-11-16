@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -345,7 +345,7 @@ window.blankPages = (function($) {
         var btnArray = page.find("#{0} .emptyScrBttnPnl a".format(id));
         $.each(btnArray, function (index, value) {
             if (buttons[index] && buttons[index].handler) {
-                $(value).on("click", buttons[index].handler);
+                $(value).click(buttons[index].handler);
             }
         });
 

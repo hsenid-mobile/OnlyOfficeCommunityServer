@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
 using ASC.Core;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -30,41 +28,28 @@ namespace ASC.VoipService
 {
     public class VoipSettings
     {
-        ///<example>VoiceUrl</example>
         public string VoiceUrl { get; set; }
 
-        ///<example>Name</example>
         public string Name { get; set; }
 
-        ///<type>ASC.VoipService.Agent, ASC.VoipService</type>
-        ///<collection>list</collection>
         public List<Agent> Operators { get; set; }
 
-        ///<type>ASC.VoipService.Queue, ASC.VoipService</type>
         public Queue Queue { get; set; }
 
-        ///<type>ASC.VoipService.Agent, ASC.VoipService</type>
         public Agent Caller { get { return Operators.FirstOrDefault(r => r.Id == SecurityContext.CurrentAccount.ID); } }
 
-        ///<type>ASC.VoipService.WorkingHours, ASC.VoipService</type>
         public WorkingHours WorkingHours { get; set; }
 
-        ///<example>VoiceMail</example>
         public string VoiceMail { get; set; }
 
-        ///<example>GreetingAudio</example>
         public string GreetingAudio { get; set; }
 
-        ///<example>HoldAudio</example>
         public string HoldAudio { get; set; }
 
-        ///<example>true</example>
         public bool AllowOutgoingCalls { get; set; }
 
-        ///<example>true</example>
         public bool Pause { get; set; }
 
-        ///<example>true</example>
         public bool Record { get; set; }
 
         internal string JsonSettings
@@ -91,7 +76,7 @@ namespace ASC.VoipService
             {
                 try
                 {
-                    var settings = JsonConvert.DeserializeObject<VoipSettings>(value, new JsonSerializerSettings { ContractResolver = CustomSerializeContractResolver.Instance });
+                    var settings = JsonConvert.DeserializeObject<VoipSettings>(value, new JsonSerializerSettings {ContractResolver = CustomSerializeContractResolver.Instance });
 
                     Operators = settings.Operators ?? new List<Agent>();
                     Name = settings.Name;
@@ -145,7 +130,7 @@ namespace ASC.VoipService
 
         public static VoipSettings GetSettings(string settings)
         {
-            return new VoipSettings { JsonSettings = settings };
+            return new VoipSettings {JsonSettings = settings};
         }
     }
 

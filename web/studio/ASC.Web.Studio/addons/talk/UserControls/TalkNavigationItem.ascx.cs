@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 
 
 using System;
-using System.Configuration;
 using System.Text;
 using System.Web;
 using System.Web.UI;
-
 using ASC.Core;
 using ASC.Web.Talk.Addon;
+using System.Configuration;
 
 namespace ASC.Web.Talk.UserControls
 {
@@ -87,7 +86,7 @@ namespace ASC.Web.Talk.UserControls
             base.Render(writer);
 
             // Migrate to CommonBodyScripts
-            // Page.RegisterBodyScripts("~/addons/talk/js/talk.navigationitem.js");
+           // Page.RegisterBodyScripts("~/addons/talk/js/talk.navigationitem.js");
             RegisterScript();
         }
 

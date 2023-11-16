@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,11 @@ using System.Configuration;
 using System.Globalization;
 using System.Linq;
 using System.Web;
-
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.VoipService.Dao;
 using ASC.Web.Core.Client.HttpHandlers;
 using ASC.Web.Core.Users;
-using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Utility;
 
@@ -109,8 +107,7 @@ namespace ASC.Web.Studio.Masters.MasterResources
             return SecurityContext.CurrentAccount.ID +
                    (SecurityContext.IsAuthenticated && !CoreContext.Configuration.Personal
                         ? (CoreContext.UserManager.GetMaxUsersLastModified().Ticks.ToString(CultureInfo.InvariantCulture) +
-                           CoreContext.UserManager.GetMaxGroupsLastModified().Ticks.ToString(CultureInfo.InvariantCulture) +
-                           ((int)ModeThemeSettings.GetModeThemesSettings().ModeThemeName).ToString(CultureInfo.InvariantCulture))
+                           CoreContext.UserManager.GetMaxGroupsLastModified().Ticks.ToString(CultureInfo.InvariantCulture))
                         : string.Empty);
         }
 
@@ -121,7 +118,7 @@ namespace ASC.Web.Studio.Masters.MasterResources
             {
                 if (i + 1 < userInfo.Contacts.Count)
                 {
-                    contacts.Add(new { type = userInfo.Contacts[i], value = userInfo.Contacts[i + 1] });
+                    contacts.Add(new {type = userInfo.Contacts[i], value = userInfo.Contacts[i + 1]});
                 }
             }
 
@@ -130,8 +127,6 @@ namespace ASC.Web.Studio.Masters.MasterResources
 
         private static object PrepareUserInfo(UserInfo userInfo)
         {
-            var displayPrivate = userInfo.CanViewPrivateData();
-
             return new
             {
                 id = userInfo.ID,
@@ -147,9 +142,9 @@ namespace ASC.Web.Studio.Masters.MasterResources
                 isOutsider = userInfo.IsOutsider(),
                 isAdmin = userInfo.IsAdmin(),
                 isOwner = userInfo.IsOwner(),
-                contacts = displayPrivate ? GetContacts(userInfo) : null,
+                contacts = GetContacts(userInfo),
                 created = userInfo.CreateDate,
-                email = displayPrivate ? userInfo.Email : string.Empty,
+                email = userInfo.Email,
                 isLDAP = userInfo.IsLDAP(),
                 isSSO = userInfo.IsSSO(),
                 isTerminated = userInfo.Status == EmployeeStatus.Terminated

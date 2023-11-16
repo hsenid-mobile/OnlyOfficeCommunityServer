@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Routing;
-
 using ASC.Api.Impl.Constraints;
 using ASC.Api.Interfaces;
-
 using Autofac;
 
 namespace ASC.Api.Impl.Routing
@@ -40,7 +38,7 @@ namespace ASC.Api.Impl.Routing
             foreach (var apiMethodCall in entryPoints.OrderBy(x => x.RoutingUrl.IndexOf('{')).ThenBy(x => x.RoutingUrl.LastIndexOf('}')))
             {
                 var dataTokens = GetDataTokens(apiMethodCall);
-                var url = apiMethodCall.FullPath + (apiMethodCall.FullPath.EndsWith("}") ? "." : "") + ExtensionBrace;
+                var url = apiMethodCall.FullPath + (apiMethodCall.FullPath.EndsWith("}") ? "." : "") +  ExtensionBrace;
 
                 apiMethodCall.Constraints.Add(Extension, apiExtensionConstraint);
 

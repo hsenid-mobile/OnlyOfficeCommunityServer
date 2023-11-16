@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,12 @@
 */
 
 
-using System;
-using System.IO;
-using System.Threading.Tasks;
-
-using ASC.Core.ChunkedUploader;
 using ASC.Files.Core;
 using ASC.Web.Files.Classes;
+using System;
+using System.IO;
+using ASC.Core.ChunkedUploader;
 using ASC.Web.Studio.Core;
-
 using File = ASC.Files.Core.File;
 
 namespace ASC.Web.Files.Utils
@@ -62,7 +59,7 @@ namespace ASC.Web.Files.Utils
 
         public static ChunkedUploadSession GetSession(string sessionId)
         {
-            return CommonSessionHolder(false).Get<ChunkedUploadSession>(sessionId);
+            return (ChunkedUploadSession)CommonSessionHolder(false).Get(sessionId);
         }
 
         public static ChunkedUploadSession CreateUploadSession(File file, long contentLength)
@@ -77,11 +74,6 @@ namespace ASC.Web.Files.Utils
             CommonSessionHolder().UploadChunk(uploadSession, stream, length);
         }
 
-        public static async Task UploadChunkAsync(ChunkedUploadSession uploadSession, Stream stream, long length)
-        {
-            await CommonSessionHolder().UploadChunkAsync(uploadSession, stream, length);
-        }
-
         public static void FinalizeUploadSession(ChunkedUploadSession uploadSession)
         {
             CommonSessionHolder().Finalize(uploadSession);
@@ -89,7 +81,7 @@ namespace ASC.Web.Files.Utils
 
         public static void Move(ChunkedUploadSession chunkedUploadSession, string newPath)
         {
-            CommonSessionHolder().Move(chunkedUploadSession, newPath, chunkedUploadSession.CheckQuota);
+            CommonSessionHolder().Move(chunkedUploadSession, newPath);
         }
 
         public static void AbortUploadSession(ChunkedUploadSession uploadSession)

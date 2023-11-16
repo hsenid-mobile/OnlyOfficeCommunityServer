@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,20 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
-
+using System.Web;
 using ASC.Common.Data.AdoProxy;
 using ASC.Common.Data.Sql;
 using ASC.Common.Logging;
+using ASC.Common.Web;
 
-using LogManager = ASC.Common.Logging.BaseLogManager;
 
 namespace ASC.Common.Data
 {
-    public class DbSleepConnectionsCounter
-    {
-        public static volatile int SleepConnectionsCount;
-    }
-
     public class DbManager : IDbManager
     {
         private readonly ILog logger = LogManager.GetLogger("ASC.SQL");
         private readonly ProxyContext proxyContext;
+        private readonly bool shared;
 
         private DbCommand command;
         private ISqlDialect dialect;
@@ -45,7 +41,7 @@ namespace ASC.Common.Data
 
         private readonly int? commandTimeout;
 
-        public DbCommand Command
+        private DbCommand Command
         {
             get
             {
@@ -53,27 +49,10 @@ namespace ASC.Common.Data
                 if (command == null)
                 {
                     command = OpenConnection().CreateCommand();
-
-                    if (logger.IsTraceEnabled)
-                    {
-                        CheckSleepConnections("new command");
-                    }
                 }
-
-                if (command.Connection.State == ConnectionState.Broken)
-                {
-                    command.Connection.Close();
-                    command.Connection.Open();
-                }
-
-                if (command.Connection.State == ConnectionState.Closed)
+                if (command.Connection.State == ConnectionState.Closed || command.Connection.State == ConnectionState.Broken)
                 {
                     command = OpenConnection().CreateCommand();
-
-                    if (logger.IsTraceEnabled)
-                    {
-                        CheckSleepConnections("closed command");
-                    }
                 }
 
                 if (commandTimeout.HasValue)
@@ -85,48 +64,11 @@ namespace ASC.Common.Data
             }
         }
 
-        private int CountSleepConnections()
-        {
-            return command.ExecuteScalar<int>("SELECT COUNT(*) FROM information_schema.processlist WHERE command = 'Sleep'");
-        }
-
-        private void CheckSleepConnections(string flag)
-        {
-            try
-            {
-                var previousCount = DbSleepConnectionsCounter.SleepConnectionsCount;
-                var currentCount = CountSleepConnections();
-                int diff = currentCount - previousCount;
-
-                if (diff > 0)
-                {
-                    logger.Error(string.Format(
-                            "{0}. {1} connection(s) have been leaked! Previous count: {2}, Current count: {3}",
-                            flag,
-                            diff,
-                            previousCount,
-                            currentCount
-                        ));
-                }
-
-                DbSleepConnectionsCounter.SleepConnectionsCount = currentCount;
-            }
-            catch (Exception e)
-            {
-                logger.Error(e);
-            }
-        }
-
         public string DatabaseId { get; private set; }
 
         public bool InTransaction
         {
             get { return Command.Transaction != null; }
-        }
-
-        public bool IsDisposed
-        {
-            get { return disposed; }
         }
 
         public DbConnection Connection
@@ -136,13 +78,15 @@ namespace ASC.Common.Data
 
 
         public DbManager(string databaseId, int? commandTimeout = null)
+            : this(databaseId, true, commandTimeout)
         {
-            if (databaseId == null)
-            {
-                throw new ArgumentNullException("databaseId");
-            }
+        }
 
+        public DbManager(string databaseId, bool shared, int? commandTimeout = null)
+        {
+            if (databaseId == null) throw new ArgumentNullException("databaseId");
             DatabaseId = databaseId;
+            this.shared = shared;
 
             if (logger.IsDebugEnabled)
             {
@@ -159,27 +103,37 @@ namespace ASC.Common.Data
 
         public void Dispose()
         {
-            if (disposed)
+            lock (this)
             {
-                return;
-            }
-
-            disposed = true;
-            if (command != null)
-            {
-                if (command.Connection != null)
+                if (disposed) return;
+                disposed = true;
+                if (command != null)
                 {
-                    command.Connection.Close();
-                    command.Connection.Dispose();
+                    if (command.Connection != null) command.Connection.Dispose();
+                    command.Dispose();
+                    command = null;
                 }
-
-                command.Dispose();
-                command = null;
             }
         }
 
         #endregion
 
+        public static IDbManager FromHttpContext(string databaseId)
+        {
+            if (HttpContext.Current != null)
+            {
+                var dbManager = DisposableHttpContext.Current[databaseId] as DbManager;
+                if (dbManager == null || dbManager.disposed)
+                {
+                    var localDbManager = new DbManager(databaseId);
+                    var dbManagerAdapter = new DbManagerProxy(localDbManager);
+                    DisposableHttpContext.Current[databaseId] = localDbManager;
+                    return dbManagerAdapter;
+                }
+                return new DbManagerProxy(dbManager);
+            }
+            return new DbManager(databaseId);
+        }
 
         private DbConnection OpenConnection()
         {
@@ -191,20 +145,46 @@ namespace ASC.Common.Data
         private DbConnection GetConnection()
         {
             CheckDispose();
-            var connection = DbRegistry.CreateDbConnection(DatabaseId);
+            DbConnection connection = null;
+            string key = null;
+            if (shared && HttpContext.Current != null)
+            {
+                key = string.Format("Connection {0}|{1}", GetDialect(), DbRegistry.GetConnectionString(DatabaseId));
+                connection = DisposableHttpContext.Current[key] as DbConnection;
+                if (connection != null)
+                {
+                    var state = ConnectionState.Closed;
+                    var disposed = false;
+                    try
+                    {
+                        state = connection.State;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        disposed = true;
+                    }
+                    if (!disposed && (state == ConnectionState.Closed || state == ConnectionState.Broken))
+                    {
+                        if (string.IsNullOrEmpty(connection.ConnectionString))
+                        {
+                            connection.ConnectionString = DbRegistry.GetConnectionString(DatabaseId).ConnectionString;
+                        }
+                        return connection;
+                    }
+                }
+            }
+            connection = DbRegistry.CreateDbConnection(DatabaseId);
             if (proxyContext != null)
             {
                 connection = new DbConnectionProxy(connection, proxyContext);
             }
+            if (shared && HttpContext.Current != null) DisposableHttpContext.Current[key] = connection;
             return connection;
         }
 
         public IDbTransaction BeginTransaction()
         {
-            if (InTransaction)
-            {
-                throw new InvalidOperationException("Transaction already open.");
-            }
+            if (InTransaction) throw new InvalidOperationException("Transaction already open.");
 
             Command.Transaction = Command.Connection.BeginTransaction();
 
@@ -215,10 +195,7 @@ namespace ASC.Common.Data
 
         public IDbTransaction BeginTransaction(IsolationLevel il)
         {
-            if (InTransaction)
-            {
-                throw new InvalidOperationException("Transaction already open.");
-            }
+            if (InTransaction) throw new InvalidOperationException("Transaction already open.");
 
             il = GetDialect().GetSupportedIsolationLevel(il);
             Command.Transaction = Command.Connection.BeginTransaction(il);
@@ -245,17 +222,17 @@ namespace ASC.Common.Data
 
         public List<object[]> ExecuteList(ISqlInstruction sql)
         {
-            return this.ExecuteList(sql, GetDialect());
+            return Command.ExecuteList(sql, GetDialect());
         }
 
         public Task<List<object[]>> ExecuteListAsync(ISqlInstruction sql)
         {
-            return this.ExecuteListAsync(sql, GetDialect());
+            return Command.ExecuteListAsync(sql, GetDialect());
         }
 
         public List<T> ExecuteList<T>(ISqlInstruction sql, Converter<IDataRecord, T> converter)
         {
-            return this.ExecuteList(sql, GetDialect(), converter);
+            return Command.ExecuteList(sql, GetDialect(), converter);
         }
 
         public T ExecuteScalar<T>(string sql, params object[] parameters)
@@ -265,7 +242,7 @@ namespace ASC.Common.Data
 
         public T ExecuteScalar<T>(ISqlInstruction sql)
         {
-            return this.ExecuteScalar<T>(sql, GetDialect());
+            return Command.ExecuteScalar<T>(sql, GetDialect());
         }
 
         public int ExecuteNonQuery(string sql, params object[] parameters)
@@ -280,15 +257,12 @@ namespace ASC.Common.Data
 
         public int ExecuteNonQuery(ISqlInstruction sql)
         {
-            return this.ExecuteNonQuery(sql, GetDialect());
+            return Command.ExecuteNonQuery(sql, GetDialect());
         }
 
         public int ExecuteBatch(IEnumerable<ISqlInstruction> batch)
         {
-            if (batch == null)
-            {
-                throw new ArgumentNullException("batch");
-            }
+            if (batch == null) throw new ArgumentNullException("batch");
 
             var affected = 0;
             using (var tx = BeginTransaction())
@@ -312,10 +286,7 @@ namespace ASC.Common.Data
 
         private void CheckDispose()
         {
-            if (disposed)
-            {
-                throw new ObjectDisposedException(GetType().FullName);
-            }
+            if (disposed) throw new ObjectDisposedException(GetType().FullName);
         }
 
         private ISqlDialect GetDialect()
@@ -328,8 +299,7 @@ namespace ASC.Common.Data
             logger.DebugWithProps(a.SqlMethod,
                 new KeyValuePair<string, object>("duration", a.Duration.TotalMilliseconds),
                 new KeyValuePair<string, object>("sql", RemoveWhiteSpaces(a.Sql)),
-                new KeyValuePair<string, object>("sqlParams", RemoveWhiteSpaces(a.SqlParameters)),
-                new KeyValuePair<string, object>("sqlThread", a.SqlThread)
+                new KeyValuePair<string, object>("sqlParams", RemoveWhiteSpaces(a.SqlParameters))
                 );
         }
 
@@ -338,6 +308,88 @@ namespace ASC.Common.Data
             return !string.IsNullOrEmpty(str) ?
                 str.Replace(Environment.NewLine, " ").Replace("\n", "").Replace("\r", "").Replace("\t", " ") :
                 string.Empty;
+        }
+    }
+
+    public class DbManagerProxy : IDbManager
+    {
+        private DbManager dbManager { get; set; }
+
+        public DbManagerProxy(DbManager dbManager)
+        {
+            this.dbManager = dbManager;
+        }
+
+        public void Dispose()
+        {
+            if (HttpContext.Current == null)
+            {
+                dbManager.Dispose();
+            }
+        }
+
+        public DbConnection Connection { get { return dbManager.Connection; } }
+        public string DatabaseId { get { return dbManager.DatabaseId; } }
+        public bool InTransaction { get { return dbManager.InTransaction; } }
+
+        public IDbTransaction BeginTransaction()
+        {
+            return dbManager.BeginTransaction();
+        }
+
+        public IDbTransaction BeginTransaction(IsolationLevel isolationLevel)
+        {
+            return dbManager.BeginTransaction(isolationLevel);
+        }
+
+        public IDbTransaction BeginTransaction(bool nestedIfAlreadyOpen)
+        {
+            return dbManager.BeginTransaction(nestedIfAlreadyOpen);
+        }
+
+        public List<object[]> ExecuteList(string sql, params object[] parameters)
+        {
+            return dbManager.ExecuteList(sql, parameters);
+        }
+
+        public List<object[]> ExecuteList(ISqlInstruction sql)
+        {
+            return dbManager.ExecuteList(sql);
+        }
+
+        public Task<List<object[]>> ExecuteListAsync(ISqlInstruction sql)
+        {
+            return dbManager.ExecuteListAsync(sql);
+        }
+
+        public List<T> ExecuteList<T>(ISqlInstruction sql, Converter<IDataRecord, T> converter)
+        {
+            return dbManager.ExecuteList<T>(sql, converter);
+        }
+
+        public T ExecuteScalar<T>(string sql, params object[] parameters)
+        {
+            return dbManager.ExecuteScalar<T>(sql, parameters);
+        }
+
+        public T ExecuteScalar<T>(ISqlInstruction sql)
+        {
+            return dbManager.ExecuteScalar<T>(sql);
+        }
+
+        public int ExecuteNonQuery(string sql, params object[] parameters)
+        {
+            return dbManager.ExecuteNonQuery(sql, parameters);
+        }
+
+        public int ExecuteNonQuery(ISqlInstruction sql)
+        {
+            return dbManager.ExecuteNonQuery(sql);
+        }
+
+        public int ExecuteBatch(IEnumerable<ISqlInstruction> batch)
+        {
+            return dbManager.ExecuteBatch(batch);
         }
     }
 }

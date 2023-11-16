@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,18 @@ ASC.Controls.FirstTimeView = new function() {
 
     this.Finish = function() {
         window.onbeforeunload = null;
+
+        try {
+            if (window.ga) {
+                window.ga('www.send', 'pageview', '/wizard_finish');
+                window.ga('www.send', 'event', 'onlyoffice_adwords', 'wizard_finish');
+                window.ga('testTracker.send', 'pageview', '/wizard_finish');
+                window.ga('testTracker.send', 'event', 'onlyoffice_adwords', 'wizard_finish');
+            }
+            window.uetq = window.uetq || [];
+            window.uetq.push({ 'ec': 'onlyoffice_msn', 'ea': 'clickto', 'el': 'onbutton', 'ev': '1' });
+        } catch(err) {
+        }
 
         var url = "Default.aspx";
         if (jq("body").is(".desktop")) {
@@ -62,7 +74,7 @@ ASC.Controls.FirstTimeView = new function() {
         } else {
             ASC.Controls.FirstTimeView.ShowOperationInfo(result);
             window.onbeforeunload = function(e) {
-                return ASC.Resources.Master.ResourceJS.WizardCancelConfirmMessage;
+                return ASC.Resources.Master.Resource.WizardCancelConfirmMessage;
             };
         }
     };
@@ -77,12 +89,12 @@ ASC.Controls.FirstTimeView = new function() {
 
 
 jq(document).ready(function() {
-    jq(document).on("keyup", function (e) {
+    jq(document).keyup(function (e) {
     if (e.which == 13) {
         ASC.Controls.FirstTimeView.SaveRequiredStep();
         }
     });
     window.onbeforeunload = function(e) {
-    return ASC.Resources.Master.ResourceJS.WizardCancelConfirmMessage;
+    return ASC.Resources.Master.Resource.WizardCancelConfirmMessage;
     };
 });

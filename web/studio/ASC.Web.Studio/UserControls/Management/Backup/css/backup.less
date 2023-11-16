@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,30 +54,26 @@
         }
     }
 
-    .input-button-box {
-        width: 350px;
-        display: flex;
-        align-items: center;
+    .teamlabStorageFolderSelectorBox {
+        width: 343px;
         height: 25px;
+        margin-bottom: 15px;
 
-        .textEdit {
-            width: 100%;
+        .teamlabStorageFolderSelector {
             height: 18px;
+            width: 65%;
             margin-right: 5px;
+            vertical-align: middle;
         }
 
         .button {
-            white-space: nowrap;
+            min-width: 15%;
             padding-left: 16px;
             padding-right: 16px;
         }
     }
 
-    .teamlabStorageFolderSelectorBox {
-        margin-bottom: 15px;
-    }
-
-    .storageBox {
+        .storageBox {
         border: 1px solid #e0e0e0;
         padding: 29px 35px;
 
@@ -100,15 +96,24 @@
     }
 
     .consumerStorageSettingsBox {
-        .textEdit {
+        margin-top: 10px;
+
+        .textBox {
             margin-bottom: 10px;
-            width: 100%;
-            height: 22px;
-            box-sizing: border-box;
+            width: 90%;
+        }
+
+        select.textEdit{
+            height: 24px;
+            width: 345px;
+        }
+
+        div .textBox:first-child {
+            margin-top: 10px;
         }
     }
 
-    .amazonStorageSettingsBox {
+    .amazonStorageSettingsBox  {
         margin-bottom: 15px;
 
         .amazonStorageSettingsParam {
@@ -129,7 +134,7 @@
                 width: 343px;
             }
 
-            &.accessKeyId {
+            &.accessKeyId  {
                 width: 343px;
             }
 
@@ -140,7 +145,7 @@
             &.filePath {
                 width: 343px;
             }
-
+                        
             &.region {
                 height: 24px;
                 width: 345px;
@@ -150,7 +155,7 @@
     }
 
     #backupProgressBox {
-        display: none;
+        display: none; 
         margin-bottom: 10px;
         padding: 20px 0 0 0;
 
@@ -175,8 +180,4 @@
 
 .select-time-period {
     margin-top:10px;
-}
-
-.backup-settings_title {
-    margin-bottom: 15px;
 }

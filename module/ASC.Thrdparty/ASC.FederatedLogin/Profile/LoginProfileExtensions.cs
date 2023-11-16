@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,10 @@ namespace ASC.FederatedLogin.Profile
         {
             return profile.AppendProfile(uri);
         }
+        public static Uri AddProfileSession(this Uri uri, LoginProfile profile, HttpContext context)
+        {
+            return profile.AppendSessionProfile(uri, context);
+        }
 
         public static Uri AddProfileCache(this Uri uri, LoginProfile profile)
         {
@@ -36,6 +40,10 @@ namespace ASC.FederatedLogin.Profile
         {
             var profile = new LoginProfile();
             var queryString = HttpUtility.ParseQueryString(uri.Query);
+            if (!string.IsNullOrEmpty(queryString[LoginProfile.QuerySessionParamName]) && HttpContext.Current != null && HttpContext.Current.Session != null)
+            {
+                return (LoginProfile)HttpContext.Current.Session[queryString[LoginProfile.QuerySessionParamName]];
+            }
             if (!string.IsNullOrEmpty(queryString[LoginProfile.QueryParamName]))
             {
                 profile.ParseFromUrl(uri);
@@ -43,7 +51,7 @@ namespace ASC.FederatedLogin.Profile
             }
             if (!string.IsNullOrEmpty(queryString[LoginProfile.QueryCacheParamName]))
             {
-                return (LoginProfile)HttpRuntime.Cache.Get(queryString[LoginProfile.QueryCacheParamName]);
+                return (LoginProfile)HttpRuntime.Cache.Get(queryString[LoginProfile.QuerySessionParamName]);
             }
             return null;
         }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ using System.Text;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
-
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Common.Configuration;
@@ -35,9 +34,7 @@ using ASC.VoipService;
 using ASC.VoipService.Twilio;
 using ASC.Web.CRM.Core;
 using ASC.Web.Studio.Utility;
-
 using Autofac;
-
 using Twilio.AspNet.Common;
 using Twilio.AspNet.Mvc;
 using Twilio.TwiML;
@@ -51,7 +48,7 @@ namespace ASC.Web.CRM.Classes
         private static readonly object LockObj = new object();
 
         [System.Web.Http.HttpPost]
-        public HttpResponseMessage Index(TwilioVoiceRequest request, [FromUri] Guid? callerId = null, [FromUri] int contactId = 0)
+        public HttpResponseMessage Index(TwilioVoiceRequest request, [FromUri]Guid? callerId = null, [FromUri]int contactId = 0)
         {
             try
             {
@@ -74,7 +71,7 @@ namespace ASC.Web.CRM.Classes
         }
 
         [System.Web.Http.HttpPost]
-        public HttpResponseMessage Client(TwilioVoiceRequest request, [FromUri] Guid callerId)
+        public HttpResponseMessage Client(TwilioVoiceRequest request, [FromUri]Guid callerId)
         {
             try
             {
@@ -95,7 +92,7 @@ namespace ASC.Web.CRM.Classes
         }
 
         [System.Web.Http.HttpPost]
-        public HttpResponseMessage Dial(TwilioVoiceRequest request, [FromUri] Guid callerId, [FromUri] int contactId = 0, [FromUri] string reject = null)
+        public HttpResponseMessage Dial(TwilioVoiceRequest request, [FromUri]Guid callerId, [FromUri]int contactId = 0, [FromUri]string reject = null)
         {
             try
             {
@@ -115,7 +112,7 @@ namespace ASC.Web.CRM.Classes
                     {
                         if (parentCall.VoipRecord == null || string.IsNullOrEmpty(parentCall.VoipRecord.Id))
                         {
-                            parentCall.VoipRecord = new VoipRecord { Id = request.RecordingSid };
+                            parentCall.VoipRecord = new VoipRecord {Id = request.RecordingSid};
                         }
 
                         daoFactory.VoipDao.SaveOrUpdateCall(parentCall);
@@ -134,7 +131,7 @@ namespace ASC.Web.CRM.Classes
         }
 
         [System.Web.Http.HttpPost]
-        public HttpResponseMessage Enqueue(TwilioVoiceRequest request, [FromUri] Guid? callerId = null, [FromUri] int contactId = 0)
+        public HttpResponseMessage Enqueue(TwilioVoiceRequest request, [FromUri]Guid? callerId = null, [FromUri]int contactId = 0)
         {
             try
             {
@@ -160,7 +157,7 @@ namespace ASC.Web.CRM.Classes
         }
 
         [System.Web.Http.HttpPost]
-        public HttpResponseMessage Queue(TwilioVoiceRequest request, [FromUri] Guid? callerId = null, [FromUri] int contactId = 0)
+        public HttpResponseMessage Queue(TwilioVoiceRequest request, [FromUri]Guid? callerId = null, [FromUri]int contactId = 0)
         {
             try
             {
@@ -175,7 +172,7 @@ namespace ASC.Web.CRM.Classes
         }
 
         [System.Web.Http.HttpPost]
-        public HttpResponseMessage Dequeue(TwilioVoiceRequest request, [FromUri] Guid? callerId = null, [FromUri] int contactId = 0, [FromUri] string reject = "")
+        public HttpResponseMessage Dequeue(TwilioVoiceRequest request, [FromUri]Guid? callerId = null, [FromUri]int contactId = 0, [FromUri]string reject = "")
         {
             try
             {
@@ -204,7 +201,7 @@ namespace ASC.Web.CRM.Classes
         }
 
         [System.Web.Http.HttpPost]
-        public HttpResponseMessage Wait(TwilioVoiceRequest request, [FromUri] Guid? callerId = null, [FromUri] int contactId = 0, [FromUri] string redirectTo = null)
+        public HttpResponseMessage Wait(TwilioVoiceRequest request, [FromUri]Guid? callerId = null, [FromUri]int contactId = 0, [FromUri]string redirectTo = null)
         {
             try
             {
@@ -243,7 +240,7 @@ namespace ASC.Web.CRM.Classes
         }
 
         [System.Web.Http.HttpPost]
-        public HttpResponseMessage GatherQueue(TwilioVoiceRequest request, [FromUri] Guid? callerId = null, [FromUri] int contactId = 0)
+        public HttpResponseMessage GatherQueue(TwilioVoiceRequest request, [FromUri]Guid? callerId = null, [FromUri]int contactId = 0)
         {
             try
             {
@@ -258,7 +255,7 @@ namespace ASC.Web.CRM.Classes
         }
 
         [System.Web.Http.HttpPost]
-        public HttpResponseMessage Redirect(TwilioVoiceRequest request, [FromUri] string redirectTo, [FromUri] Guid? callerId = null)
+        public HttpResponseMessage Redirect(TwilioVoiceRequest request, [FromUri]string redirectTo, [FromUri]Guid? callerId = null)
         {
             try
             {
@@ -273,7 +270,7 @@ namespace ASC.Web.CRM.Classes
         }
 
         [System.Web.Http.HttpPost]
-        public HttpResponseMessage VoiceMail(TwilioVoiceRequest request, [FromUri] Guid? callerId = null, [FromUri] int contactId = 0)
+        public HttpResponseMessage VoiceMail(TwilioVoiceRequest request, [FromUri]Guid? callerId = null, [FromUri]int contactId = 0)
         {
             try
             {
@@ -297,7 +294,7 @@ namespace ASC.Web.CRM.Classes
 
         private VoiceResponse Inbound(TwilioVoiceRequest request, DaoFactory daoFactory)
         {
-            SecurityContext.CurrentUser = CoreContext.TenantManager.GetCurrentTenant().OwnerId;
+            SecurityContext.AuthenticateMe(CoreContext.TenantManager.GetCurrentTenant().OwnerId);
             var call = SaveCall(request, VoipCallStatus.Incoming, daoFactory);
 
             return request.Inbound(call, daoFactory);
@@ -419,7 +416,7 @@ namespace ASC.Web.CRM.Classes
             if (callerId.HasValue && !callerId.Value.Equals(ASC.Core.Configuration.Constants.Guest.ID))
             {
                 CallerId = callerId.Value;
-                SecurityContext.CurrentUser = CallerId;
+                SecurityContext.AuthenticateMe(CallerId);
             }
             if (contactId != 0)
             {
@@ -451,7 +448,7 @@ namespace ASC.Web.CRM.Classes
             if (agent != null && agent.Item1 != null)
             {
                 var agentId = agent.Item1.Id;
-                SecurityContext.CurrentUser = agentId;
+                SecurityContext.AuthenticateMe(agentId);
                 call.AnsweredBy = agentId;
 
                 contact = contacts.FirstOrDefault(CRMSecurity.CanAccessTo);

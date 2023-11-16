@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Studio.PublicResources {
+namespace Resources {
     using System;
     
     
@@ -106,6 +106,15 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Chat rooms.
+        /// </summary>
+        public static string ConferenceGroupName {
+            get {
+                return ResourceManager.GetString("ConferenceGroupName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Extend mini-chat.
         /// </summary>
         public static string ExtendChatAltTitle {
@@ -120,6 +129,15 @@ namespace ASC.Web.Studio.PublicResources {
         public static string GoTalk {
             get {
                 return ResourceManager.GetString("GoTalk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Groups.
+        /// </summary>
+        public static string Groups {
+            get {
+                return ResourceManager.GetString("Groups", resourceCulture);
             }
         }
         
@@ -147,6 +165,15 @@ namespace ASC.Web.Studio.PublicResources {
         public static string InputNotificationMessage {
             get {
                 return ResourceManager.GetString("InputNotificationMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mailings.
+        /// </summary>
+        public static string MailingsGroupName {
+            get {
+                return ResourceManager.GetString("MailingsGroupName", resourceCulture);
             }
         }
         
@@ -291,6 +318,15 @@ namespace ASC.Web.Studio.PublicResources {
         public static string StatusOnline {
             get {
                 return ResourceManager.GetString("StatusOnline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create chat room.
+        /// </summary>
+        public static string TitleCreateRoom {
+            get {
+                return ResourceManager.GetString("TitleCreateRoom", resourceCulture);
             }
         }
         

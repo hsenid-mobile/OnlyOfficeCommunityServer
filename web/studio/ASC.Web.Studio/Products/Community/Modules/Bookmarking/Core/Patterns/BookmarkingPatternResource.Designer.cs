@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Community.Modules.Bookmarking.Core.Patterns {
+namespace ASC.Web.Community.Bookmarking.Core.Patterns {
     using System;
     
     
@@ -67,9 +67,7 @@ namespace ASC.Web.Community.Modules.Bookmarking.Core.Patterns {
         ///
         ///$CommentBody
         ///
-        ///&quot;Read More&quot;:&quot;$BookmarkUrl&quot;
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notifications about new comments added to this bookmark, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
+        ///&quot;Read More&quot;:&quot;$BookmarkUrl&quot;.
         /// </summary>
         public static string pattern_BookmarkCommentCreatedID {
             get {
@@ -82,30 +80,11 @@ namespace ASC.Web.Community.Modules.Bookmarking.Core.Patterns {
         ///
         ///$Date &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has added a new bookmark:&quot;$BookmarkTitle&quot;:&quot;$BookmarkUrl&quot;
         ///
-        ///$BookmarkDescription
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notifications about new bookmarks added, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
+        ///$BookmarkDescription.
         /// </summary>
         public static string pattern_BookmarkCreatedID {
             get {
                 return ResourceManager.GetString("pattern_BookmarkCreatedID", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1.You were mentioned in comment to Bookmark: &quot;$BookmarkTitle&quot;:&quot;$BookmarkUrl&quot;
-        ///
-        ///$Date &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; mentioned you in the comment to the bookmark:&quot;$BookmarkTitle&quot;:&quot;$BookmarkUrl&quot;
-        ///
-        ///$CommentBody
-        ///
-        ///&quot;Read More&quot;:&quot;$BookmarkUrl&quot;
-        ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notifications about new comments added to this bookmark, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscription [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_MentionForBookmarkComment {
-            get {
-                return ResourceManager.GetString("pattern_MentionForBookmarkComment", resourceCulture);
             }
         }
         
@@ -142,24 +121,6 @@ namespace ASC.Web.Community.Modules.Bookmarking.Core.Patterns {
         public static string subject_BookmarkCreatedID_tg {
             get {
                 return ResourceManager.GetString("subject_BookmarkCreatedID_tg", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Community. Mention in comment to bookmark: $BookmarkTitle.
-        /// </summary>
-        public static string subject_MentionForBookmarkComment {
-            get {
-                return ResourceManager.GetString("subject_MentionForBookmarkComment", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Community. Mention in comment to bookmark: [$BookmarkTitle]($BookmarkUrl).
-        /// </summary>
-        public static string subject_MentionForBookmarkComment_tg {
-            get {
-                return ResourceManager.GetString("subject_MentionForBookmarkComment_tg", resourceCulture);
             }
         }
     }

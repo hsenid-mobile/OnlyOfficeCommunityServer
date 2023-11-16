@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
 using ASC.Common.Utils;
 using ASC.Core;
 
@@ -75,7 +74,7 @@ namespace ASC.Web.Core.Calendars
             sb.AppendLine("BEGIN:VCALENDAR");
             sb.AppendLine("PRODID:TeamLab Calendar");
             sb.AppendLine("VERSION:2.0");
-
+            
             sb.AppendLine("METHOD:PUBLISH");
             sb.AppendLine("CALSCALE:GREGORIAN");
             sb.AppendLine(String.Format("X-WR-CALNAME:{0}", Name));
@@ -88,7 +87,7 @@ namespace ASC.Web.Core.Calendars
             //events
             foreach (var e in LoadEvents(SecurityContext.CurrentAccount.ID, DateTime.MinValue, DateTime.MaxValue))
             {
-                if (e is BaseEvent && e.GetType().GetCustomAttributes(typeof(AllDayLongUTCAttribute), true).Length == 0)
+                if (e is BaseEvent && e.GetType().GetCustomAttributes(typeof(AllDayLongUTCAttribute),true).Length==0)
                     (e as BaseEvent).TimeZone = TimeZone;
 
                 sb.AppendLine(e.ToiCalFormat());

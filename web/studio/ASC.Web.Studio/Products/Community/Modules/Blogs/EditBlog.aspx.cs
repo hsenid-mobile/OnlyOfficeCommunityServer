@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,20 @@
 */
 
 
+using ASC.Blogs.Core.Resources;
+using AjaxPro;
+using ASC.Blogs.Core;
+using ASC.Blogs.Core.Domain;
+using ASC.Web.Community.Blogs.Views;
+using ASC.Web.Community.Product;
+using ASC.Web.Studio.Core;
+using ASC.Web.Studio.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.UI.WebControls;
-
-using AjaxPro;
-
-using ASC.Blogs.Core;
-using ASC.Blogs.Core.Domain;
-using ASC.Web.Community.Blogs.Views;
-using ASC.Web.Community.Modules.Blogs.Core.Resources;
-using ASC.Web.Community.Product;
-using ASC.Web.Studio.Core;
-using ASC.Web.Studio.Utility;
 
 namespace ASC.Web.Community.Blogs
 {
@@ -178,7 +176,7 @@ namespace ASC.Web.Community.Blogs
 
         protected override string RenderRedirectUpload()
         {
-            return string.Format("{0}://{1}:{2}{3}", Request.GetUrlRewriter().Scheme, Request.GetUrlRewriter().Host, Request.GetUrlRewriter().Port, VirtualPathUtility.ToAbsolute("~/") + "fckuploader.ashx?esid=blogs&iid=" + BlogId);
+            return string.Format("{0}://{1}:{2}{3}", Request.GetUrlRewriter().Scheme, Request.GetUrlRewriter().Host, Request.GetUrlRewriter().Port, VirtualPathUtility.ToAbsolute("~/") + "fckuploader.ashx?newEditor=true&esid=blogs&iid=" + BlogId);
         }
 
         public void UpdatePost(Post post, BlogsEngine engine)
@@ -194,9 +192,9 @@ namespace ASC.Web.Community.Blogs
                     continue;
 
                 var tag = new Tag(post)
-                {
-                    Content = GetLimitedText(tagName.Trim())
-                };
+                    {
+                        Content = GetLimitedText(tagName.Trim())
+                    };
                 post.TagList.Add(tag);
             }
 

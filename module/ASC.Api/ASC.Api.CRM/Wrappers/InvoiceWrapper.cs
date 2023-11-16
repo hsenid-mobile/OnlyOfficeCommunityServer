@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
-
+using System.Text;
 using ASC.Api.Employee;
 using ASC.CRM.Core;
 using ASC.CRM.Core.Entities;
 using ASC.Specific;
+using ASC.Core.Tenants;
 using ASC.Web.CRM.Classes;
 #endregion
 
@@ -34,7 +36,6 @@ namespace ASC.Api.CRM.Wrappers
     /// <summary>
     ///  Invoice
     /// </summary>
-    /// <inherited>ASC.Api.CRM.Wrappers.ObjectWrapperBase, ASC.Api.CRM</inherited>
     [DataContract(Name = "invoiceBase", Namespace = "")]
     public class InvoiceBaseWrapper : ObjectWrapperBase
     {
@@ -48,9 +49,9 @@ namespace ASC.Api.CRM.Wrappers
         {
             Status = new InvoiceStatusWrapper(invoice.Status);
             Number = invoice.Number;
-            IssueDate = (ApiDateTime)invoice.IssueDate;
+            IssueDate = (ApiDateTime) invoice.IssueDate;
             TemplateType = invoice.TemplateType;
-            DueDate = (ApiDateTime)invoice.DueDate;
+            DueDate = (ApiDateTime) invoice.DueDate;
             Currency = !String.IsNullOrEmpty(invoice.Currency) ?
                 new CurrencyInfoWrapper(CurrencyProvider.Get(invoice.Currency)) :
                 new CurrencyInfoWrapper(Global.TenantSettings.DefaultCurrency);
@@ -66,83 +67,64 @@ namespace ASC.Api.CRM.Wrappers
             CanDelete = CRMSecurity.CanDelete(invoice);
         }
 
-        ///<type>ASC.Api.CRM.Wrappers.InvoiceStatusWrapper, ASC.Api.CRM</type>
+
         [DataMember]
         public InvoiceStatusWrapper Status { get; set; }
 
-        ///<example></example>
         [DataMember]
         public string Number { get; set; }
 
-        ///<example>2020-12-14T22:13:41.5378233Z</example>
         [DataMember]
         public ApiDateTime IssueDate { get; set; }
 
-        ///<example type="int">0</example>
         [DataMember]
         public InvoiceTemplateType TemplateType { get; set; }
 
-        ///<type>ASC.Api.CRM.Wrappers.ContactBaseWrapper, ASC.Api.CRM</type>
         [DataMember]
         public ContactBaseWrapper Contact { get; set; }
 
-        ///<type>ASC.Api.CRM.Wrappers.ContactBaseWrapper, ASC.Api.CRM</type>
         [DataMember]
         public ContactBaseWrapper Consignee { get; set; }
 
-        ///<type>ASC.Api.CRM.Wrappers.EntityWrapper, ASC.Api.CRM</type>
         [DataMember]
         public EntityWrapper Entity { get; set; }
 
-        ///<example>2020-12-14T22:13:41.5378233Z</example>
         [DataMember]
         public ApiDateTime DueDate { get; set; }
 
-        ///<example></example>
         [DataMember]
         public string Language { get; set; }
 
-        ///<type>ASC.Api.CRM.CurrencyInfoWrapper, ASC.Api.CRM</type>
         [DataMember]
         public CurrencyInfoWrapper Currency { get; set; }
 
-        ///<example type="double">1,0</example>
         [DataMember]
         public decimal ExchangeRate { get; set; }
 
-        ///<example></example>
         [DataMember]
         public string PurchaseOrderNumber { get; set; }
 
-        ///<example></example>
         [DataMember]
         public string Terms { get; set; }
 
-        ///<example></example>
         [DataMember]
         public string Description { get; set; }
 
-        ///<example type="int">-1</example>
         [DataMember]
         public int FileID { get; set; }
 
-        ///<example>2020-12-14T22:13:41.5378233Z</example>
         [DataMember]
         public ApiDateTime CreateOn { get; set; }
 
-        ///<type>ASC.Api.Employee.EmployeeWraper, ASC.Api.Employee</type>
         [DataMember]
         public EmployeeWraper CreateBy { get; set; }
 
-        ///<example type="double">0,0</example>
         [DataMember]
         public decimal Cost { get; set; }
 
-        ///<example>true</example>
         [DataMember(IsRequired = false, EmitDefaultValue = true)]
         public bool CanEdit { get; set; }
 
-        ///<example>true</example>
         [DataMember(IsRequired = false, EmitDefaultValue = true)]
         public bool CanDelete { get; set; }
     }
@@ -150,7 +132,6 @@ namespace ASC.Api.CRM.Wrappers
     /// <summary>
     ///  Invoice
     /// </summary>
-    /// <inherited>ASC.Api.CRM.Wrappers.InvoiceBaseWrapper, ASC.Api.CRM</inherited>
     [DataContract(Name = "invoice", Namespace = "")]
     public class InvoiceWrapper : InvoiceBaseWrapper
     {
@@ -164,10 +145,10 @@ namespace ASC.Api.CRM.Wrappers
         {
             Status = new InvoiceStatusWrapper(invoice.Status);
             Number = invoice.Number;
-            IssueDate = (ApiDateTime)invoice.IssueDate;
+            IssueDate = (ApiDateTime) invoice.IssueDate;
             TemplateType = invoice.TemplateType;
-            DueDate = (ApiDateTime)invoice.DueDate;
-            Currency = !String.IsNullOrEmpty(invoice.Currency) ?
+            DueDate = (ApiDateTime) invoice.DueDate;
+            Currency = !String.IsNullOrEmpty(invoice.Currency) ? 
                 new CurrencyInfoWrapper(CurrencyProvider.Get(invoice.Currency)) :
                 new CurrencyInfoWrapper(Global.TenantSettings.DefaultCurrency);
             ExchangeRate = invoice.ExchangeRate;
@@ -181,9 +162,7 @@ namespace ASC.Api.CRM.Wrappers
             CanEdit = CRMSecurity.CanEdit(invoice);
             CanDelete = CRMSecurity.CanDelete(invoice);
         }
-
-        ///<type>ASC.Api.CRM.Wrappers.InvoiceLineWrapper, ASC.Api.CRM</type>
-        ///<collection>list</collection>
+        
         [DataMember]
         public List<InvoiceLineWrapper> InvoiceLines { get; set; }
 
@@ -208,7 +187,7 @@ namespace ASC.Api.CRM.Wrappers
                 CanEdit = true,
                 CanDelete = true,
                 Cost = 0,
-                InvoiceLines = new List<InvoiceLineWrapper> { InvoiceLineWrapper.GetSample() }
+                InvoiceLines = new List<InvoiceLineWrapper>{ InvoiceLineWrapper.GetSample() }
             };
         }
     }
@@ -216,7 +195,6 @@ namespace ASC.Api.CRM.Wrappers
     /// <summary>
     ///  Invoice Item
     /// </summary>
-    /// <inherited>ASC.Api.CRM.Wrappers.ObjectWrapperBase, ASC.Api.CRM</inherited>
     [DataContract(Name = "invoiceItem", Namespace = "")]
     public class InvoiceItemWrapper : ObjectWrapperBase
     {
@@ -244,55 +222,43 @@ namespace ASC.Api.CRM.Wrappers
             CanDelete = CRMSecurity.CanDelete(invoiceItem);
         }
 
-        ///<example>Title</example>
+
         [DataMember]
         public string Title { get; set; }
 
-        ///<example>StockKeepingUnit</example>
         [DataMember]
         public string StockKeepingUnit { get; set; }
 
-        ///<example>Description</example>
         [DataMember]
         public string Description { get; set; }
 
-        ///<example type="double">1.2</example>
         [DataMember]
         public decimal Price { get; set; }
 
-        ///<type>ASC.Api.CRM.CurrencyInfoWrapper, ASC.Api.CRM</type>
         [DataMember]
         public CurrencyInfoWrapper Currency { get; set; }
 
-        ///<example type="decimal">2.2</example>
         [DataMember]
         public decimal StockQuantity { get; set; }
 
-        ///<example>true</example>
         [DataMember]
         public bool TrackInvenory { get; set; }
 
-        ///<type>ASC.Api.CRM.Wrappers.InvoiceTaxWrapper, ASC.Api.CRM</type>
         [DataMember]
         public InvoiceTaxWrapper InvoiceTax1 { get; set; }
 
-        ///<type>ASC.Api.CRM.Wrappers.InvoiceTaxWrapper, ASC.Api.CRM</type>
         [DataMember]
         public InvoiceTaxWrapper InvoiceTax2 { get; set; }
 
-        ///<example>2020-12-14T22:13:41.5378233Z</example>
         [DataMember]
         public ApiDateTime CreateOn { get; set; }
 
-        ///<example>ASC.Api.Employee.EmployeeWraper, ASC.Api.Employee</example>
         [DataMember]
         public EmployeeWraper CreateBy { get; set; }
 
-        ///<example>true</example>
         [DataMember(IsRequired = false, EmitDefaultValue = true)]
         public bool CanEdit { get; set; }
 
-        ///<example>true</example>
         [DataMember(IsRequired = false, EmitDefaultValue = true)]
         public bool CanDelete { get; set; }
     }
@@ -300,7 +266,6 @@ namespace ASC.Api.CRM.Wrappers
     /// <summary>
     ///  Invoice Tax
     /// </summary>
-    /// <inherited>ASC.Api.CRM.Wrappers.ObjectWrapperBase, ASC.Api.CRM</inherited>
     [DataContract(Name = "invoiceTax", Namespace = "")]
     public class InvoiceTaxWrapper : ObjectWrapperBase
     {
@@ -323,31 +288,25 @@ namespace ASC.Api.CRM.Wrappers
         }
 
 
-        ///<example>Name</example>
+
         [DataMember]
         public string Name { get; set; }
 
-        ///<example>Description</example>
         [DataMember]
         public string Description { get; set; }
 
-        ///<example type="double">Rate</example>
         [DataMember]
         public decimal Rate { get; set; }
 
-        ///<example>2020-12-14T22:13:41.5378233Z</example>
         [DataMember]
         public ApiDateTime CreateOn { get; set; }
 
-        ///<type>ASC.Api.Employee.EmployeeWraper, ASC.Api.Employee</type>
         [DataMember]
         public EmployeeWraper CreateBy { get; set; }
 
-        ///<example>true</example>
         [DataMember(IsRequired = false, EmitDefaultValue = true)]
         public bool CanEdit { get; set; }
 
-        ///<example>true</example>
         [DataMember(IsRequired = false, EmitDefaultValue = true)]
         public bool CanDelete { get; set; }
     }
@@ -355,7 +314,6 @@ namespace ASC.Api.CRM.Wrappers
     /// <summary>
     ///  Invoice Line
     /// </summary>
-    /// <inherited>ASC.Api.CRM.Wrappers.ObjectWrapperBase, ASC.Api.CRM</inherited>
     [DataContract(Name = "invoiceLine", Namespace = "")]
     public class InvoiceLineWrapper : ObjectWrapperBase
     {
@@ -378,62 +336,52 @@ namespace ASC.Api.CRM.Wrappers
             Discount = invoiceLine.Discount;
         }
 
-        ///<example type="int">0</example>
         [DataMember]
         public int InvoiceID { get; set; }
 
-        ///<example type="int">0</example>
         [DataMember]
         public int InvoiceItemID { get; set; }
 
-        ///<example type="int">0</example>
         [DataMember]
         public int InvoiceTax1ID { get; set; }
 
-        ///<example type="int">0</example>
         [DataMember]
         public int InvoiceTax2ID { get; set; }
 
-        ///<example type="int">0</example>
         [DataMember]
         public int SortOrder { get; set; }
 
-        ///<example>Description</example>
         [DataMember]
         public string Description { get; set; }
 
-        ///<example type="double">0,0</example>
         [DataMember]
         public decimal Quantity { get; set; }
 
-        ///<example type="double">0,0</example>
         [DataMember]
         public decimal Price { get; set; }
 
-        ///<example type="double">0,0</example>
         [DataMember]
         public decimal Discount { get; set; }
 
         public static InvoiceLineWrapper GetSample()
         {
             return new InvoiceLineWrapper(0)
-            {
-                Description = string.Empty,
-                Discount = (decimal)0.00,
-                InvoiceID = 0,
-                InvoiceItemID = 0,
-                InvoiceTax1ID = 0,
-                InvoiceTax2ID = 0,
-                Price = (decimal)0.00,
-                Quantity = (decimal)0.00
-            };
+                {
+                    Description = string.Empty,
+                    Discount = (decimal)0.00,
+                    InvoiceID = 0,
+                    InvoiceItemID = 0,
+                    InvoiceTax1ID = 0,
+                    InvoiceTax2ID = 0,
+                    Price = (decimal)0.00,
+                    Quantity = (decimal)0.00
+                };
         }
     }
 
     /// <summary>
     ///  Invoice Status
     /// </summary>
-    /// <inherited>ASC.Api.CRM.Wrappers.ObjectWrapperBase, ASC.Api.CRM</inherited>
     [DataContract(Name = "invoiceStatus", Namespace = "")]
     public class InvoiceStatusWrapper : ObjectWrapperBase
     {
@@ -450,7 +398,7 @@ namespace ASC.Api.CRM.Wrappers
             Title = status.ToLocalizedString();
         }
 
-        ///<example>Title</example>
+
         [DataMember]
         public string Title { get; set; }
     }

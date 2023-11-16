@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ window.ASC.Files.Share = (function () {
             sharingManager.OnSave = setAceObject;
             sharingManager.OnChange = onChangeAce;
             sharingManager.OnCopyLink = function () {
-                ASC.Files.UI.displayInfoPanel(ASC.Resources.Master.ResourceJS.LinkCopySuccess);
+                ASC.Files.UI.displayInfoPanel(ASC.Resources.Master.Resource.LinkCopySuccess);
             };
 
             jq(".embedded-size-item").on("click", setEmbeddedSize);
@@ -59,36 +59,36 @@ window.ASC.Files.Share = (function () {
                     rightPos: true,
                     addTop: 10,
                     afterShowFunction: function () {
-                        jq("#shareEmbedded").trigger("focus").trigger("select");
+                        jq("#shareEmbedded").focus().select();
                     }
                 });
 
-            jq(".sharing-empty").html(jq.format(ASC.Files.FilesJSResource.SharingSettingsEmpty, "<br />"));
+            jq(".sharing-empty").html(jq.format(ASC.Files.FilesJSResources.SharingSettingsEmpty, "<br />"));
         }
     };
 
     var getAceString = function (aceStatus) {
         if (aceStatus == "owner") {
-            return ASC.Files.FilesJSResource.AceStatusEnum_Owner;
+            return ASC.Files.FilesJSResources.AceStatusEnum_Owner;
         }
         aceStatus = parseInt(aceStatus);
         switch (aceStatus) {
             case ASC.Files.Constants.AceStatusEnum.Read:
-                return ASC.Files.FilesJSResource.AceStatusEnum_Read;
+                return ASC.Files.FilesJSResources.AceStatusEnum_Read;
             case ASC.Files.Constants.AceStatusEnum.ReadWrite:
-                return ASC.Files.FilesJSResource.AceStatusEnum_ReadWrite;
+                return ASC.Files.FilesJSResources.AceStatusEnum_ReadWrite;
             case ASC.Files.Constants.AceStatusEnum.CustomFilter:
-                return ASC.Files.FilesJSResource.AceStatusEnum_CustomFilter;
+                return ASC.Files.FilesJSResources.AceStatusEnum_CustomFilter;
             case ASC.Files.Constants.AceStatusEnum.Restrict:
-                return ASC.Files.FilesJSResource.AceStatusEnum_Restrict;
+                return ASC.Files.FilesJSResources.AceStatusEnum_Restrict;
             case ASC.Files.Constants.AceStatusEnum.Varies:
-                return ASC.Files.FilesJSResource.AceStatusEnum_Varies;
+                return ASC.Files.FilesJSResources.AceStatusEnum_Varies;
             case ASC.Files.Constants.AceStatusEnum.Review:
-                return ASC.Files.FilesJSResource.AceStatusEnum_Review;
+                return ASC.Files.FilesJSResources.AceStatusEnum_Review;
             case ASC.Files.Constants.AceStatusEnum.FillForms:
-                return ASC.Files.FilesJSResource.AceStatusEnum_FillForms;
+                return ASC.Files.FilesJSResources.AceStatusEnum_FillForms;
             case ASC.Files.Constants.AceStatusEnum.Comment:
-                return ASC.Files.FilesJSResource.AceStatusEnum_Comment;
+                return ASC.Files.FilesJSResources.AceStatusEnum_Comment;
             default:
                 return "";
         }
@@ -105,7 +105,7 @@ window.ASC.Files.Share = (function () {
         ASC.Files.Share.clip = ASC.Clipboard.create(jq("#shareLink").val(), "shareLinkCopy", {
             onComplete: function () {
                 if (typeof(window.toastr) !== "undefined") {
-                    toastr.success(ASC.Resources.Master.ResourceJS.LinkCopySuccess);
+                    toastr.success(ASC.Resources.Master.Resource.LinkCopySuccess);
                 } else {
                     jq("#shareLink, #shareLinkCopy").yellowFade();
                 }
@@ -118,7 +118,7 @@ window.ASC.Files.Share = (function () {
         ASC.Files.Share.clipEmbed = ASC.Clipboard.create(jq("#shareEmbedded").val(), "shareEmbedCopy", {
             onComplete: function () {
                 if (typeof(window.toastr) !== "undefined") {
-                    toastr.success(ASC.Files.FilesJSResource.CodeCopySuccess);
+                    toastr.success(ASC.Files.FilesJSResources.CodeCopySuccess);
                 } else {
                     jq("#shareEmbedded, #shareEmbedCopy").yellowFade();
                 }
@@ -143,8 +143,8 @@ window.ASC.Files.Share = (function () {
         }
 
         var urlShareMail = "mailto:?subject={1}&body={0}";
-        var subject = ASC.Files.FilesJSResource.shareLinkMailSubject.format(objectTitle);
-        var body = ASC.Files.FilesJSResource.shareLinkMailBody.format(objectTitle, url);
+        var subject = ASC.Files.FilesJSResources.shareLinkMailSubject.format(objectTitle);
+        var body = ASC.Files.FilesJSResources.shareLinkMailBody.format(objectTitle, url);
         linkPanel.find(".mail").attr("href", urlShareMail.format(encodeURIComponent(body), encodeURIComponent(subject)));
     };
 
@@ -154,7 +154,7 @@ window.ASC.Files.Share = (function () {
             : ASC.Files.Constants.AceStatusEnum.Restrict;
 
         if (jq("#sharingLinkAce select").val() != ace) {
-            jq("#sharingLinkAce select").val(ace).trigger("change");
+            jq("#sharingLinkAce select").val(ace).change();
         }
     };
 
@@ -182,24 +182,18 @@ window.ASC.Files.Share = (function () {
             }
         }
 
-        var externalShare = ASC.Resources.Master.Personal || jq("#cbxExternalShare").prop("checked") ||  jq("#shareLinkEnable").data("enable");
-
-        jq("#shareLinkPanel, #sharingLinkAce").toggle(!restrict && externalShare);
-        jq("#shareLinkDescr").toggle(restrict && externalShare);
-        jq("#sharingSettingsItems").toggleClass("with-share-link", !restrict && externalShare);
-        jq("#shareLinkEnable").toggle(!externalShare);
+        jq("#shareLinkPanel, #sharingLinkAce").toggle(!restrict);
+        jq("#shareLinkDescr").toggle(restrict);
+        jq("#sharingSettingsItems").toggleClass("with-share-link", !restrict);
 
         jq("#shareLink").val(url);
         if (jq("#shareLink").is(":visible")) {
-            jq("#shareLink").trigger("focus").trigger("select");
+            jq("#shareLink").focus().select();
         }
 
         updateSocialLink(url);
 
         updateClip();
-
-        var social = jq("#shareLinkEnable").data("social");
-        jq("#shareViaSocPanel").find(".facebook, .twitter").toggle(social).closest(".sharelink-around").toggleClass("custom-mode", !social);
 
         if (needUpdate) {
             saveAccessLink();
@@ -227,12 +221,12 @@ window.ASC.Files.Share = (function () {
                     var winMail = window.open(ASC.Desktop ? "" : ASC.Files.Constants.URL_LOADER);
 
                     var message = new ASC.Mail.Message();
-                    message.subject = ASC.Files.FilesJSResource.shareLinkMailSubject.format(objectTitle);
+                    message.subject = ASC.Files.FilesJSResources.shareLinkMailSubject.format(objectTitle);
 
                     var linkFormat = "<a href=\"{0}\">{1}</a>";
                     var linkName = linkFormat.format(Encoder.htmlEncode(shareLink), Encoder.htmlEncode(objectTitle));
                     var link = linkFormat.format(Encoder.htmlEncode(shareLink), Encoder.htmlEncode(shareLink));
-                    var body = ASC.Files.FilesJSResource.shareLinkMailBody.format(linkName, link);
+                    var body = ASC.Files.FilesJSResources.shareLinkMailBody.format(linkName, link);
 
                     message.body = body;
 
@@ -266,13 +260,13 @@ window.ASC.Files.Share = (function () {
             setEmbeddedSize();
         }
 
-        jq("#sharingLinkAce select").val(linkInfo).trigger("change");
+        jq("#sharingLinkAce select").val(linkInfo).change();
 
-        jq("#sharingLinkAce select [value=" + ASC.Files.Constants.AceStatusEnum.ReadWrite + "]").prop("disabled", !ASC.Files.Utility.CanWebEdit(objectTitle) || ASC.Files.Utility.MustConvert(objectTitle));
-        jq("#sharingLinkAce select [value=" + ASC.Files.Constants.AceStatusEnum.CustomFilter + "]").prop("disabled", !ASC.Files.Utility.CanWebCustomFilterEditing(objectTitle));
-        jq("#sharingLinkAce select [value=" + ASC.Files.Constants.AceStatusEnum.Review + "]").prop("disabled", !ASC.Files.Utility.CanWebReview(objectTitle));
-        jq("#sharingLinkAce select [value=" + ASC.Files.Constants.AceStatusEnum.FillForms + "]").prop("disabled", true);
-        jq("#sharingLinkAce select [value=" + ASC.Files.Constants.AceStatusEnum.Comment + "]").prop("disabled", !ASC.Files.Utility.CanWebComment(objectTitle));
+        jq("#sharingLinkAce select [value=" + ASC.Files.Constants.AceStatusEnum.ReadWrite + "]").attr("disabled", !ASC.Files.Utility.CanWebEdit(objectTitle) || ASC.Files.Utility.MustConvert(objectTitle));
+        jq("#sharingLinkAce select [value=" + ASC.Files.Constants.AceStatusEnum.CustomFilter + "]").attr("disabled", !ASC.Files.Utility.CanWebCustomFilterEditing(objectTitle));
+        jq("#sharingLinkAce select [value=" + ASC.Files.Constants.AceStatusEnum.Review + "]").attr("disabled", !ASC.Files.Utility.CanWebReview(objectTitle));
+        jq("#sharingLinkAce select [value=" + ASC.Files.Constants.AceStatusEnum.FillForms + "]").attr("disabled", !ASC.Files.Utility.CanWebRestrictedEditing(objectTitle));
+        jq("#sharingLinkAce select [value=" + ASC.Files.Constants.AceStatusEnum.Comment + "]").attr("disabled", !ASC.Files.Utility.CanWebComment(objectTitle));
         jq("#sharingLinkAce select").tlcombobox();
     };
 
@@ -393,7 +387,7 @@ window.ASC.Files.Share = (function () {
 
         ASC.Files.UI.blockUI("#filesConfirmUnsubscribe", 420);
 
-        PopupKeyUpActionProvider.EnterAction = "jq(\"#unsubscribeConfirmBtn\").trigger('click');";
+        PopupKeyUpActionProvider.EnterAction = "jq(\"#unsubscribeConfirmBtn\").click();";
     };
 
     var updateForParent = function () {
@@ -438,15 +432,19 @@ window.ASC.Files.Share = (function () {
         }
 
         objectTitle = (typeof objectID == "object"
-            ? ASC.Files.FilesJSResource.SharingSettingsCount.format(objectID.length)
+            ? ASC.Files.FilesJSResources.SharingSettingsCount.format(objectID.length)
             : objTitle);
 
         var canWebCustomFilterEditing = false;
         var canWebReview = false;
         var canWebRestrictedEditing = false;
         var canWebComment = false;
-
-        if (typeof objTitle == "object") {
+        if (typeof objectID != "object") {
+            canWebCustomFilterEditing = ASC.Files.Utility.CanWebCustomFilterEditing(objectTitle);
+            canWebReview = ASC.Files.Utility.CanWebReview(objectTitle);
+            canWebRestrictedEditing = ASC.Files.Utility.CanWebRestrictedEditing(objectTitle);
+            canWebComment = ASC.Files.Utility.CanWebComment(objectTitle);
+        } else if (typeof objTitle == "object") {
             canWebCustomFilterEditing = true;
             canWebReview = true;
             canWebRestrictedEditing = true;
@@ -470,19 +468,6 @@ window.ASC.Files.Share = (function () {
                 }
                 return canWebCustomFilterEditing || canWebReview || canWebRestrictedEditing || canWebComment;
             });
-
-            if (ASC.Files.ThirdParty && ASC.Files.ThirdParty.isThirdParty() && ASC.Files.ThirdParty.isThirdParty(entryData)
-                || ASC.Files.Folders.folderContainer == "privacy") {
-                canWebRestrictedEditing = false;
-            }
-        } else if (typeof objectID != "object" && itemId.entryType == "file") {
-            canWebCustomFilterEditing = ASC.Files.Utility.CanWebCustomFilterEditing(objectTitle);
-            canWebReview = ASC.Files.Utility.CanWebReview(objectTitle);
-            canWebRestrictedEditing = ASC.Files.Utility.CanWebRestrictedEditing(objectTitle);
-            canWebComment = ASC.Files.Utility.CanWebComment(objectTitle);
-            if (ASC.Files.ThirdParty && ASC.Files.ThirdParty.isThirdParty() && ASC.Files.ThirdParty.isThirdParty(entryData)) {
-                canWebRestrictedEditing = false;
-            }
         }
 
         var data = {
@@ -512,7 +497,7 @@ window.ASC.Files.Share = (function () {
             });
     };
 
-    var onChangeAce = function (value, data) {
+    var onChangeAce = function (value) {
         if (value
             && (!ASC.Files.Folders
                 || ASC.Files.Folders.folderContainer == "my"
@@ -521,10 +506,6 @@ window.ASC.Files.Share = (function () {
             jq("#studio_sharingSettingsDialog #shareMessagePanel").show();
             jq("#sharingSettingsItems").addClass("with-message-panel");
         }
-
-        var showFormFillingPanel = false;//data.items.some(function (item) { return item.selectedAction.id == ASC.Files.Constants.AceStatusEnum.FillForms; })
-
-        window.ASC.Files.FormFilling.togglePanel(showFormFillingPanel);
     };
 
     var setAceObject = function (data) {
@@ -635,7 +616,7 @@ window.ASC.Files.Share = (function () {
                 var entryConfirmType = jq(item).attr("entryType");
                 var entryConfirmId = jq(item).attr("entryId");
                 var entryConfirmObj = ASC.Files.UI.getEntryObject(entryConfirmType, entryConfirmId);
-                ASC.Files.UI.blockObject(entryConfirmObj, true, ASC.Files.FilesJSResource.DescriptRemove, true);
+                ASC.Files.UI.blockObject(entryConfirmObj, true, ASC.Files.FilesJSResources.DescriptRemove, true);
                 data.entry.push(entryConfirmType + "_" + entryConfirmId);
                 return { entryId: entryConfirmId, entryType: entryConfirmType };
             }).toArray();
@@ -658,12 +639,6 @@ window.ASC.Files.Share = (function () {
         jq("#getShortenLink").hide();
     };
 
-    var changeExternalShareSettings = function () {
-        jq("#shareLinkEnable")
-            .data("enable", jq("#cbxExternalShare").prop("checked"))
-            .data("social", jq("#cbxExternalShareSocialMedia").prop("checked"));
-    };
-
     //event handler
 
     var onGetSharedInfo = function (jsonData, params, errorMessage) {
@@ -678,7 +653,6 @@ window.ASC.Files.Share = (function () {
         var translateItems = [];
         var linkAccess;
         linkInfo = ASC.Files.Constants.AceStatusEnum.None;
-        var externalShare = ASC.Resources.Master.Personal || jq("#cbxExternalShare").prop("checked") || jq("#shareLinkEnable").data("enable");
         jq(jsonData).each(function (i) {
             var item = jsonData[i];
             if (item.id === ASC.Files.Constants.ShareLinkId) {
@@ -706,26 +680,12 @@ window.ASC.Files.Share = (function () {
             }
         });
 
-        var entryLink = null;
-        if (typeof objectID != "object") {
-            if (!encrypted) {
-                var itemId = ASC.Files.UI.parseItemId(objectID);
-                entryLink = ASC.Files.UI.getEntryLink(itemId.entryType, itemId.entryId, objectTitle);
-                var aElement = document.createElement("a");
-                aElement.href = entryLink;
-                entryLink = jq(aElement).prop("href");
-            } else {
-                linkAccess = false;
-            }
-        }
-
         var arrayActions = [
             {
                 "id": ASC.Files.Constants.AceStatusEnum.ReadWrite,
                 "name": getAceString(ASC.Files.Constants.AceStatusEnum.ReadWrite),
                 "defaultAction": encrypted,
                 "defaultStyle": "full",
-                "hideForVisitor": (!itemId || itemId.entryType == "file"),
             }];
 
         if (!encrypted) {
@@ -737,7 +697,6 @@ window.ASC.Files.Share = (function () {
                             "name": getAceString(ASC.Files.Constants.AceStatusEnum.CustomFilter),
                             "defaultAction": false,
                             "defaultStyle": "customfilterEditing",
-                            "hideForVisitor": true,
                         }]);
             }
 
@@ -749,7 +708,6 @@ window.ASC.Files.Share = (function () {
                             "name": getAceString(ASC.Files.Constants.AceStatusEnum.Review),
                             "defaultAction": false,
                             "defaultStyle": "review",
-                            "hideForVisitor": true,
                         }]);
             }
 
@@ -761,7 +719,6 @@ window.ASC.Files.Share = (function () {
                             "name": getAceString(ASC.Files.Constants.AceStatusEnum.FillForms),
                             "defaultAction": false,
                             "defaultStyle": "restrictedEditing",
-                            "hideForVisitor": true,
                         }]);
             }
 
@@ -773,7 +730,6 @@ window.ASC.Files.Share = (function () {
                             "name": getAceString(ASC.Files.Constants.AceStatusEnum.Comment),
                             "defaultAction": false,
                             "defaultStyle": "comment",
-                            "hideForVisitor": true,
                         }]);
             }
 
@@ -811,11 +767,24 @@ window.ASC.Files.Share = (function () {
 
         sharingInfo = translateItems;
 
+        var entryLink = null;
+        if (typeof objectID != "object") {
+            if (!encrypted) {
+                var itemId = ASC.Files.UI.parseItemId(objectID);
+                entryLink = ASC.Files.UI.getEntryLink(itemId.entryType, itemId.entryId, objectTitle);
+                var aElement = document.createElement("a");
+                aElement.href = entryLink;
+                entryLink = jq(aElement).prop("href");
+            } else {
+                linkAccess = false;
+            }
+        }
+
         sharingManager.UpdateSharingData(translateData, entryLink);
 
         jq("#shareLinkBody").hide();
         var height = 460;
-        if (linkAccess && (externalShare || linkAccess != ASC.Files.Constants.AceStatusEnum.Restrict)) {
+        if (linkAccess) {
             renderGetLink();
 
             height = 550;
@@ -841,7 +810,7 @@ window.ASC.Files.Share = (function () {
         if (shareHead.is("span")) {
             shareHead.replaceWith("<div class=\"share-container-head\"></div>");
             shareHead = jq(".share-container-head");
-            shareHead.html(ASC.Files.FilesJSResource.SharingSettingsHeader.format("<span></span>"));
+            shareHead.html(ASC.Files.FilesJSResources.SharingSettingsHeader.format("<span></span>"));
         }
 
         var accessHead = jq(".share-container-head-corporate");
@@ -857,7 +826,7 @@ window.ASC.Files.Share = (function () {
             if (!accessHead.length) {
                 shareHead.after("<div class=\"share-container-head-corporate\"></div>");
                 accessHead = jq(".share-container-head-corporate");
-                accessHead.html(ASC.Files.FilesJSResource.AccessSettingsHeader.format("<span></span>"));
+                accessHead.html(ASC.Files.FilesJSResources.AccessSettingsHeader.format("<span></span>"));
             }
             accessHead.show()
                 .find("span").attr("title", objectTitle).text(objectTitle);
@@ -872,16 +841,6 @@ window.ASC.Files.Share = (function () {
             var entryObject = ASC.Files.UI.getEntryObject(itemId.entryType, itemId.entryId);
             var entryData = ASC.Files.UI.getObjectData(entryObject);
             var isThirdpartyOnly = ASC.Files.ThirdParty && ASC.Files.ThirdParty.isThirdParty(entryData);
-
-            window.ASC.Files.FormFilling.setFileId(itemId.entryId);
-        } else {
-            if (Array.isArray(objectID)) {
-                var entries = objectID.map(function (item) {
-                    return ASC.Files.UI.parseItemId(item).entryId;
-                });
-                window.ASC.Files.FormFilling.setFileId(entries);
-            }
-            window.ASC.Files.FormFilling.togglePanel(false);
         }
 
         if (ASC.Files.Folders && ASC.Files.Folders.folderContainer == "corporate"
@@ -910,7 +869,7 @@ window.ASC.Files.Share = (function () {
                         sharingManager.WhereChanges(true);
                     }
                     jq("#shareOwnerSelector").useradvancedSelector("reset");
-                    //jq("#shareOwnerSelector").useradvancedSelector("disable", [item.id]);
+                    jq("#shareOwnerSelector").useradvancedSelector("disable", [item.id]);
                 })
                 .attr("data-id", ownerItem.id)
                 .attr("data-id-old", ownerItem.id)
@@ -962,11 +921,11 @@ window.ASC.Files.Share = (function () {
             }
 
             var itemId = ASC.Files.UI.parseItemId(objectID);
-            ASC.Files.UI.blockObject(objectID, true, ASC.Files.FilesJSResource.DescriptCreate);
+            ASC.Files.UI.blockObject(objectID, true, ASC.Files.FilesJSResources.DescriptCreate);
 
             ASC.Desktop.setAccess(itemId.entryId, function (encryptedFile) {
                 if (encryptedFile) {
-                    ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.DesktopMessageStoring);
+                    ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.DesktopMessageStoring);
 
                     if (ASC.Files.Folders) {
                         ASC.Files.Folders.replaceFileStream(itemId.entryId, "", encryptedFile, true, null, true);
@@ -1006,8 +965,7 @@ window.ASC.Files.Share = (function () {
             }
 
             ASC.Files.Marker.removeNewIcon(item.entryType, item.entryId);
-            var entryObject = ASC.Files.UI.getEntryObject(item.entryType, item.entryId);
-            ASC.Files.UI.removeEntryObject(entryObject);
+            ASC.Files.UI.getEntryObject(item.entryType, item.entryId).remove();
         });
 
         if (foldersCountChange && ASC.Files.Tree) {
@@ -1047,15 +1005,6 @@ window.ASC.Files.Share = (function () {
         var entryObj = ASC.Files.UI.getEntryObject(itemId.entryType, itemId.entryId);
 
         entryObj.toggleClass("__active", jsonData);
-
-        if (!jsonData && params.share != ASC.Files.Constants.AceStatusEnum.Restrict) {
-            jq("#shareLinkBody").hide();
-        }
-
-        var externalShare = ASC.Resources.Master.Personal || jq("#cbxExternalShare").prop("checked") || jq("#shareLinkEnable").data("enable");
-        if (!externalShare) {
-            jq("#shareLinkBody").hide();
-        }
     };
 
     return {
@@ -1068,8 +1017,6 @@ window.ASC.Files.Share = (function () {
         setAceObject: setAceObject,
         unSubscribeMe: unSubscribeMe,
         confirmUnSubscribe: confirmUnSubscribe,
-
-        changeExternalShareSettings: changeExternalShareSettings,
 
         clip: clip,
         clipEmbed: clipEmbed,
@@ -1106,7 +1053,7 @@ jq(document).ready(function () {
                 ASC.Files.Share.getSharedInfo(dataIds, dataTitles);
             });
 
-            jq("#unsubscribeConfirmBtn").on("click", function () {
+            jq("#unsubscribeConfirmBtn").click(function () {
                 ASC.Files.Share.confirmUnSubscribe();
             });
 
@@ -1128,7 +1075,7 @@ jq(document).ready(function () {
             jq("#studio_sharingSettingsDialog .containerBodyBlock").addClass("clearFix");
 
             jq("#shareLink, #shareEmbedded").on("mousedown", function () {
-                jq(this).trigger("select");
+                jq(this).select();
                 return false;
             });
 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,12 @@
 
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Mail.Data.Contracts;
 using ASC.Mail.Utils;
-
-using MimeKit;
 
 namespace ASC.Mail.Core.Engine
 {
@@ -39,7 +35,7 @@ namespace ASC.Mail.Core.Engine
         }
 
         public void UploadIcsToCalendar(MailBoxData mailBoxData, int calendarId, string calendarEventUid, string calendarIcs,
-            string calendarCharset, string calendarContentType, List<MailAttachmentData> mailAttachments, IEnumerable<MimeEntity> mimeAttachments, string calendarEventReceiveEmail, string httpContextScheme)
+            string calendarCharset, string calendarContentType, string calendarEventReceiveEmail, string httpContextScheme)
         {
             try
             {
@@ -53,14 +49,13 @@ namespace ASC.Mail.Core.Engine
                 if (calendar == null)
                     return;
 
-                var eventObj = calendar.Events[0];
                 var alienEvent = true;
 
-                var organizer = eventObj.Organizer;
+                var organizer = calendar.Events[0].Organizer;
 
                 if (organizer != null)
                 {
-                    var orgEmail = eventObj.Organizer.Value.ToString()
+                    var orgEmail = calendar.Events[0].Organizer.Value.ToString()
                         .ToLowerInvariant()
                         .Replace("mailto:", "");
 
@@ -74,7 +69,7 @@ namespace ASC.Mail.Core.Engine
 
                 if (alienEvent)
                 {
-                    if (eventObj.Attendees.Any(
+                    if (calendar.Events[0].Attendees.Any(
                         a =>
                             a.Value.ToString()
                                 .ToLowerInvariant()
@@ -89,12 +84,12 @@ namespace ASC.Mail.Core.Engine
                     return;
 
                 CoreContext.TenantManager.SetCurrentTenant(mailBoxData.TenantId);
-                SecurityContext.CurrentUser = new Guid(mailBoxData.UserId);
+                SecurityContext.AuthenticateMe(new Guid(mailBoxData.UserId));
 
                 using (var ms = new MemoryStream(EncodingTools.GetEncodingByCodepageName(calendarCharset).GetBytes(calendarIcs)))
                 {
                     var apiHelper = new ApiHelper(httpContextScheme, Log);
-                    apiHelper.UploadIcsToCalendar(calendarId, ms, "calendar.ics", calendarContentType, eventObj, mimeAttachments, mailAttachments);
+                    apiHelper.UploadIcsToCalendar(calendarId, ms, "calendar.ics", calendarContentType);
                 }
 
                 Log.Info("CalendarEngine->UploadIcsToCalendar() has been succeeded");

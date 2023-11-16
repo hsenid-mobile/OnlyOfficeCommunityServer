@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.Api.Calendar.iCalParser;
 
 
@@ -33,7 +32,7 @@ namespace ASC.Api.Calendar.BusinessObjects
             EventId = eventId;
             Ics = ics;
         }
-
+        
         public int CalendarId { get; set; }
         public string EventUid { get; set; }
         public int EventId { get; set; }
@@ -41,8 +40,7 @@ namespace ASC.Api.Calendar.BusinessObjects
 
         public List<Ical.Net.Calendar> History
         {
-            get
-            {
+            get {
                 var history = DDayICalParser.DeserializeCalendar(Ics);
                 return history == null ? new List<Ical.Net.Calendar>() : history.ToList();
             }
@@ -52,7 +50,7 @@ namespace ASC.Api.Calendar.BusinessObjects
         {
             if (!History.Any() || calendar == null || calendar.Events == null || calendar.Events.FirstOrDefault() == null)
                 return false;
-
+            
             var eventObj = calendar.Events.First();
 
             var isExist = History
@@ -71,7 +69,7 @@ namespace ASC.Api.Calendar.BusinessObjects
                 .Where(x => x != null && x.Events != null && x.Events.FirstOrDefault() != null)
                 .ToList();
 
-            if (!allCalendars.Any()) return null;
+            if(!allCalendars.Any()) return null;
 
             var recurrenceIdCalendars = new List<Ical.Net.Calendar>();
             var calendars = new List<Ical.Net.Calendar>();

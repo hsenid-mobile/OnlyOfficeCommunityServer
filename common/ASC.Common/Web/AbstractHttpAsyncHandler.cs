@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ using System.Globalization;
 using System.Security.Principal;
 using System.Threading;
 using System.Web;
-
+using System.Web.SessionState;
 
 namespace ASC.Common.Web
 {
-    public abstract class AbstractHttpAsyncHandler : IHttpAsyncHandler
+    public abstract class AbstractHttpAsyncHandler : IHttpAsyncHandler, IReadOnlySessionState
     {
         private Action<HttpContext> processRequest;
         private IPrincipal principal;

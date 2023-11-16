@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@
 
 
 using System;
-
 using ASC.Web.Core.ModuleManagement.Common;
 using ASC.Web.Core.Utility;
 using ASC.Web.Core.Utility.Skins;
-using ASC.Web.Studio.PublicResources;
 
 namespace ASC.Web.Studio.Core.SearchHandlers
 {
@@ -28,12 +26,12 @@ namespace ASC.Web.Studio.Core.SearchHandlers
     {
         public override ImageOptions Logo
         {
-            get { return new ImageOptions { ImageFileName = "common_search_icon.svg", PartID = Guid.Empty }; }
+            get { return new ImageOptions { ImageFileName = "common_search_icon.png", PartID = Guid.Empty }; }
         }
 
         public override string SearchName
         {
-            get { return Resource.Search; }
+            get { return Resources.Resource.Search; }
         }
 
         public override SearchResultItem[] Search(string text)

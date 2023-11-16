@@ -1,7 +1,7 @@
 /*
  * AssemblyInfo.cs
  * 
- * Copyright Â© 2009 Michael Schwarz (http://www.ajaxpro.info).
+ * Copyright © 2009 Michael Schwarz (http://www.ajaxpro.info).
  * All Rights Reserved.
  * 
  * Permission is hereby granted, free of charge, to any person 
@@ -24,9 +24,11 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 /* Developers of Ajax.NET Professional (AjaxPro)
- * MS	Michael Schwarz
+ * MS	Michael Schwarz		info@schwarz-interactive.de
  * TB	Tim Byng			
  * MR	Matthew Raymer
+ * 
+ * 
  * 
  * 
  * MS	06-04-03	fixed missing http error status code in core.js
@@ -37,10 +39,7 @@
  * MS	06-04-25	added ComVisible and CLSCompliant attribute
  * MS	06-06-11	added ReflectionPermission attribute
  * MS	06-07-19	removed ReflectionPermission attribute (why did we add it?)
- * MS	21-10-30	added contentSecurityPolicy to specify a nonce for all scripts
- * MS	21-11-22	changed default behavior of passing types during deserialization to deny
- * MS	21-11-29	added check for custom type deserialization
- * MS	21-11-30	changed error message for unsupported deserialization types in debug mode
+ * 
  * 
  */
 using System;
@@ -71,7 +70,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Michael Schwarz")]
 [assembly: AssemblyProduct("Ajax.NET Professional")]
-[assembly: AssemblyCopyright("2021, Michael Schwarz")]
+[assembly: AssemblyCopyright("2009, Michael Schwarz")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]	
 [assembly: System.Security.AllowPartiallyTrustedCallersAttribute()]
@@ -92,7 +91,7 @@ using System.Runtime.CompilerServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion(AjaxPro.Constant.AssemblyVersion)]
+[assembly:				AssemblyVersion("2.9.17.2")]		// do not remove the blanks!!!!
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
-using System.Web;
 using System.Web.UI;
-
 using ASC.Core;
 using ASC.Forum;
 using ASC.Web.Studio.Controls.Common;
 using ASC.Web.Studio.Utility;
+using ASC.Web.UserControls.Forum.Common;
+using System.Globalization;
+using System.Web;
 
 namespace ASC.Web.UserControls.Forum
 {
@@ -53,7 +53,7 @@ namespace ASC.Web.UserControls.Forum
             PageSize = string.IsNullOrEmpty(Request["size"]) ? 20 : Convert.ToInt32(Request["size"]);
             //var pageSize = PageSize;            
             Topics = new List<Topic>();
-
+           
             if (ThreadID == 0)
                 Response.Redirect(settings.StartPageAbsolutePath);
 
@@ -62,11 +62,10 @@ namespace ASC.Web.UserControls.Forum
             {
                 try
                 {
-                    currentPageNumber = Convert.ToInt32(Request["p"]);
+                    currentPageNumber = Convert.ToInt32(Request["p"]);                    
                 }
-                catch
-                {
-                    currentPageNumber = 0;
+                catch { 
+                    currentPageNumber = 0;                    
                 }
             }
             if (currentPageNumber <= 0)
@@ -80,7 +79,7 @@ namespace ASC.Web.UserControls.Forum
             int i = 0;
             foreach (Topic topic in Topics)
             {
-                TopicControl topicControl = (TopicControl)LoadControl(settings.UserControlsVirtualPath + "/TopicControl.ascx");
+                TopicControl topicControl = (TopicControl)LoadControl(settings.UserControlsVirtualPath+"/TopicControl.ascx");
                 topicControl.Topic = topic;
                 topicControl.SettingsID = SettingsID;
                 topicControl.IsEven = (i % 2 == 0);
@@ -88,7 +87,7 @@ namespace ASC.Web.UserControls.Forum
                 i++;
             }
             PageSize = string.IsNullOrEmpty(Request["size"]) ? 20 : Convert.ToInt32(Request["size"]);
-            var pageSize = PageSize;
+            var pageSize = PageSize;            
 
             PageNavigator pageNavigator = new PageNavigator()
             {
@@ -123,7 +122,7 @@ namespace ASC.Web.UserControls.Forum
         private void InitScripts()
         {
             var jsResource = new StringBuilder();
-            jsResource.Append("jq('#tableForNavigation select').val(" + PageSize + ").on('change', function(evt) {changeCountOfRows(this.value);}).tlCombobox();");
+            jsResource.Append("jq('#tableForNavigation select').val(" + PageSize + ").change(function(evt) {changeCountOfRows(this.value);}).tlCombobox();");
             Page.RegisterInlineScript(jsResource.ToString(), true);
         }
     }

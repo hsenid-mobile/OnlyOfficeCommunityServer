@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-
-using ASC.Core.Tenants;
 using ASC.CRM.Core;
 using ASC.CRM.Core.Dao;
-using ASC.Files.Core;
+using ASC.Core.Tenants;
 using ASC.Web.CRM.Core;
 using ASC.Web.CRM.Resources;
 using ASC.Web.Files.Services.DocumentService;
-
 using Autofac;
-
 using Newtonsoft.Json;
 
 namespace ASC.Web.CRM.Classes
@@ -187,12 +183,11 @@ namespace ASC.Web.CRM.Classes
                 using (var stream = new MemoryStream(data))
                 {
                     var document = new ASC.Files.Core.File
-                    {
-                        Title = state.FileName,
-                        FolderID = daoFactory.FileDao.GetRoot(),
-                        ContentLength = stream.Length,
-                        ThumbnailStatus = Thumbnail.NotRequired,
-                    };
+                        {
+                            Title = state.FileName,
+                            FolderID = daoFactory.FileDao.GetRoot(),
+                            ContentLength = stream.Length
+                        };
 
                     var file = daoFactory.FileDao.SaveFile(document, stream);
 
@@ -214,7 +209,7 @@ namespace ASC.Web.CRM.Classes
             if (string.IsNullOrEmpty(script))
                 throw new Exception(CRMReportResource.ErrorNullReportScript);
 
-            var state = new ReportState(GetFileName(reportType), tmpFileName, script, (int)reportType, ReportOrigin.CRM, SaveReportFile, null);
+            var state = new ReportState(GetFileName(reportType), tmpFileName,  script, (int)reportType, ReportOrigin.CRM, SaveReportFile, null);
 
             DocbuilderReportsUtility.Enqueue(state);
 

@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" encoding="utf-8" standalone="yes" indent="yes" omit-xml-declaration="yes" media-type="text/xhtml" />
 
-  <register type="ASC.Web.Files.Resources.FilesCommonResource,ASC.Web.Files" alias="FilesCommonResource" />
+  <register type="ASC.Web.Files.Resources.FilesCommonResource,ASC.Web.Files" alias="fres" />
 
   <xsl:template match="third_partyList">
     <xsl:for-each select="entry">
@@ -12,7 +12,7 @@
           <xsl:if test="isNew = 'false'">
             <div class="menu-small">
               <xsl:attribute name="title">
-                <resource name="FilesCommonResource.TitleShowFolderActions" />
+                <resource name="fres.TitleShowFolderActions" />
               </xsl:attribute>
             </div>
           </xsl:if>
@@ -35,7 +35,9 @@
                     <xsl:attribute name="target">_blank</xsl:attribute>
                   </xsl:when>
                   <xsl:otherwise>
-                    <xsl:attribute name="href">#<xsl:value-of select="id"/></xsl:attribute>
+                    <xsl:attribute name="href">
+                      #<xsl:value-of select="id"/>
+                    </xsl:attribute>
                   </xsl:otherwise>
                 </xsl:choose>
                 <xsl:attribute name="title">
@@ -59,13 +61,13 @@
             <div class="account-log-pass-container">
               <div class="account-field-url account-field-row">
                 <div class="account-field-title">
-                  <resource name="FilesCommonResource.ConnectionUrl" />
+                  <resource name="fres.ConnectionUrl" />
                 </div>
                 <div class="account-field-body">
                   <input type="url" class="textEdit account-input-url" name="account-field" autocomplete="off">
                     <xsl:if test="isNew != 'true'">
                       <xsl:attribute name="placeholder">
-                        <resource name="FilesCommonResource.ThirdPartyCorrect"/>
+                        <resource name="fres.ThirdPartyCorrect"/>
                       </xsl:attribute>
                     </xsl:if>
                   </input>
@@ -74,7 +76,7 @@
               <xsl:if test="isNew = 'true'">
                 <div class="account-field-row">
                   <div class="account-field-title">
-                    <resource name="FilesCommonResource.Login" />
+                    <resource name="fres.Login" />
                   </div>
                   <div class="account-field-body">
                     <input type="text" class="textEdit account-input-login" name="account-field" autocomplete="off"/>
@@ -83,17 +85,16 @@
               </xsl:if>
               <div class="account-field-row">
                 <div class="account-field-title">
-                  <resource name="FilesCommonResource.Password" />
+                  <resource name="fres.Password" />
                 </div>
                 <div class="account-field-body">
                   <input type="password" class="textEdit account-input-pass" name="account-field" autocomplete="new-password">
                     <xsl:if test="isNew != 'true'">
                       <xsl:attribute name="placeholder">
-                        <resource name="FilesCommonResource.ThirdPartyCorrect"/>
+                        <resource name="fres.ThirdPartyCorrect"/>
                       </xsl:attribute>
                     </xsl:if>
                   </input>
-                  <label class="pass-visibility" />
                 </div>
               </div>
             </div>
@@ -101,7 +102,7 @@
               <xsl:if test="getTokenUrl != ''">
                 <div class="account-field-row">
                   <div class="account-field-title">
-                    <resource name="FilesCommonResource.ThirdPartyReconnectTitle" />
+                    <resource name="fres.ThirdPartyReconnectTitle" />
                   </div>
                   <div class="account-field-body">
                     <div class="edit-account-button button white">
@@ -113,7 +114,7 @@
                           <xsl:value-of select="provider_key"/>
                         </xsl:attribute>
                       </span>
-                      <resource name="FilesCommonResource.ThirdPartyReconnect" />
+                      <resource name="fres.ThirdPartyReconnect" />
                     </div>
                   </div>
                 </div>
@@ -123,7 +124,7 @@
                   account-field-row <xsl:if test="canCorporate = 'true'">account-field-row-large</xsl:if>
                 </xsl:attribute>
                 <div class="account-field-title">
-                  <resource name="FilesCommonResource.ThirdPartyFolderTitle" />
+                  <resource name="fres.ThirdPartyFolderTitle" />
                 </div>
                 <div class="account-field-body">
                   <input type="text" class="textEdit account-input-folder">
@@ -144,27 +145,19 @@
                           <xsl:attribute name="checked">checked</xsl:attribute>
                         </xsl:if>
                       </input>
-                      <resource name="FilesCommonResource.ThirdPartySetCorporate" />
+                      <resource name="fres.ThirdPartySetCorporate" />
                     </label>
                   </xsl:if>
                 </div>
               </div>
               <div class="account-action-container">
                 <a class="button middle blue account-save-link">
-                  <resource name="FilesCommonResource.ButtonSave"/>
+                  <resource name="fres.ButtonSave"/>
                 </a>
                 <span class="splitter-buttons"></span>
                 <a class="button middle gray account-cancel-link">
-                  <resource name="FilesCommonResource.ButtonCancel"/>
+                  <resource name="fres.ButtonCancel"/>
                 </a>
-                <xsl:if test="faqUrl != ''">
-                  <a class="link underline red-text faq-link" target="_blank">
-                      <xsl:attribute name="href">
-                        <xsl:value-of select="faqUrl"/>
-                      </xsl:attribute>
-                    <resource name="FilesCommonResource.ThirdPartyFaqLinkText"/>
-                  </a>
-                </xsl:if>
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 
 using System;
 using System.IO;
-using System.Threading;
 using System.Web;
-
 using ASC.Api.Attributes;
 using ASC.Mail.Core.Engine;
-using ASC.Mail.Core.Engine.Operations.Base;
 using ASC.Mail.Data.Contracts;
 using ASC.Mail.Utils;
+using ASC.Mail.Core.Engine.Operations.Base;
+using System.Threading;
 
 // ReSharper disable InconsistentNaming
 
@@ -33,15 +32,12 @@ namespace ASC.Api.Mail
     public partial class MailApi
     {
         /// <summary>
-        /// Exports all the message attachments to the folder with documents.
+        /// Export all message's attachments to MyDocuments
         /// </summary>
-        /// <short>Export message attachments</short>
-        /// <param type="System.Int32, System" name="id_message">Message ID</param>
-        /// <param type="System.String, System" name="id_folder" optional="true">Folder ID (if this parameter is empty, the "My documents" folder is used)</param>
-        /// <returns>Number of attachments exported</returns>
-        /// <category>Attachments</category>
-        /// <path>api/2.0/mail/messages/attachments/export</path>
-        /// <httpMethod>PUT</httpMethod>
+        /// <param name="id_message">Id of any message</param>
+        /// <param name="id_folder" optional="true">Id of Documents folder (if empty then @My)</param>
+        /// <returns>Count of exported attachments</returns>
+        /// <category>Messages</category>
         [Update(@"messages/attachments/export")]
         public int ExportAttachmentsToDocuments(int id_message, string id_folder = null)
         {
@@ -59,15 +55,12 @@ namespace ASC.Api.Mail
         }
 
         /// <summary>
-        /// Exports an attachment with the ID specified in the request to the folder with documents.
+        /// Export attachment to MyDocuments
         /// </summary>
-        /// <short>Export an attachment</short>
-        /// <param type="System.Int32, System" name="id_attachment">Attachment ID</param>
-        /// <param type="System.String, System" name="id_folder" optional="true">Folder ID (if this parameter is empty, the "My documents" folder is used)</param>
-        /// <returns>Document ID in the folder with documents</returns>
-        /// <category>Attachments</category>
-        /// <path>api/2.0/mail/messages/attachment/export</path>
-        /// <httpMethod>PUT</httpMethod>
+        /// <param name="id_attachment">Id of any attachment from the message</param>
+        /// <param name="id_folder" optional="true">Id of Documents folder (if empty then @My)</param>
+        /// <returns>Id document in My Documents</returns>
+        /// <category>Messages</category>
         [Update(@"messages/attachment/export")]
         public object ExportAttachmentToDocuments(int id_attachment, string id_folder = null)
         {
@@ -85,17 +78,14 @@ namespace ASC.Api.Mail
         }
 
         /// <summary>
-        /// Adds an attachment to the draft with the ID specified in the request.
+        /// Add attachment to draft
         /// </summary>
-        /// <short>Add an attachment</short>
-        /// <param type="System.Int32, System" name="id_message">Message ID</param>
-        /// <param type="System.String, System" name="name">File name</param>
-        /// <param type="System.IO.Stream, System.IO" name="file">File stream</param>
-        /// <param type="System.String, System" name="content_type">File content type</param>
-        /// <returns type="ASC.Mail.Data.Contracts.MailAttachmentData, ASC.Mail">Mail attachment</returns>
-        /// <category>Attachments</category>
-        /// <path>api/2.0/mail/messages/attachment/add</path>
-        /// <httpMethod>POST</httpMethod>
+        /// <param name="id_message">Id of any message</param>
+        /// <param name="name">File name</param>
+        /// <param name="file">File stream</param>
+        /// <param name="content_type">File content type</param>
+        /// <returns>MailAttachment</returns>
+        /// <category>Messages</category>
         [Create(@"messages/attachment/add")]
         public MailAttachmentData AddAttachment(int id_message, string name, Stream file, string content_type)
         {
@@ -106,15 +96,12 @@ namespace ASC.Api.Mail
         }
 
         /// <summary>
-        /// Adds an iCal body to the draft with the ID specified in the request.
+        /// Add attachment to draft
         /// </summary>
-        /// <short>Add a calendar</short>
-        /// <param type="System.Int32, System" name="id_message">Message ID</param>
-        /// <param type="System.String, System" name="ical_body">iCal body</param>
-        /// <returns type="ASC.Mail.Data.Contracts.MailAttachmentData, ASC.Mail">Mail attachment</returns>
-        /// <category>Attachments</category>
-        /// <path>api/2.0/mail/messages/calendarbody/add</path>
-        /// <httpMethod>POST</httpMethod>
+        /// <param name="id_message">Id of any message</param>
+        /// <param name="ical_body">File name</param>
+        /// <returns>MailAttachment</returns>
+        /// <category>Messages</category>
         [Create(@"messages/calendarbody/add")]
         public MailAttachmentData AddCalendarBody(int id_message, string ical_body)
         {
@@ -144,16 +131,13 @@ namespace ASC.Api.Mail
         }
 
         /// <summary>
-        /// Downloads all the attachments from the message with the ID specified in the request.
+        /// Download all attachments from message
         /// </summary>
         /// <short>
-        /// Download attachments
+        /// Download all attachments from message
         /// </short>
-        /// <category>Attachments</category>
-        /// <param type="System.Int32, System" method="url" name="messageId">Message ID</param>
-        /// <returns type="ASC.Mail.Core.Engine.Operations.Base.MailOperationStatus, ASC.Mail">Attachment archive</returns>
-        /// <path>api/2.0/mail/messages/attachment/downloadall/{messageId}</path>
-        /// <httpMethod>PUT</httpMethod>
+        /// <param name="messageId">Id of message</param>
+        /// <returns>Attachment Archive</returns>
         [Update(@"messages/attachment/downloadall/{messageId}")]
         public MailOperationStatus DownloadAllAttachments(int messageId)
         {

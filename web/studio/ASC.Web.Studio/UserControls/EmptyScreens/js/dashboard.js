@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 
 jq(function () {
-    
-    if (!ASC.Resources.Master.IsAuthenticated){
-        return;
-    }
 
     var hash = window.location.hash;
 
@@ -37,7 +33,7 @@ jq(function () {
         }
     });
 
-    jq(document).on("keyup", function (event) {
+    jq(document).keyup(function (event) {
         var code;
 
         if (event.keyCode) {
@@ -47,7 +43,7 @@ jq(function () {
         }
 
         if (code == 27) {
-            jq("#dashboardContent .close").trigger("click");
+            jq("#dashboardContent .close").click();
         }
     });
 
@@ -60,6 +56,6 @@ jq(function () {
         centerMode: true
     });
 
-    jq("#dashboardContent .slick-next").trigger("focus");
+    jq("#dashboardContent .slick-next").focus();
 
 });

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
 */
 
 
+using ASC.Common.Caching;
+using ASC.Core;
+using ASC.Web.Files.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-
-using ASC.Common.Caching;
-using ASC.Core;
 
 namespace ASC.Web.Files.Utils
 {
@@ -44,21 +44,14 @@ namespace ASC.Web.Files.Utils
 
         private FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone)
         {
-            _editingBy = new Dictionary<Guid, TrackInfo> { { tabId, new TrackInfo(userId, newScheme, editingAlone) } };
+            _editingBy = new Dictionary<Guid, TrackInfo> {{tabId, new TrackInfo(userId, newScheme, editingAlone)}};
         }
 
 
         public static Guid Add(object fileId)
         {
             var tabId = Guid.NewGuid();
-            var userId = SecurityContext.CurrentAccount.ID;
-
-            if (!SecurityContext.IsAuthenticated && FileShareLink.TryGetSessionId(out var sessionId))
-            {
-                userId = sessionId;
-            }
-            
-            ProlongEditing(fileId, tabId, userId);
+            ProlongEditing(fileId, tabId, SecurityContext.CurrentAccount.ID);
             return tabId;
         }
 

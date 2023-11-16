@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,7 +193,7 @@ ASC.Projects.GantChartPage = (function () {
         localStorageManager.setItem("ganttProjects", currentFilteredProjectsIds.join(','));
     };
     var setProjectsFilterFromStorage = function () {
-        // project in url - do not forget that there are no closed projects in the list!
+        // project in url - не забыть, что закрытых проектов в списке нет!
         var prjId = currentProjectId, prjCount = 0;
 
         if (localStorageManager.getItem("ganttProjects") && null === currentProjectId) {
@@ -210,7 +210,7 @@ ASC.Projects.GantChartPage = (function () {
             currentFilteredProjectsIds[k] = parseInt(currentFilteredProjectsIds[k]);
         }
 
-        // the project may be deleted or become unavailable, so you need to check
+        // проект может быть удален или стать недоступен, поэтому надо проверить
 
         var i, j, project;
 
@@ -229,8 +229,8 @@ ASC.Projects.GantChartPage = (function () {
         }
 
 
-        // Cut off closed or paused projects for viewing
-        // We cut off private projects in which the user is not in the project team
+        // Отсекаем закрытые или запауженные проекты на просмотр
+        // Отсекаем приватные проекты в которых юзер не в команде проекта
 
         if (showOnlyActiveProjects) {
 
@@ -391,7 +391,7 @@ ASC.Projects.GantChartPage = (function () {
         // create new button
         var $dropDownObj = jq("#createNewButton");
 
-        jq("#showGanttHelp").on("click", function (event) {
+        jq("#showGanttHelp").click(function (event) {
             var elt = jq((event.target) ? event.target : event.srcElement);
             if (ganttHelpPanel.is(":visible")) {
                 ganttHelpPanel.hide();
@@ -420,7 +420,7 @@ ASC.Projects.GantChartPage = (function () {
             return message;
         };
 
-        jq("#createNewMilestone").on("click", function () {
+        jq("#createNewMilestone").click(function () {
             if (currentFilteredProjectsIds.length) {
                 disableChartEvents();
                 ASC.Projects.MilestoneAction.showNewMilestonePopup();
@@ -429,7 +429,7 @@ ASC.Projects.GantChartPage = (function () {
             }
         });
 
-        jq("#createNewTask").on("click", function () {
+        jq("#createNewTask").click(function () {
             if (currentFilteredProjectsIds.length) {
                 disableChartEvents();
                 ASC.Projects.TaskAction.showCreateNewTaskForm();
@@ -439,16 +439,16 @@ ASC.Projects.GantChartPage = (function () {
         });
 
         // undo/redo buttons
-        undoBtn.on("click", function () {
+        undoBtn.click(function () {
             if (jq(this).hasClass("disable") || jq("#mainActionButtons").hasClass("disable")) return;
             chart.undoManager().undo();
         });
-        redoBtn.on("click", function () {
+        redoBtn.click(function () {
             if (jq(this).hasClass("disable") || jq("#mainActionButtons").hasClass("disable")) return;
             chart.undoManager().redo();
         });
 
-        jq(".print").on("click", function () {
+        jq(".print").click(function () {
             if (jq(this).parent().hasClass("disable")) return;
             var content = getContentForPrint();
             var printWin = window.open();
@@ -459,7 +459,7 @@ ASC.Projects.GantChartPage = (function () {
             printWin.focus();
         });
 
-        jq(".refresh").on("click", function () {
+        jq(".refresh").click(function () {
             // if (jq(this).parent().hasClass("disable")) return;
 
             refreshChartData();
@@ -469,7 +469,7 @@ ASC.Projects.GantChartPage = (function () {
         jq(".scale-conteiner").on("click", ".tl-combobox-container", function () {
             autoScaleFlag = false;
         });
-        zoomScale.on("change", function () {
+        zoomScale.change(function () {
             if (autoScaleFlag) {
                 autoScaleFlag = false;
                 return false;
@@ -478,7 +478,7 @@ ASC.Projects.GantChartPage = (function () {
             localStorageManager.setItem("ganttZoomScale", jq(this).val());
         });
 
-        jq("#todayPreset").on("click", function () {
+        jq("#todayPreset").click(function () {
             if (chart) {
                 chart.viewController().strafeToDay();
                 updateZoomElement();
@@ -492,14 +492,14 @@ ASC.Projects.GantChartPage = (function () {
             return false;
         });
 
-        jq("#questionWindowDeleteMilestone .remove, #questionWindowTaskWithSubtasks .end").on("click", function () {
+        jq("#questionWindowDeleteMilestone .remove, #questionWindowTaskWithSubtasks .end").click(function () {
             enableChartEvents();
             chart.modelController().finalize();
             jq.unblockUI();
             return false;
         });
 
-        jq('#questionWindowTaskRemove .remove').on("click", function () {
+        jq('#questionWindowTaskRemove .remove').click(function () {
             enableChartEvents();
             saveOrderFlag = true;
             removeTask({}, jq(this).data("taskid"));
@@ -507,63 +507,63 @@ ASC.Projects.GantChartPage = (function () {
             jq.unblockUI();
         });
 
-        jq("#moveTaskOutMilestone .move-all").on("click", function () {
+        jq("#moveTaskOutMilestone .move-all").click(function () {
             enableChartEvents();
             chart.modelController().finalize('SaveConnections');
             jq.unblockUI();
             return false;
         });
 
-        jq("#moveTaskOutMilestone .one-move").on("click", function () {
+        jq("#moveTaskOutMilestone .one-move").click(function () {
             enableChartEvents();
             chart.modelController().finalize();
             jq.unblockUI();
             return false;
         });
         //empty screen
-        jq("#addFirstTask").on("click", function () {
+        jq("#addFirstTask").click(function () {
             chart.addNewTask();
             emptyScreen.addClass("display-none");
             return false;
         });
-        jq("#addFirstMilestone").on("click", function () {
+        jq("#addFirstMilestone").click(function () {
             chart.addNewMilestone();
             emptyScreen.addClass("display-none");
             return false;
         });
-        jq("#hideEmptyScreen").on("click", function () {
+        jq("#hideEmptyScreen").click(function () {
             emptyScreen.addClass("display-none");
             return false;
         });
 
         //additional panel
-        fullScreenMode.on("click", function () {
+        fullScreenMode.click(function () {
             if (jq(this).hasClass("active")) return;
             checkFullScreen();
         });
 
-        leftPanelMode.on("click", function () {
+        leftPanelMode.click(function () {
             if (jq(this).hasClass("active")) return;
             checkLeftPanel();
         });
 
-        jq("#hideActionsButton").on("click", function () {
+        jq("#hideActionsButton").click(function () {
             helpActionsPanel.addClass("display-none");
             localStorageManager.setItem("hideActionHelpPlag", true);
         });
        
-		jq("#btnCloseHelpActionsPanel").on("click", function () {
+		jq("#btnCloseHelpActionsPanel").click(function () {
             helpActionsPanel.addClass("display-none");
             localStorageManager.setItem("hideActionHelpPlag", true);
         });
 		
-        jq(document).on("keydown", function (e) {
+        jq(document).keydown(function (e) {
             var keyCode = e.keyCode ? e.keyCode : e.which ? e.which : e.charCode;
 
             // Hook CTR + P
             if (80 === keyCode && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
-                jq(".print").trigger("click");
+                jq(".print").click();
                 return;
             }
 
@@ -593,11 +593,11 @@ ASC.Projects.GantChartPage = (function () {
             disableChartEvents();
         });
 
-        teamMemberFilter.on("change", function () {
+        teamMemberFilter.change(function () {
             //filterChartData();
         });
 
-        openTaskOnly.on("change", function () {
+        openTaskOnly.change(function () {
             filterChartData();
 
             if (openTaskOnly.is(":checked")) {
@@ -616,15 +616,15 @@ ASC.Projects.GantChartPage = (function () {
             }
         });
 
-        jq(".gantt-context-menu").on("mouseenter", function () {
+        jq(".gantt-context-menu").mouseenter(function () {
             disableChartEvents();
         });
 
-        jq(".gantt-context-menu").on("mouseleave", function () {
+        jq(".gantt-context-menu").mouseleave(function () {
             enableChartEvents();
         });
 
-        jq(".gantt-context-menu .dropdown-item").on("click", function (event) {
+        jq(".gantt-context-menu .dropdown-item").click(function (event) {
             var contextMenuId = jq(this).closest(".gantt-context-menu").attr("id");
             if (contextMenuId == "statusList") {
                 return true;
@@ -645,7 +645,7 @@ ASC.Projects.GantChartPage = (function () {
             }
         });
 
-        jq('body').on("click", function (event) {
+        jq('body').click(function (event) {
             var elt = jq((event.target) ? event.target : event.srcElement);
             var isHide = true;
 
@@ -701,11 +701,11 @@ ASC.Projects.GantChartPage = (function () {
             checkPossibleLinkType();
             enableSaveLinkButton();
         });
-        linkTypeSelector.on("change", function () {
+        linkTypeSelector.change(function () {
             enableSaveLinkButton();
         });
 
-        saveLinkButton.on("click", function () {
+        saveLinkButton.click(function () {
             if (jq(this).hasClass("disable")) return;
             var link = {};
 
@@ -739,7 +739,7 @@ ASC.Projects.GantChartPage = (function () {
             setResponsibleMenu.data("changed", "true");
         });
 
-        jq("#setResponsible").on("click", function (event) {
+        jq("#setResponsible").click(function (event) {
             if (setResponsibleMenu.data("changed") != "true") {
                 setResponsibleMenu.data("id", "");
                 setResponsibleMenu.hide();
@@ -890,10 +890,10 @@ ASC.Projects.GantChartPage = (function () {
             jq(document).find('.mainPageContent').append('<div id="block-panel" class="blocked-panel"/>');
             blockPanel = jq('#block-panel');
             if (blockPanel) {
-                blockPanel.on("mousemove", function (e) { e.preventDefault(); e.stopImmediatePropagation(); });
-                blockPanel.on("mousedown", function (e) { e.preventDefault(); e.stopImmediatePropagation(); });
-                blockPanel.on("mouseup", function (e) { e.preventDefault(); e.stopImmediatePropagation(); });
-                blockPanel.on("contextmenu",function(e) { return false; });
+                blockPanel.mousemove(function (e) { e.preventDefault(); e.stopImmediatePropagation(); });
+                blockPanel.mousedown(function (e) { e.preventDefault(); e.stopImmediatePropagation(); });
+                blockPanel.mouseup(function (e) { e.preventDefault(); e.stopImmediatePropagation(); });
+                blockPanel.bind("contextmenu",function(e) { return false; });
             }
         }
 
@@ -921,7 +921,7 @@ ASC.Projects.GantChartPage = (function () {
             currentUserProjects = [],
             otherProjects = [];
 
-        for (var i = 0; i < projectsCount; i++) {               //add access checks to tasks and milestones
+        for (var i = 0; i < projectsCount; i++) {               // добавить проверки на доступ к задачам и вехам
             allProjectsHash[projects[i].id] = projects[i];
 
             if (showOnlyActiveProjects) {
@@ -950,26 +950,26 @@ ASC.Projects.GantChartPage = (function () {
         initLeftPanelCells();
 
         if (!reload) {
-            jq(document).on("loadTasks", function (event, data) {
+            jq(document).bind("loadTasks", function (event, data) {
                 loadTasks = true;
                 jq(document).trigger("loadData", { prjId: data.prjId });
             });
 
-            jq(document).on("loadMilestones", function (event, data) {
+            jq(document).bind("loadMilestones", function (event, data) {
                 loadMilestones = true;
                 jq(document).trigger("loadData", { prjId: data.prjId });
             });
 
-            jq(document).on("loadGanttIndex", function (event, data) {
+            jq(document).bind("loadGanttIndex", function (event, data) {
                 loadGanttIndex = true;
                 jq(document).trigger("loadData", { prjId: data.prjId });
             });
-            jq(document).on("loadStatuses", function (event, data) {
+            jq(document).bind("loadStatuses", function (event, data) {
                 loadStatuses = true;
                 jq(document).trigger("loadData", { prjId: data.prjId });
             });
 
-            jq(document).on("loadData", function (event, data) {
+            jq(document).bind("loadData", function (event, data) {
                 if (loadMilestones && loadTasks && loadGanttIndex && loadStatuses) {
 
                     if (!data) return;
@@ -1034,7 +1034,7 @@ ASC.Projects.GantChartPage = (function () {
         if (!localStorageManager.getItem("hideActionHelpPlag") && !readMode) {
             helpActionsPanel.removeClass("display-none").addClass("display-block");
         }
-        //checkLeftPanel(); // it may be possible to remove this setting
+        //checkLeftPanel(); // может быть уже можно удалить эту настройку
 
         setReadMode();
         chart.userDefaults().setFontFamily(jq("body").css("fontFamily"));
@@ -1137,7 +1137,7 @@ ASC.Projects.GantChartPage = (function () {
         Teamlab.getPrjGanttIndex({ prjId: projectId }, projectId, {
             success: function (params, data) {
                 if (typeof data === "string") {
-                    allProjectsHash[params.prjId].ganttIndex = JSON.parse(data);
+                    allProjectsHash[params.prjId].ganttIndex = jq.parseJSON(data);
                 } else {
                     allProjectsHash[params.prjId].ganttIndex = {};
                 }
@@ -1305,7 +1305,7 @@ ASC.Projects.GantChartPage = (function () {
             layers[OVERLAY_LAYER].addEventListener("onmousewheel", function (e) { return false }, false);
         }
 
-        jq('.left-panel').on('mousewheel DOMMouseScroll', function (event, delta) {
+        jq('.left-panel').bind('mousewheel DOMMouseScroll', function (event, delta) {
             jq(".advanced-selector-container ").first().css({ display: 'none' });
             if (taskContextMenu.is(":visible")) {
                 taskContextMenu.hide();
@@ -1390,8 +1390,8 @@ ASC.Projects.GantChartPage = (function () {
 
         jq("#ganttChartZoom").width(width);
         if (firstLoad) {
-            jq("#ganttChartZoom").css("border", ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "1px solid #ccc" : "1px solid #474747");
-            jq("#ganttChartZoom").css("backgroundColor", ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#fff" : "#333");
+            jq("#ganttChartZoom").css("border", "1px solid #ccc");
+            jq("#ganttChartZoom").css("backgroundColor", "#fff");
         }
 
         // set max-width responsible filter
@@ -1428,7 +1428,7 @@ ASC.Projects.GantChartPage = (function () {
             id = project.id,
             description = "", // need?
             respName = "",
-            createdDate = project.created ? new Date(project.created) : new Date(), // need?
+            createdDate = project.created ? new Date(project.created) : new Date(), // нужна ли эта дата вообще?
             ganttIndex = project.ganttIndex;
 
         var respUser = window.UserManager.getUser(project.responsibleId) || window.UserManager.getRemovedProfile(project.responsibleId);
@@ -1720,7 +1720,7 @@ ASC.Projects.GantChartPage = (function () {
         }
         PopupKeyUpActionProvider.CloseDialogAction = closeDialogAction;
         StudioBlockUIManager.blockUI(jq("#questionWindowTaskRemove"), 400);
-        PopupKeyUpActionProvider.EnterAction = "jq('#questionWindowTaskRemove .remove').trigger('click');";
+        PopupKeyUpActionProvider.EnterAction = "jq('#questionWindowTaskRemove .remove').click();";
 
         jq("#questionWindowTaskRemove .remove").data("taskid", task.id());
     };
@@ -1728,27 +1728,27 @@ ASC.Projects.GantChartPage = (function () {
         disableChartEvents();
         PopupKeyUpActionProvider.CloseDialogAction = closeDialogAction;
         StudioBlockUIManager.blockUI(jq("#questionWindowDeleteMilestone"), 400);
-        PopupKeyUpActionProvider.EnterAction = "jq('#questionWindowDeleteMilestone .remove').trigger('click');";
+        PopupKeyUpActionProvider.EnterAction = "jq('#questionWindowDeleteMilestone .remove').click();";
         jq("#questionWindowDeleteMilestone").attr("milestoneId", milestoneId);
     };
     var showTaskWithSubtasksQuestionPopup = function (taskId) {
         disableChartEvents();
         PopupKeyUpActionProvider.CloseDialogAction = closeDialogAction;
         StudioBlockUIManager.blockUI(jq("#questionWindowTaskWithSubtasks"), "auto");
-        PopupKeyUpActionProvider.EnterAction = "jq('#questionWindowTaskWithSubtasks .end').trigger('click');";
+        PopupKeyUpActionProvider.EnterAction = "jq('#questionWindowTaskWithSubtasks .end').click();";
         jq("#questionWindowTaskWithSubtasks .end").data("taskid", taskId);
     };
     var showMilestoneWithTasksQuestionPopup = function () {
         disableChartEvents();
         PopupKeyUpActionProvider.CloseDialogAction = closeDialogAction;
         StudioBlockUIManager.blockUI(jq("#questionWindowMilestoneTasks"), 400);
-        PopupKeyUpActionProvider.EnterAction = "jq('#questionWindowMilestoneTasks .cancel').trigger('click');";
+        PopupKeyUpActionProvider.EnterAction = "jq('#questionWindowMilestoneTasks .cancel').click();";
     };
     var showMoveTaskOutMilestonePopup = function () {
         disableChartEvents();
         PopupKeyUpActionProvider.CloseDialogAction = closeDialogAction;
         StudioBlockUIManager.blockUI(jq("#moveTaskOutMilestone"), "auto");
-        PopupKeyUpActionProvider.EnterAction = "jq('#moveTaskOutMilestone .cancel').trigger('click');";
+        PopupKeyUpActionProvider.EnterAction = "jq('#moveTaskOutMilestone .cancel').click();";
     };
     var showCreateNewLinkPopup = function (task) {
         if (setTaskSelect(task)) {
@@ -2661,14 +2661,14 @@ ASC.Projects.GantChartPage = (function () {
             ganttCellChecker.find('.dropdown-content').each(function () { jq(this).css('margin-top', '0px'); });
             ganttCellChecker.addClass("gantt-context-menu").css("width", "auto");
 
-            jq("#Responsibility").on("click", function (e) { saveHiddenRows(e); });
-            jq("#BeginDate").on("click", function (e) { saveHiddenRows(e); });
-            jq("#EndDate").on("click", function (e) { saveHiddenRows(e); });
-            jq("#Status").on("click", function (e) { saveHiddenRows(e); });
-            jq("#Priority").on("click", function (e) { saveHiddenRows(e); });
+            jq("#Responsibility").click(function (e) { saveHiddenRows(e); });
+            jq("#BeginDate").click(function (e) { saveHiddenRows(e); });
+            jq("#EndDate").click(function (e) { saveHiddenRows(e); });
+            jq("#Status").click(function (e) { saveHiddenRows(e); });
+            jq("#Priority").click(function (e) { saveHiddenRows(e); });
         };
 
-        jq("#showChoosedFields").on("click", function (e) {
+        jq("#showChoosedFields").click(function (e) {
             saveAvailableRows(e);
         });
 
@@ -2770,7 +2770,7 @@ ASC.Projects.GantChartPage = (function () {
 
         if (currentScale != value) {
             autoScaleFlag = true;
-            zoomScale.val(value).trigger("change");
+            zoomScale.val(value).change();
             localStorageManager.setItem("ganttZoomScale", value);
         }
     };
@@ -2841,13 +2841,13 @@ ASC.Projects.GantChartPage = (function () {
             taskContextMenu.find(".edit").hide();
             taskContextMenu.find(".addlink").hide();
             jq("#taskResponsible").hide();
-            taskContextMenuStatus.removeAttr("class").addClass("-1 open dropdown-item");
+            taskContextMenuStatus.removeAttr("class").addClass("open dropdown-item");
             taskContextMenuStatus.text(taskContextMenuStatus.data("opentext"));
         } else {
             taskContextMenu.find(".edit").show();
             taskContextMenu.find(".addlink").show();
             jq("#taskResponsible").show();
-            taskContextMenuStatus.removeAttr("class").addClass("-2 closed dropdown-item");
+            taskContextMenuStatus.removeAttr("class").addClass("closed dropdown-item");
             taskContextMenuStatus.text(taskContextMenuStatus.data("closetext"));
         }
         showContextMenu(taskContextMenu, coords.left, coords.top);
@@ -3043,7 +3043,7 @@ ASC.Projects.GantChartPage = (function () {
                 dateControl.style.width = '0px';
                 dateControl.style.height = '30px';
                 dateControl.style.background = 'transparent';
-                dateControl.onfocus = 'this.trigger("blur")';
+                dateControl.onfocus = 'this.blur()';
 
                 document.body.appendChild(dateControl);
 
@@ -3072,7 +3072,7 @@ ASC.Projects.GantChartPage = (function () {
             }
 
             jq("#datepicker-chart").datepicker(show ? "show" : "hide");
-            jq("#ui-datepicker-div").trigger("focus");
+            jq("#ui-datepicker-div").focus();
         }
     };
 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-
 using ASC.Api.Interfaces;
-
 using Autofac;
 
 namespace ASC.Api.Impl.Serializers
@@ -34,7 +32,7 @@ namespace ASC.Api.Impl.Serializers
         public SerializerResponder(IComponentContext container)
         {
             var serializers = container.Resolve<IEnumerable<IApiSerializer>>();
-            if (serializers == null)
+            if (serializers==null)
                 throw new ArgumentException("No serializers resolved");
 
             _serializers = new List<IApiSerializer>(serializers);

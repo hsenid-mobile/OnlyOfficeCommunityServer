@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Common.Settings;
@@ -28,7 +27,6 @@ using ASC.Core.Configuration;
 using ASC.Data.Storage;
 using ASC.Web.Core.WhiteLabel;
 using ASC.Web.Studio.Core;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -70,7 +68,7 @@ namespace ASC.Web.Studio.Utility
                     jsonObject = JObject.Parse(reader.ReadToEnd());
                 }
 
-                if (jsonObject == null) return;
+                if(jsonObject == null) return;
 
                 SaveSettings<CompanyWhiteLabelSettings>(jsonObject, "CompanyWhiteLabelSettings");
                 SaveSettings<AdditionalWhiteLabelSettings>(jsonObject, "AdditionalWhiteLabelSettings");
@@ -162,8 +160,8 @@ namespace ASC.Web.Studio.Utility
 
         private static void MakeLogoFile(IDataStore store, String prop, String value)
         {
-            if (String.IsNullOrEmpty(value)) return;
-
+            if(String.IsNullOrEmpty(value)) return;
+            
             var fileName = prop.Replace("Logo", "logo_").Replace("General", "_general").ToLower() + PngExt;
 
             Uri validUri;

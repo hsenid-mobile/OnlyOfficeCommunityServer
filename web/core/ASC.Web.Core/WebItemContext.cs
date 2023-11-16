@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using ASC.Web.Core.Subscriptions;
 
 namespace ASC.Web.Core
@@ -37,7 +36,7 @@ namespace ASC.Web.Core
         public string SmallIconFileName { get; set; }
 
         public string DisabledIconFileName { get; set; }
-
+        
         public string IconFileName { get; set; }
 
         public string LargeIconFileName { get; set; }

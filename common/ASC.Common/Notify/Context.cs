@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using ASC.Common.Logging;
 using ASC.Notify.Channels;
 using ASC.Notify.Engine;
 using ASC.Notify.Model;
 using ASC.Notify.Sinks;
-
-using LogManager = ASC.Common.Logging.BaseLogManager;
 
 namespace ASC.Notify
 {

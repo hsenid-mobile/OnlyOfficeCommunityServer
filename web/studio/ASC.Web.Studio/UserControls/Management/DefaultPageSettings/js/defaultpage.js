@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ var DefaultPage = new function() {
             bafore: function() { LoadingBanner.showLoaderBtn("#studio_defaultPageSettings"); },
             after: function() { LoadingBanner.hideLoaderBtn("#studio_defaultPageSettings"); },
             success: function() {
-                LoadingBanner.showMesInfoBtn("#studio_defaultPageSettings", ASC.Resources.Master.ResourceJS.SuccessfullySaveSettingsMessage, "success");
+                LoadingBanner.showMesInfoBtn("#studio_defaultPageSettings", ASC.Resources.Master.Resource.SuccessfullySaveSettingsMessage, "success");
             },
             error: function(params, errors) {
                 LoadingBanner.showMesInfoBtn("#studio_defaultPageSettings", errors[0], "error");
@@ -35,7 +35,7 @@ var DefaultPage = new function() {
 jq(function() {
     jq("input[name=defaultPage]").each(function() {
         var obj = jq(this);
-        if (obj.attr("checked"))
+        if (obj.attr("checked") == "checked")
             obj.prop("checked", true);
     });
 });

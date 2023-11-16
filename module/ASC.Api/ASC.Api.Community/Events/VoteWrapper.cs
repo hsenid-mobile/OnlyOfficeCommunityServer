@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,29 +22,23 @@ namespace ASC.Api.Events
     [DataContract(Name = "vote", Namespace = "")]
     public class VoteWrapper
     {
-        ///<example type="int">133</example>
-        ///<order>1</order>
         [DataMember(Order = 1, EmitDefaultValue = true)]
         public long Id { get; set; }
 
-        ///<example>Variant 1</example>
-        ///<order>10</order>
         [DataMember(Order = 10, EmitDefaultValue = true)]
         public string Name { get; set; }
 
-        ///<example type="int">100</example>
-        ///<order>20</order>
         [DataMember(Order = 20, EmitDefaultValue = true)]
         public int Votes { get; set; }
 
         public static VoteWrapper GetSample()
         {
             return new VoteWrapper
-            {
-                Votes = 100,
-                Name = "Variant 1",
-                Id = 133
-            };
+                       {
+                           Votes = 100,
+                           Name = "Variant 1",
+                           Id = 133
+                       };
         }
     }
 }

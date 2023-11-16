@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Runtime.Serialization;
-
 using ASC.Mail.Enums.Filter;
 
 namespace ASC.Mail.Data.Contracts
@@ -26,11 +25,9 @@ namespace ASC.Mail.Data.Contracts
     [DataContract(Namespace = "", Name = "FilterAction")]
     public class MailSieveFilterActionData : IEquatable<MailSieveFilterActionData>
     {
-        ///<example name="action" type="int">1</example>
         [DataMember(IsRequired = true, Name = "action")]
         public ActionType Action { get; set; }
 
-        ///<example name="data">data</example>
         [DataMember(IsRequired = false, Name = "data")]
         public string Data { get; set; }
 

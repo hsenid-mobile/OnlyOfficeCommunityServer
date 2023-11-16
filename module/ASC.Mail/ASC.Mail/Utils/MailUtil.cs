@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,19 +25,15 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
-
+using System.Xml;
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Mail.Data.Contracts;
 using ASC.Mail.Data.Imap;
 using ASC.Security.Cryptography;
-
 using HtmlAgilityPack;
-
 using MimeKit;
-
 using Newtonsoft.Json;
-
 using File = System.IO.File;
 
 namespace ASC.Mail.Utils
@@ -114,7 +110,7 @@ namespace ASC.Mail.Utils
 
         public static double BytesToMegabytes(long bytes)
         {
-            return Math.Round(bytes / 1024d / 1024d, 1);
+            return Math.Round(bytes/1024d/1024d, 1);
         }
 
         public static Dictionary<string, ImapFolderUids> ParseImapIntervals(string json)
@@ -156,6 +152,24 @@ namespace ASC.Mail.Utils
             return subject.Trim();
         }
 
+        /// <summary>
+        /// Removes control characters and other non-UTF-8 characters
+        /// </summary>
+        /// <param name="inString">The string to process</param>
+        /// <return>A string with no control characters or entities above 0x00FD</return>
+        public static string NormalizeStringForMySql(string inString)
+        {
+            if (string.IsNullOrEmpty(inString))
+                return inString;
+
+            var newString = new StringBuilder(inString.Length);
+
+            foreach (var ch in inString.Where(XmlConvert.IsXmlChar))
+                newString.Append(ch);
+
+            return newString.ToString();
+        }
+
         public static T[] SubArray<T>(this T[] data, int index, int length)
         {
             var result = new T[length];
@@ -182,7 +196,7 @@ namespace ASC.Mail.Utils
                 if (!calendars.Any())
                     throw new InvalidDataException("Calendars not found");
 
-                if (calendars.Count > 1)
+                if(calendars.Count > 1)
                     throw new InvalidDataException("Too many calendars");
 
                 var calendar = calendars.First();
@@ -200,7 +214,7 @@ namespace ASC.Mail.Utils
                         calendar.Method));
                 }
 
-                if (!calendar.Events.Any())
+                if(!calendar.Events.Any())
                     throw new InvalidDataException("Calendar events not found");
 
                 if (calendar.Events.Count > 1)
@@ -208,7 +222,7 @@ namespace ASC.Mail.Utils
 
                 var icalEvent = calendar.Events.First();
 
-                if (string.IsNullOrEmpty(icalEvent.Uid))
+                if(string.IsNullOrEmpty(icalEvent.Uid))
                     throw new InvalidDataException("Calendar event uid is empty");
 
                 return calendar;
@@ -257,7 +271,7 @@ namespace ASC.Mail.Utils
             if (text == null)
                 throw new ArgumentNullException("text");
 
-            var quoted = new StringBuilder(text.Length + 2, (text.Length * 2) + 2);
+            var quoted = new StringBuilder(text.Length + 2, (text.Length*2) + 2);
 
             if (!skipFirstAndLastQuotes)
                 quoted.Append("\"");
@@ -289,7 +303,7 @@ namespace ASC.Mail.Utils
             if (text == null)
                 throw new ArgumentNullException("text");
 
-            var index = text.IndexOfAny(new[] { '\r', '\n', '\t', '\\', '"' });
+            var index = text.IndexOfAny(new[] {'\r', '\n', '\t', '\\', '"'});
 
             if (index == -1)
                 return text;
@@ -400,7 +414,7 @@ namespace ASC.Mail.Utils
                     if ((parentName == "script") || (parentName == "style"))
                         break;
 
-                    var html = ((HtmlTextNode)node).Text;
+                    var html = ((HtmlTextNode) node).Text;
 
                     if (HtmlNode.IsOverlappedClosingElement(html))
                         break;

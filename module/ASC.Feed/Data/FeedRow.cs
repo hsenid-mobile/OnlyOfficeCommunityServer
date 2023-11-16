@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using Newtonsoft.Json;
 
 namespace ASC.Feed.Data
@@ -46,14 +45,12 @@ namespace ASC.Feed.Data
 
         public string GroupId { get { return Feed.GroupId; } }
 
-        public string Json
-        {
+        public string Json {
             get
             {
                 return JsonConvert.SerializeObject(Feed, new JsonSerializerSettings
                 {
-                    DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-                    DefaultValueHandling = DefaultValueHandling.Ignore
+                    DateTimeZoneHandling = DateTimeZoneHandling.Utc
                 });
             }
         }

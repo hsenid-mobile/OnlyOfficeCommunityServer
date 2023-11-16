@@ -1,6 +1,6 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="NewNavigationPanel.ascx.cs"
             Inherits="ASC.Web.Studio.UserControls.Feed.NewNavigationPanel" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 <%@ Import Namespace="ASC.Data.Storage" %>
 
 <style type="text/css">
@@ -28,15 +28,6 @@
                         <span class="menu-item-icon community"><svg class="menu-item-svg"><use base="<%= WebPath.GetPath("/")%>" href="/skins/default/images/svg/feed-icons.svg#feedIconscommunity"></use></svg></span>
                         <a id="feed-community-product-nav" class="menu-item-label outer-text text-overflow" href="#" title="<%= FeedResource.CommunityProduct %>">
                             <%= FeedResource.CommunityProduct %>
-                        </a>
-                    </li>
-                <% } %>
-                <% if (IsProductAvailable("people"))
-                   { %>
-                    <li class="menu-sub-item filter">
-                        <span class="menu-item-icon people"><svg class="menu-item-svg"><use base="<%= WebPath.GetPath("/")%>" href="/skins/default/images/svg/feed-icons.svg#feedIconspeople"></use></svg></span>
-                        <a id="feed-people-product-nav" class="menu-item-label outer-text text-overflow" href="#" title="<%= FeedResource.PeopleProduct %>">
-                            <%= FeedResource.PeopleProduct %>
                         </a>
                     </li>
                 <% } %>

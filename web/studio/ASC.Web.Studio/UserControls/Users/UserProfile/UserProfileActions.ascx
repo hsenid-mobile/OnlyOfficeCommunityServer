@@ -4,7 +4,7 @@
 <%@ Import Namespace="ASC.Web.Core.Mobile" %>
 <%@ Import Namespace="ASC.Web.Studio.Core.Users" %>
 <%@ Import Namespace="ASC.Core.Users" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <% if (HasActions)
    { %>
@@ -65,7 +65,7 @@
         <% }
        if (Actions.AllowEdit && !MobileDetector.IsMobile && (!ProfileHelper.UserInfo.IsLDAP() || (ProfileHelper.UserInfo.IsLDAP() && ProfileHelper.UserInfo.HasAvatar())))
            { %>
-        <li class="edit-photo <%= (ProfileHelper.UserInfo.Status != EmployeeStatus.Terminated) ? "" :  "display-none"%>">
+        <li class="edit-photo">
             <a class="dropdown-item"
                 title="<%= Resource.EditPhoto %>">
                 <%= Resource.EditPhoto %>
@@ -78,15 +78,6 @@
             <a class="dropdown-item"
                 title="<%= CustomNamingPeople.Substitute<Resource>("DisableUserHelp").HtmlEncode() %>">
                 <%= Resource.DisableUserButton %>
-            </a>
-        </li>
-        <% }
-           if (IsAdmin && !MyStaff && Actions.AllowAddOrDelete && !ProfileHelper.UserInfo.IsLDAP())
-           { %>
-        <li class="logout-connections <%= (ProfileHelper.UserInfo.Status != EmployeeStatus.Terminated) ? "" :  "display-none"%>">
-            <a class="dropdown-item"
-                title="<%= Resource.LogOutAllActiveConnections %>">
-                <%= Resource.LogOutAllActiveConnections %>
             </a>
         </li>
         <% }
@@ -121,12 +112,6 @@
         <li class="subscribe-tips">
             <a class="dropdown-item" title="<%= SubscribeBtnText %>"><%= SubscribeBtnText %></a>
         </li>
-        <% }
-           if (CanImpersonateUser)
-           { %>
-        <li class="impersonate-user">
-            <a class="dropdown-item" title="<%= ResourceJS.ImpersonateUser %>"><%= ResourceJS.ImpersonateUser %></a>
-        </li>
         <% } %>
     </ul>
 </div>
@@ -134,10 +119,5 @@
 <% if (Actions.AllowAddOrDelete)
    { %>
 <asp:PlaceHolder ID="_phConfirmationDeleteUser" runat="server"></asp:PlaceHolder>
-    <% } %>
-
-<% if (CanImpersonateUser)
-   { %>
-<asp:PlaceHolder ID="_confirmationImpersonateUser" runat="server"></asp:PlaceHolder>
     <% } %>
 <% } %>

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
 */
 
 
-@import "params.less";
+@import "base.less";
 
 .aside-content {
-    background-color: @hover-row-color-aside;
+    background-color: #F2F2F2;
 }
 
 .reports-menu-container {
@@ -43,7 +43,7 @@
     }
 
     .menu-report-name {
-        color: @text-color;
+        color: #333;
         text-decoration: none;
         cursor: pointer;
 
@@ -57,6 +57,10 @@
             text-decoration: none;
         }
     }
+}
+
+.mainPageTable .reports-content-container {
+    padding-top: 12px;
 }
 
 #currencyRatesDialog .content {

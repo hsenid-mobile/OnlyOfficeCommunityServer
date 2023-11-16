@@ -1,9 +1,0 @@
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.dll.config
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.xml
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Data.Storage.pdb
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage\obj\Debug\ASC.Data.Storage.csproj.AssemblyReference.cache
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage\obj\Debug\ASC.Data.Storage.csproj.CoreCompileInputs.cache
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage\obj\Debug\ASC.Data.Storage.csproj.CopyComplete
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage\obj\Debug\ASC.Data.Storage.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.Data.Storage\obj\Debug\ASC.Data.Storage.pdb

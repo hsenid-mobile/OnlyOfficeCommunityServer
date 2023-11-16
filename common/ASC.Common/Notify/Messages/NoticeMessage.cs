@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using ASC.Notify.Model;
 using ASC.Notify.Patterns;
 using ASC.Notify.Recipients;
@@ -87,8 +86,8 @@ namespace ASC.Notify.Messages
         {
             if (tagValues == null) throw new ArgumentNullException("tagValues");
             Array.ForEach(tagValues,
-                tagValue =>
-                {
+                tagValue => 
+                {   
                     if (!arguments.Exists(tv => Equals(tv.Tag, tagValue.Tag)))
                     {
                         arguments.Add(tagValue);

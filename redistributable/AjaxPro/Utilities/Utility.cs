@@ -47,8 +47,6 @@
  * MS	07-04-24	fixed Ajax token
  *					using new AjaxSecurityProvider
  * MS   09-02-17    fixed memory problem
- * MS	21-10-30	added contentSecurityPolicy to specify a nonce for all scripts
- * MS	21-11-29	removed HtmlControlConverter from default converters
  * 
  * 
  * 
@@ -165,7 +163,7 @@ namespace AjaxPro
             RegisterCommonAjax(page);
 
             RegisterClientScriptBlock(page, Constant.AjaxID + ".AjaxEnum." + type.FullName,
-                "<script" + AjaxPro.Utility.Settings.AppendContentSecurityPolicyNonce() + " type=\"text/javascript\">\r\n" + JavaScriptUtil.GetEnumRepresentation(type) + "\r\n</script>");
+                "<script type=\"text/javascript\">\r\n" + JavaScriptUtil.GetEnumRepresentation(type) + "\r\n</script>");
         }
 
 
@@ -239,7 +237,7 @@ namespace AjaxPro
             AddConverter(settings, new IEnumerableConverter());
 
             AddConverter(settings, new DataRowConverter());
-            //AddConverter(settings, new HtmlControlConverter());
+            AddConverter(settings, new HtmlControlConverter());
 
             #endregion
         }
@@ -455,21 +453,21 @@ namespace AjaxPro
             if (prototypeJs.Length > 0 && coreJs.Length > 0 && convertersJs.Length > 0)
             {
                 RegisterClientScriptBlock(page, Constant.AjaxID + ".core-prototype-converter",
-                                          "<script" + AjaxPro.Utility.Settings.AppendContentSecurityPolicyNonce() + "  type=\"text/javascript\" src=\"" + corePrototypeConverterJs + "\"></script>");
+                                          "<script type=\"text/javascript\" src=\"" + corePrototypeConverterJs + "\"></script>");
             }
             else
             {
                 if (prototypeJs.Length > 0)
                     RegisterClientScriptBlock(page, Constant.AjaxID + ".prototype",
-                        "<script" + AjaxPro.Utility.Settings.AppendContentSecurityPolicyNonce() + "  type=\"text/javascript\" src=\"" + prototypeJs + "\"></script>");
+                        "<script type=\"text/javascript\" src=\"" + prototypeJs + "\"></script>");
 
                 if (coreJs.Length > 0)
                     RegisterClientScriptBlock(page, Constant.AjaxID + ".core",
-                        "<script" + AjaxPro.Utility.Settings.AppendContentSecurityPolicyNonce() + " type=\"text/javascript\" src=\"" + coreJs + "\"></script>");
+                        "<script type=\"text/javascript\" src=\"" + coreJs + "\"></script>");
 
                 if (convertersJs.Length > 0)
                     RegisterClientScriptBlock(page, Constant.AjaxID + ".converters",
-                        "<script" + AjaxPro.Utility.Settings.AppendContentSecurityPolicyNonce() + "  type=\"text/javascript\" src=\"" + convertersJs + "\"></script>");
+                        "<script type=\"text/javascript\" src=\"" + convertersJs + "\"></script>");
             }
 
 
@@ -479,7 +477,7 @@ namespace AjaxPro
                 string msJs = rootFolder + Utility.HandlerPath + "/" + Utility.GetSessionUri() + "ms" + Utility.HandlerExtension;
 
                 RegisterClientScriptBlock(page, Constant.AjaxID + ".ms",
-                    "<script" + AjaxPro.Utility.Settings.AppendContentSecurityPolicyNonce() + " type=\"text/javascript\" src=\"" + msJs + "\"></script>");
+                    "<script type=\"text/javascript\" src=\"" + msJs + "\"></script>");
             }
 
             StringBuilder sb = new StringBuilder();
@@ -493,7 +491,7 @@ namespace AjaxPro
             if (sb.Length > 0)
             {
                 RegisterClientScriptBlock(page, Constant.AjaxID + ".ajaxproinit",
-                    "<script" + AjaxPro.Utility.Settings.AppendContentSecurityPolicyNonce() + " type=\"text/javascript\">\r\n" + sb.ToString() + "</script>\r\n");
+                    "<script type=\"text/javascript\">\r\n" + sb.ToString() + "</script>\r\n");
             }
         }
 

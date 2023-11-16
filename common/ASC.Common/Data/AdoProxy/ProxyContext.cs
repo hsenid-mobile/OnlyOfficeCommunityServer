@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 using System;
 using System.Data;
+using System.Data.Common;
 
 namespace ASC.Common.Data.AdoProxy
 {
@@ -35,19 +36,19 @@ namespace ASC.Common.Data.AdoProxy
         }
 
 
-        public void FireExecuteEvent(DbCommandProxy cmd, string method, TimeSpan duration, int sqlThread)
+        public void FireExecuteEvent(DbCommand cmd, string method, TimeSpan duration)
         {
-            executedEvent(new ExecutedEventArgs("Command." + method, duration, cmd, sqlThread));
+            executedEvent(new ExecutedEventArgs("Command." + method, duration, cmd));
         }
 
-        public void FireExecuteEvent(string method, TimeSpan duration, int sqlThread)
+        public void FireExecuteEvent(IDbConnection conn, string method, TimeSpan duration)
         {
-            executedEvent(new ExecutedEventArgs("Connection." + method, duration, sqlThread));
+            executedEvent(new ExecutedEventArgs("Connection." + method, duration));
         }
 
-        public void FireExecuteEvent(IDbTransaction tx, string method, TimeSpan duration, int sqlThread)
+        public void FireExecuteEvent(IDbTransaction tx, string method, TimeSpan duration)
         {
-            executedEvent(new ExecutedEventArgs("Transaction." + method, duration, sqlThread));
+            executedEvent(new ExecutedEventArgs("Transaction." + method, duration));
         }
     }
 }

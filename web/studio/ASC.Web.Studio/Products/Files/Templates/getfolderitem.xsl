@@ -2,13 +2,13 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" encoding="utf-8" standalone="yes" indent="yes" omit-xml-declaration="yes" media-type="text/xhtml" />
 
-  <register type="ASC.Web.Files.Resources.FilesCommonResource,ASC.Web.Files" alias="FilesCommonResource" />
+  <register type="ASC.Web.Files.Resources.FilesCommonResource,ASC.Web.Files" alias="fres" />
 
   <xsl:template match="folder">
     <li name="addRow">
       <xsl:attribute name="class">
         file-row folder-row new-folder item-row
-        <xsl:if test="contains(folder_is_favorite, 'true')">
+        <xsl:if test="contains(file_status, 'IsFavorite')">
           on-favorite
         </xsl:if>
         <xsl:if test="provider_key != ''">
@@ -25,29 +25,16 @@
       <div class="checkbox">
         <input type="checkbox" >
           <xsl:attribute name="title">
-            <resource name="FilesCommonResource.TitleSelectFile" />
+            <resource name="fres.TitleSelectFile" />
           </xsl:attribute>
         </input>
         <input type="radio" name="fileRowInputCheck" >
           <xsl:attribute name="title">
-            <resource name="FilesCommonResource.TitleSelectFile" />
+            <resource name="fres.TitleSelectFile" />
           </xsl:attribute>
         </input>
       </div>
       <div class="thumb-folder">
-        <xsl:attribute name="title">
-          <xsl:value-of select="title" />
-        </xsl:attribute>
-        <xsl:if test="provider_key != ''">
-          <div>
-            <xsl:attribute name="class">
-              provider-key
-              <xsl:value-of select="provider_key" />
-            </xsl:attribute>
-          </div>
-        </xsl:if>
-      </div>
-      <div class="thumb-img">
         <xsl:attribute name="title">
           <xsl:value-of select="title" />
         </xsl:attribute>
@@ -70,15 +57,10 @@
               <xsl:value-of select="title" />
             </a>
           </div>
-			<div class="favorite">
-				<xsl:attribute name="title">
-					<resource name="FilesCommonResource.ButtonRemoveFavorite" />
-				</xsl:attribute>
-			</div>
           <xsl:if test="isnew > 0">
             <div class="new-label-menu is-new">
               <xsl:attribute name="title">
-                <resource name="FilesCommonResource.RemoveIsNew" />
+                <resource name="fres.RemoveIsNew" />
               </xsl:attribute>
               <xsl:value-of select="isnew" />
             </div>
@@ -106,30 +88,24 @@
                 <xsl:if test="create_on != '' or modified_on != ''">
                   <span> | </span>
                   <span class="title-created">
-                    <resource name="FilesCommonResource.TitleCreated" />
+                    <resource name="fres.TitleCreated" />
                   </span>
                   <span class="title-removed">
-                    <resource name="FilesCommonResource.TitleRemoved" />
-                  </span>
-                  <span class="title-removed-permanently" >
-                    <resource name="FilesCommonResource.TitleRemovePermanently" />
+                    <resource name="fres.TitleRemoved" />
                   </span>&#160;<span class="create-date">
                     <xsl:value-of select="create_on" />
                   </span>
                   <span class="modified-date" >
                     <xsl:value-of select="modified_on" />
                   </span>
-                  <span class="deleted-permanently-date">
-                    <xsl:value-of select="deleted_permanently_date" />
-                  </span>
                 </xsl:if>
                 <xsl:if test="not(provider_key) or provider_key = ''">
                   <span> | </span>
-                  <resource name="FilesCommonResource.TitleFiles" />&#160;<span class="countFiles">
+                  <resource name="fres.TitleFiles" />&#160;<span class="countFiles">
                     <xsl:value-of select="total_files" />
                   </span>
                   <span> | </span>
-                  <resource name="FilesCommonResource.TitleSubfolders" />&#160;<span class="countFolders">
+                  <resource name="fres.TitleSubfolders" />&#160;<span class="countFolders">
                     <xsl:value-of select="total_sub_folder" />
                   </span>
                 </xsl:if>
@@ -147,12 +123,6 @@
             </xsl:attribute>
             <xsl:attribute name="data-shared">
               <xsl:value-of select="shared" />
-            </xsl:attribute>
-            <xsl:attribute name="data-deny_download">
-              <xsl:value-of select="deny_download" />
-            </xsl:attribute>
-            <xsl:attribute name="data-deny_sharing">
-              <xsl:value-of select="deny_sharing" />
             </xsl:attribute>
             <xsl:attribute name="data-create_by_id">
               <xsl:value-of select="create_by_id" />
@@ -193,31 +163,25 @@
             <xsl:attribute name="data-folder_id">
               <xsl:value-of select="folder_id" />
             </xsl:attribute>
-            <xsl:attribute name="data-deleted_permanently_date">
-              <xsl:value-of select="deleted_permanently_date" />
-            </xsl:attribute>
-			<xsl:attribute name="data-folder_is_favorite">
-				<xsl:value-of select="folder_is_favorite" />
-			</xsl:attribute>
           </input>
         </div>
       </div>
       <div class="menu-small">
         <xsl:attribute name="title">
-          <resource name="FilesCommonResource.TitleShowFolderActions" />
+          <resource name="fres.TitleShowFolderActions" />
         </xsl:attribute>
       </div>
       <div class="btn-row __share">
         <xsl:attribute name="title">
-          <resource name="FilesCommonResource.TitleShareFile" />
+          <resource name="fres.TitleShareFile" />
         </xsl:attribute>
-        <resource name="FilesCommonResource.Share" />
+        <resource name="fres.Share" />
       </div>
       <div class="btn-row __lock">
         <xsl:attribute name="title">
-          <resource name="FilesCommonResource.TitleShareFile" />
+          <resource name="fres.TitleShareFile" />
         </xsl:attribute>
-        <resource name="FilesCommonResource.Access" />
+        <resource name="fres.Access" />
       </div>
       <div class="entry-descr-compact">
         <xsl:choose>
@@ -281,12 +245,12 @@
       <div class="checkbox">
         <input type="checkbox" >
           <xsl:attribute name="title">
-            <resource name="FilesCommonResource.TitleSelectFile" />
+            <resource name="fres.TitleSelectFile" />
           </xsl:attribute>
         </input>
         <input type="radio" name="fileRowInputCheck" >
           <xsl:attribute name="title">
-            <resource name="FilesCommonResource.TitleSelectFile" />
+            <resource name="fres.TitleSelectFile" />
           </xsl:attribute>
         </input>
       </div>
@@ -296,11 +260,6 @@
         </xsl:attribute>
         <xsl:if test="encrypted = 'true'">
           <div class="thumb-encrypted"></div>
-        </xsl:if>
-      </div>
-      <div class="thumb-img">
-        <xsl:if test="thumbnail_status = '1'">
-          <img src="" alt="" />
         </xsl:if>
       </div>
       <div class="entry-info">
@@ -315,10 +274,15 @@
           </div>
           <a class="file-edit pencil">
             <xsl:attribute name="title">
-              <resource name="FilesCommonResource.ButtonEdit" />
+              <resource name="fres.ButtonEdit" />
             </xsl:attribute>
           </a>
           <div class="file-editing pencil"></div>
+          <div class="favorite">
+            <xsl:attribute name="title">
+              <resource name="fres.ButtonRemoveFavorite" />
+            </xsl:attribute>
+          </div>
           <div class="file-lock">
             <xsl:if test="locked_by != ''">
               <xsl:attribute name="data-name">
@@ -328,39 +292,29 @@
           </div>
           <div class="convert-action pencil">
             <xsl:attribute name="title">
-              <resource name="FilesCommonResource.ButtonConvertOpen" />
-            </xsl:attribute>
-          </div>
-          <div class="fillform-action pencil">
-            <xsl:attribute name="title">
-              <resource name="FilesCommonResource.ButtonFillingForm" />
+              <resource name="fres.ButtonConvertOpen" />
             </xsl:attribute>
           </div>
           <div class="template-action">
             <xsl:attribute name="title">
-              <resource name="FilesCommonResource.ButtonCreateByTemplate" />
-            </xsl:attribute>
-          </div>
-          <div class="favorite">
-            <xsl:attribute name="title">
-              <resource name="FilesCommonResource.ButtonRemoveFavorite" />
+              <resource name="fres.ButtonCreateByTemplate" />
             </xsl:attribute>
           </div>
           <xsl:if test="version > 1">
             <div class="version">
               <xsl:attribute name="title">
-                <resource name="FilesCommonResource.ShowVersions" />(<xsl:value-of select="version_group" />)
+                <resource name="fres.ShowVersions" />(<xsl:value-of select="version_group" />)
               </xsl:attribute>
-              <resource name="FilesCommonResource.Version" />
+              <resource name="fres.Version" />
               <xsl:value-of select="version_group" />
             </div>
           </xsl:if>
           <xsl:if test="contains(file_status, 'IsNew')">
             <div class="new-label-menu is-new">
               <xsl:attribute name="title">
-                <resource name="FilesCommonResource.RemoveIsNew" />
+                <resource name="fres.RemoveIsNew" />
               </xsl:attribute>
-              <resource name="FilesCommonResource.IsNew" />
+              <resource name="fres.IsNew" />
             </div>
           </xsl:if>
         </div>
@@ -387,23 +341,17 @@
                 <span class="title-created">
                   <xsl:choose>
                     <xsl:when test="version > 1">
-                      <resource name="FilesCommonResource.TitleModified" />
+                      <resource name="fres.TitleModified" />
                     </xsl:when>
                     <xsl:otherwise>
-                      <resource name="FilesCommonResource.TitleUploaded" />
+                      <resource name="fres.TitleUploaded" />
                     </xsl:otherwise>
                   </xsl:choose>
                 </span>
                 <span class="title-removed" >
-                  <resource name="FilesCommonResource.TitleRemoved" />
-                </span>
-                <span class="title-removed-permanently" >
-                  <resource name="FilesCommonResource.TitleRemovePermanently" />
+                  <resource name="fres.TitleRemoved" />
                 </span>&#160;<span class="modified-date">
                   <xsl:value-of select="modified_on" />
-                </span>
-                <span class="deleted-permanently-date">
-                  <xsl:value-of select="deleted_permanently_date" />
                 </span>
                 <span> | </span>
                 <span class="content-length">
@@ -423,12 +371,6 @@
             </xsl:attribute>
             <xsl:attribute name="data-shared">
               <xsl:value-of select="shared" />
-            </xsl:attribute>
-            <xsl:attribute name="data-deny_download">
-              <xsl:value-of select="deny_download" />
-            </xsl:attribute>
-            <xsl:attribute name="data-deny_sharing">
-              <xsl:value-of select="deny_sharing" />
             </xsl:attribute>
             <xsl:attribute name="data-create_by_id">
               <xsl:value-of select="create_by_id" />
@@ -484,31 +426,25 @@
             <xsl:attribute name="data-encrypted">
               <xsl:value-of select="encrypted" />
             </xsl:attribute>
-            <xsl:attribute name="data-thumbnail_status">
-              <xsl:value-of select="thumbnail_status" />
-            </xsl:attribute>
-            <xsl:attribute name="data-deleted_permanently_date">
-              <xsl:value-of select="deleted_permanently_date" />
-            </xsl:attribute>
           </input>
         </div>
       </div>
       <div class="menu-small">
         <xsl:attribute name="title">
-          <resource name="FilesCommonResource.TitleShowActions" />
+          <resource name="fres.TitleShowActions" />
         </xsl:attribute>
       </div>
       <div class="btn-row __share">
         <xsl:attribute name="title">
-          <resource name="FilesCommonResource.TitleShareFile" />
+          <resource name="fres.TitleShareFile" />
         </xsl:attribute>
-        <resource name="FilesCommonResource.Share" />
+        <resource name="fres.Share" />
       </div>
       <div class="btn-row __lock">
         <xsl:attribute name="title">
-          <resource name="FilesCommonResource.TitleShareFile" />
+          <resource name="fres.TitleShareFile" />
         </xsl:attribute>
-        <resource name="FilesCommonResource.Access" />
+        <resource name="fres.Access" />
       </div>
       <div class="entry-descr-compact">
         <xsl:choose>

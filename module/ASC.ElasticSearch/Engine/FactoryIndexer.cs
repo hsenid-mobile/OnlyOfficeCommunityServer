@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading;
 using System.Threading.Tasks;
 
 using ASC.Common.Caching;
@@ -43,7 +42,7 @@ namespace ASC.ElasticSearch
 {
     public class FactoryIndexer<T> where T : Wrapper, new()
     {
-        private static readonly ICache Cache = AscCache.Memory;
+        private static ICache Cache = AscCache.Memory;
         private static readonly TaskScheduler Scheduler = new LimitedConcurrencyLevelTaskScheduler(10);
         private static readonly ILog Logger = LogManager.GetLogger("ASC.Indexer");
 
@@ -148,6 +147,11 @@ namespace ASC.ElasticSearch
             return true;
         }
 
+        public static bool CanSearchByContent()
+        {
+            return SearchSettings.Load().CanSearchByContent<T>();
+        }
+
         public static bool Index(T data, bool immediately = true)
         {
             if (!Support) return false;
@@ -164,7 +168,7 @@ namespace ASC.ElasticSearch
             return false;
         }
 
-        public static void Index(List<T> data, bool immediately = true, int retry = 0)
+        public static void Index(List<T> data, bool immediately = true)
         {
             if (!Support || !data.Any()) return;
 
@@ -172,108 +176,26 @@ namespace ASC.ElasticSearch
             {
                 Indexer.Index(data, immediately);
             }
-            catch (ElasticsearchClientException e)
-            {
-                Logger.Error(e);
-
-                if (e.Response != null)
-                {
-                    IndexRetry(e, data, immediately, retry);
-                }
-            }
-            catch (AggregateException e) //ElasticsearchClientException
+            catch (AggregateException e)
             {
                 if (e.InnerExceptions.Count == 0) throw;
 
                 var inner = e.InnerExceptions.OfType<ElasticsearchClientException>().FirstOrDefault();
+                Logger.Error(inner);
 
                 if (inner != null)
                 {
-                    IndexRetry(inner, data, immediately, retry);
+                    Logger.Error("inner", inner.Response.OriginalException);
+
+                    if (inner.Response.HttpStatusCode == 413)
+                    {
+                        data.ForEach(r => Index(r, immediately));
+                    }
                 }
                 else
                 {
                     throw;
                 }
-            }
-        }
-
-        private static void IndexRetry(ElasticsearchClientException e, List<T> data, bool immediately = true, int retry = 0)
-        {
-            Logger.Error(e);
-
-            if (e.Response.HttpStatusCode == 413 || e.Response.HttpStatusCode == 403 || e.Response.HttpStatusCode == 408)
-            {
-                data.Where(r => r != null).ToList().ForEach(r => Index(r, immediately));
-            }
-            else if (e.Response.HttpStatusCode == 429)
-            {
-                Thread.Sleep(60000);
-                if (retry < 10)
-                {
-                    Index(data.Where(r => r != null).ToList(), immediately, retry++);
-                    return;
-                }
-
-                throw e;
-            }
-        }
-
-        public static async Task IndexAsync(List<T> data, bool immediately = true, int retry = 0)
-        {
-            if (!Support || !data.Any()) return;
-
-            try
-            {
-                await Indexer.IndexAsync(data, immediately).ConfigureAwait(false);
-            }
-            catch (ElasticsearchClientException e)
-            {
-                Logger.Error(e);
-
-                if (e.Response != null)
-                {
-                    await IndexRetryAsync(e, data, immediately, retry);
-                }
-            }
-            catch (AggregateException e) //ElasticsearchClientException
-            {
-                if (e.InnerExceptions.Count == 0) throw;
-
-                var inner = e.InnerExceptions.OfType<ElasticsearchClientException>().FirstOrDefault();
-
-                if (inner != null)
-                {
-                    await IndexRetryAsync(inner, data, immediately, retry);
-                }
-                else
-                {
-                    throw;
-                }
-            }
-        }
-
-        private static async Task IndexRetryAsync(ElasticsearchClientException e, List<T> data, bool immediately = true, int retry = 0)
-        {
-            Logger.Error(e);
-
-            if (e.Response.HttpStatusCode == 413 || e.Response.HttpStatusCode == 403 || e.Response.HttpStatusCode == 408)
-            {
-                foreach (var r in data.Where(r => r != null))
-                {
-                    await IndexAsync(r, immediately);
-                }
-            }
-            else if (e.Response.HttpStatusCode == 429)
-            {
-                await Task.Delay(60000);
-                if (retry < 10)
-                {
-                    await IndexAsync(data.Where(r => r != null).ToList(), immediately, retry++);
-                    return;
-                }
-
-                throw e;
             }
         }
 
@@ -366,11 +288,11 @@ namespace ASC.ElasticSearch
             return Queue(() => Indexer.Index(data, immediately));
         }
 
-        //public static Task<bool> IndexAsync(List<T> data, bool immediately = true)
-        //{
-        //    if (!Support) return Task.FromResult(false);
-        //    return Queue(() => Indexer.Index(data, immediately));
-        //}
+        public static Task<bool> IndexAsync(List<T> data, bool immediately = true)
+        {
+            if (!Support) return Task.FromResult(false);
+            return Queue(() => Indexer.Index(data, immediately));
+        }
 
         public static Task<bool> UpdateAsync(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
         {
@@ -437,8 +359,7 @@ namespace ASC.ElasticSearch
 
     public class FactoryIndexer
     {
-        private static readonly ICache cache = AscCache.Memory;
-        private static readonly ILog Logger = LogManager.GetLogger("ASC.Indexer");
+        private static ICache cache = AscCache.Memory;
         internal static IContainer Builder { get; set; }
         internal static bool Init { get; set; }
 
@@ -454,7 +375,6 @@ namespace ASC.ElasticSearch
                 }
                 else
                 {
-                    Logger.Fatal("FactoryIndexer container == null");
                     return;
                 }
 
@@ -468,7 +388,7 @@ namespace ASC.ElasticSearch
             }
             catch (Exception e)
             {
-                Logger.Fatal("FactoryIndexer", e);
+                LogManager.GetLogger("ASC.Indexer").Fatal("FactoryIndexer", e);
             }
         }
 
@@ -488,6 +408,7 @@ namespace ASC.ElasticSearch
             }
 
             var cacheTime = DateTime.UtcNow.AddMinutes(15);
+            var logger = LogManager.GetLogger("ASC.Indexer");
 
             try
             {
@@ -495,7 +416,7 @@ namespace ASC.ElasticSearch
 
                 var isValid = result.IsValid;
 
-                Logger.DebugFormat("CheckState ping {0}", result.DebugInformation);
+                logger.DebugFormat("CheckState ping {0}", result.DebugInformation);
 
                 if (cacheState)
                 {
@@ -511,50 +432,46 @@ namespace ASC.ElasticSearch
                     cache.Insert(key, "false", cacheTime);
                 }
 
-                Logger.Error("Ping false", e);
+                logger.Error("Ping false", e);
                 return false;
             }
         }
 
         public static object GetState()
         {
-            State state = null;
-            IEnumerable<object> indices = null;
-            Dictionary<string, long> count = null;
-
-            if (!CoreContext.Configuration.Standalone)
-            {
-                return new
-                {
-                    state,
-                    indices,
-                    status = CheckState()
-                };
-            }
-
-            using (var service = new ServiceClient())
-            {
-                state = service.GetState();
-                count = service.GetCount();
-            }
-
-            if (state.LastIndexed.HasValue)
-            {
-                state.LastIndexed = TenantUtil.DateTimeFromUtc(state.LastIndexed.Value);
-            }
-
-            indices = Client.Instance.Cat.Indices(new CatIndicesRequest { SortByColumns = new[] { "index" } }).Records
-                .Select(r => new
+            var indices = CoreContext.Configuration.Standalone ?
+                Client.Instance.Cat.Indices(new CatIndicesRequest { SortByColumns = new[] { "index" } }).Records.Select(r => new
                 {
                     r.Index,
-                    Count = count.ContainsKey(r.Index) ? count[r.Index] : 0,
-                    DocsCount = Client.Instance.Count(new CountRequest(r.Index)).Count,
+                    r.DocsCount,
                     r.StoreSize
                 })
                 .Where(r =>
                 {
-                    return r.Count > 0;
-                });
+                    int docsCount;
+                    if (!int.TryParse(r.DocsCount, out docsCount))
+                    {
+                        docsCount = 0;
+                    }
+
+                    return docsCount > 0;
+                }) :
+                null;
+
+            State state = null;
+
+            if (CoreContext.Configuration.Standalone)
+            {
+                using (var service = new ServiceClient())
+                {
+                    state = service.GetState();
+                }
+
+                if (state.LastIndexed.HasValue)
+                {
+                    state.LastIndexed = TenantUtil.DateTimeFromUtc(state.LastIndexed.Value);
+                }
+            }
 
             return new
             {
@@ -578,6 +495,5 @@ namespace ASC.ElasticSearch
                 indexer.ReIndex();
             }
         }
-
     }
 }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,15 @@ using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Web.UI.WebControls;
-
 using ASC.Core;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
-using ASC.Web.Community.Modules.Wiki.Resources;
 using ASC.Web.Community.Product;
-using ASC.Web.Community.Resources;
 using ASC.Web.Community.Wiki.Common;
 using ASC.Web.UserControls.Wiki;
 using ASC.Web.UserControls.Wiki.Data;
-
+using ASC.Web.UserControls.Wiki.Resources;
+using ASC.Web.Community.Resources;
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Web.Community.Wiki
@@ -53,7 +51,7 @@ namespace ASC.Web.Community.Wiki
             WikiPageIn = CommunityResource.InForParentPage;
             WikiPageURL = ActionHelper.GetViewPagePath(this.ResolveUrlLC("Default.aspx"), page.PageName);
             //WikiPageIn = CommunityResource.InForParentPage;
-            //WikiMaster.CurrentPageCaption = WikiResource.wikiHistoryCaption;
+            WikiMaster.CurrentPageCaption = WikiResource.wikiHistoryCaption;
 
             if (!IsPostBack)
             {
@@ -64,7 +62,7 @@ namespace ASC.Web.Community.Wiki
 
         protected void cmdRevert_Click(object sender, EventArgs e)
         {
-            if (CommunitySecurity.IsOutsider())
+            if(CommunitySecurity.IsOutsider())
                 throw new SecurityException();
 
             int ver;

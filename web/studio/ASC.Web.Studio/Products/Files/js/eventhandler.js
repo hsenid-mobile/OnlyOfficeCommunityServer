@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,6 @@ window.ASC.Files.EventHandler = (function () {
             ASC.Files.ServiceManager.bind(ASC.Files.ServiceManager.events.Download, ASC.Files.EventHandler.onGetTasksStatuses);
             ASC.Files.ServiceManager.bind(ASC.Files.ServiceManager.events.TerminateTasks, ASC.Files.EventHandler.onGetTasksStatuses);
             ASC.Files.ServiceManager.bind(ASC.Files.ServiceManager.events.GetTasksStatuses, ASC.Files.EventHandler.onGetTasksStatuses);
-
-            ASC.Files.ServiceManager.bind(ASC.Files.ServiceManager.events.ChangeExternalShareSettings, ASC.Files.EventHandler.onChangeExternalShareSettings);
-            ASC.Files.ServiceManager.bind(ASC.Files.ServiceManager.events.ChangeExternalShareSocialMediaSettings, ASC.Files.EventHandler.onChangeExternalShareSocialMediaSettings);
         }
     };
 
@@ -96,9 +93,6 @@ window.ASC.Files.EventHandler = (function () {
         if (!params.append) {
             jq("#filesMainContent").empty();
             jq(document).scrollTop(0);
-            if (ASC.Files.Folders.folderContainer != "forme") {
-                jq("#filesMainContent").append("<div class='folders-separator'></div>");
-            }
         }
 
         var htmlXML = ASC.Files.TemplateManager.translate(xmlData);
@@ -137,11 +131,7 @@ window.ASC.Files.EventHandler = (function () {
         }
 
         if (ASC.Files.CreateMenu) {
-            if (!ASC.Desktop && (ASC.Files.Folders.currentFolder.id == ASC.Files.Constants.FOLDER_ID_PRIVACY || ASC.Files.Folders.folderContainer == "privacy")) {
-                ASC.Files.CreateMenu.disableMenu(false);
-            } else {
-                ASC.Files.CreateMenu.disableMenu(ASC.Files.UI.accessEdit());
-            }
+            ASC.Files.CreateMenu.disableMenu(ASC.Files.UI.accessEdit());
         }
 
         ASC.Files.UI.stickContentHeader();
@@ -162,11 +152,10 @@ window.ASC.Files.EventHandler = (function () {
                     var selectedBefore = (replaceWith.hasClass("row-selected") || replaceWith.attr("data-selected") == "true");
                     replaceWith.after(htmlXML);
                     var newFolderItems = replaceWith.next();
-                    newFolderItems.toggleClass("min", replaceWith.hasClass("min"));
-                    ASC.Files.UI.removeEntryObject(replaceWith);
+                    replaceWith.remove();
                 } else {
                     jq("#filesMainContent").prepend(htmlXML);
-                    newFolderItems = jq("#filesMainContent .file-row[name=\"addRow\"][data-id!=\"folder_0\"][data-id!=\"file_0\"]");
+                    newFolderItems = jq("#filesMainContent .file-row[name=\"addRow\"]");
                 }
             } else {
                 jq("#filesMainContent").append(htmlXML);
@@ -191,11 +180,11 @@ window.ASC.Files.EventHandler = (function () {
             var countLeft = ASC.Files.UI.countTotal - jq("#filesMainContent .file-row").length;
             if (ASC.Files.UI.currentPage < ASC.Files.UI.amountPage && countLeft > 0) {
                 jq("#pageNavigatorHolder").show();
-                if (ASC.Files.FilesJSResource) {
+                if (ASC.Files.FilesJSResources) {
                     jq("#pageNavigatorHolder a")
                         .text(countShowOnPage < countLeft ?
-                            ASC.Files.FilesJSResource.ButtonShowMoreOf.format(countShowOnPage, countLeft) :
-                            ASC.Files.FilesJSResource.ButtonShowMore.format(countLeft));
+                            ASC.Files.FilesJSResources.ButtonShowMoreOf.format(countShowOnPage, countLeft) :
+                            ASC.Files.FilesJSResources.ButtonShowMore.format(countLeft));
                 }
             } else {
                 jq("#pageNavigatorHolder").hide();
@@ -257,7 +246,7 @@ window.ASC.Files.EventHandler = (function () {
             ASC.Files.Folders.currentFolder.access = parseInt(ASC.Files.Folders.currentFolder.access || ASC.Files.Constants.AceStatusEnum.None);
 
             if (ASC.Files.Folders.currentFolder.access == ASC.Files.Constants.AceStatusEnum.Restrict) {
-                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.AceStatusEnum_Restrict, true);
+                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.AceStatusEnum_Restrict, true);
                 return false;
             }
 
@@ -265,7 +254,7 @@ window.ASC.Files.EventHandler = (function () {
         }
 
         if (ASC.Files.Tree && ASC.Files.Folders.currentFolder.id == ASC.Files.Tree.folderIdCurrentRoot) {
-            ASC.Files.Folders.currentFolder.title = ASC.Files.FilesJSResource.ProjectFiles;
+            ASC.Files.Folders.currentFolder.title = ASC.Files.FilesJSResources.ProjectFiles;
         }
 
         ASC.Files.UI.setDocumentTitle(ASC.Files.Folders.currentFolder.title);
@@ -364,18 +353,8 @@ window.ASC.Files.EventHandler = (function () {
         }
 
         if (ASC.Files.Share && ASC.Files.Folders.currentFolder.shareable
-            && ASC.Files.Folders.folderContainer != "privacy"
             && !ASC.Resources.Master.Personal) {
             jq("#mainShare").show();
-        }
-
-        if (!ASC.Resources.Master.IsAuthenticated) {
-            jq("#mainShare, #mainMarkRead, #mainDelete, #mainMove, #mainCopy").hide()
-            jq("#mainDownload, #mainConvert").show();
-
-            if (ASC.Files.Folders.currentFolder.access === ASC.Files.Constants.AceStatusEnum.ReadWrite) {
-                jq("#mainMove, #mainCopy").show();
-            }
         }
 
         if (ASC.Files.Filter) {
@@ -391,6 +370,58 @@ window.ASC.Files.EventHandler = (function () {
         ASC.Files.UI.checkButtonBack(".to-parent-folder", "#filesBreadCrumbs");
 
         return true;
+    };
+
+    var onGetPrivacy = function () {
+        //fake duplicate from onGetFolderItems
+
+        ASC.Files.Folders.currentFolder = {
+            access: ASC.Files.Constants.AceStatusEnum.Read,
+            entryId: ASC.Files.Constants.FOLDER_ID_PRIVACY,
+            entryType: "folder",
+            id: ASC.Files.Constants.FOLDER_ID_PRIVACY,
+            shareable: false,
+            title: ASC.Files.FilesJSResources.PrivacyRoom,
+        };
+        ASC.Files.UI.setDocumentTitle(ASC.Files.Folders.currentFolder.title);
+
+        jq("#filesMainContent")
+            .removeClass("myFiles")
+            .removeClass("corporateFiles")
+            .removeClass("shareformeFiles")
+            .removeClass("recentFiles")
+            .removeClass("favoritesFiles")
+            .removeClass("templatesFiles")
+            .removeClass("privacyFiles")
+            .removeClass("trashFiles")
+            .removeClass("projectFiles");
+
+        ASC.Files.Folders.folderContainer = "privacy";
+        jq("#filesMainContent").addClass("privacyFiles");
+
+        if (ASC.Files.Tree) {
+            ASC.Files.Tree.pathParts = [ASC.Files.Constants.FOLDER_ID_PRIVACY];
+            ASC.Files.Tree.updateTreePath();
+        }
+
+        if (ASC.Files.Filter) {
+            ASC.Files.Filter.disableFilter();
+        }
+
+        ASC.Files.UI.countTotal = 0;
+
+        jq("#filesMainContent").empty();
+        jq(document).scrollTop(0);
+
+        jq("#emptyContainer_privacy .emptyScrBttnPnl").remove();
+        ASC.Files.EmptyScreen.displayEmptyScreen();
+
+        ASC.Files.UI.lastSelectedEntry = null;
+        ASC.Files.Folders.eventAfter = null;
+
+        if (ASC.Files.CreateMenu) {
+            ASC.Files.CreateMenu.disableMenu(false);
+        }
     };
 
     var onGetItems = function (jsonData, params, errorMessage) {
@@ -435,7 +466,7 @@ window.ASC.Files.EventHandler = (function () {
 
         var winEditor = params.winEditor;
         if (typeof errorMessage != "undefined") {
-            ASC.Files.UI.removeEntryObject(fileNewObj);
+            fileNewObj.remove();
             if (winEditor) {
                 winEditor.close();
             }
@@ -458,22 +489,20 @@ window.ASC.Files.EventHandler = (function () {
 
             if (ASC.Files.Folders.folderContainer == "privacy"
                 && ASC.Desktop && ASC.Desktop.setAccess) {
-                ASC.Files.UI.blockObject(fileObj, true, ASC.Files.FilesJSResource.DescriptCreate);
+                ASC.Files.UI.blockObject(fileObj, true, ASC.Files.FilesJSResources.DescriptCreate);
 
                 ASC.Desktop.setAccess(fileId, function (encryptedFile) {
                     if (encryptedFile) {
-                        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.DesktopMessageStoring);
+                        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.DesktopMessageStoring);
                         ASC.Files.Folders.replaceFileStream(fileId, fileTitle, encryptedFile, true, winEditor);
                     } else {
                         ASC.Files.UI.blockObject(fileObj);
-                        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoCrateFile.format(fileTitle));
+                        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoCrateFile.format(fileTitle));
                     }
                 });
                 return;
             } else {
-                if (winEditor !== false) {
-                    ASC.Files.Actions.checkEditFile(fileId, winEditor);
-                }
+                ASC.Files.Actions.checkEditFile(fileId, winEditor);
             }
         } else {
             fileObj = jq(htmlXML);
@@ -481,20 +510,17 @@ window.ASC.Files.EventHandler = (function () {
             fileTitle = fileData.title;
             fileId = fileData.entryId;
 
-            if (winEditor !== false) {
-                ASC.Files.Actions.checkEditFile(fileId, winEditor);
-            }
+            ASC.Files.Actions.checkEditFile(fileId, winEditor);
         }
 
-        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoCrateFile.format(fileTitle));
+        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoCrateFile.format(fileTitle));
     };
 
     var onCreateFolder = function (xmlData, params, errorMessage) {
         var folderNewObj = ASC.Files.UI.getEntryObject("folder", "0");
 
         if (typeof errorMessage != "undefined") {
-            ASC.Files.UI.removeEntryObject(folderNewObj);
-
+            folderNewObj.remove();
             if (jq("#filesMainContent .file-row").length == 0) {
                 ASC.Files.EmptyScreen.displayEmptyScreen();
             }
@@ -518,7 +544,11 @@ window.ASC.Files.EventHandler = (function () {
             ASC.Files.Tree.reloadFolder(params.parentFolderID);
         }
 
-        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoCrateFolder.format(folderTitle));
+        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoCrateFolder.format(folderTitle));
+
+        //track event
+
+        trackingGoogleAnalytics("documents", "create", "folder");
     };
 
     var onRenameFolder = function (xmlData, params, errorMessage) {
@@ -545,7 +575,7 @@ window.ASC.Files.EventHandler = (function () {
             ASC.Files.Tree.reloadFolder(params.parentFolderID);
         }
 
-        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoRenameFolder.format(params.name, folderNewTitle));
+        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoRenameFolder.format(params.name, folderNewTitle));
     };
 
     var onRenameFile = function (xmlData, params, errorMessage) {
@@ -561,7 +591,7 @@ window.ASC.Files.EventHandler = (function () {
 
         var newName = fileData.title;
 
-        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoRenameFile.format(params.name, newName));
+        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoRenameFile.format(params.name, newName));
     };
 
     var onChangeOwner = function (jsonData, params, errorMessage) {
@@ -624,9 +654,9 @@ window.ASC.Files.EventHandler = (function () {
         });
 
         if (params.list.length > 1) {
-            ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoChangeOwnerArray.format(Encoder.htmlEncode(createBy), params.list.length));
+            ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoChangeOwnerArray.format(Encoder.htmlEncode(createBy), params.list.length));
         } else {
-            ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoChangeOwner.format(Encoder.htmlEncode(createBy), title));
+            ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoChangeOwner.format(Encoder.htmlEncode(createBy), title));
         }
     };
 
@@ -665,26 +695,7 @@ window.ASC.Files.EventHandler = (function () {
             : ASC.Files.TemplateManager.translate(xmlData));
 
         jq("#contentVersions").remove();
-        jq(".display-versions").removeClass("display-versions");
-
-        if (jq("#filesMainContent").hasClass("thumbnails")) {
-            var obj = fileObj;
-            while (true) {
-                var next = obj.next();
-                if (!next.length) {
-                    break;
-                }
-                if (next.position().top != obj.position().top) {
-                    break;
-                }
-                obj = next;
-            }
-            obj.after(htmlXML);
-        } else {
-            fileObj.append(htmlXML).addClass("file-row-fix");
-        }
-
-        fileObj.addClass("display-versions");
+        fileObj.append(htmlXML).addClass("file-row-fix");
 
         var fileData = ASC.Files.UI.getObjectData(fileObj);
 
@@ -701,10 +712,6 @@ window.ASC.Files.EventHandler = (function () {
             canEdit = false;
         } else {
             jq("#contentVersions").addClass("version-edit");
-        }
-
-        if (fileData.deny_download) {
-            jq(".version-download").remove();
         }
 
         jq("#contentVersions").addClass("version-highlight");
@@ -733,7 +740,7 @@ window.ASC.Files.EventHandler = (function () {
 
                 var groupList = jq("#contentVersions .version-row[data-version-group=" + curVersionGroup + "]");
                 if (groupList.length > 1) {
-                    row.find(".version-sublist span").addClass("version-sublist-toggle").text(jq.format(ASC.Files.FilesJSResource.RevisionCount, groupList.length));
+                    row.find(".version-sublist span").addClass("version-sublist-toggle").text(jq.format(ASC.Files.FilesJSResources.RevisionCount, groupList.length));
                 }
             } else if (!canEdit) {
                 row.find(".version-num").empty();
@@ -742,9 +749,7 @@ window.ASC.Files.EventHandler = (function () {
             }
         });
 
-        if (ASC.Resources.Master.IsAuthenticated) {
-            ASC.Files.UI.registerUserProfilePopup(jq("#contentVersions"));
-        }
+        ASC.Files.UI.registerUserProfilePopup(jq("#contentVersions"));
     };
 
     var onUpdateComment = function (jsonData, params, errorMessage) {
@@ -754,8 +759,8 @@ window.ASC.Files.EventHandler = (function () {
         }
 
         jsonData = jsonData || "";
-
-        jq("#contentVersions .version-row[data-version=" + params.version + "]")
+        var fileObj = ASC.Files.UI.getEntryObject("file", params.fileId);
+        fileObj.find(".version-row[data-version=" + params.version + "]")
             .removeClass("version-row-comment")
             .find(".version-comment")
             .attr("data-comment", jsonData)
@@ -827,7 +832,7 @@ window.ASC.Files.EventHandler = (function () {
         }
     };
 
-    var onMoveItemsFinish = function (listData, isCopyOperation, countProcessed, listSource) {
+    var onMoveItemsFinish = function (listData, isCopyOperation, countProcessed) {
         var folderToId = ASC.Files.UI.parseItemId(listData[0]).entryId;
         listData = listData.slice(1);
         var listFromId = new Array();
@@ -876,7 +881,7 @@ window.ASC.Files.EventHandler = (function () {
 
             if (!isCopyOperation && ASC.Files.Folders.currentFolder.id != folderToId) {
                 ASC.Files.Marker.removeNewIcon(listFromId[i].entryType, listFromId[i].entryId);
-                ASC.Files.UI.removeEntryObject(entryRowObj);
+                entryRowObj.remove();
             }
         }
 
@@ -895,8 +900,8 @@ window.ASC.Files.EventHandler = (function () {
 
         if (filesCount > 0) {
             var fileCountObj = folderToObj.find(".countFiles");
-            var countOverwrites = ASC.Files.Folders.owerwriteManager.get(isCopyOperation, listSource);
-            fileCountObj.html((parseInt(fileCountObj.html()) || 0) + filesCount - countOverwrites);
+
+            fileCountObj.html((parseInt(fileCountObj.html()) || 0) + filesCount);
         }
 
         if (listFromId.length > 0 && ASC.Files.Folders.currentFolder.id != folderToId) {
@@ -905,15 +910,15 @@ window.ASC.Files.EventHandler = (function () {
 
         if (isCopyOperation) {
             if (listFromId.length == 1 && entryTitle != "") {
-                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoCopyItem.format(entryTitle));
+                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoCopyItem.format(entryTitle));
             } else {
-                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoCopyGroup.format(countProcessed));
+                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoCopyGroup.format(countProcessed));
             }
         } else {
             if (listFromId.length == 1 && entryTitle != "") {
-                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoMoveItem.format(entryTitle));
+                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoMoveItem.format(entryTitle));
             } else {
-                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoMoveGroup.format(countProcessed));
+                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoMoveGroup.format(countProcessed));
             }
         }
 
@@ -975,8 +980,7 @@ window.ASC.Files.EventHandler = (function () {
 
             if (redrawItems) {
                 ASC.Files.Marker.removeNewIcon(listItemId[i].entryType, listItemId[i].entryId);
-                ASC.Files.UI.removeEntryObject(entryRowObj);
-                ASC.Files.ChunkUploads.removeUploadItemByFileId(listItemId[i].entryId);
+                entryRowObj.remove();
             }
         }
 
@@ -990,12 +994,12 @@ window.ASC.Files.EventHandler = (function () {
 
         if (listItemId.length == 1 && entryTitle != "") {
             if (foldersCountChange > 0) {
-                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoRemoveFolder.format(entryTitle));
+                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoRemoveFolder.format(entryTitle));
             } else {
-                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoRemoveFile.format(entryTitle));
+                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoRemoveFile.format(entryTitle));
             }
         } else {
-            ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoRemoveGroup.format(listItemId.length, totalCount));
+            ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoRemoveGroup.format(listItemId.length, totalCount));
         }
 
         if (fromRootId == ASC.Files.Constants.FOLDER_ID_TRASH) {
@@ -1107,7 +1111,7 @@ window.ASC.Files.EventHandler = (function () {
             var entryTitle = entryData.title;
 
             var ftClass = (entryType == "file" ? ASC.Files.Utility.getCssClassByFileTitle(entryTitle, true) : ASC.Files.Utility.getFolderCssClass(true));
-            entryObj.find(".thumb-img, .thumb-" + entryType).addClass(ftClass);
+            entryObj.find(".thumb-" + entryType).addClass(ftClass);
 
             var rowLink = entryObj.find(".entry-title .name a");
 
@@ -1137,7 +1141,7 @@ window.ASC.Files.EventHandler = (function () {
 
         showHelpPage(params.helpId);
 
-        ASC.Files.UI.setDocumentTitle(ASC.Files.FilesJSResource.TitleSettingsHelp);
+        ASC.Files.UI.setDocumentTitle(ASC.Files.FilesJSResources.TitleSettingsHelp);
         ASC.Files.CreateMenu.disableMenu();
     };
 
@@ -1156,16 +1160,16 @@ window.ASC.Files.EventHandler = (function () {
         var progress = 0;
         var notFinished = false;
         var operationType;
-        var operationTypes = [ASC.Files.FilesJSResource.TasksOperationMove,
-            ASC.Files.FilesJSResource.TasksOperationCopy,
-            ASC.Files.FilesJSResource.TasksOperationDelete,
-            ASC.Files.FilesJSResource.TasksOperationBulkdownload,
-            ASC.Files.FilesJSResource.TasksOperationMarkAsRead];
-        var blockTypes = [ASC.Files.FilesJSResource.DescriptMove,
-            ASC.Files.FilesJSResource.DescriptCopy,
-            ASC.Files.FilesJSResource.DescriptRemove,
-            ASC.Files.FilesJSResource.DescriptBulkdownload,
-            ASC.Files.FilesJSResource.DescriptMarkAsRead];
+        var operationTypes = [ASC.Files.FilesJSResources.TasksOperationMove,
+            ASC.Files.FilesJSResources.TasksOperationCopy,
+            ASC.Files.FilesJSResources.TasksOperationDelete,
+            ASC.Files.FilesJSResources.TasksOperationBulkdownload,
+            ASC.Files.FilesJSResources.TasksOperationMarkAsRead];
+        var blockTypes = [ASC.Files.FilesJSResources.DescriptMove,
+            ASC.Files.FilesJSResources.DescriptCopy,
+            ASC.Files.FilesJSResources.DescriptRemove,
+            ASC.Files.FilesJSResources.DescriptBulkdownload,
+            ASC.Files.FilesJSResources.DescriptMarkAsRead];
 
         if (data.length != 0) {
             //show
@@ -1174,7 +1178,7 @@ window.ASC.Files.EventHandler = (function () {
 
                 if (jq("#tasksProgress").length == 0) {
                     jq("#progressTemplate").clone().attr("id", "tasksProgress").prependTo("#bottomLoaderPanel");
-                    jq("#tasksProgress .progress-dialog-header").append("<a title=\"{0}\" class=\"actions-container close\">&times;</a>".format(ASC.Files.FilesJSResource.TitleCancel));
+                    jq("#tasksProgress .progress-dialog-header").append("<a title=\"{0}\" class=\"actions-container close\">&times;</a>".format(ASC.Files.FilesJSResources.TitleCancel));
                     jq("#tasksProgress .progress-dialog-header").append("<span></span>");
                 }
                 ASC.Files.UI.setProgressValue("#tasksProgress", 0);
@@ -1190,7 +1194,7 @@ window.ASC.Files.EventHandler = (function () {
 
             //type operation in progress
             if (data.length > 1) {
-                operationType = ASC.Files.FilesJSResource.TasksOperationMixed.format(data.length);
+                operationType = ASC.Files.FilesJSResources.TasksOperationMixed.format(data.length);
             } else {
                 operationType = operationTypes[data[0].operation];
             }
@@ -1222,11 +1226,11 @@ window.ASC.Files.EventHandler = (function () {
                     switch (data[i].operation) {
                         case 0:
                             //move
-                            onMoveItemsFinish(listResult, false, data[i].processed, listSource);
+                            onMoveItemsFinish(listResult, false, data[i].processed);
                             break;
                         case 1:
                             //copy
-                            onMoveItemsFinish(listResult, true, data[i].processed, listSource);
+                            onMoveItemsFinish(listResult, true, data[i].processed);
                             break;
                         case 2:
                             //delete
@@ -1234,7 +1238,7 @@ window.ASC.Files.EventHandler = (function () {
                             break;
                         case 3:
                             //download
-                            if (listResult[0] && data[i].error == null) {
+                            if (listResult[0]) {
                                 location.href = listResult[0];
                             }
                             ASC.Files.Folders.bulkStatuses = false;
@@ -1280,50 +1284,11 @@ window.ASC.Files.EventHandler = (function () {
         }
     };
 
-    var onChangeExternalShareSettings = function (jsonData, params, errorMessage) {
-        if (typeof errorMessage != "undefined") {
-            ASC.Files.UI.displayInfoPanel(errorMessage, true);
-            return;
-        }
-
-        var enable = jsonData === true;
-        jq("#cbxExternalShare").prop("checked", enable);
-
-        if (enable) {
-            jq("#cbxExternalShareSocialMedia").prop("disabled", false).next().removeClass("gray-text");
-        } else {
-            jq("#cbxExternalShareSocialMedia").prop("disabled", true).prop("checked", false).next().addClass("gray-text");
-        }
-
-        if (ASC.Files.Share) {
-            ASC.Files.Share.changeExternalShareSettings();
-        }
-    };
-
-    var onChangeExternalShareSocialMediaSettings = function (jsonData, params, errorMessage) {
-        if (typeof errorMessage != "undefined") {
-            ASC.Files.UI.displayInfoPanel(errorMessage, true);
-            return;
-        }
-
-        jq("#cbxExternalShareSocialMedia").prop("checked", jsonData === true);
-
-        if (ASC.Files.Share) {
-            ASC.Files.Share.changeExternalShareSettings();
-        }
-    };
-
-    var onThumbnailError = function () {
-        if (!jq.browser.msie) {
-            this.parentElement.style.backgroundSize = "96px";
-            this.parentElement.removeChild(this);
-        }
-    };
-
     return {
         init: init,
 
         onGetFolderItems: onGetFolderItems,
+        onGetPrivacy: onGetPrivacy,
         onGetItems: onGetItems,
         onGetFile: onGetFile,
         onCreateNewFile: onCreateNewFile,
@@ -1342,14 +1307,7 @@ window.ASC.Files.EventHandler = (function () {
         onGetHelpCenter: onGetHelpCenter,
 
         onMoveFilesCheck: onMoveFilesCheck,
-        onGetTasksStatuses: onGetTasksStatuses,
-
-        onChangeExternalShareSettings: onChangeExternalShareSettings,
-        onChangeExternalShareSocialMediaSettings: onChangeExternalShareSocialMediaSettings,
-
-        onThumbnailError: onThumbnailError,
-
-        insertFolderItems: insertFolderItems
+        onGetTasksStatuses: onGetTasksStatuses
     };
 })();
 

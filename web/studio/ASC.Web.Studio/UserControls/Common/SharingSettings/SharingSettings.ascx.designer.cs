@@ -7,13 +7,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Studio.UserControls.Common
-{
-
-
-    public partial class SharingSettings
-    {
-
+namespace ASC.Web.Studio.UserControls.Common {
+    
+    
+    public partial class SharingSettings {
+        
         /// <summary>
         /// _sharingDialogContainer control.
         /// </summary>
@@ -22,14 +20,5 @@ namespace ASC.Web.Studio.UserControls.Common
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::ASC.Web.Studio.Controls.Common.Container _sharingDialogContainer;
-
-        /// <summary>
-        /// FormFillingHolder control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder FormFillingHolder;
     }
 }

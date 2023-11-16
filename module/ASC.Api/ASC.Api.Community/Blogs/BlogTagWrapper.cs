@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 */
 
 
+using System;
 using System.Runtime.Serialization;
-
 using ASC.Blogs.Core.Domain;
 
 namespace ASC.Api.Blogs
@@ -35,23 +35,19 @@ namespace ASC.Api.Blogs
         {
         }
 
-        ///<example>Sample tag</example>
-        ///<order>1</order>
         [DataMember(Order = 1)]
         public string Name { get; set; }
 
-        ///<example type="int">10</example>
-        ///<order>10</order>
         [DataMember(Order = 10)]
         public int Count { get; set; }
 
         public static BlogTagWrapper GetSample()
         {
             return new BlogTagWrapper
-            {
-                Count = 10,
-                Name = "Sample tag"
-            };
+                       {
+                           Count = 10,
+                           Name = "Sample tag"
+                       };
         }
     }
 }

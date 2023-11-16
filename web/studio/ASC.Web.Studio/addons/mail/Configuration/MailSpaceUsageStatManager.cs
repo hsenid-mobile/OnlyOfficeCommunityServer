@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Core;
-using ASC.Core.Tenants;
 using ASC.Core.Users;
-using ASC.Mail;
 using ASC.Web.Core;
 using ASC.Web.Core.Users;
 using ASC.Web.Studio.Utility;
@@ -34,7 +31,7 @@ namespace ASC.Web.Mail.Configuration
 {
     public class MailSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
     {
-        private const string MailDatabaseId = "default";
+        private const string MailDatabaseId = "mail";
 
         public override List<UsageSpaceStatItem> GetStatData()
         {
@@ -55,13 +52,13 @@ namespace ASC.Web.Mail.Configuration
                             var user_id = new Guid(Convert.ToString(r[0]));
                             var user = CoreContext.UserManager.GetUsers(user_id);
                             var item = new UsageSpaceStatItem
-                            {
-                                Name = DisplayUserSettings.GetFullUserName(user, false),
-                                ImgUrl = UserPhotoManager.GetSmallPhotoURL(user.ID),
-                                Url = CommonLinkUtility.GetUserProfile(user.ID),
-                                SpaceUsage = Convert.ToInt64(r[1]),
-                                Disabled = user.Status == EmployeeStatus.Terminated
-                            };
+                                {
+                                    Name = DisplayUserSettings.GetFullUserName(user, false),
+                                    ImgUrl = UserPhotoManager.GetSmallPhotoURL(user.ID),
+                                    Url = CommonLinkUtility.GetUserProfile(user.ID),
+                                    SpaceUsage = Convert.ToInt64(r[1]),
+                                    Disabled = user.Status == EmployeeStatus.Terminated
+                                };
                             return item;
                         })
                     .ToList();
@@ -81,24 +78,6 @@ namespace ASC.Web.Mail.Configuration
 
                 return mail_db.ExecuteScalar<long>(query);
             }
-        }
-        public void RecalculateUserQuota(int TenantId, Guid userId)
-        {
-            CoreContext.TenantManager.SetCurrentTenant(TenantId);
-
-            var size = GetUserSpaceUsage(userId);
-            var MAIL_QUOTA_TAG = "666ceac1-4532-4f8c-9cba-8f510eca2fd1";
-
-            CoreContext.TenantManager.SetTenantQuotaRow(
-                new TenantQuotaRow
-                {
-                    Tenant = TenantId,
-                    Path = $"/{Defines.MODULE_NAME}/",
-                    Counter = size,
-                    Tag = MAIL_QUOTA_TAG,
-                    UserId = userId
-                },
-               false);
         }
     }
 }

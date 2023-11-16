@@ -124,7 +124,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connect.
+        ///   Looks up a localized string similar to Add account.
         /// </summary>
         public static string AddAccount {
             get {
@@ -135,9 +135,9 @@ namespace ASC.Web.Files.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Add message.
         /// </summary>
-        public static string AddMessage {
+        public static string AddShareMessage {
             get {
-                return ResourceManager.GetString("AddMessage", resourceCulture);
+                return ResourceManager.GetString("AddShareMessage", resourceCulture);
             }
         }
         
@@ -151,29 +151,20 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Advanced settings.
+        ///   Looks up a localized string similar to Author.
         /// </summary>
-        public static string AdvancedSettings {
+        public static string Author {
             get {
-                return ResourceManager.GetString("AdvancedSettings", resourceCulture);
+                return ResourceManager.GetString("Author", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Trash bin auto-clearing - Delete files older than.
+        ///   Looks up a localized string similar to Access.
         /// </summary>
-        public static string AutomaticallyCleanUp {
+        public static string ButtonAccess {
             get {
-                return ResourceManager.GetString("AutomaticallyCleanUp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The files will be deleted some time after you activate the setting.
-        /// </summary>
-        public static string AutomaticallyCleanUpInfo {
-            get {
-                return ResourceManager.GetString("AutomaticallyCleanUpInfo", resourceCulture);
+                return ResourceManager.GetString("ButtonAccess", resourceCulture);
             }
         }
         
@@ -214,15 +205,6 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add link.
-        /// </summary>
-        public static string ButtonAddLink {
-            get {
-                return ResourceManager.GetString("ButtonAddLink", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Add Nextcloud account.
         /// </summary>
         public static string ButtonAddNextcloud {
@@ -246,15 +228,6 @@ namespace ASC.Web.Files.Resources {
         public static string ButtonAddTemplate {
             get {
                 return ResourceManager.GetString("ButtonAddTemplate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Add users.
-        /// </summary>
-        public static string ButtonAddUsers {
-            get {
-                return ResourceManager.GetString("ButtonAddUsers", resourceCulture);
             }
         }
         
@@ -286,15 +259,6 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Change access rights.
-        /// </summary>
-        public static string ButtonChangeAccessRights {
-            get {
-                return ResourceManager.GetString("ButtonChangeAccessRights", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Change owner.
         /// </summary>
         public static string ButtonChangeOwner {
@@ -304,20 +268,11 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Change connection settings.
+        ///   Looks up a localized string similar to Change the third party info.
         /// </summary>
         public static string ButtonChangeThirdParty {
             get {
                 return ResourceManager.GetString("ButtonChangeThirdParty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Clean.
-        /// </summary>
-        public static string ButtonClean {
-            get {
-                return ResourceManager.GetString("ButtonClean", resourceCulture);
             }
         }
         
@@ -349,38 +304,11 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Copy direct link.
-        /// </summary>
-        public static string ButtonCopyDirectLink {
-            get {
-                return ResourceManager.GetString("ButtonCopyDirectLink", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Copy external link.
         /// </summary>
         public static string ButtonCopyExternalLink {
             get {
                 return ResourceManager.GetString("ButtonCopyExternalLink", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Copy link and password.
-        /// </summary>
-        public static string ButtonCopyLinkAndPassword {
-            get {
-                return ResourceManager.GetString("ButtonCopyLinkAndPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Quick external link.
-        /// </summary>
-        public static string ButtonCopyQuickExternalLink {
-            get {
-                return ResourceManager.GetString("ButtonCopyQuickExternalLink", resourceCulture);
             }
         }
         
@@ -403,7 +331,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create.
+        ///   Looks up a localized string similar to Create....
         /// </summary>
         public static string ButtonCreate {
             get {
@@ -412,7 +340,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create from template.
+        ///   Looks up a localized string similar to Create by Template.
         /// </summary>
         public static string ButtonCreateByTemplate {
             get {
@@ -421,7 +349,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to From template.
+        ///   Looks up a localized string similar to By Template.
         /// </summary>
         public static string ButtonCreateByTemplateShort {
             get {
@@ -444,42 +372,6 @@ namespace ASC.Web.Files.Resources {
         public static string ButtonCreateFolder {
             get {
                 return ResourceManager.GetString("ButtonCreateFolder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Form template.
-        /// </summary>
-        public static string ButtonCreateFormTemplate {
-            get {
-                return ResourceManager.GetString("ButtonCreateFormTemplate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Blank.
-        /// </summary>
-        public static string ButtonCreateMasterFormFromBlank {
-            get {
-                return ResourceManager.GetString("ButtonCreateMasterFormFromBlank", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to From text document.
-        /// </summary>
-        public static string ButtonCreateMasterFormFromFile {
-            get {
-                return ResourceManager.GetString("ButtonCreateMasterFormFromFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Create new external link.
-        /// </summary>
-        public static string ButtonCreateNewExternalLink {
-            get {
-                return ResourceManager.GetString("ButtonCreateNewExternalLink", resourceCulture);
             }
         }
         
@@ -538,16 +430,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete link after timeout.
-        /// </summary>
-        public static string ButtonDeleteExpiredLink {
-            get {
-                return ResourceManager.GetString("ButtonDeleteExpiredLink", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Disconnect third party.
+        ///   Looks up a localized string similar to Delete third party.
         /// </summary>
         public static string ButtonDeleteThirdParty {
             get {
@@ -592,29 +475,11 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Embedding settings.
-        /// </summary>
-        public static string ButtonEmbeddingSettings {
-            get {
-                return ResourceManager.GetString("ButtonEmbeddingSettings", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Empty Trash.
+        ///   Looks up a localized string similar to Empty Recycle Bin.
         /// </summary>
         public static string ButtonEmptyTrash {
             get {
                 return ResourceManager.GetString("ButtonEmptyTrash", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Fill in the form.
-        /// </summary>
-        public static string ButtonFillForm {
-            get {
-                return ResourceManager.GetString("ButtonFillForm", resourceCulture);
             }
         }
         
@@ -691,6 +556,15 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Actual Size.
+        /// </summary>
+        public static string ButtonFullScale {
+            get {
+                return ResourceManager.GetString("ButtonFullScale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Go to &apos;{0}&apos;.
         /// </summary>
         public static string ButtonGotoFolder {
@@ -700,7 +574,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Go to My documents.
+        ///   Looks up a localized string similar to Go to My Documents.
         /// </summary>
         public static string ButtonGotoMy {
             get {
@@ -718,20 +592,11 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Block for co-authors.
+        ///   Looks up a localized string similar to Block.
         /// </summary>
         public static string ButtonLock {
             get {
                 return ResourceManager.GetString("ButtonLock", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Save as oform.
-        /// </summary>
-        public static string ButtonMakeForm {
-            get {
-                return ResourceManager.GetString("ButtonMakeForm", resourceCulture);
             }
         }
         
@@ -754,6 +619,15 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Next Image.
+        /// </summary>
+        public static string ButtonNextImg {
+            get {
+                return ResourceManager.GetString("ButtonNextImg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to OK.
         /// </summary>
         public static string ButtonOk {
@@ -772,6 +646,15 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to More Actions.
+        /// </summary>
+        public static string ButtonOtherAction {
+            get {
+                return ResourceManager.GetString("ButtonOtherAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Overwrite with version update.
         /// </summary>
         public static string ButtonOverwrite {
@@ -781,11 +664,11 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Remove.
+        ///   Looks up a localized string similar to Previous Image.
         /// </summary>
-        public static string ButtonRemove {
+        public static string ButtonPrevImg {
             get {
-                return ResourceManager.GetString("ButtonRemove", resourceCulture);
+                return ResourceManager.GetString("ButtonPrevImg", resourceCulture);
             }
         }
         
@@ -799,11 +682,29 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        public static string ButtonRemoveFavoriteShort {
+            get {
+                return ResourceManager.GetString("ButtonRemoveFavoriteShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove from templates.
         /// </summary>
         public static string ButtonRemoveTemplate {
             get {
                 return ResourceManager.GetString("ButtonRemoveTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        public static string ButtonRemoveTemplateShort {
+            get {
+                return ResourceManager.GetString("ButtonRemoveTemplateShort", resourceCulture);
             }
         }
         
@@ -826,38 +727,29 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rotate Counterclockwise.
+        /// </summary>
+        public static string ButtonRotateLeft {
+            get {
+                return ResourceManager.GetString("ButtonRotateLeft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rotate Clockwise.
+        /// </summary>
+        public static string ButtonRotateRight {
+            get {
+                return ResourceManager.GetString("ButtonRotateRight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Save.
         /// </summary>
         public static string ButtonSave {
             get {
                 return ResourceManager.GetString("ButtonSave", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Save and Copy direct link.
-        /// </summary>
-        public static string ButtonSaveAndCopyLink {
-            get {
-                return ResourceManager.GetString("ButtonSaveAndCopyLink", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Save and Send.
-        /// </summary>
-        public static string ButtonSaveAndSend {
-            get {
-                return ResourceManager.GetString("ButtonSaveAndSend", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Save without notification.
-        /// </summary>
-        public static string ButtonSaveWithoutNotification {
-            get {
-                return ResourceManager.GetString("ButtonSaveWithoutNotification", resourceCulture);
             }
         }
         
@@ -871,34 +763,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Groups.
-        /// </summary>
-        public static string ButtonSelectGroups {
-            get {
-                return ResourceManager.GetString("ButtonSelectGroups", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Links.
-        /// </summary>
-        public static string ButtonSelectLinks {
-            get {
-                return ResourceManager.GetString("ButtonSelectLinks", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Users.
-        /// </summary>
-        public static string ButtonSelectUsers {
-            get {
-                return ResourceManager.GetString("ButtonSelectUsers", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Sign with DocuSign.
+        ///   Looks up a localized string similar to Send with DocuSign.
         /// </summary>
         public static string ButtonSendDocuSign {
             get {
@@ -925,24 +790,6 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Limit by time.
-        /// </summary>
-        public static string ButtonSetLifetime {
-            get {
-                return ResourceManager.GetString("ButtonSetLifetime", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Set a password.
-        /// </summary>
-        public static string ButtonSetPassword {
-            get {
-                return ResourceManager.GetString("ButtonSetPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Sharing Settings.
         /// </summary>
         public static string ButtonShareAccess {
@@ -961,11 +808,11 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Shorten the link.
+        ///   Looks up a localized string similar to Show more.
         /// </summary>
-        public static string ButtonShortenLink {
+        public static string ButtonShowMore {
             get {
-                return ResourceManager.GetString("ButtonShortenLink", resourceCulture);
+                return ResourceManager.GetString("ButtonShowMore", resourceCulture);
             }
         }
         
@@ -997,7 +844,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unblock / Check-in.
+        ///   Looks up a localized string similar to Unblock.
         /// </summary>
         public static string ButtonUnlock {
             get {
@@ -1105,6 +952,24 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Zoom In.
+        /// </summary>
+        public static string ButtonZoomIn {
+            get {
+                return ResourceManager.GetString("ButtonZoomIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zoom Out.
+        /// </summary>
+        public static string ButtonZoomOut {
+            get {
+                return ResourceManager.GetString("ButtonZoomOut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Canceled.
         /// </summary>
         public static string Canceled {
@@ -1119,15 +984,6 @@ namespace ASC.Web.Files.Resources {
         public static string CaptionConvertPassword {
             get {
                 return ResourceManager.GetString("CaptionConvertPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enter the password for conversion.
-        /// </summary>
-        public static string CaptionConvertPasswordWhenUploading {
-            get {
-                return ResourceManager.GetString("CaptionConvertPasswordWhenUploading", resourceCulture);
             }
         }
         
@@ -1159,7 +1015,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Once the changes are applied, the current file/folder owner gets access rights according to the access settings of the group he/she belongs to or according to the default folder permissions..
+        ///   Looks up a localized string similar to Once the changes are applied, the current folder owner gets access rights to the access settings of the group he/she belongs to or according to the default folder permissions..
         /// </summary>
         public static string ChangeOwnerDescription {
             get {
@@ -1195,7 +1051,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Display notification when moving the element to the trash.
+        ///   Looks up a localized string similar to Confirmation dialog for deletion to recycle bin.
         /// </summary>
         public static string ConfirmDelete {
             get {
@@ -1218,33 +1074,6 @@ namespace ASC.Web.Files.Resources {
         public static string ConfirmDuplicateDescr {
             get {
                 return ResourceManager.GetString("ConfirmDuplicateDescr", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enable external link access.
-        /// </summary>
-        public static string ConfirmExternalShare {
-            get {
-                return ResourceManager.GetString("ConfirmExternalShare", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Show social media buttons for external sharing.
-        /// </summary>
-        public static string ConfirmExternalShareSocialMedia {
-            get {
-                return ResourceManager.GetString("ConfirmExternalShareSocialMedia", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Show or hide buttons to quickly share external links to your files in social networks, e.g. Twitter or Facebook.
-        /// </summary>
-        public static string ConfirmExternalShareSocialMediaHelper {
-            get {
-                return ResourceManager.GetString("ConfirmExternalShareSocialMediaHelper", resourceCulture);
             }
         }
         
@@ -1294,16 +1123,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Are you sure you want to continue?.
-        /// </summary>
-        public static string ConfirmRemoveToContinue {
-            get {
-                return ResourceManager.GetString("ConfirmRemoveToContinue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No file will be copied. The original file will be retained in the destination folder..
+        ///   Looks up a localized string similar to No file will be copied. The orginal file be in the destination folder..
         /// </summary>
         public static string ConfirmSkipDescr {
             get {
@@ -1321,7 +1141,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The document file you open will be converted to the Office Open XML format for faster viewing and editing..
+        ///   Looks up a localized string similar to To edit the file its copy in the Office Open XML format (docx, xlsx or pptx) will be created on the portal. The source file will not be changed..
         /// </summary>
         public static string ConfirmStoreOriginalOpenTitle {
             get {
@@ -1348,11 +1168,20 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Save the file copy in the original format as well.
+        ///   Looks up a localized string similar to Upload the documents in original format as well.
         /// </summary>
         public static string ConfirmStoreOriginalUploadCbxLabelText {
             get {
                 return ResourceManager.GetString("ConfirmStoreOriginalUploadCbxLabelText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All the documents you upload will be converted to the Office Open XML format for faster editing..
+        /// </summary>
+        public static string ConfirmStoreOriginalUploadTitle {
+            get {
+                return ResourceManager.GetString("ConfirmStoreOriginalUploadTitle", resourceCulture);
             }
         }
         
@@ -1384,7 +1213,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connection URL.
+        ///   Looks up a localized string similar to Connection url.
         /// </summary>
         public static string ConnectionUrl {
             get {
@@ -1407,15 +1236,6 @@ namespace ASC.Web.Files.Resources {
         public static string ConvertAndDownload {
             get {
                 return ResourceManager.GetString("ConvertAndDownload", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error! Invalid password.
-        /// </summary>
-        public static string ConvertErrorInvalidPassword {
-            get {
-                return ResourceManager.GetString("ConvertErrorInvalidPassword", resourceCulture);
             }
         }
         
@@ -1456,7 +1276,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Common.
+        ///   Looks up a localized string similar to Common Documents.
         /// </summary>
         public static string CorporateFiles {
             get {
@@ -1465,101 +1285,29 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create Form Template from file.
+        ///   Looks up a localized string similar to Creation date.
         /// </summary>
-        public static string CreateFormTemplateFromFile {
+        public static string CreatingDate {
             get {
-                return ResourceManager.GetString("CreateFormTemplateFromFile", resourceCulture);
+                return ResourceManager.GetString("CreatingDate", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Date.
+        ///   Looks up a localized string similar to Department.
         /// </summary>
-        public static string Date {
+        public static string Department {
             get {
-                return ResourceManager.GetString("Date", resourceCulture);
+                return ResourceManager.GetString("Department", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Default access rights in sharing settings.
+        ///   Looks up a localized string similar to Departments.
         /// </summary>
-        public static string DefaultSharingAccessRightsSetting {
+        public static string Departments {
             get {
-                return ResourceManager.GetString("DefaultSharingAccessRightsSetting", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to If not, then &quot;Read Only&quot;.
-        /// </summary>
-        public static string DefaultSharingAccessRightsSettingCommentInfo {
-            get {
-                return ResourceManager.GetString("DefaultSharingAccessRightsSettingCommentInfo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Spreadsheet only.
-        /// </summary>
-        public static string DefaultSharingAccessRightsSettingCustomFilterInfo {
-            get {
-                return ResourceManager.GetString("DefaultSharingAccessRightsSettingCustomFilterInfo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Forms only.
-        /// </summary>
-        public static string DefaultSharingAccessRightsSettingFillFormsInfo {
-            get {
-                return ResourceManager.GetString("DefaultSharingAccessRightsSettingFillFormsInfo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Documents only.
-        /// </summary>
-        public static string DefaultSharingAccessRightsSettingReviewInfo {
-            get {
-                return ResourceManager.GetString("DefaultSharingAccessRightsSettingReviewInfo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Default access rights for a specific file type.
-        /// </summary>
-        public static string DefaultSharingAccessRightsSettingSpecific {
-            get {
-                return ResourceManager.GetString("DefaultSharingAccessRightsSettingSpecific", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Delete this link?.
-        /// </summary>
-        public static string DeleteThisLink {
-            get {
-                return ResourceManager.GetString("DeleteThisLink", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Can&apos;t print, download and copy file (for Read Only &amp; Comment).
-        /// </summary>
-        public static string DenyDownload {
-            get {
-                return ResourceManager.GetString("DenyDownload", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Can&apos;t change sharing settings (for Full Access).
-        /// </summary>
-        public static string DenySharing {
-            get {
-                return ResourceManager.GetString("DenySharing", resourceCulture);
+                return ResourceManager.GetString("Departments", resourceCulture);
             }
         }
         
@@ -1618,6 +1366,15 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Document Name.
+        /// </summary>
+        public static string DocumentName {
+            get {
+                return ResourceManager.GetString("DocumentName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Documents.
         /// </summary>
         public static string Documents {
@@ -1645,7 +1402,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To sign a document, you need to connect the DocuSign service..
+        ///   Looks up a localized string similar to To sign document, you need to connect the DocuSign service..
         /// </summary>
         public static string DocuSignConnect {
             get {
@@ -1762,15 +1519,6 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Download files in .tar.gz format. Otherwise, the files will be downloaded in .zip format..
-        /// </summary>
-        public static string DownloadTarGz {
-            get {
-                return ResourceManager.GetString("DownloadTarGz", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Size.
         /// </summary>
         public static string EmbeddedSize {
@@ -1807,7 +1555,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The &apos;Common&apos; section shows all the documents shared by the portal administrators for common access. Only portal administrators can create folders in this section, but with the access granted the portal users can also upload their files here..
+        ///   Looks up a localized string similar to In this section, you can access files available to all portal members. Note that only admins can create folders here..
         /// </summary>
         public static string EmptyScreenDescrCorporate {
             get {
@@ -1825,7 +1573,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To mark files as favorites or remove them from this list, use the context menu..
+        ///   Looks up a localized string similar to In this section, you can access files marked as favorites. To mark files as favorites or remove them from this list, use the context menu..
         /// </summary>
         public static string EmptyScreenDescrFavorites {
             get {
@@ -1834,7 +1582,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The &apos;Shared with me&apos; section shows the files which your friends or colleagues gave you access to. In case you haven&apos;t seen the latest changes in the documents they are marked &apos;new&apos;. You can remove the files from the list by clicking the appropriate button..
+        ///   Looks up a localized string similar to In this section, you can access files your teammates shared with you..
         /// </summary>
         public static string EmptyScreenDescrForme {
             get {
@@ -1843,7 +1591,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The documents and image files you {0}create{1} or {2}upload{3} to the portal are kept here in &apos;My documents&apos; section. You can {4}open{5} and {6}edit{7} them using the ONLYOFFICE™ portal editor, share them with friends or colleagues, organize into folders..
+        ///   Looks up a localized string similar to {2}Upload{3}, {0}create{1}, and {4}open{5} documents. Share and {6}edit{7} them together with your teammates..
         /// </summary>
         public static string EmptyScreenDescrMy {
             get {
@@ -1852,7 +1600,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The documents and image files you {2}upload{3} to the portal are kept here in the &apos;My documents&apos; section. You can share them with friends or colleagues, organize them into folders..
+        ///   Looks up a localized string similar to The documents and image files you {2}upload{3} to the portal are kept here in &apos;My Documents&apos; section. You can share them with friends or colleagues, organize into folders..
         /// </summary>
         public static string EmptyScreenDescrMyPoor {
             get {
@@ -1870,7 +1618,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Work in Private Room is available via ONLYOFFICE desktop app. {0}Instructions{1}.
+        ///   Looks up a localized string similar to Work in Private Room is available via lastest ONLYOFFICE desktop app. {0}Instructions{1}.
         /// </summary>
         public static string EmptyScreenDescrPrivacyBrowser {
             get {
@@ -1897,7 +1645,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The documents and image files you create or upload for your project are kept in this section. You can open and edit them using the ONLYOFFICE™ portal editor, organize into folders..
+        ///   Looks up a localized string similar to In this section, you can access documents attached to your projects..
         /// </summary>
         public static string EmptyScreenDescrProject {
             get {
@@ -1915,7 +1663,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The &apos;Recent&apos; section shows you last viewed or edited files..
+        ///   Looks up a localized string similar to In this section, you can access your recently edited files..
         /// </summary>
         public static string EmptyScreenDescrRecent {
             get {
@@ -1924,7 +1672,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To mark files as a template or remove them from this list, use the context menu..
+        ///   Looks up a localized string similar to In this section, you can access files saved as templates. To save file as template, use the context menu..
         /// </summary>
         public static string EmptyScreenDescrTemplates {
             get {
@@ -1933,7 +1681,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to All deleted files are moved to &apos;Trash&apos;. Restore files deleted by mistake or delete them permanently. Please note, that the files deleted from the &apos;Trash&apos; cannot be restored any longer..
+        ///   Looks up a localized string similar to Your deleted files are moved to this section. You can restore files or delete them permanently..
         /// </summary>
         public static string EmptyScreenDescrTrash {
             get {
@@ -1942,7 +1690,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No files to be displayed for this filter here.
+        ///   Looks up a localized string similar to No files found.
         /// </summary>
         public static string EmptyScreenFilter {
             get {
@@ -1951,7 +1699,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No files or folders matching your filter can be displayed in this section. Please select other filter options or clear filter to view all the files in this section. You can also look for the file you need in other sections..
+        ///   Looks up a localized string similar to No files and folders matching your filter found. Please, select other filter options or clear it..
         /// </summary>
         public static string EmptyScreenFilterDescr {
             get {
@@ -1969,7 +1717,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No files to be displayed in this section.
+        ///   Looks up a localized string similar to No files here yet.
         /// </summary>
         public static string EmptyScreenHeader {
             get {
@@ -1978,38 +1726,11 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You haven&apos;t connected any third-party clouds yet.
+        ///   Looks up a localized string similar to No connected accounts.
         /// </summary>
         public static string EmptyScreenThirdPartyDscr {
             get {
                 return ResourceManager.GetString("EmptyScreenThirdPartyDscr", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enable password access.
-        /// </summary>
-        public static string EnablePassword {
-            get {
-                return ResourceManager.GetString("EnablePassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enable time limit.
-        /// </summary>
-        public static string EnableTimeLimit {
-            get {
-                return ResourceManager.GetString("EnableTimeLimit", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enter password.
-        /// </summary>
-        public static string EnterPassword {
-            get {
-                return ResourceManager.GetString("EnterPassword", resourceCulture);
             }
         }
         
@@ -2019,6 +1740,24 @@ namespace ASC.Web.Files.Resources {
         public static string Error {
             get {
                 return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The uploaded file was not found.
+        /// </summary>
+        public static string ErrorEmptyUploadFileSelected {
+            get {
+                return ResourceManager.GetString("ErrorEmptyUploadFileSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All Users.
+        /// </summary>
+        public static string Everyone {
+            get {
+                return ResourceManager.GetString("Everyone", resourceCulture);
             }
         }
         
@@ -2050,20 +1789,11 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Files will be compressed into the {0}.tar.gz file{1}.
-        /// </summary>
-        public static string FilesWillBeCompressedTarGz {
-            get {
-                return ResourceManager.GetString("FilesWillBeCompressedTarGz", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Files will be compressed into the {0}.zip file{1}.
         /// </summary>
-        public static string FilesWillBeCompressedZip {
+        public static string FilesWillBeCompressed {
             get {
-                return ResourceManager.GetString("FilesWillBeCompressedZip", resourceCulture);
+                return ResourceManager.GetString("FilesWillBeCompressed", resourceCulture);
             }
         }
         
@@ -2086,168 +1816,6 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Collect filled forms.
-        /// </summary>
-        public static string FormFillingCollect {
-            get {
-                return ResourceManager.GetString("FormFillingCollect", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to By default.
-        /// </summary>
-        public static string FormFillingDialogByDefault {
-            get {
-                return ResourceManager.GetString("FormFillingDialogByDefault", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Collect in.
-        /// </summary>
-        public static string FormFillingDialogCollectIn {
-            get {
-                return ResourceManager.GetString("FormFillingDialogCollectIn", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Create subfolder.
-        /// </summary>
-        public static string FormFillingDialogCreateSubfolder {
-            get {
-                return ResourceManager.GetString("FormFillingDialogCreateSubfolder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Vacation applications 2021.
-        /// </summary>
-        public static string FormFillingDialogCreateSubfolderExample {
-            get {
-                return ResourceManager.GetString("FormFillingDialogCreateSubfolderExample", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Create a subfolder for each type of form.
-        /// </summary>
-        public static string FormFillingDialogCreateUniqueSubfolder {
-            get {
-                return ResourceManager.GetString("FormFillingDialogCreateUniqueSubfolder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The subfolder name will be inherited from the document name.
-        /// </summary>
-        public static string FormFillingDialogCreateUniqueSubfolderDscr {
-            get {
-                return ResourceManager.GetString("FormFillingDialogCreateUniqueSubfolderDscr", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Customize.
-        /// </summary>
-        public static string FormFillingDialogCustomize {
-            get {
-                return ResourceManager.GetString("FormFillingDialogCustomize", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Date.
-        /// </summary>
-        public static string FormFillingDialogDate {
-            get {
-                return ResourceManager.GetString("FormFillingDialogDate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Document Title - Username (MM/DD/YYYY) .docx.
-        /// </summary>
-        public static string FormFillingDialogDefaultTitleFormat {
-            get {
-                return ResourceManager.GetString("FormFillingDialogDefaultTitleFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enable collection of filled forms.
-        /// </summary>
-        public static string FormFillingDialogEnableCollection {
-            get {
-                return ResourceManager.GetString("FormFillingDialogEnableCollection", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to File Name.
-        /// </summary>
-        public static string FormFillingDialogFileName {
-            get {
-                return ResourceManager.GetString("FormFillingDialogFileName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Title setting.
-        /// </summary>
-        public static string FormFillingDialogTitleSetting {
-            get {
-                return ResourceManager.GetString("FormFillingDialogTitleSetting", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to User Name.
-        /// </summary>
-        public static string FormFillingDialogUserName {
-            get {
-                return ResourceManager.GetString("FormFillingDialogUserName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to At the moment, the collection of filled forms is configured in a folder where you do not have permission to view the content. Want to reset these settings?.
-        /// </summary>
-        public static string FormFillingOwnerDialogBody {
-            get {
-                return ResourceManager.GetString("FormFillingOwnerDialogBody", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Attention!.
-        /// </summary>
-        public static string FormFillingOwnerDialogHeader {
-            get {
-                return ResourceManager.GetString("FormFillingOwnerDialogHeader", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Yes, reset.
-        /// </summary>
-        public static string FormFillingOwnerDialogResetBtn {
-            get {
-                return ResourceManager.GetString("FormFillingOwnerDialogResetBtn", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Form filling settings.
-        /// </summary>
-        public static string FormFillingSettings {
-            get {
-                return ResourceManager.GetString("FormFillingSettings", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Start Now.
         /// </summary>
         public static string GetGreeAccountBtn {
@@ -2266,11 +1834,38 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hide.
+        ///   Looks up a localized string similar to Group.
         /// </summary>
-        public static string Hide {
+        public static string Group {
             get {
-                return ResourceManager.GetString("Hide", resourceCulture);
+                return ResourceManager.GetString("Group", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import from Google Drive.
+        /// </summary>
+        public static string ImportFromGoogle {
+            get {
+                return ResourceManager.GetString("ImportFromGoogle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to new.
+        /// </summary>
+        public static string IsNew {
+            get {
+                return ResourceManager.GetString("IsNew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Link.
+        /// </summary>
+        public static string Link {
+            get {
+                return ResourceManager.GetString("Link", resourceCulture);
             }
         }
         
@@ -2280,6 +1875,15 @@ namespace ASC.Web.Files.Resources {
         public static string LinkViaMail {
             get {
                 return ResourceManager.GetString("LinkViaMail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login.
+        /// </summary>
+        public static string Login {
+            get {
+                return ResourceManager.GetString("Login", resourceCulture);
             }
         }
         
@@ -2428,7 +2032,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE™ for teams!.
+        ///   Looks up a localized string similar to Welcome ONLYOFFICE™ for teams!.
         /// </summary>
         public static string MoreFeaturesTitle {
             get {
@@ -2437,7 +2041,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to My documents.
+        ///   Looks up a localized string similar to My Documents.
         /// </summary>
         public static string MyFiles {
             get {
@@ -2446,11 +2050,11 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Notify with changes in rights and new ones..
+        ///   Looks up a localized string similar to New File.
         /// </summary>
-        public static string NotifyWithChangesInRights {
+        public static string NewFile {
             get {
-                return ResourceManager.GetString("NotifyWithChangesInRights", resourceCulture);
+                return ResourceManager.GetString("NewFile", resourceCulture);
             }
         }
         
@@ -2482,7 +2086,16 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hide document list.
+        ///   Looks up a localized string similar to Original format.
+        /// </summary>
+        public static string OriginalFormat {
+            get {
+                return ResourceManager.GetString("OriginalFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hide documents list.
         /// </summary>
         public static string OverwriteListHide {
             get {
@@ -2509,7 +2122,16 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Private Room.
+        ///   Looks up a localized string similar to Warning! Possibly this file is a renamed executable file and it cannot be previewed..
+        /// </summary>
+        public static string PreviewError {
+            get {
+                return ResourceManager.GetString("PreviewError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Privacy Room.
         /// </summary>
         public static string PrivacyRoom {
             get {
@@ -2527,7 +2149,16 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to In projects.
+        ///   Looks up a localized string similar to This is a web application for internal use designed to store and share files and work on them in team..
+        /// </summary>
+        public static string ProductDescription {
+            get {
+                return ResourceManager.GetString("ProductDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project Documents.
         /// </summary>
         public static string ProjectFiles {
             get {
@@ -2536,20 +2167,20 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Random password.
-        /// </summary>
-        public static string RandomPassword {
-            get {
-                return ResourceManager.GetString("RandomPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Recent.
+        ///   Looks up a localized string similar to Recent Documents.
         /// </summary>
         public static string Recent {
             get {
                 return ResourceManager.GetString("Recent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to delete.
+        /// </summary>
+        public static string Remove {
+            get {
+                return ResourceManager.GetString("Remove", resourceCulture);
             }
         }
         
@@ -2581,6 +2212,15 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Remove message.
+        /// </summary>
+        public static string RemoveShareMessage {
+            get {
+                return ResourceManager.GetString("RemoveShareMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File name.
         /// </summary>
         public static string SaveAsFileTitle {
@@ -2595,6 +2235,24 @@ namespace ASC.Web.Files.Resources {
         public static string SaveAsOpenTab {
             get {
                 return ResourceManager.GetString("SaveAsOpenTab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search.
+        /// </summary>
+        public static string Search {
+            get {
+                return ResourceManager.GetString("Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search.
+        /// </summary>
+        public static string SearchText {
+            get {
+                return ResourceManager.GetString("SearchText", resourceCulture);
             }
         }
         
@@ -2617,6 +2275,15 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Send notification.
+        /// </summary>
+        public static string SendShareNotify {
+            get {
+                return ResourceManager.GetString("SendShareNotify", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Display Favorites.
         /// </summary>
         public static string SettingFavorite {
@@ -2626,7 +2293,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Save revisions when the document version is changed.
+        ///   Looks up a localized string similar to Keep intermediate versions when editing.
         /// </summary>
         public static string SettingForcesave {
             get {
@@ -2635,16 +2302,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Save revisions to track intermediate versions of the documents.
-        /// </summary>
-        public static string SettingForcesaveHelper {
-            get {
-                return ResourceManager.GetString("SettingForcesaveHelper", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Display Recent.
+        ///   Looks up a localized string similar to Display Recent Documents.
         /// </summary>
         public static string SettingRecent {
             get {
@@ -2662,7 +2320,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Always save revisions when the version is changed.
+        ///   Looks up a localized string similar to Keep all saved intermediate versions.
         /// </summary>
         public static string SettingStoreForcesave {
             get {
@@ -2671,7 +2329,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Display Templates.
+        ///   Looks up a localized string similar to Using Document Templates.
         /// </summary>
         public static string SettingTemplates {
             get {
@@ -2707,7 +2365,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Shared with me.
+        ///   Looks up a localized string similar to Shared with Me.
         /// </summary>
         public static string SharedForMe {
             get {
@@ -2716,16 +2374,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Share to.
-        /// </summary>
-        public static string ShareTo {
-            get {
-                return ResourceManager.GetString("ShareTo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to External link access.
+        ///   Looks up a localized string similar to Set up the access right for the link.
         /// </summary>
         public static string SharingLinkCaption {
             get {
@@ -2734,29 +2383,11 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Share via the link or embed.
+        ///   Looks up a localized string similar to Provides access to the link.
         /// </summary>
         public static string SharingLinkDescr {
             get {
                 return ResourceManager.GetString("SharingLinkDescr", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Temporarily disabled on the portal by adminstration.
-        /// </summary>
-        public static string SharingLinkEnableDescr {
-            get {
-                return ResourceManager.GetString("SharingLinkEnableDescr", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Sharing settings.
-        /// </summary>
-        public static string SharingSettings {
-            get {
-                return ResourceManager.GetString("SharingSettings", resourceCulture);
             }
         }
         
@@ -2788,15 +2419,6 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Switch to thumbnails view.
-        /// </summary>
-        public static string switchToThumbnails {
-            get {
-                return ResourceManager.GetString("switchToThumbnails", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Switch to compact view.
         /// </summary>
         public static string SwitchViewToCompact {
@@ -2815,7 +2437,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Templates.
+        ///   Looks up a localized string similar to Document Templates.
         /// </summary>
         public static string Templates {
             get {
@@ -2824,7 +2446,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No templates.
+        ///   Looks up a localized string similar to No Document Templates.
         /// </summary>
         public static string TemplatesEmpty {
             get {
@@ -2860,7 +2482,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connect cloud.
+        ///   Looks up a localized string similar to Connect account.
         /// </summary>
         public static string ThirdPartyConnectAccount {
             get {
@@ -2869,7 +2491,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connected clouds.
+        ///   Looks up a localized string similar to Connect Accounts.
         /// </summary>
         public static string ThirdPartyConnectAccounts {
             get {
@@ -2878,7 +2500,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You can connect the following services to your ONLYOFFICE™ account. They will be displayed in the &apos;My documents&apos; folder and you will be able to edit and save all your documents in a single workspace..
+        ///   Looks up a localized string similar to You can connect the following accounts to the ONLYOFFICE™ Documents. They will be displayed in &apos;My Documents&apos; folder and you will be able to edit and save them right on the portal all in one place..
         /// </summary>
         public static string ThirdPartyConnectAccountsDescription {
             get {
@@ -2905,7 +2527,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Fill in to change.
+        ///   Looks up a localized string similar to Specify for change.
         /// </summary>
         public static string ThirdPartyCorrect {
             get {
@@ -2914,7 +2536,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disconnect Third Party.
+        ///   Looks up a localized string similar to Delete Third Party.
         /// </summary>
         public static string ThirdPartyDeleteCaption {
             get {
@@ -2941,7 +2563,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Allow users to connect third-party storages.
+        ///   Looks up a localized string similar to Enable third party settings for users.
         /// </summary>
         public static string ThirdPartyEnableSettings {
             get {
@@ -3013,7 +2635,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Make shared and put into Common.
+        ///   Looks up a localized string similar to Make shared and put into Common Documents.
         /// </summary>
         public static string ThirdPartySetCorporate {
             get {
@@ -3067,15 +2689,6 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Time.
-        /// </summary>
-        public static string Time {
-            get {
-                return ResourceManager.GetString("Time", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Search in.
         /// </summary>
         public static string TitleSearchIn {
@@ -3094,7 +2707,7 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Click to search without subfolders.
+        ///   Looks up a localized string similar to Click for searchibg without subfolders.
         /// </summary>
         public static string TitleSearchWithoutSubfolder {
             get {
@@ -3148,11 +2761,20 @@ namespace ASC.Web.Files.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Trash.
+        ///   Looks up a localized string similar to Recycle Bin.
         /// </summary>
         public static string Trash {
             get {
                 return ResourceManager.GetString("Trash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Types.
+        /// </summary>
+        public static string Types {
+            get {
+                return ResourceManager.GetString("Types", resourceCulture);
             }
         }
         
@@ -3180,6 +2802,24 @@ namespace ASC.Web.Files.Resources {
         public static string UpgradeYourPlan {
             get {
                 return ResourceManager.GetString("UpgradeYourPlan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User.
+        /// </summary>
+        public static string User {
+            get {
+                return ResourceManager.GetString("User", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users.
+        /// </summary>
+        public static string Users {
+            get {
+                return ResourceManager.GetString("Users", resourceCulture);
             }
         }
     }

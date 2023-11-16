@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-
 using ASC.Api.Attributes;
 using ASC.Api.Settings.Smtp;
 using ASC.Common.Threading;
@@ -26,23 +25,20 @@ using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Configuration;
 using ASC.Web.Studio.Core;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
+using Resources;
 
 namespace ASC.Api.Settings
 {
     public partial class SettingsApi
     {
         /// <summary>
-        /// Returns the current portal SMTP settings.
+        /// Returns current portal SMTP settings
         /// </summary>
         /// <short>
-        /// Get the SMTP settings
+        /// Get SMTP settings
         /// </short>
-        /// <category>SMTP</category>
-        /// <returns type="ASC.Api.Settings.Smtp.SmtpSettingsWrapper, ASC.Api.Settings">SMTP settings</returns>
-        /// <path>api/2.0/settings/smtp</path>
-        /// <httpMethod>GET</httpMethod>
+        /// <returns>SmtpSettings data</returns>
         [Read("smtp")]
         public SmtpSettingsWrapper GetSmtpSettings()
         {
@@ -54,16 +50,13 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Saves the SMTP settings for the current portal.
+        /// Save SMTP settings for current portal
         /// </summary>
         /// <short>
-        /// Save the SMTP settings
+        /// Save SMTP settings
         /// </short>
-        /// <category>SMTP</category>
-        /// <param type="ASC.Api.Settings.Smtp.SmtpSettingsWrapper, ASC.Api.Settings.Smtp" file="ASC.Api.Settings" name="smtpSettings">SMTP settings</param>
-        /// <returns type="ASC.Api.Settings.Smtp.SmtpSettingsWrapper, ASC.Api.Settings">SMTP settings</returns>
-        /// <path>api/2.0/settings/smtp</path>
-        /// <httpMethod>POST</httpMethod>
+        /// <param name="smtpSettings">SMTP settings data</param>
+        /// <returns>SmtpSettings data</returns>
         [Create("smtp")]
         public SmtpSettingsWrapper SaveSmtpSettings(SmtpSettingsWrapper smtpSettings)
         {
@@ -71,8 +64,10 @@ namespace ASC.Api.Settings
 
             //TODO: Add validation check
 
-            if (smtpSettings == null)
+            if(smtpSettings == null)
                 throw new ArgumentNullException("smtpSettings");
+
+            SecurityContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
 
             var settingConfig = ToSmtpSettingsConfig(smtpSettings);
 
@@ -84,15 +79,12 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Resets SMTP settings of the current portal.
+        /// Reset SMTP settings for current portal
         /// </summary>
         /// <short>
-        /// Reset the SMTP settings
+        /// Reset SMTP settings
         /// </short>
-        /// <category>SMTP</category>
-        /// <returns type="ASC.Api.Settings.Smtp.SmtpSettingsWrapper, ASC.Api.Settings">Default SMTP settings</returns>
-        /// <path>api/2.0/settings/smtp</path>
-        /// <httpMethod>DELETE</httpMethod>
+        /// <returns>SmtpSettings data</returns>
         [Delete("smtp")]
         public SmtpSettingsWrapper ResetSmtpSettings()
         {
@@ -100,24 +92,22 @@ namespace ASC.Api.Settings
 
             if (!CoreContext.Configuration.SmtpSettings.IsDefaultSettings)
             {
+                SecurityContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
                 CoreContext.Configuration.SmtpSettings = null;
             }
 
             var current = CoreContext.Configuration.Standalone ? CoreContext.Configuration.SmtpSettings : SmtpSettings.Empty;
-
+            
             return ToSmtpSettings(current, true);
         }
 
         /// <summary>
-        /// Tests the SMTP settings for the current portal (send test message to the user email).
+        /// Test SMTP settings for current portal (send test message to user email)
         /// </summary>
         /// <short>
-        /// Test the SMTP settings
+        /// Test SMTP settings
         /// </short>
-        /// <category>SMTP</category>
-        /// <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatus, ASC.Api.Settings">SMTP operation status</returns>
-        /// <path>api/2.0/settings/smtp/test</path>
-        /// <httpMethod>GET</httpMethod>
+        /// <returns>SmtpOperationStatus data</returns>
         [Read("smtp/test")]
         public SmtpOperationStatus TestSmtpSettings()
         {
@@ -133,15 +123,12 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Returns the SMTP test process status.
+        /// Returns SMTP test process status
         /// </summary>
         /// <short>
-        /// Get the SMTP test process status
+        /// Get SMTP test process status
         /// </short>
-        /// <category>SMTP</category>
-        /// <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatus, ASC.Api.Settings">SMTP operation status</returns>
-        /// <path>api/2.0/settings/smtp/test/status</path>
-        /// <httpMethod>GET</httpMethod>
+        /// <returns>SmtpOperationStatus object</returns>
         [Read("smtp/test/status")]
         public SmtpOperationStatus GetSmtpOperationStatus()
         {
@@ -207,7 +194,6 @@ namespace ASC.Api.Settings
             if (settingsWrapper.EnableAuth)
             {
                 settingsConfig.SetCredentials(settingsWrapper.CredentialsUserName, settingsWrapper.CredentialsUserPassword);
-                settingsConfig.UseNtlm = settingsWrapper.UseNtlm;
             }
 
             return settingsConfig;
@@ -224,8 +210,7 @@ namespace ASC.Api.Settings
                 CredentialsUserName = settingsConfig.CredentialsUserName,
                 CredentialsUserPassword = hidePassword ? "" : settingsConfig.CredentialsUserPassword,
                 EnableSSL = settingsConfig.EnableSSL,
-                EnableAuth = settingsConfig.EnableAuth,
-                UseNtlm = settingsConfig.UseNtlm
+                EnableAuth = settingsConfig.EnableAuth
             };
         }
 
@@ -235,8 +220,6 @@ namespace ASC.Api.Settings
             {
                 throw new BillingException(Resource.ErrorNotAllowedOption, "Smtp");
             }
-
-            SecurityContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
         }
     }
 }

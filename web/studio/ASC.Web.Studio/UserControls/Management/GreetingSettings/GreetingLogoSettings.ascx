@@ -1,6 +1,6 @@
 <%@ Control Language="C#" AutoEventWireup="true" CodeBehind="GreetingLogoSettings.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Management.GreetingLogoSettings" %>
 
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <div class="clearFix">
     <div id="studio_greetingLogoSettings" class="settings-block">
@@ -15,7 +15,7 @@
                 <div >
                     <div class="clearFix">
                         <div class="greetingContentLogoImg">
-                            <img id="studio_greetingLogo" class="borderBase" alt="" src="<%= _logoPath %>" />
+                            <img id="studio_greetingLogo" class="borderBase" alt="" src="<%= _tenantInfoSettings.GetAbsoluteCompanyLogoPath() %>" />
                         </div>
                         <div class="greetingContentChangeLogo">
                             <input type="hidden" id="studio_greetingLogoPath" value="" />

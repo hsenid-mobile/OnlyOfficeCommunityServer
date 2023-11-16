@@ -147,14 +147,14 @@
   <data name="AceStatusEnum_Varies" xml:space="preserve">
     <value>Varies</value>
   </data>
-  <data name="ButtonFilterArchive" xml:space="preserve">
-    <value>Archives</value>
-  </data>
   <data name="ButtonFilterAuthor" xml:space="preserve">
     <value>Author</value>
   </data>
+  <data name="ButtonFilterArchive" xml:space="preserve">
+    <value>Archives</value>
+  </data>
   <data name="ButtonFilterCurrentFolderOnly" xml:space="preserve">
-    <value>Exclude subfolders</value>
+    <value>No subfolders</value>
   </data>
   <data name="ButtonFilterDocument" xml:space="preserve">
     <value>Documents</value>
@@ -199,10 +199,10 @@
     <value>Author</value>
   </data>
   <data name="ButtonSortCreated" xml:space="preserve">
-    <value>Creation date</value>
+    <value>Created</value>
   </data>
   <data name="ButtonSortModifiedNew" xml:space="preserve">
-    <value>Last modified date</value>
+    <value>Modified</value>
   </data>
   <data name="ButtonSortName" xml:space="preserve">
     <value>Title</value>
@@ -220,55 +220,34 @@
     <value>Are you sure you want to remove the {0} from the 'Documents' module? This will not affect your {1} account in any way.</value>
   </data>
   <data name="ConfirmEmptyTrash" xml:space="preserve">
-    <value>Are you sure you want to empty the trash?</value>
+    <value>Are you sure you want to empty the recycle bin?</value>
   </data>
   <data name="ConfirmLeavePage" xml:space="preserve">
     <value>Are you sure you want to leave the current page? Downloading of files will be interrupted.</value>
   </data>
   <data name="ConfirmRemoveFile" xml:space="preserve">
-    <value>You are about to delete this file? Please note, that if you have shared it with someone, it will become unavailable. Are you sure you want to continue?</value>
-  </data>
-  <data name="ConfirmRemoveFilePermanently" xml:space="preserve">
-    <value>You are about to delete this file? Please note, that if you have shared it with someone, it will become unavailable. File will be deleted permanently in {0}.</value>
+    <value>Are you sure you want to delete the document?</value>
   </data>
   <data name="ConfirmRemoveFolder" xml:space="preserve">
-    <value>You are about to delete this folder? Please note, that if you have shared it with someone, it will become unavailable. Are you sure you want to continue?</value>
-  </data>
-  <data name="ConfirmRemoveFolderPermanently" xml:space="preserve">
-    <value>You are about to delete this folder? Please note, that if you have shared it with someone, it will become unavailable. Folder will be deleted permanently in {0}.</value>
+    <value>Are you sure you want to delete the folder?</value>
   </data>
   <data name="ConfirmRemoveList" xml:space="preserve">
-    <value>You are about to delete these elements? Please note, that if you have shared these files/folders with someone, they will become unavailable. Are you sure you want to continue?</value>
-  </data>
-  <data name="ConfirmRemoveListPermanently" xml:space="preserve">
-    <value>You are about to delete these elements? Please note, that if you have shared these files/folders with someone, they will become unavailable. Files/folders will be deleted permanently in {0}.</value>
+    <value>Are you sure you want to delete these elements?</value>
   </data>
   <data name="ConfirmThirdPartyMoveMessage" xml:space="preserve">
     <value>You are about to move elements from the {1} directory. In such a case, they will be deleted from your {1} account and will no longer be accessible to other users, in case these elements have previously been shared. {0}Are you sure you want to move the elements?</value>
   </data>
+  <data name="CopyToClipboard" xml:space="preserve">
+    <value>Copy link</value>
+  </data>
   <data name="CorporateFiles" xml:space="preserve">
-    <value>Common</value>
+    <value>Common Documents</value>
   </data>
   <data name="CustomFormat" xml:space="preserve">
     <value>Custom format</value>
   </data>
   <data name="Departments" xml:space="preserve">
     <value>Groups</value>
-  </data>
-  <data name="DateOneMonth" xml:space="preserve">
-    <value>1 month</value>
-  </data>
-  <data name="DateOneWeek" xml:space="preserve">
-    <value>1 week</value>
-  </data>
-  <data name="DateThreeMonths" xml:space="preserve">
-    <value>3 months</value>
-  </data>
-  <data name="DateTwoMonths" xml:space="preserve">
-    <value>2 months</value>
-  </data>
-  <data name="DateTwoWeeks" xml:space="preserve">
-    <value>2 weeks</value>
   </data>
   <data name="DescriptBulkdownload" xml:space="preserve">
     <value>Archiving Data</value>
@@ -355,16 +334,13 @@
     <value>You don't have enough permission to perform the operation</value>
   </data>
   <data name="ErrorMassage_SecurityException_PrivateRoot" xml:space="preserve">
-    <value>You cannot perform such an action in this folder</value>
+    <value>You can not performed this action in this folder</value>
   </data>
   <data name="ErrorMassage_SpecCharacter" xml:space="preserve">
     <value>The title cannot contain any of the following characters: {0}</value>
   </data>
   <data name="ErrorMassage_StorageSize" xml:space="preserve">
     <value>The portal storage has run out of free space. You cannot upload files larger than {0}.</value>
-  </data>
-  <data name="ExternalLink" xml:space="preserve">
-    <value>External link</value>
   </data>
   <data name="FileAlreadyExist" xml:space="preserve">
     <value>The file with the name {0} already exists in the folder {1}.</value>
@@ -387,11 +363,11 @@
   <data name="FolderTitleBoxNet" xml:space="preserve">
     <value>Box directory</value>
   </data>
-  <data name="FolderTitleDocuSign" xml:space="preserve">
-    <value>DocuSign account</value>
-  </data>
   <data name="FolderTitleDropBox" xml:space="preserve">
     <value>Dropbox directory</value>
+  </data>
+  <data name="FolderTitleDocuSign" xml:space="preserve">
+    <value>DocuSign account</value>
   </data>
   <data name="FolderTitleGoogle" xml:space="preserve">
     <value>Google directory</value>
@@ -411,11 +387,47 @@
   <data name="FolderTitleYandex" xml:space="preserve">
     <value>Yandex Directory</value>
   </data>
-  <data name="InfoChangeOwner" xml:space="preserve">
-    <value>Now '{0}' is the owner of '{1}'</value>
+  <data name="GetShortenLink" xml:space="preserve">
+    <value>Shorten link</value>
   </data>
-  <data name="InfoChangeOwnerArray" xml:space="preserve">
-    <value>Now '{0}' is the owner of {1} items</value>
+  <data name="HelpContentConnectAccount" xml:space="preserve">
+    <value>Connect your Google Drive, Dropbox,  Box and OneDrive accounts and have all documents in one place.</value>
+  </data>
+  <data name="HelpContentCreateFiles" xml:space="preserve">
+    <value>Use this button to create new documents, spreadsheets and presentations directly on your portal.</value>
+  </data>
+  <data name="HelpContentDownloadFiles" xml:space="preserve">
+    <value>Click the file name to download and save the document to your hard disk drive.</value>
+  </data>
+  <data name="HelpContentShareFiles" xml:space="preserve">
+    <value>Share your files with other portal users or make them available to people outside your portal setting the appropriate access rights.</value>
+  </data>
+  <data name="HelpContentUploadFiles" xml:space="preserve">
+    <value>Use this button to upload files: documents, spreadsheets, presentations, etc. stored on your hard disk drive.</value>
+  </data>
+  <data name="HelpContentViewFiles" xml:space="preserve">
+    <value>Click the file name to view the document, or use the pencil icon to open it for editing. For faster processing your file will be converted to the Office Open XML format.</value>
+  </data>
+  <data name="HelpTitleConnectAccount" xml:space="preserve">
+    <value>Connect Your Account</value>
+  </data>
+  <data name="HelpTitleCreateFiles" xml:space="preserve">
+    <value>Create New Files</value>
+  </data>
+  <data name="HelpTitleDownloadFiles" xml:space="preserve">
+    <value>Download Your Files</value>
+  </data>
+  <data name="HelpTitleShareFiles" xml:space="preserve">
+    <value>Share Your Files</value>
+  </data>
+  <data name="HelpTitleUploadFiles" xml:space="preserve">
+    <value>Upload Your Files</value>
+  </data>
+  <data name="HelpTitleViewFiles" xml:space="preserve">
+    <value>View &amp; Edit Your Files</value>
+  </data>
+  <data name="ImportFromGoogle" xml:space="preserve">
+    <value>Import from Google Drive</value>
   </data>
   <data name="InfoChangeThirdParty" xml:space="preserve">
     <value>'{0}' changed</value>
@@ -454,22 +466,22 @@
     <value>Move {1}{0}{2}</value>
   </data>
   <data name="InfoMoveGroup" xml:space="preserve">
-    <value>{0} elements have been moved</value>
+    <value>{0} moved elements</value>
   </data>
   <data name="InfoMoveItem" xml:space="preserve">
     <value>'{0}' moved</value>
   </data>
   <data name="InfoRemoveFile" xml:space="preserve">
-    <value>The document '{0}' is deleted.</value>
+    <value>The document '{0}' is deleted</value>
   </data>
   <data name="InfoRemoveFolder" xml:space="preserve">
-    <value>The folder '{0}' is deleted.</value>
+    <value>The folder '{0}' is deleted</value>
   </data>
   <data name="InfoRemoveGroup" xml:space="preserve">
-    <value>It was successfully deleted {0} from {1}.</value>
+    <value>It was successfully deleted {0} from {1}</value>
   </data>
   <data name="InfoRemoveThirdParty" xml:space="preserve">
-    <value>Third party '{0}' is disconnected</value>
+    <value>Third Party '{0}' is deleted</value>
   </data>
   <data name="InfoRenameFile" xml:space="preserve">
     <value>The document '{0}' is renamed to '{1}'</value>
@@ -477,26 +489,41 @@
   <data name="InfoRenameFolder" xml:space="preserve">
     <value>The folder '{0}' is renamed to '{1}'</value>
   </data>
-  <data name="InfoSaveThirdParty" xml:space="preserve">
-    <value>'{0}' added to '{1}'</value>
-  </data>
   <data name="InfoTemplateAdd" xml:space="preserve">
     <value>Files added to Templates</value>
   </data>
   <data name="InfoTemplateRemove" xml:space="preserve">
     <value>Files removed from Templates</value>
   </data>
+  <data name="InfoChangeOwner" xml:space="preserve">
+    <value>Now '{0}' is the owner of '{1}'</value>
+  </data>
+  <data name="InfoChangeOwnerArray" xml:space="preserve">
+    <value>Now '{0}' is the owner of {1} items</value>
+  </data>
+  <data name="InfoSaveThirdParty" xml:space="preserve">
+    <value>'{0}' added to '{1}'</value>
+  </data>
   <data name="InfoUploadedSuccess" xml:space="preserve">
     <value>{0} documents are successfully uploaded</value>
   </data>
+  <data name="LoadingProcessing" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="LoadingWait" xml:space="preserve">
+    <value>Please wait...</value>
+  </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>My documents</value>
+    <value>My Documents</value>
   </data>
   <data name="OriginalFormat" xml:space="preserve">
     <value>Original format</value>
   </data>
   <data name="Other" xml:space="preserve">
     <value>Other</value>
+  </data>
+  <data name="OverallProgress" xml:space="preserve">
+    <value>Overall Progress</value>
   </data>
   <data name="Presentations" xml:space="preserve">
     <value>Presentations</value>
@@ -505,10 +532,10 @@
     <value>Failed to upload file {0} to display</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
-    <value>Private Room</value>
+    <value>Privacy Room</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
-    <value>In projects</value>
+    <value>Project Documents</value>
   </data>
   <data name="RevisionCount" xml:space="preserve">
     <value>revisions: {0}</value>
@@ -520,10 +547,10 @@
     <value>You have been granted access to the {0} document</value>
   </data>
   <data name="SharingSettingsCount" xml:space="preserve">
-    <value>{0}</value>
+    <value>elements: {0}</value>
   </data>
   <data name="SharingSettingsEmpty" xml:space="preserve">
-    <value>Add users and groups to share documents with them.{0} Set their permissions for reading,  editing, etc.</value>
+    <value>Add users or groups and give them permissions{0} to read, review or edit the documents.</value>
   </data>
   <data name="SharingSettingsHeader" xml:space="preserve">
     <value>Sharing Settings for {0}</value>
@@ -556,7 +583,7 @@
     <value>Cancel</value>
   </data>
   <data name="TitleCreate" xml:space="preserve">
-    <value>Save</value>
+    <value>Create</value>
   </data>
   <data name="TitleEditingFile" xml:space="preserve">
     <value>It is currently being edited</value>
@@ -572,9 +599,6 @@
   </data>
   <data name="TitleMoreFeaturs" xml:space="preserve">
     <value>More Features</value>
-  </data>
-  <data name="TitleNewFileFormTemplate" xml:space="preserve">
-    <value>New Form template</value>
   </data>
   <data name="TitleNewFilePresentation" xml:space="preserve">
     <value>New Presentation</value>
@@ -598,34 +622,34 @@
     <value>Help</value>
   </data>
   <data name="TitleSettingsThirdParty" xml:space="preserve">
-    <value>Connected Clouds</value>
+    <value>Connect accounts</value>
   </data>
   <data name="TypeTitleBoxNet" xml:space="preserve">
     <value>Box</value>
   </data>
-  <data name="TypeTitleDocuSign" xml:space="preserve">
-    <value>DocuSign</value>
-  </data>
   <data name="TypeTitleDropBox" xml:space="preserve">
     <value>Dropbox</value>
   </data>
+  <data name="TypeTitleDocuSign" xml:space="preserve">
+    <value>DocuSign</value>
+  </data>
   <data name="TypeTitleGoogle" xml:space="preserve">
-    <value>Google Drive</value>
+    <value>google.com</value>
   </data>
   <data name="TypeTitlekDrive" xml:space="preserve">
     <value>kDrive</value>
   </data>
   <data name="TypeTitleSharePoint" xml:space="preserve">
-    <value>SharePoint</value>
+    <value>sharepoint.com</value>
   </data>
   <data name="TypeTitleSkyDrive" xml:space="preserve">
-    <value>OneDrive</value>
+    <value>onedrive.live.com</value>
   </data>
   <data name="TypeTitleWebDav" xml:space="preserve">
     <value>WebDAV</value>
   </data>
   <data name="TypeTitleYandex" xml:space="preserve">
-    <value>Yandex.Disk</value>
+    <value>yandex.com</value>
   </data>
   <data name="UnknownErrorText" xml:space="preserve">
     <value>Unknown error...</value>
@@ -644,26 +668,5 @@
   </data>
   <data name="Users" xml:space="preserve">
     <value>Users</value>
-  </data>
-  <data name="Shortened" xml:space="preserve">
-    <value>Shortened</value>
-  </data>
-  <data name="IndividualRights" xml:space="preserve">
-    <value>Individual rights</value>
-  </data>
-  <data name="ExternalLinkDisabled" xml:space="preserve">
-    <value>Disabled</value>
-  </data>
-  <data name="TitleNewSharedLink" xml:space="preserve">
-    <value>New link</value>
-  </data>
-  <data name="QuickExternalLink" xml:space="preserve">
-    <value>Quick external link</value>
-  </data>
-  <data name="shareFolderLinkMailBody" xml:space="preserve">
-    <value>You have been granted access to the {0} folder. Click the link below to open the folder right now: {1}</value>
-  </data>
-  <data name="shareFolderLinkMailSubject" xml:space="preserve">
-    <value>You have been granted access to the {0} folder</value>
   </data>
 </root>

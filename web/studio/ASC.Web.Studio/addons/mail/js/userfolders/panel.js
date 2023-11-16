@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,8 +71,8 @@ window.userFoldersPanel = (function($) {
             });
 
         createFolderLink = $("#userFoldersManage .link")
-            .off("click")
-            .on("click", createFolder);
+            .unbind("click")
+            .bind("click", createFolder);
 
         userFoldersManager.bind(userFoldersManager.events.OnCreate, onCreated);
         userFoldersManager.bind(userFoldersManager.events.OnUpdate, onEdited);
@@ -240,7 +240,7 @@ window.userFoldersPanel = (function($) {
         var nodeId = idPrefix + id;
 
         if (stateReady)
-            container.off("select_node.jstree");
+            container.unbind("select_node.jstree");
 
         unmarkAll();
 
@@ -252,7 +252,7 @@ window.userFoldersPanel = (function($) {
         selectedId = id;
 
         if (stateReady)
-            container.on("select_node.jstree", onSelectNode);
+            container.bind("select_node.jstree", onSelectNode);
     }
 
     function unmarkAll() {

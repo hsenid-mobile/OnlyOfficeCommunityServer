@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,13 @@ using System.Net.Sockets;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
-
 using ASC.Common.Logging;
 using ASC.Common.Security.Authorizing;
 using ASC.Common.Threading;
 using ASC.Core;
-using ASC.Web.Studio.PublicResources;
-
 using MailKit.Net.Smtp;
 using MailKit.Security;
-
 using MimeKit;
-
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Settings.Smtp
@@ -102,7 +97,7 @@ namespace ASC.Api.Settings.Smtp
 
                 SetProgress(10, "Setup user");
 
-                SecurityContext.CurrentUser = CurrentUser; //Core.Configuration.Constants.CoreSystem);
+                SecurityContext.AuthenticateMe(CurrentUser); //Core.Configuration.Constants.CoreSystem);
 
                 SetProgress(15, "Find user data");
 
@@ -143,16 +138,8 @@ namespace ASC.Api.Settings.Smtp
                     {
                         SetProgress(60, "Authenticate");
 
-                        if (SmtpSettings.UseNtlm)
-                        {
-                            var saslMechanism = new SaslMechanismNtlm(SmtpSettings.CredentialsUserName, SmtpSettings.CredentialsUserPassword);
-                            client.Authenticate(saslMechanism, cancellationToken);
-                        }
-                        else
-                        {
-                            client.Authenticate(SmtpSettings.CredentialsUserName,
-                                SmtpSettings.CredentialsUserPassword, cancellationToken);
-                        }
+                        client.Authenticate(SmtpSettings.CredentialsUserName,
+                            SmtpSettings.CredentialsUserPassword, cancellationToken);
                     }
 
                     SetProgress(80, "Send test message");
@@ -163,7 +150,7 @@ namespace ASC.Api.Settings.Smtp
             }
             catch (AuthorizingException authError)
             {
-                Error = Resource.ErrorAccessDenied; // "No permissions to perform this action";
+                Error = Resources.Resource.ErrorAccessDenied; // "No permissions to perform this action";
                 Logger.Error(Error, new SecurityException(Error, authError));
             }
             catch (AggregateException ae)
@@ -206,15 +193,13 @@ namespace ASC.Api.Settings.Smtp
             var sslCertificatePermit = ConfigurationManagerExtension.AppSettings["mail.certificate-permit"] != null &&
                     Convert.ToBoolean(ConfigurationManagerExtension.AppSettings["mail.certificate-permit"]);
 
-            var client = new SmtpClient
+            return new SmtpClient
             {
-                Timeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds
+                ServerCertificateValidationCallback = (sender, certificate, chain, errors) =>
+                    sslCertificatePermit ||
+                    MailKit.MailService.DefaultServerCertificateValidationCallback(sender, certificate, chain, errors),
+                Timeout = (int) TimeSpan.FromSeconds(30).TotalMilliseconds
             };
-
-            if (sslCertificatePermit)
-                client.ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true;
-
-            return client;
         }
 
         public virtual DistributedTask GetDistributedTask()

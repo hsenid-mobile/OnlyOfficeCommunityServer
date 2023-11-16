@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Web;
 using System.Web.UI;
-
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Utility;
 
@@ -37,7 +36,7 @@ namespace ASC.Web.Studio.UserControls.Management.StorageSettings
                 return;
             }
 
-            Page.RegisterBodyScripts("~/UserControls/Management/StorageSettings/js/storageSettings.js", "~/UserControls/Management/Backup/js/consumersettings.js");
+            Page.RegisterBodyScripts("~/UserControls/Management/StorageSettings/js/storageSettings.js");
             Page.RegisterStyle("~/UserControls/Management/StorageSettings/css/storageSettings.less");
         }
     }

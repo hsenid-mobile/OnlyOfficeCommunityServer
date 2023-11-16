@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
@@ -35,7 +34,7 @@ namespace ASC.Mail.Core.Dao
     {
         public void CleanupMailboxData(MailBoxData mailbox, bool totalRemove)
         {
-            if (!mailbox.IsRemoved)
+            if(!mailbox.IsRemoved)
                 throw new Exception("Mailbox is not removed.");
 
             var deleteMailboxMessagesQuery = new SqlDelete(MailTable.TABLE_NAME)
@@ -219,10 +218,12 @@ namespace ASC.Mail.Core.Dao
             }
         }
 
-        private IDbManager GetDb()
+        private DbManager GetDb()
         {
             return new DbManager(Defines.CONNECTION_STRING_NAME);
         }
 
     }
+
+    
 }

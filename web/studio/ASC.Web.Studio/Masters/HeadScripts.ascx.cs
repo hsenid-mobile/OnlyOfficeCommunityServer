@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-
 using ASC.Web.Core.Client.Bundling;
 
 namespace ASC.Web.Studio.Masters
@@ -60,10 +59,6 @@ namespace ASC.Web.Studio.Masters
         }
 
         public StyleBundleData GetStaticStyleSheet()
-        {
-            return null;
-        }
-        public StyleBundleData GetStaticDarkStyleSheet()
         {
             return null;
         }

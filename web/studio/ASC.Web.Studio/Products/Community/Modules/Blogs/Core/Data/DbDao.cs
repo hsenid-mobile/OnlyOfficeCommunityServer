@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 
 using System;
 using System.Data;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 
@@ -29,10 +28,10 @@ namespace ASC.Blogs.Core.Data
 {
     public class DbDao
     {
-        private readonly IDbManager db;
+        private readonly DbManager db;
 
 
-        protected DbDao(IDbManager db, int tenant)
+        protected DbDao(DbManager db, int tenant)
         {
             if (db == null) throw new ArgumentNullException("db");
 
@@ -42,7 +41,7 @@ namespace ASC.Blogs.Core.Data
 
         public int Tenant { get; private set; }
 
-        public IDbManager Db { get { return db; } }
+        public DbManager Db { get { return db; } }
 
         public IDbConnection OpenConnection()
         {
@@ -70,7 +69,7 @@ namespace ASC.Blogs.Core.Data
         }
 
         protected string TenantColumnName { get { return "Tenant"; } }
-
+        
         protected string GetTenantColumnName(string table)
         {
             return String.Format("{0}.{1}", table, TenantColumnName);

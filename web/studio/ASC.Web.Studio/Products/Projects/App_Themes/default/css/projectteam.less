@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,8 @@
 */
 
 
-@import "params.less";
-
 #team_container .listContainer tr:first-child, #projectParticipantsContainer .listContainer tr:first-child {
-    border-top: 1px solid @border-color;
+    border-top: 1px solid #d1d1d1;
 }
 
 #projectParticipantsContainer tr:hover .reset-action {
@@ -29,7 +27,7 @@
 .pm-projectTeam-projectLeaderCard {
     padding: 8px;
     width: 360px;
-    border: solid 1px @border-color;
+    border: solid 1px #D1D1D1;
 
     .managerAvatar {
         float: left;
@@ -67,8 +65,8 @@
     cursor: default;
 }
 .pm-projectTeam-modulePermissionOn span {
-    border-bottom: 1px dotted @dark-text-color;
-    color: @dark-text-color;
+    border-bottom: 1px dotted #000;
+    color: #000;
     margin-right: 8px;
 }
 .pm-projectTeam-modulePermissionOff {
@@ -77,8 +75,8 @@
     cursor: pointer;
 
     span {
-        border-bottom: 1px dotted @text-color;
-        color: @text-color;
+        border-bottom: 1px dotted #333;
+        color: #333;
         margin-right: 8px;
     }
 
@@ -94,7 +92,7 @@
 //TODO: remove no-access
 .no-access .pm-projectTeam-modulePermissionOn span,
 .pm-projectTeam-participantContainer.disable .pm-projectTeam-modulePermissionOn span {
-    color: @text-color;
+    color: #333;
     margin-right: 8px;
 }
 .no-access .pm-projectTeam-modulePermissionOff,
@@ -103,7 +101,7 @@
     cursor: default;
 }
 .no-access .pm-projectTeam-modulePermissionOn span .pm-projectTeam-participantContainer.disable .pm-projectTeam-modulePermissionOff span {
-    color: @text-color;
+    color: #333;
     margin-right: 8px;
 }
 .no-access .pm-projectTeam-modulePermissionOn,
@@ -118,7 +116,7 @@
     }
 
 #team_container table, #projectParticipantsContainer table {
-    color: @text-color;
+    color: #333;
     border-collapse: collapse;
     width: 100%;
 }
@@ -126,14 +124,14 @@
 
 .pm-projectTeam-participantContainer {
     > td {
-        border-bottom: 1px solid @border-color;
+        border-bottom: 1px solid #D1D1D1;
         vertical-align: middle;
         overflow: hidden;
         padding: 8px 0;
     }
 
     &.open {
-        background-color: @body-color-selected;
+        background-color: #f2f2f2;
 
         .entity-menu {
             border-color: #3b72a7;
@@ -145,7 +143,7 @@
     }
 
     &:hover {
-        background-color: @body-color-selected;
+        background-color: #f2f2f2;
 
         .user-info a.user-name {
             text-decoration: underline;
@@ -159,11 +157,12 @@
         .user-name {
             font-size: 14px;
             font-weight: bold;
-            color: @text-color;
+            color: #333;
             text-decoration: none;
-            display: block;
+            display: inline-block;
             overflow: hidden;
             text-overflow: ellipsis;
+            max-width: 340px;
 
             &.without-title {
                 margin-top: 6px;
@@ -208,7 +207,7 @@
             float: left;
 
             span {
-                text-overflow: ellipsis;
+                max-width: 350px;
                 overflow: hidden;
                 white-space: nowrap;
             }

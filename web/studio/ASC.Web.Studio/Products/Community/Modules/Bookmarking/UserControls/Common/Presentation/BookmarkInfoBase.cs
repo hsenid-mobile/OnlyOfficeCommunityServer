@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 
 using System;
-
-using ASC.Bookmarking;
 using ASC.Bookmarking.Business.Permissions;
-using ASC.Bookmarking.Common;
 using ASC.Bookmarking.Pojo;
 using ASC.Core;
 using ASC.Core.Users;
-using ASC.Web.Community.Modules.Bookmarking.UserControls.Resources;
 using ASC.Web.Core.Helpers;
 using ASC.Web.Core.Utility.Skins;
 using ASC.Web.UserControls.Bookmarking.Common.Util;
+using ASC.Web.UserControls.Bookmarking.Resources;
+using ASC.Bookmarking.Common;
+using ASC.Bookmarking;
 
 namespace ASC.Web.UserControls.Bookmarking.Common.Presentation
 {
@@ -276,7 +275,7 @@ namespace ASC.Web.UserControls.Bookmarking.Common.Presentation
         {
             try
             {
-                var id = (Guid)userID;
+                var id = (Guid) userID;
                 return CoreContext.UserManager.GetUsers(id);
             }
             catch
@@ -322,7 +321,7 @@ namespace ASC.Web.UserControls.Bookmarking.Common.Presentation
         {
             try
             {
-                var dateAdded = (DateTime)date;
+                var dateAdded = (DateTime) date;
                 return BookmarkingConverter.GetDateAsString(dateAdded);
             }
             catch
@@ -362,7 +361,7 @@ namespace ASC.Web.UserControls.Bookmarking.Common.Presentation
                 {
                     return string.Empty;
                 }
-                var comments = GrammaticalHelper.ChooseNumeralCase((int)commentsCount,
+                var comments = GrammaticalHelper.ChooseNumeralCase((int) commentsCount,
                                                                    BookmarkingUCResource.CommentsNominative,
                                                                    BookmarkingUCResource.CommentsGenitiveSingular,
                                                                    BookmarkingUCResource.CommentsGenitivePlural);
@@ -427,7 +426,7 @@ namespace ASC.Web.UserControls.Bookmarking.Common.Presentation
         {
             if (!string.IsNullOrEmpty(SingleBookmarkDivID))
             {
-                var a = SingleBookmarkDivID.Split(new string[] { "SingleBookmark" }, StringSplitOptions.None);
+                var a = SingleBookmarkDivID.Split(new string[] {"SingleBookmark"}, StringSplitOptions.None);
                 if (a.Length == 2)
                 {
                     return a[0];

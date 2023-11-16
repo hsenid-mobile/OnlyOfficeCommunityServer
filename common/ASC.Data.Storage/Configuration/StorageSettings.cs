@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.Optimization;
-
 using ASC.Common.Caching;
 using ASC.Core;
 using ASC.Core.Common.Configuration;
@@ -29,14 +29,11 @@ namespace ASC.Data.Storage.Configuration
 {
     [Serializable]
     [DataContract]
-    public abstract class BaseStorageSettings<T> : BaseSettings<T> where T : class, ISettings, new()
+    public abstract class BaseStorageSettings<T> : BaseSettings<T> where T: class, ISettings, new()
     {
-        ///<example>Module</example>
         [DataMember(Name = "Module")]
         public string Module { get; set; }
 
-        ///<example>Props</example>
-        ///<collection>list</collection>
         [DataMember(Name = "Props")]
         public Dictionary<string, string> Props { get; set; }
 
@@ -47,12 +44,10 @@ namespace ASC.Data.Storage.Configuration
 
         static BaseStorageSettings()
         {
-            AscCache.Notify.Subscribe<ConsumerCacheItem>((i, a) =>
+            AscCache.Notify.Subscribe<Consumer>((i, a) =>
             {
                 if (a == CacheNotifyAction.Remove)
                 {
-                    CoreContext.TenantManager.SetCurrentTenant(i.TenantId);
-
                     var settings = StorageSettings.Load();
                     if (i.Name == settings.Module)
                     {
@@ -122,7 +117,6 @@ namespace ASC.Data.Storage.Configuration
         public virtual Func<DataStoreConsumer, DataStoreConsumer> Switch { get { return d => d; } }
     }
 
-    ///<inherited>ASC.Data.Storage.Configuration.BaseStorageSettings`1, ASC.Data.Storage</inherited>
     [Serializable]
     [DataContract]
     public class StorageSettings : BaseStorageSettings<StorageSettings>
@@ -133,7 +127,6 @@ namespace ASC.Data.Storage.Configuration
         }
     }
 
-    ///<inherited>ASC.Data.Storage.Configuration.BaseStorageSettings`1, ASC.Data.Storage</inherited>
     [Serializable]
     [DataContract]
     public class CdnStorageSettings : BaseStorageSettings<CdnStorageSettings>

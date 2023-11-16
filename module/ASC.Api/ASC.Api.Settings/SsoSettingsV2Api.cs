@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,33 +18,28 @@
 using System;
 using System.Linq;
 using System.Web;
-
 using ASC.Api.Attributes;
 using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Users;
 using ASC.MessagingSystem;
 using ASC.Web.Studio.Core;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;
 using ASC.Web.Studio.Utility;
-
 using Newtonsoft.Json;
+using Resources;
 
 namespace ASC.Api.Settings
 {
     public partial class SettingsApi
     {
         /// <summary>
-        /// Returns the current portal SSO settings.
+        /// Returns current portal SSO settings
         /// </summary>
         /// <short>
-        /// Get the SSO settings
+        /// Get SSO settings
         /// </short>
-        /// <category>SSO</category>
-        /// <returns type="ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoSettingsV2, ASC.Web.Studio">SSO settings</returns>
-        /// <path>api/2.0/settings/ssov2</path>
-        /// <httpMethod>GET</httpMethod>
+        /// <returns>SsoSettingsV2 object</returns>
         [Read("ssov2")]
         public SsoSettingsV2 GetSsoSettingsV2()
         {
@@ -52,22 +47,19 @@ namespace ASC.Api.Settings
 
             var settings = SsoSettingsV2.Load();
 
-            if (string.IsNullOrEmpty(settings.SpLoginLabel))
+            if(string.IsNullOrEmpty(settings.SpLoginLabel))
                 settings.SpLoginLabel = SsoSettingsV2.SSO_SP_LOGIN_LABEL;
 
             return settings;
         }
 
         /// <summary>
-        /// Returns the default portal SSO settings.
+        /// Returns default portal SSO settings
         /// </summary>
         /// <short>
-        /// Get the default SSO settings
+        /// Get default SSO settings
         /// </short>
-        /// <category>SSO</category>
-        /// <returns type="ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoSettingsV2, ASC.Web.Studio">Default SSO settings</returns>
-        /// <path>api/2.0/settings/ssov2/default</path>
-        /// <httpMethod>GET</httpMethod>
+        /// <returns>SsoSettingsV2 object</returns>
         [Read("ssov2/default")]
         public SsoSettingsV2 GetDefaultSsoSettingsV2()
         {
@@ -77,40 +69,34 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Returns the SSO settings constants.
+        /// Returns SSO settings constants
         /// </summary>
         /// <short>
-        /// Get the SSO settings constants
+        /// Get SSO settings constants
         /// </short>
-        /// <category>SSO</category>
-        /// <returns>The SSO settings constants</returns>
-        /// <path>api/2.0/settings/ssov2/constants</path>
-        /// <httpMethod>GET</httpMethod>
+        /// <returns>object</returns>
         [Read("ssov2/constants")]
         public object GetSsoSettingsV2Constants()
         {
             return new
-            {
-                SsoNameIdFormatType = new SsoNameIdFormatType(),
-                SsoBindingType = new SsoBindingType(),
-                SsoSigningAlgorithmType = new SsoSigningAlgorithmType(),
-                SsoEncryptAlgorithmType = new SsoEncryptAlgorithmType(),
-                SsoSpCertificateActionType = new SsoSpCertificateActionType(),
-                SsoIdpCertificateActionType = new SsoIdpCertificateActionType()
-            };
+                {
+                    SsoNameIdFormatType = new SsoNameIdFormatType(),
+                    SsoBindingType = new SsoBindingType(),
+                    SsoSigningAlgorithmType = new SsoSigningAlgorithmType(),
+                    SsoEncryptAlgorithmType = new SsoEncryptAlgorithmType(),
+                    SsoSpCertificateActionType = new SsoSpCertificateActionType(),
+                    SsoIdpCertificateActionType = new SsoIdpCertificateActionType()
+                };
         }
 
         /// <summary>
-        /// Saves the SSO settings for the current portal.
+        /// Save SSO settings for current portal
         /// </summary>
         /// <short>
-        /// Save the SSO settings
+        /// Save SSO settings
         /// </short>
-        /// <category>SSO</category>
-        /// <param type="System.String, System" name="serializeSettings">Serialized SSO settings</param>
-        /// <returns>SSO settings</returns>
-        /// <path>api/2.0/settings/ssov2</path>
-        /// <httpMethod>POST</httpMethod>
+        /// <param name="serializeSettings">serialized SsoSettingsV2 object</param>
+        /// <returns>SsoSettingsV2 object</returns>
         [Create("ssov2")]
         public SsoSettingsV2 SaveSsoSettingsV2(string serializeSettings)
         {
@@ -152,7 +138,7 @@ namespace ASC.Api.Settings
             if (!settings.Save())
                 throw new Exception(Resource.SsoSettingsCantSaveSettings);
 
-            if (!settings.EnableSso)
+            if(!settings.EnableSso)
                 ConverSsoUsersToOrdinary();
 
             var messageAction = settings.EnableSso ? MessageAction.SSOEnabled : MessageAction.SSODisabled;
@@ -163,15 +149,12 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Resets the SSO settings of the current portal.
+        /// Reset SSO settings for current portal
         /// </summary>
         /// <short>
-        /// Reset the SSO settings
+        /// Reset SSO settings
         /// </short>
-        /// <category>SSO</category>
-        /// <returns type="ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoSettingsV2, ASC.Web.Studio">Default SSO settings</returns>
-        /// <path>api/2.0/settings/ssov2</path>
-        /// <httpMethod>DELETE</httpMethod>
+        /// <returns>SsoSettingsV2 object</returns>
         [Delete("ssov2")]
         public SsoSettingsV2 ResetSsoSettingsV2()
         {
@@ -193,7 +176,7 @@ namespace ASC.Api.Settings
         {
             var ssoUsers = CoreContext.UserManager.GetUsers().Where(u => u.IsSSO()).ToList();
 
-            if (!ssoUsers.Any())
+            if(!ssoUsers.Any())
                 return;
 
             foreach (var existingSsoUser in ssoUsers)
@@ -218,9 +201,9 @@ namespace ASC.Api.Settings
         {
             SecurityContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
 
-            if (!CoreContext.Configuration.Standalone
-                && (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString())
-                    || !CoreContext.TenantManager.GetTenantQuota(TenantProvider.CurrentTenantID).Sso))
+            if (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString()) ||
+                (CoreContext.Configuration.Standalone &&
+                 !CoreContext.TenantManager.GetTenantQuota(TenantProvider.CurrentTenantID).Sso))
             {
                 throw new BillingException(Resource.ErrorNotAllowedOption, "Sso");
             }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,6 +157,9 @@ window.tagsManager = (function($) {
             return d.reject(onError({}, [error]))
         }
 
+        // Google Analytics
+        window.ASC.Mail.ga_track(ga_Categories.tagsManagement, ga_Actions.createNew, "create_new_tag");
+
         serviceManager.createTag(newTag.name,
             newTag.style,
             newTag.addresses,
@@ -184,6 +187,9 @@ window.tagsManager = (function($) {
             return d.reject(onError({}, [error]));
         }
 
+        // Google Analytics
+        window.ASC.Mail.ga_track(ga_Categories.tagsManagement, ga_Actions.update, "update_tag");
+
         serviceManager.updateTag(newTag.id,
             newTag.name,
             newTag.style,
@@ -202,7 +208,7 @@ window.tagsManager = (function($) {
     }
 
     function deleteTag(id) {
-        serviceManager.deleteTag(id, {}, {}, ASC.Resources.Master.ResourceJS.LoadingProcessing);
+        serviceManager.deleteTag(id, {}, {}, ASC.Resources.Master.Resource.LoadingProcessing);
     }
 
     function getVacantStyle() {
@@ -250,11 +256,11 @@ window.tagsManager = (function($) {
     }
 
     function bind(eventName, fn) {
-        eventsHandler.on(eventName, fn);
+        eventsHandler.bind(eventName, fn);
     }
 
     function unbind(eventName) {
-        eventsHandler.off(eventName);
+        eventsHandler.unbind(eventName);
     }
 
     return {

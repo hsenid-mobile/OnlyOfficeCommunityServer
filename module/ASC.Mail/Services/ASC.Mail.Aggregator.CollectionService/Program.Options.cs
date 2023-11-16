@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System.Collections.Generic;
-
 using CommandLine;
 using CommandLine.Text;
 
@@ -24,7 +23,7 @@ namespace ASC.Mail.Aggregator.CollectionService
 {
     public class Options
     {
-        [Option('u', "users", MetaValue = "STRING ARRAY", Required = false, HelpText = "An array of users for which the aggregator will take tasks. " +
+        [OptionList('u', "users", MetaValue = "STRING ARRAY", Required = false, HelpText = "An array of users for which the aggregator will take tasks. " +
                                                                                            "Separator = ';' " +
                                                                                            "Example: -u\"{tl_userId_1}\";\"{tl_userId_2}\";\"{tl_userId_3}\"", Separator = ';')]
         public IList<string> OnlyUsers { get; set; }
@@ -34,5 +33,11 @@ namespace ASC.Mail.Aggregator.CollectionService
 
         [Option("unlimit", Required = false, HelpText = "Unlimit messages per mailbox session")]
         public bool NoMessagesLimit { get; set; }
+
+        [HelpOption]
+        public string GetUsage()
+        {
+            return HelpText.AutoBuild(this, current => HelpText.DefaultParsingErrorsHandler(this, current));
+        }
     }
 }

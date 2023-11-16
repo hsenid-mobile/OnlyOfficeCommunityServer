@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
@@ -60,15 +59,10 @@ namespace ASC.Core.Data
                         ? Exp.Eq("t.status", (int)TenantStatus.Active)
                         : Exp.Empty,
                     from != default(DateTime)
-                        ? Exp.Ge("t.last_modified", from)
+                        ? Exp.Ge("last_modified", from)
                         : Exp.Empty
                     )
                 );
-        }
-
-        public IEnumerable<Tenant> GetTenants(List<int> ids)
-        {
-            return GetTenants(Exp.And(Exp.In("t.id", ids), Exp.Eq("t.status", (int)TenantStatus.Active)));
         }
 
         public IEnumerable<Tenant> GetTenants(string login, string passwordHash)
@@ -79,6 +73,7 @@ namespace ASC.Core.Data
             {
                 var q = TenantsQuery(Exp.Empty)
                     .InnerJoin("core_user u", Exp.EqColumns("t.id", "u.tenant"))
+                    .InnerJoin("core_usersecurity s", Exp.EqColumns("u.id", "s.userid"))
                     .Where("t.status", (int)TenantStatus.Active)
                     .Where(login.Contains('@') ? "u.email" : "u.id", login)
                     .Where("u.status", EmployeeStatus.Active)
@@ -97,12 +92,27 @@ namespace ASC.Core.Data
                     .Where("u.id", userId)
                     .Where("u.status", EmployeeStatus.Active)
                     .Where("u.removed", false)
-                    .Where(Exp.Eq("s.pwdhash", GetPasswordHash(userId, passwordHash)));
+                    .Where(Exp.Or(
+                            Exp.Eq("s.pwdhash", GetPasswordHash(userId, passwordHash)),
+                            Exp.Eq("s.pwdhash", Hasher.Base64Hash(passwordHash, HashAlg.SHA256)) //todo: remove old scheme
+                        ));
 
                 return ExecList(q).ConvertAll(ToTenant);
             }
             else
             {
+                var q = TenantsQuery(Exp.Empty)
+                    .InnerJoin("core_user u", Exp.EqColumns("t.id", "u.tenant"))
+                    .InnerJoin("core_usersecurity s", Exp.EqColumns("u.id", "s.userid"))
+                    .Where("t.status", (int)TenantStatus.Active)
+                    .Where(login.Contains('@') ? "u.email" : "u.id", login)
+                    .Where("u.status", EmployeeStatus.Active)
+                    .Where("u.removed", false)
+                    .Where("s.pwdhash", Hasher.Base64Hash(passwordHash, HashAlg.SHA256));
+
+                //old password
+                var result = ExecList(q).ConvertAll(ToTenant);
+
                 var usersQuery = new SqlQuery("core_user u")
                     .Select("u.id")
                     .Where("u.email", login)
@@ -113,18 +123,21 @@ namespace ASC.Core.Data
                         GetPasswordHash(new Guid((string)r[0]), passwordHash)
                     );
 
-                var q = TenantsQuery(Exp.Empty)
+                q = TenantsQuery(Exp.Empty)
                     .InnerJoin("core_usersecurity s", Exp.EqColumns("t.id", "s.tenant"))
-                    .Where("t.status", (int)TenantStatus.Active)
                     .Where(Exp.In("s.pwdhash", passwordHashs));
 
-                return ExecList(q).ConvertAll(ToTenant);
+                //new password
+                result = result.Concat(ExecList(q).ConvertAll(ToTenant)).ToList();
+                result.Distinct();
+
+                return result;
             }
         }
 
         public Tenant GetTenant(int id)
         {
-            return GetTenants(Exp.Eq("t.id", id))
+            return GetTenants(Exp.Eq("id", id))
                 .SingleOrDefault();
         }
 
@@ -132,7 +145,7 @@ namespace ASC.Core.Data
         {
             if (string.IsNullOrEmpty(domain)) throw new ArgumentNullException("domain");
 
-            return GetTenants(Exp.Eq("t.alias", domain.ToLowerInvariant()) | Exp.Eq("t.mappeddomain", domain.ToLowerInvariant()))
+            return GetTenants(Exp.Eq("alias", domain.ToLowerInvariant()) | Exp.Eq("mappeddomain", domain.ToLowerInvariant()))
                 .OrderBy(a => a.Status == TenantStatus.Restoring ? TenantStatus.Active : a.Status)
                 .ThenByDescending(a => a.Status == TenantStatus.Restoring ? 0 : a.TenantId)
                 .FirstOrDefault();
@@ -287,7 +300,7 @@ namespace ASC.Core.Data
         public void SetTenantSettings(int tenant, string key, byte[] data)
         {
             var i = data == null || data.Length == 0 ?
-                new SqlDelete("core_settings").Where("tenant", tenant).Where("id", key) :
+                (ISqlInstruction)new SqlDelete("core_settings").Where("tenant", tenant).Where("id", key) :
                 (ISqlInstruction)new SqlInsert("core_settings", true).InColumns("tenant", "id", "value").Values(tenant, key, data);
             ExecNonQuery(i);
         }
@@ -359,7 +372,7 @@ namespace ASC.Core.Data
                                 id = File.ReadAllText("/etc/timezone").Trim();
                             }
 
-                            if (string.IsNullOrEmpty(id))
+                            if(string.IsNullOrEmpty(id))
                             {
                                 var psi = new ProcessStartInfo
                                 {
@@ -385,7 +398,7 @@ namespace ASC.Core.Data
                     }
                     defaultTimeZone = tz;
                 }
-                catch (Exception)
+                catch(Exception)
                 {
                     // ignore
                     defaultTimeZone = TimeZoneInfo.Utc;
@@ -424,14 +437,14 @@ namespace ASC.Core.Data
             if (!exists)
             {
                 exists = 0 < db.ExecuteScalar<int>(new SqlQuery("tenants_tenants").SelectCount()
-                    .Where(Exp.Eq("mappeddomain", domain) & !Exp.Eq("id", tenantId) & !Exp.In("status", new[] { (int)TenantStatus.RemovePending, (int)TenantStatus.Restoring })));
+                    .Where(Exp.Eq("mappeddomain", domain) & !Exp.Eq("id", tenantId) & !Exp.In("status", new []{(int)TenantStatus.RemovePending, (int) TenantStatus.Restoring})));
             }
             if (exists)
             {
                 // cut number suffix
                 while (true)
                 {
-                    if (TenantDomainValidator.MinLength < domain.Length && char.IsNumber(domain, domain.Length - 1))
+                    if (6 < domain.Length && char.IsNumber(domain, domain.Length - 1))
                     {
                         domain = domain.Substring(0, domain.Length - 1);
                     }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,9 @@ using ASC.Core.Tenants;
 using ASC.CRM.Core.Entities;
 using ASC.ElasticSearch;
 using ASC.Files.Core;
-using ASC.Web.CRM.Core.Enums;
 using ASC.Web.CRM.Core.Search;
+using ASC.Web.CRM.Core.Enums;
 using ASC.Web.Files.Api;
-
 using OrderBy = ASC.CRM.Core.Entities.OrderBy;
 
 namespace ASC.CRM.Core.Dao
@@ -239,45 +238,45 @@ namespace ASC.CRM.Core.Dao
                                             isShared);
             int result;
 
-            if (withParams)
-            {
-                ICollection<int> excludedContactIDs;
-
-                switch (contactListView)
+                if (withParams)
                 {
-                    case ContactListViewType.Person:
-                        excludedContactIDs = CRMSecurity.GetPrivateItems(typeof(Person))
-                                            .Except(Db.ExecuteList(Query("crm_contact").Select("id")
-                                                    .Where(Exp.In("is_shared", new[] { (int)ShareType.Read, (int)ShareType.ReadWrite }) & Exp.Eq("is_company", false)))
-                                              .Select(x => Convert.ToInt32(x[0]))).ToList();
-                        break;
-                    case ContactListViewType.Company:
-                        excludedContactIDs = CRMSecurity.GetPrivateItems(typeof(Company))
-                                           .Except(Db.ExecuteList(Query("crm_contact").Select("id")
-                                                  .Where(Exp.In("is_shared", new[] { (int)ShareType.Read, (int)ShareType.ReadWrite }) & Exp.Eq("is_company", true)))
+                    ICollection<int> excludedContactIDs;
+
+                    switch (contactListView)
+                    {
+                        case ContactListViewType.Person:
+                            excludedContactIDs = CRMSecurity.GetPrivateItems(typeof(Person))
+                                                .Except(Db.ExecuteList(Query("crm_contact").Select("id")
+                                                        .Where(Exp.In("is_shared", new[] { (int)ShareType.Read, (int)ShareType.ReadWrite }) & Exp.Eq("is_company", false)))
                                                   .Select(x => Convert.ToInt32(x[0]))).ToList();
+                            break;
+                        case ContactListViewType.Company:
+                            excludedContactIDs = CRMSecurity.GetPrivateItems(typeof(Company))
+                                               .Except(Db.ExecuteList(Query("crm_contact").Select("id")
+                                                      .Where(Exp.In("is_shared", new[] { (int)ShareType.Read, (int)ShareType.ReadWrite }) & Exp.Eq("is_company", true)))
+                                                      .Select(x => Convert.ToInt32(x[0]))).ToList();
 
-                        break;
-                    default:
-                        excludedContactIDs = CRMSecurity.GetPrivateItems(typeof(Company)).Union(CRMSecurity.GetPrivateItems(typeof(Person)))
-                                    .Except(Db.ExecuteList(Query("crm_contact").Select("id").Where(Exp.In("is_shared", new[] { (int)ShareType.Read, (int)ShareType.ReadWrite })))
-                                          .Select(x => Convert.ToInt32(x[0]))).ToList();
+                            break;
+                        default:
+                            excludedContactIDs = CRMSecurity.GetPrivateItems(typeof(Company)).Union(CRMSecurity.GetPrivateItems(typeof(Person)))
+                                        .Except(Db.ExecuteList(Query("crm_contact").Select("id").Where(Exp.In("is_shared", new[] { (int)ShareType.Read, (int)ShareType.ReadWrite })))
+                                              .Select(x => Convert.ToInt32(x[0]))).ToList();
 
 
 
-                        break;
-                }
+                            break;
+                    }
 
-                var whereConditional = WhereConditional(excludedContactIDs,
-                                                        searchText,
-                                                        tags,
-                                                        contactStage,
-                                                        contactType,
-                                                        contactListView,
-                                                        fromDate,
-                                                        toDate,
-                                                        responsibleid,
-                                                        isShared);
+                    var whereConditional = WhereConditional(excludedContactIDs,
+                                                            searchText,
+                                                            tags,
+                                                            contactStage,
+                                                            contactType,
+                                                            contactListView,
+                                                            fromDate,
+                                                            toDate,
+                                                            responsibleid,
+                                                            isShared);
 
                 if (whereConditional != null)
                 {
@@ -295,9 +294,8 @@ namespace ASC.CRM.Core.Dao
 
                         var fakeContactsOldScheme = sqlResultRows
                             .Where(row => row[2] == null).ToList() // old scheme
-                            .ConvertAll(row => Convert.ToBoolean(row[1]) == true ? new Company() { ID = Convert.ToInt32(row[0]) } as Contact : new Person() { ID = Convert.ToInt32(row[0]) } as Contact);
-                        var resultFakeContactsOldScheme_Count = fakeContactsOldScheme.Where(fc =>
-                        {
+                            .ConvertAll(row =>  Convert.ToBoolean(row[1]) == true ? new Company() {ID = Convert.ToInt32(row[0])} as Contact : new Person() {ID = Convert.ToInt32(row[0])} as Contact );
+                        var resultFakeContactsOldScheme_Count = fakeContactsOldScheme.Where(fc => {
                             var accessSubjectToContact = CRMSecurity.GetAccessSubjectTo(fc);
                             if (isShared.Value == true)
                             {
@@ -359,7 +357,7 @@ namespace ASC.CRM.Core.Dao
                     .InnerJoin("crm_contact_info cci",
                         Exp.EqColumns("cc.tenant_id", "cci.tenant_id") &
                         Exp.EqColumns("cc.id", "cci.contact_id"))
-                    .Where("cci.type", (int)ContactInfoType.Email)
+                    .Where("cci.type", (int) ContactInfoType.Email)
                     .Where("cc.tenant_id", TenantID);
 
                 return query;
@@ -503,10 +501,10 @@ namespace ASC.CRM.Core.Dao
 
                         result.AddRange(crudeContacts.Where(c => (isShared.Value == true ? c.ShareType != ShareType.None : c.ShareType == ShareType.None)));
 
-                        if ((result.Count >= count + from) || (crudeContacts.Count < localCount)) break;
+                       if ((result.Count >= count + from) || (crudeContacts.Count < localCount)) break;
 
-                        localFrom += localCount;
-                        localCount = localCount * 2;
+                       localFrom += localCount;
+                       localCount = localCount * 2;
                     }
 
                     return result.Skip(from).Take(count).ToList();
@@ -727,12 +725,9 @@ namespace ASC.CRM.Core.Dao
 
             if (isShared.HasValue)
             {
-                if (isShared.Value == true)
-                {
-                    conditions.Add(Exp.Or(Exp.In("is_shared", new[] { (int)ShareType.Read, (int)ShareType.ReadWrite }), Exp.Eq("is_shared", null)));
-                }
-                else
-                {
+                if (isShared.Value == true) {
+                    conditions.Add(Exp.Or(Exp.In("is_shared", new[]{(int)ShareType.Read , (int)ShareType.ReadWrite}), Exp.Eq("is_shared", null)));
+                } else {
                     conditions.Add(Exp.Or(Exp.Eq("is_shared", (int)ShareType.None), Exp.Eq("is_shared", null)));
                 }
             }
@@ -760,9 +755,7 @@ namespace ASC.CRM.Core.Dao
 
                     conditions.Add(Exp.In("id", ids));
 
-                }
-                else
-                {
+                } else {
                     conditions.Add(!Exp.In("id", exceptIDs.ToArray()));
                 }
             }
@@ -1053,8 +1046,7 @@ namespace ASC.CRM.Core.Dao
                 .Where(Exp.Eq("ec.contact_id", companyID) & Exp.Eq("ec.entity_type", (int)EntityType.Person));
             var rows = Db.ExecuteList(query);
 
-            foreach (var row in rows)
-            {
+            foreach (var row in rows) {
                 if (row[1] == null)
                 {
                     result.Add((int)(row[0]), null);
@@ -1189,8 +1181,7 @@ namespace ASC.CRM.Core.Dao
 
                 emailsAlreadyExists = Db.ExecuteList(sqlQuery).ConvertAll(row => Convert.ToString(row[1]));
 
-                if (emailsAlreadyExists.Count != 0)
-                {
+                if (emailsAlreadyExists.Count != 0) {
                     result = items.Where(i => emailsAlreadyExists.Contains(i.Data)).Select(i => i.ContactID).ToList();
                 }
 
@@ -1282,7 +1273,7 @@ namespace ASC.CRM.Core.Dao
                 firstName = String.Empty;
                 lastName = String.Empty;
                 title = String.Empty;
-                companyName = (((Company)contact).CompanyName ?? "").Trim();
+                companyName = (((Company) contact).CompanyName ?? "").Trim();
                 isCompany = true;
                 companyID = 0;
                 displayName = companyName;
@@ -1355,7 +1346,7 @@ namespace ASC.CRM.Core.Dao
 
         public Boolean IsExist(int contactID)
         {
-            return Db.ExecuteScalar<bool>("select exists(select 1 from crm_contact where tenant_id = @tid and id = @id)",
+            return Db.ExecuteScalar<bool>("select exists(select 1 from crm_contact where tenant_id = @tid and id = @id)", 
                 new { tid = TenantID, id = contactID });
         }
 
@@ -1799,17 +1790,17 @@ namespace ASC.CRM.Core.Dao
 
             if (isCompany)
                 contact = new Company
-                {
-                    CompanyName = Convert.ToString(row[3])
-                };
+                           {
+                               CompanyName = Convert.ToString(row[3])
+                           };
             else
                 contact = new Person
-                {
-                    FirstName = Convert.ToString(row[1]),
-                    LastName = Convert.ToString(row[2]),
-                    JobTitle = Convert.ToString(row[4]),
-                    CompanyID = Convert.ToInt32(row[9])
-                };
+                       {
+                           FirstName = Convert.ToString(row[1]),
+                           LastName = Convert.ToString(row[2]),
+                           JobTitle = Convert.ToString(row[4]),
+                           CompanyID = Convert.ToInt32(row[9])
+                       };
 
             contact.ID = Convert.ToInt32(row[0]);
             contact.About = Convert.ToString(row[5]);
@@ -1862,7 +1853,7 @@ namespace ASC.CRM.Core.Dao
 
         private SqlQuery GetContactSqlQuery(Exp where)
         {
-            var sqlQuery = Query("crm_contact");
+            var sqlQuery = Query("crm_contact").UseIndex("company_id");
 
             sqlQuery.Select(GetContactColumnsTable(String.Empty));
 

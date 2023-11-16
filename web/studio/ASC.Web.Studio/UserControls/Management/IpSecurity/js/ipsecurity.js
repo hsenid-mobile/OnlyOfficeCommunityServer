@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@
 window.IpSecurity = new function() {
     var $ = jq;
 
-    var commonIpRegex = /^(\s*(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\s*(\-\s*(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\s*)?)$/;
-    var CIDRIpRegex = /^(\s*(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\s*(\/(3[012]|[12]?[0-9]))\s*)$/;
+    var ipRegex = /^\s*(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\s*(\-\s*(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\s*)?$/;
 
     var $view = $('#iprestrictions-view');
 
@@ -28,27 +27,17 @@ window.IpSecurity = new function() {
     var $settingsBlock = $view.find('.settings-block');
     var $restrictionsList = $view.find('#restrictions-list');
     var $addRestrictionBtn = $restrictionsList.find('#add-restriction-btn');
-    var $addRestrictionBtnForAdmin = $restrictionsList.find('#add-restriction-btn-admin');
 
     var $ipsecurityOff = $view.find('#ipsecurityOff');
     var $ipsecurityOn = $view.find('#ipsecurityOn');
     var $saveRestrictionBtn = $view.find('#save-restriction-btn');
 
-    var userRestrictions = [];
-    var adminRestrictions = [];
+    var restrictions = [];
 
     function init() {
         bind$Events();
-        getRestrictions(function (params, data) {
-            data.forEach((item) => {
-                if (item.forAdmin == true) {
-                    adminRestrictions.push(item);
-                }
-                else {
-                    userRestrictions.push(item);
-                }
-            })
-
+        getRestrictions(function(params, data) {
+            restrictions = data;
             renderView();
         });
     }
@@ -77,11 +66,8 @@ window.IpSecurity = new function() {
     }
 
     function renderView() {
-        var $restrictions = restrictionTmpl.tmpl(userRestrictions);
+        var $restrictions = restrictionTmpl.tmpl(restrictions);
         $addRestrictionBtn.before($restrictions);
-
-        var $restrictionsAdmin = restrictionTmpl.tmpl(adminRestrictions);
-        $addRestrictionBtnForAdmin.before($restrictionsAdmin);
     }
 
     function bind$Events() {
@@ -90,8 +76,6 @@ window.IpSecurity = new function() {
 
         $addRestrictionBtn.on('click', addRestriction);
         $saveRestrictionBtn.on('click', saveRestriction);
-
-        $addRestrictionBtnForAdmin.on('click', addAdminRestriction);
 
         $restrictionsList.on('click', '.restriction .delete-btn', deleteRestriction);
     }
@@ -105,13 +89,8 @@ window.IpSecurity = new function() {
     }
 
     function addRestriction() {
-        var $newRestriction = restrictionTmpl.tmpl({forAdmin: false});
+        var $newRestriction = restrictionTmpl.tmpl();
         $addRestrictionBtn.before($newRestriction);
-    }
-
-    function addAdminRestriction() {
-        var $newRestriction = restrictionTmpl.tmpl({forAdmin: true});
-        $addRestrictionBtnForAdmin.before($newRestriction);
     }
 
     function saveRestriction() {
@@ -125,7 +104,7 @@ window.IpSecurity = new function() {
             Teamlab.updateIpRestrictionsSettings({ enable: false }, {
                 success: function() {
                     hideLoader();
-                    LoadingBanner.showMesInfoBtn($settingsBlock, ASC.Resources.Master.ResourceJS.IPRestrictionsSettingsSuccessfullyUpdated, 'success');
+                    LoadingBanner.showMesInfoBtn($settingsBlock, ASC.Resources.Master.Resource.IPRestrictionsSettingsSuccessfullyUpdated, 'success');
                 },
                 error: function() {
                     hideLoader();
@@ -136,30 +115,28 @@ window.IpSecurity = new function() {
             return;
         }
 
-        var $el;
         var formRestrictions = [];
-        $restrictionsList.find('.restriction .ip').each(function (idx, el) {
-            $el = $(el);
-            formRestrictions.push({ ip: $el.val(), forAdmin: $el.data('admin')  });
+        $restrictionsList.find('.restriction .ip').each(function(idx, el) {
+            formRestrictions.push($(el).val());
         });
 
         var restrictionsToSave = [];
         for (var i = 0; i < formRestrictions.length; i++) {
-            var r = formRestrictions[i].ip.replace(/\s/g, '');
+            var r = formRestrictions[i].replace(/\s/g, '');
             if (r == '') {
                 continue;
             }
 
-            if (!commonIpRegex.test(r) && !CIDRIpRegex.test(r)) {
-                LoadingBanner.showMesInfoBtn($settingsBlock, ASC.Resources.Master.ResourceJS.IncorrectIPAddressFormatError, 'error');
+            if (!ipRegex.test(r)) {
+                LoadingBanner.showMesInfoBtn($settingsBlock, ASC.Resources.Master.Resource.IncorrectIPAddressFormatError, 'error');
                 return;
             }
-
-            if (~restrictionsToSave.findIndex(item => item.ip == formRestrictions[i].ip)) {
-                LoadingBanner.showMesInfoBtn($settingsBlock, ASC.Resources.Master.ResourceJS.SameIPRestrictionError, 'error');
+            
+            if (~restrictionsToSave.indexOf(r)) {
+                LoadingBanner.showMesInfoBtn($settingsBlock, ASC.Resources.Master.Resource.SameIPRestrictionError, 'error');
                 return;
             } else {
-                restrictionsToSave.push(formRestrictions[i]);
+                restrictionsToSave.push(r);
             }
         }
 
@@ -192,9 +169,9 @@ window.IpSecurity = new function() {
                         showErrorMessage();
                     } else {
                         if (!enabled) {
-                            $ipsecurityOff.trigger("click");
+                            $ipsecurityOff.click();
                         }
-                        LoadingBanner.showMesInfoBtn($settingsBlock, ASC.Resources.Master.ResourceJS.IPRestrictionsSettingsSuccessfullyUpdated, 'success');
+                        LoadingBanner.showMesInfoBtn($settingsBlock, ASC.Resources.Master.Resource.IPRestrictionsSettingsSuccessfullyUpdated, 'success');
                     }
                 });
     }
@@ -212,7 +189,7 @@ window.IpSecurity = new function() {
     }
 
     function showErrorMessage() {
-        LoadingBanner.showMesInfoBtn($settingsBlock, ASC.Resources.Master.ResourceJS.CommonJSErrorMsg, 'error');
+        LoadingBanner.showMesInfoBtn($settingsBlock, ASC.Resources.Master.Resource.CommonJSErrorMsg, 'error');
     }
 
     return {

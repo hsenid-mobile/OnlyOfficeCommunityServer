@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Mail.Core;
-using ASC.Web.Studio.Utility;
-
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.MailServer
@@ -46,21 +44,6 @@ namespace ASC.Api.MailServer
         public string Name
         {
             get { return "mailserver"; }
-        }
-
-        public bool IsEnableMailServer
-        {
-            get
-            {
-                if (CoreContext.Configuration.Standalone)
-                {
-                    return true;
-                }
-                else
-                {
-                    return TenantExtra.GetTenantQuota().EnableMailServer;
-                }
-            }
         }
 
         private ILog _log;

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -253,7 +253,7 @@ jq(document).ready(function() {
     }
     var $firstInput = jq("input[id$='feedName']");
     if ($firstInput.length) {
-        $firstInput.trigger("focus");
+        $firstInput.focus();
     }
     var anchor = ASC.Controls.AnchorController.getAnchor();
     if (anchor == "addcomment" && CommentsManagerObj) {
@@ -262,7 +262,7 @@ jq(document).ready(function() {
 
     resizeContent();
 
-    jq(window).on("resize", function () {
+    jq(window).resize(function () {
         resizeContent();
     });
 

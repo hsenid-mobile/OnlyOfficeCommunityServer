@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 
 using System;
 using System.Web;
-
 using ASC.Data.Storage;
 using ASC.Web.Core.Files;
-using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Utility;
 
 namespace ASC.Web.Projects.Classes
@@ -54,6 +52,7 @@ namespace ASC.Web.Projects.Classes
                     return WebPath.GetPath("/Products/Projects/App_Themes/Default/images/" + fileName);
                 case ".ascx":
                     return CommonLinkUtility.ToAbsolute("~/Products/Projects/Controls/" + fileName);
+                case ".css":
                 case ".less":
                     return VirtualPathUtility.ToAbsolute("~/Products/Projects/App_Themes/default/css/" + fileName);
             }

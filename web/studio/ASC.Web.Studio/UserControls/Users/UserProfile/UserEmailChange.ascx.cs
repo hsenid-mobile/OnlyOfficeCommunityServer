@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,10 @@
 
 
 using System;
-using System.Web;
 using System.Web.UI;
-
 using ASC.Core.Users;
-using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Core;
+using System.Web;
 
 namespace ASC.Web.Studio.UserControls.Users.UserProfile
 {
@@ -43,15 +41,8 @@ namespace ASC.Web.Studio.UserControls.Users.UserProfile
 
             if (RegisterStylesAndScripts)
             {
-                if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
-                {
-                    Page.RegisterStyle("~/UserControls/Users/UserProfile/css/dark-userprofilecontrol_style.less");
-                }
-                else
-                {
-                    Page.RegisterStyle("~/UserControls/Users/UserProfile/css/userprofilecontrol_style.less");
-                }
-                Page.RegisterBodyScripts("~/UserControls/Users/UserProfile/js/userprofilecontrol.js");
+                Page.RegisterStyle("~/UserControls/Users/UserProfile/css/userprofilecontrol_style.less")
+                    .RegisterBodyScripts("~/UserControls/Users/UserProfile/js/userprofilecontrol.js");
             }
         }
     }

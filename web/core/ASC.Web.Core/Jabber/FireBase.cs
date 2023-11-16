@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System.Collections.Generic;
-
 using ASC.Core.Common.Configuration;
 
 namespace ASC.Web.Core.Jabber
@@ -52,7 +51,7 @@ namespace ASC.Web.Core.Jabber
         {
         }
 
-        public FireBase(string name, int order, Dictionary<string, Prop> props, Dictionary<string, Prop> additional = null)
+        public FireBase(string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
             : base(name, order, props, additional)
         {
         }

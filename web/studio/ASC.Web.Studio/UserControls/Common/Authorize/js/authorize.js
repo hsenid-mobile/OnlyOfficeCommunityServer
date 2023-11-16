@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ var Authorize = new function () {
             RecaptchaController.InitRecaptcha(jq("#recaptchaHiddenContainer").attr("data-hl"));
         }
 
-        jq(jq("#login").val().length ? "#pwd" : "#login").trigger("focus");
+        jq(jq("#login").val().length ? "#pwd" : "#login").focus();
 
-        jq("#login,#pwd").on("keyup", function (event) {
+        jq("#login,#pwd").keyup(function (event) {
             var code;
             if (!e) {
                 var e = event;
@@ -38,7 +38,7 @@ var Authorize = new function () {
 
             if (code == 13) {
                 if (jq(this).is("#login") && !jq("#pwd").val().length) {
-                    jq("#pwd").trigger("focus");
+                    jq("#pwd").focus();
                     return true;
                 }
                 if (jq('body').hasClass('desktop') && !!jq("#desktop_agree_to_terms").length && !(jq("#desktop_agree_to_terms").is(':checked'))) {
@@ -53,7 +53,7 @@ var Authorize = new function () {
 
         try {
             var anch = ASC.Controls.AnchorController.getAnchor();
-            if (anch.trim() == "passrecovery") {
+            if (jq.trim(anch) == "passrecovery") {
                 PasswordTool.ShowPwdReminderDialog();
             }
         } catch (e) { }

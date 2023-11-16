@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 
 using System;
+using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
-
 using ASC.Common.Logging;
 using ASC.Common.Utils;
 using ASC.Mail.Core.Entities;
@@ -80,7 +81,7 @@ namespace ASC.Mail.Core.Engine
                         {
                             var domain = daoMbDomain.GetDomain(domainName);
 
-                            if (domain != null)
+                            if (domain != null) 
                                 continue;
 
                             domain = new MailboxDomain

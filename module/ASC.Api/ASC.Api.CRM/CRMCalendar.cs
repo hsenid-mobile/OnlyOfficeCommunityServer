@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-
-using ASC.Core;
-using ASC.CRM.Core;
-using ASC.CRM.Core.Dao;
-using ASC.Web.Core;
 using ASC.Web.Core.Calendars;
+using ASC.Core;
+using ASC.CRM.Core.Dao;
+using ASC.CRM.Core;
+using ASC.Projects.Engine;
+using ASC.Web.Core;
 using ASC.Web.CRM.Core;
-
 using Autofac;
 
 namespace ASC.Api.CRM
@@ -50,7 +49,7 @@ namespace ASC.Api.CRM
             Name = Web.CRM.Resources.CRMCommonResource.ProductName;
             Description = "";
             SharingOptions = new SharingOptions();
-            SharingOptions.PublicItems.Add(new SharingOptions.PublicItem { Id = userId, IsGroup = false });
+            SharingOptions.PublicItems.Add(new SharingOptions.PublicItem {Id = userId, IsGroup = false});
         }
 
         public override List<IEvent> LoadEvents(Guid userId, DateTime startDate, DateTime endDate)

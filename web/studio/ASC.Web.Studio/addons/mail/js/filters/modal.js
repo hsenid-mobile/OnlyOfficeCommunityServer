@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ window.filterModal = (function($) {
         window.StudioBlockUIManager.blockUI(message, width, { bindEvents: false });
 
         $('#manageWindow .cancelButton').css('cursor', 'pointer');
-        $('.containerBodyBlock .buttons .cancel').off('click').on('click', function () {
+        $('.containerBodyBlock .buttons .cancel').unbind('click').bind('click', function () {
             $.unblockUI();
             return false;
         });
@@ -87,11 +87,11 @@ window.filterModal = (function($) {
 
         blockUi(523, wnd);
 
-        window.PopupKeyUpActionProvider.EnterAction = "jq('#filterWnd .containerBodyBlock .buttons .button.blue:visible').trigger('click');";
+        window.PopupKeyUpActionProvider.EnterAction = "jq('#filterWnd .containerBodyBlock .buttons .button.blue:visible').click();";
 
         wnd.find('.buttons .cancel')
-            .off('click')
-            .on('click',
+            .unbind('click')
+            .bind('click',
                 function () {
                     hide();
                     return false;
@@ -106,8 +106,8 @@ window.filterModal = (function($) {
         show(filter, 'apply');
 
         wnd.find('.buttons .save')
-            .off('click')
-            .on('click',
+            .unbind('click')
+            .bind('click',
                 function () {
                     hide();
                     options.onSuccess(filter);
@@ -122,8 +122,8 @@ window.filterModal = (function($) {
         show(filter, 'delete');
 
         wnd.find('.buttons .del')
-            .off('click')
-            .on('click',
+            .unbind('click')
+            .bind('click',
                 function () {
                     hide();
                     options.onSuccess(filter);
@@ -136,16 +136,16 @@ window.filterModal = (function($) {
         show(filter, 'confirm');
 
         wnd.find('.buttons .confirm')
-            .off('click')
-            .on('click',
+            .unbind('click')
+            .bind('click',
                 function () {
                     hide();
                     options.onConfirm(filter);
                 });
 
         wnd.find('.buttons .change')
-            .off('click')
-            .on('click',
+            .unbind('click')
+            .bind('click',
                 function() {
                     hide();
                     options.onChange(filter);

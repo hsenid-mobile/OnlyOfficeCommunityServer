@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ if (typeof ASC === "undefined")
 
 ASC.AuthorizationKeysManager = (function () {
     function init() {
-        jq("#authKeysContainer .on_off_button:not(.disable)").on("click", function () {
+        jq("#authKeysContainer .on_off_button:not(.disable)").click(function () {
             var switcherBtn = jq(this);
             var itemName = switcherBtn.attr("id").replace("switcherBtn", "");
             if (switcherBtn.hasClass("off")) {
@@ -31,17 +31,17 @@ ASC.AuthorizationKeysManager = (function () {
             }
         });
         
-        jq(".popupContainerClass .cancelButton").on("click", function () {
+        jq(".popupContainerClass .cancelButton").click(function () {
             PopupKeyUpActionProvider.CloseDialog();
         });
         
-        jq(".popupContainerClass .saveButton").on("click", function () {
+        jq(".popupContainerClass .saveButton").click(function () {
             var saveButton = jq(this);
             var itemName = saveButton.attr("id").replace("saveBtn", "");
             save(itemName, true);
         });
 
-        jq(".popupContainerClass input.textEdit").on("keyup", function (key) {
+        jq(".popupContainerClass input.textEdit").keyup(function (key) {
             var inputObj = jq(this);
             var popupObj = inputObj.parents(".popupContainerClass");
             var saveBtn = popupObj.find(".saveButton");
@@ -56,9 +56,9 @@ ASC.AuthorizationKeysManager = (function () {
                 jq.each(inputList, function (index, obj) {
                     if (inputObj.is(obj)) {
                         if (index == inputList.length - 1) {
-                            saveBtn.trigger("click");
+                            saveBtn.click();
                         } else {
-                            jq(inputList[index + 1]).trigger("focus");
+                            jq(inputList[index + 1]).focus();
                         }
                         return false;
                     }
@@ -72,17 +72,10 @@ ASC.AuthorizationKeysManager = (function () {
         var props = [];
 
         var keys = jq("#popupDialog" + itemName + " .auth-service-key");
-        var errors = false;
         for (var i = 0; i < keys.length; i++) {
-            keys[i].classList.remove("with-error")
-            if (keys[i].value == "" && !keys[i].classList.contains("optional")) {
-                errors = true;
-                keys[i].classList.add("with-error");
-            } else {
-                props.push({ Name: keys[i].id, Value: enable ? keys[i].value.trim() : null });
-            }
+            //if (keys[i].value == "") return; //todo: need to create not required fields
+            props.push({ Name: keys[i].id, Value: enable ? keys[i].value.trim() : null });
         }
-        if (errors) return;
 
         jq("#popupDialog" + itemName).block();
 
@@ -95,7 +88,7 @@ ASC.AuthorizationKeysManager = (function () {
                     toastr.error(result.error.Message);
                 } else {
                     if (result.value) {
-                        toastr.success(ASC.Resources.Master.ResourceJS.SuccessfullySaveSettingsMessage);
+                        toastr.success(ASC.Resources.Master.Resource.SuccessfullySaveSettingsMessage);
                         jq("#switcherBtn" + itemName).toggleClass("on off");
                     }
                 }

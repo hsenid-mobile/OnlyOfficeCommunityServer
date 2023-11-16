@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Web;
-
 using ASC.Core;
 using ASC.Data.Storage;
+using ASC.ElasticSearch;
 using ASC.Web.Core.Client;
 using ASC.Web.Core.Utility.Skins;
 using ASC.Web.Studio.Core;
@@ -48,10 +48,10 @@ namespace ASC.Web.Talk.ClientScript
                 {
                     Icons = new
                     {
-                        addonIcon16 = WebImageSupplier.GetAbsoluteWebPath("talk16.svg", TalkAddon.AddonID),
-                        addonIcon32 = WebImageSupplier.GetAbsoluteWebPath("talk32.svg", TalkAddon.AddonID),
-                        addonIcon48 = WebImageSupplier.GetAbsoluteWebPath("talk48.svg", TalkAddon.AddonID),
-                        addonIcon128 = WebImageSupplier.GetAbsoluteWebPath("talk128.svg", TalkAddon.AddonID),
+                        addonIcon16 = WebImageSupplier.GetAbsoluteWebPath("talk16.png", TalkAddon.AddonID),
+                        addonIcon32 = WebImageSupplier.GetAbsoluteWebPath("talk32.png", TalkAddon.AddonID),
+                        addonIcon48 = WebImageSupplier.GetAbsoluteWebPath("talk48.png", TalkAddon.AddonID),
+                        addonIcon128 = WebImageSupplier.GetAbsoluteWebPath("talk128.png", TalkAddon.AddonID),
                         iconNewMessage = WebImageSupplier.GetAbsoluteWebPath("talk-new.ico", TalkAddon.AddonID)
                     }
                 }),
@@ -72,14 +72,14 @@ namespace ASC.Web.Talk.ClientScript
                         fileTransportType = config.FileTransportType ?? string.Empty,
                         maxUploadSize = SetupInfo.MaxImageUploadSize,
                         sounds =  WebPath.GetPath("/addons/talk/swf/sounds.swf"),
-                        soundsHtml = new List<string>() {
+                        soundsHtml = new List<string>() { 
                             WebPath.GetPath("/addons/talk/swf/startupsound.mp3"),
                             WebPath.GetPath("/addons/talk/swf/incmsgsound.mp3"),
-                            WebPath.GetPath("/addons/talk/swf/letupsound.mp3"),
+                            WebPath.GetPath("/addons/talk/swf/letupsound.mp3"), 
                             WebPath.GetPath("/addons/talk/swf/sndmsgsound.mp3"),
                             WebPath.GetPath("/addons/talk/swf/statussound.mp3")
                         },
-                        fullText = false
+                        fullText = FactoryIndexer<JabberWrapper>.CanSearchByContent()
                     }
                 })
             };
@@ -87,7 +87,7 @@ namespace ASC.Web.Talk.ClientScript
 
         protected override string GetCacheHash()
         {
-            return ClientSettings.ResetCacheKey + SecurityContext.CurrentAccount.ID +
+            return ClientSettings.ResetCacheKey + SecurityContext.CurrentAccount.ID + FactoryIndexer<JabberWrapper>.CanSearchByContent() +
                    (SecurityContext.IsAuthenticated && !CoreContext.Configuration.Personal
                         ? (CoreContext.UserManager.GetMaxUsersLastModified().Ticks.ToString(CultureInfo.InvariantCulture) +
                            CoreContext.UserManager.GetMaxGroupsLastModified().Ticks.ToString(CultureInfo.InvariantCulture))
@@ -136,7 +136,7 @@ namespace ASC.Web.Talk.ClientScript
         {
             return new List<KeyValuePair<string, object>>(2)
             {
-                RegisterResourceSet("TalkResource", TalkResource.ResourceManager),
+                RegisterResourceSet("Resources", TalkResource.ResourceManager),
                 RegisterObject(new
                 {
                     statusTitles = new

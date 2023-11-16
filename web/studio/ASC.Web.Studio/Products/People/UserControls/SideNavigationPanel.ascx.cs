@@ -1,6 +1,6 @@
-﻿/*
+/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,6 @@
 */
 
 
-using System;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.Web.Core;
@@ -30,6 +25,9 @@ using ASC.Web.Studio.UserControls.Common.Support;
 using ASC.Web.Studio.UserControls.Common.UserForum;
 using ASC.Web.Studio.UserControls.Statistics;
 using ASC.Web.Studio.Utility;
+using System;
+using System.Linq;
+using System.Web.UI;
 
 
 namespace ASC.Web.People.UserControls
@@ -40,9 +38,6 @@ namespace ASC.Web.People.UserControls
         protected bool EnableAddUsers;
         protected bool CurrentUserFullAdmin;
         protected bool CurrentUserAdmin;
-        protected bool EnableAddVisitors;
-        protected string CurrentPage { get; set; }
-        protected bool IsBirthdaysAvailable { get; set; }
 
         public static string Location
         {
@@ -52,8 +47,6 @@ namespace ASC.Web.People.UserControls
         protected void Page_Load(object sender, EventArgs e)
         {
             InitData();
-            InitPermission();
-            InitCurrentPage();
 
             var help = (HelpCenter)LoadControl(HelpCenter.Location);
             help.IsSideBar = true;
@@ -66,40 +59,9 @@ namespace ASC.Web.People.UserControls
         private void InitData()
         {
             HasPendingProfiles = CoreContext.UserManager.GetUsers().Any(u => u.ActivationStatus == EmployeeActivationStatus.Pending);
-            EnableAddUsers = TenantStatisticsProvider.GetUsersCount() < TenantExtra.GetTenantQuota().ActiveUsers;
+            EnableAddUsers =  TenantStatisticsProvider.GetUsersCount() < TenantExtra.GetTenantQuota().ActiveUsers;
             CurrentUserFullAdmin = CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID).IsAdmin();
             CurrentUserAdmin = CurrentUserFullAdmin || WebItemSecurity.IsProductAdministrator(WebItemManager.PeopleProductID, SecurityContext.CurrentAccount.ID);
-            EnableAddVisitors = CoreContext.Configuration.Standalone || TenantStatisticsProvider.GetVisitorsCount() < TenantExtra.GetTenantQuota().ActiveUsers * Constants.CoefficientOfVisitors;
-        }
-
-        private void InitPermission()
-        {
-            IsBirthdaysAvailable = WebItemManager.Instance.GetSubItems(PeopleProduct.ID).Any(item => item.ID == WebItemManager.BirthdaysProductID);
-        }
-
-        private void InitCurrentPage()
-        {
-            var currentPath = HttpContext.Current.Request.Path;
-            if (currentPath.IndexOf("Default.aspx", StringComparison.OrdinalIgnoreCase) > 0)
-            {
-                CurrentPage = "people";
-            }
-            else if (currentPath.IndexOf("Birthdays.aspx", StringComparison.OrdinalIgnoreCase) > 0)
-            {
-                CurrentPage = "birthdays";
-            }
-            else if (currentPath.IndexOf("Help.aspx", StringComparison.OrdinalIgnoreCase) > 0)
-            {
-                CurrentPage = "help";
-            }
-            else if (currentPath.IndexOf("CardDavSettings.aspx", StringComparison.OrdinalIgnoreCase) > 0)
-            {
-                CurrentPage = "carddav";
-            }
-            else
-            {
-                CurrentPage = "people";
-            }
         }
     }
 }

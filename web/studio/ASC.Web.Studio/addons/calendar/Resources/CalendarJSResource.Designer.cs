@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Calendar.Resources {
+namespace Resources {
     using System;
     
     
@@ -19,7 +19,7 @@ namespace ASC.Web.Calendar.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class CalendarJSResource {
@@ -115,7 +115,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create.
+        ///   Looks up a localized string similar to Create New.
         /// </summary>
         public static string calendarAddNewLabel {
             get {
@@ -142,7 +142,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To-do.
+        ///   Looks up a localized string similar to Todo.
         /// </summary>
         public static string calendarButtonNewText_todo {
             get {
@@ -313,222 +313,6 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete All.
-        /// </summary>
-        public static string calendarEventAttachments_attachDeleteAllLabel {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_attachDeleteAllLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Attach files from Documents.
-        /// </summary>
-        public static string calendarEventAttachments_attachFilesFromDocuments {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_attachFilesFromDocuments", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to All documents will be with access rights &apos;Read only&apos; for guests.
-        /// </summary>
-        public static string calendarEventAttachments_attachmentsLabelHelpInfo {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_attachmentsLabelHelpInfo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to B.
-        /// </summary>
-        public static string calendarEventAttachments_bytes {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_bytes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Copy to &apos;My documents&apos;.
-        /// </summary>
-        public static string calendarEventAttachments_copyFilesToMyDocumentsBtn {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_copyFilesToMyDocumentsBtn", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error occured while copying file.
-        /// </summary>
-        public static string calendarEventAttachments_copyFileToMyDocumentsFolderErrorMsg {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_copyFileToMyDocumentsFolderErrorMsg", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Copying to &apos;My documents&apos; folder.
-        /// </summary>
-        public static string calendarEventAttachments_copyingToMyDocumentsLabel {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_copyingToMyDocumentsLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Access to the document is denied..
-        /// </summary>
-        public static string calendarEventAttachments_documentAccessDeniedError {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_documentAccessDeniedError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Empty files are not supported..
-        /// </summary>
-        public static string calendarEventAttachments_emptyFileNotSupportedError {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_emptyFileNotSupportedError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to executable files may be not allowed by some services (e.g. Gmail).
-        /// </summary>
-        public static string calendarEventAttachments_executableWarning {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_executableWarning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You have &quot;View Only&quot; access rights for some attached file, thus you will not be able to share them with others. {0}{0} These files can be copied to the &quot;My documents&quot; folder and attached as links afterward. {0}{0} Alternatively you can ask document owners to give you &quot;Full Access&quot; permissions to the files you want to attach as links and repeat the operation once again..
-        /// </summary>
-        public static string calendarEventAttachments_filesCannotBeAttachedAsLinks_Body {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_filesCannotBeAttachedAsLinks_Body", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Some files cannot be attached as links..
-        /// </summary>
-        public static string calendarEventAttachments_filesCannotBeAttachedAsLinks_Header {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_filesCannotBeAttachedAsLinks_Header", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Size of attachment exceeds limit..
-        /// </summary>
-        public static string calendarEventAttachments_fileSizeError {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_fileSizeError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Inserted via link.
-        /// </summary>
-        public static string calendarEventAttachments_insertedViaLink {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_insertedViaLink", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to KB.
-        /// </summary>
-        public static string calendarEventAttachments_kilobytes {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_kilobytes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Attachments:.
-        /// </summary>
-        public static string calendarEventAttachments_label {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_label", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Note: the file size must not exceed %1 MB..
-        /// </summary>
-        public static string calendarEventAttachments_limitLabel {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_limitLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to MB.
-        /// </summary>
-        public static string calendarEventAttachments_megabytes {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_megabytes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to In the trial version, files in uneditable formats (.jpg, .mp3, .mp4, .webp, etc.) cannot be sent as external links..
-        /// </summary>
-        public static string calendarEventAttachments_multimediaFilesCannotBeAttached_Body {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_multimediaFilesCannotBeAttached_Body", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Files in this format cannot be sent as links.
-        /// </summary>
-        public static string calendarEventAttachments_multimediaFilesCannotBeAttached_Header {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_multimediaFilesCannotBeAttached_Header", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Uploaded.
-        /// </summary>
-        public static string calendarEventAttachments_uploadedLabel {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_uploadedLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Upload file.
-        /// </summary>
-        public static string calendarEventAttachments_uploadFile {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_uploadFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Uploading.
-        /// </summary>
-        public static string calendarEventAttachments_uploadingLabel {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_uploadingLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Warning.
-        /// </summary>
-        public static string calendarEventAttachments_warningLabel {
-            get {
-                return ResourceManager.GetString("calendarEventAttachments_warningLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Create new event.
         /// </summary>
         public static string calendarEventEditor_addHeader {
@@ -646,8 +430,8 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Start typing an email address or  a name from the list of your personal/CRM/portal 
-        ///users&apos; contacts, or add any other email to invite people to your event..
+        ///   Looks up a localized string similar to Start typing email address or contact name from your personal, CRM contacts or
+        ///portal users or use any other email to invite people to your event..
         /// </summary>
         public static string calendarEventEditor_attendeesLabelHelpInfo {
             get {
@@ -899,7 +683,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Send invitations.
+        ///   Looks up a localized string similar to Sent invitations.
         /// </summary>
         public static string calendarEventEditor_sentInvitationsLabel {
             get {
@@ -989,7 +773,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To-do.
+        ///   Looks up a localized string similar to Todo.
         /// </summary>
         public static string calendarEventEditor_todoButton {
             get {
@@ -1016,7 +800,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Via link.
+        ///   Looks up a localized string similar to By link.
         /// </summary>
         public static string calendarExportEvents_byLink {
             get {
@@ -1034,7 +818,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sync with a calendar via the link.
+        ///   Looks up a localized string similar to Sync with calendar by link.
         /// </summary>
         public static string calendarExportEvents_syncByLink {
             get {
@@ -1214,7 +998,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete to-do.
+        ///   Looks up a localized string similar to Delete todo.
         /// </summary>
         public static string calendarTodoDeleteDialog_dialogHeader {
             get {
@@ -1223,7 +1007,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The deleted to-do cannot be restored. Are you sure you want to continue?.
+        ///   Looks up a localized string similar to The deleted todo cannot be restored. Are you sure you want to continue?.
         /// </summary>
         public static string calendarTodoDeleteDialog_dialogSingleBody {
             get {
@@ -1250,7 +1034,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create to-do.
+        ///   Looks up a localized string similar to Create todo.
         /// </summary>
         public static string calendarTodoEditor_dialogHeader_add {
             get {
@@ -1259,7 +1043,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Edit to-do.
+        ///   Looks up a localized string similar to Edit todo.
         /// </summary>
         public static string calendarTodoEditor_dialogHeader_edit {
             get {
@@ -1277,7 +1061,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New to-do.
+        ///   Looks up a localized string similar to New todo.
         /// </summary>
         public static string calendarTodoList_addTodoLabel {
             get {
@@ -1286,7 +1070,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to new to-do.
+        ///   Looks up a localized string similar to new todo.
         /// </summary>
         public static string calendarTodoList_newTodoTitle {
             get {
@@ -1664,7 +1448,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Find detailed instructions in the.
+        ///   Looks up a localized string similar to Connection instructions in the.
         /// </summary>
         public static string icalStream_export_help {
             get {
@@ -1691,7 +1475,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To configure the export of to-dos to another calendar, copy the corresponding link and add it to the required calendar..
+        ///   Looks up a localized string similar to To configure the export of todos  to another calendar, copy the corresponding link and add it to the required calendar..
         /// </summary>
         public static string icalStream_export_todo_description {
             get {
@@ -1853,7 +1637,7 @@ namespace ASC.Web.Calendar.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show to-dos in the calendar.
+        ///   Looks up a localized string similar to Show to-do in calendar.
         /// </summary>
         public static string menuTodoInCalendar {
             get {

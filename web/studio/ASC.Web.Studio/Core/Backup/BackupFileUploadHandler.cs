@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.IO;
 using System.Web;
-
 using ASC.Core;
 using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Utility;
@@ -28,14 +27,17 @@ namespace ASC.Web.Studio.Core.Backup
     internal class BackupFileUploadHandler : IFileUploadHandler
     {
         private const long MaxBackupFileSize = 1024L * 1024L * 1024L;
-        private const string BackupTempFolder = "backup";
-        private const string BackupFileName = "backup.tmp";
 
         public FileUploadResult ProcessUpload(HttpContext context)
         {
             if (context.Request.Files.Count == 0)
             {
                 return Error("No files.");
+            }
+
+            if (BackupHelper.ExceedsMaxAvailableSize(TenantProvider.CurrentTenantID))
+            {
+                return Error("Backup not allowed.");
             }
 
             if (!SecurityContext.CheckPermissions(SecutiryConstants.EditPortalSettings))
@@ -50,17 +52,12 @@ namespace ASC.Web.Studio.Core.Backup
                 return Error("File size must be greater than 0 and less than {0} bytes", MaxBackupFileSize);
             }
 
+
             try
             {
                 var filePath = GetFilePath();
-
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
-
                 file.SaveAs(filePath);
-                return Success();
+                return Success(filePath);
             }
             catch (Exception error)
             {
@@ -68,11 +65,12 @@ namespace ASC.Web.Studio.Core.Backup
             }
         }
 
-        private static FileUploadResult Success()
+        private static FileUploadResult Success(string filePath)
         {
             return new FileUploadResult
             {
-                Success = true
+                Success = true,
+                Data = filePath
             };
         }
 
@@ -85,16 +83,9 @@ namespace ASC.Web.Studio.Core.Backup
             };
         }
 
-        internal static string GetFilePath()
+        private static string GetFilePath()
         {
-            var folder = Path.Combine(TempPath.GetTempPath(), BackupTempFolder, TenantProvider.CurrentTenantID.ToString());
-
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            return Path.Combine(folder, BackupFileName);
+            return Path.GetTempFileName();
         }
     }
 }

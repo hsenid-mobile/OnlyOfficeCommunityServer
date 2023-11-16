@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ using ASC.Api.Interfaces;
 namespace ASC.Api.Community
 {
     ///<summary>
-    ///Community API.
+    ///Provides access to community data api
     ///</summary>
     public partial class CommunityApi : IApiEntryPoint
     {
@@ -29,7 +29,7 @@ namespace ASC.Api.Community
 
 
         ///<summary>
-        /// Starting entry point name.
+        /// Starting entry point name
         ///</summary>
         public string Name
         {

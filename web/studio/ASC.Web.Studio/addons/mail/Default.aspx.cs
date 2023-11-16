@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ namespace ASC.Web.Mail
 
             Master
                 .AddStaticBodyScripts(GetStaticJavaScript())
-                .AddStaticStyles(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark ? GetStaticDarkStyleSheet() : GetStaticStyleSheet())
+                .AddStaticStyles(GetStaticStyleSheet())
                 .AddClientScript(
                     new ClientLocalizationResources(),
                     new MasterSettingsResources())
@@ -240,23 +240,6 @@ namespace ASC.Web.Mail
             return SetupInfo.IsVisibleSettings("MailPrint");
         }
 
-        public static bool IsEnableMailServer()
-        {
-            if (CoreContext.Configuration.Standalone)
-            {
-                return true;
-            }
-            else
-            {
-                return TenantExtra.GetTenantQuota().EnableMailServer;
-            }
-        }
-
-        public static string LinkToTariff()
-        {
-            return TenantExtra.GetTariffPageLink();
-        }
-
         public static string GetMailDownloadHandlerUri()
         {
             return ConfigurationManagerExtension.AppSettings["mail.download-handler-url"] ?? "/addons/mail/httphandlers/download.ashx?attachid={0}";
@@ -285,11 +268,6 @@ namespace ASC.Web.Mail
         public static string GetProxyHttpUrl()
         {
             return ConfigurationManagerExtension.AppSettings["proxy.http-url"] ?? "/httphandlers/urlProxy.ashx";
-        }
-
-        public static string GetImapSyncStartDate()
-        {
-            return ConfigurationManagerExtension.AppSettings["mail.imap-sync-start-date"];
         }
 
         public List<MailAccountData> GetAccounts()
@@ -444,7 +422,7 @@ namespace ASC.Web.Mail
                 .AppendFormat("ASC.Mail.Constants.MAIL_DAEMON_EMAIL = {0};\r\n",
                     JsonConvert.SerializeObject(GetMailDaemonEmail()))
                 .AppendFormat("ASC.Mail.Constants.FiLTER_BY_GROUP_LOCALIZE = {0};\r\n",
-                    JsonConvert.SerializeObject(CustomNamingPeople.Substitute<MailResource>("FilterByGroup").HtmlEncode()))
+                    JsonConvert.SerializeObject(CustomNamingPeople.Substitute<MailResource>("FilterByGroup")))
                 .AppendFormat("ASC.Mail.Constants.NEED_PROXY_HTTP_URL = {0};\r\n",
                     JsonConvert.SerializeObject(SetupInfo.IsVisibleSettings("ProxyHttpContent")))
                 .AppendFormat("ASC.Mail.Constants.PROXY_HTTP_URL = {0};\r\n",
@@ -454,14 +432,7 @@ namespace ASC.Web.Mail
                 .AppendFormat("ASC.Mail.Constants.MAXIMUM_MESSAGE_BODY_SIZE = {0};\r\n",
                     JsonConvert.SerializeObject(GetMaximumMessageBodySize()))
                 .AppendFormat("ASC.Mail.Constants.MS_MIGRATION_LINK_AVAILABLE = {0};\r\n",
-                    JsonConvert.SerializeObject(IsMSExchangeMigrationLinkAvailable()))
-                .AppendFormat("ASC.Mail.Constants.ENABLE_MAIL_SERVER = {0};\r\n",
-                    JsonConvert.SerializeObject(IsEnableMailServer()))
-                .AppendFormat("ASC.Mail.Constants.LinkToTariff = {0};\r\n",
-                    JsonConvert.SerializeObject(LinkToTariff()))
-                 .AppendFormat("ASC.Mail.Constants.IMAP_SYNC_START_DATE = {0};\r\n",
-                    JsonConvert.SerializeObject(GetImapSyncStartDate()));
-
+                    JsonConvert.SerializeObject(IsMSExchangeMigrationLinkAvailable()));
 
             return sbScript.ToString();
         }
@@ -533,7 +504,6 @@ namespace ASC.Web.Mail
                         "~/addons/mail/js/third-party/jquery.textchange.min.js",
                         "~/addons/mail/js/third-party/linkify.min.js",
                         "~/addons/mail/js/third-party/linkify-string.min.js",
-                        "~/addons/mail/js/third-party/linkify-html.min.js",
                         "~/addons/mail/js/third-party/placeholder.js",
                         "~/addons/mail/js/containers/set.js",
                         "~/addons/mail/js/mail.common.js",
@@ -582,6 +552,7 @@ namespace ASC.Web.Mail
                         "~/addons/mail/js/contacts/types.js",
                         "~/addons/mail/js/contacts/filter/tlfilter.js",
                         "~/addons/mail/js/contacts/filter/customfilter.js",
+                        "~/addons/mail/js/contacts/tlgroups.js",
                         "~/addons/mail/js/contacts/contacts.js",
                         "~/addons/mail/js/contacts/modal/editcontact.js",
                         "~/addons/mail/js/blankpage.js",
@@ -615,14 +586,7 @@ namespace ASC.Web.Mail
             return (StyleBundleData)
                 new StyleBundleData("mail", "mail")
                     .AddSource(ResolveUrl,
-                        "~/addons/mail/App_Themes/default/less/full.less");
-        }
-        public StyleBundleData GetStaticDarkStyleSheet()
-        {
-            return (StyleBundleData)
-                new StyleBundleData("dark-mail", "mail")
-                    .AddSource(ResolveUrl,
-                        "~/addons/mail/App_Themes/dark/dark-full.less");
+                        "~/addons/mail/App_Themes/default/less/mail.less");
         }
     }
 }

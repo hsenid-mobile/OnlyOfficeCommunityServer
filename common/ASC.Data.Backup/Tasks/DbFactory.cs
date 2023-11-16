@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@ using System.Data;
 using System.Data.Common;
 using System.Xml.Linq;
 using System.Xml.XPath;
-
 using ASC.Data.Backup.Utils;
-
 using MySql.Data.MySqlClient;
 
 namespace ASC.Data.Backup.Tasks
@@ -123,7 +121,7 @@ namespace ASC.Data.Backup.Tasks
             }
             return command;
         }
-
+        
         private static string EnsureConnectionTimeout(string connectionString)
         {
             if (!connectionString.Contains("Connection Timeout"))

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.Core;
 using ASC.Core.Tenants;
 using ASC.ElasticSearch;
@@ -26,7 +25,6 @@ using ASC.Files.Core;
 using ASC.Projects.Core.Domain;
 using ASC.Projects.Core.Services.NotifyService;
 using ASC.Web.Projects.Core.Search;
-
 using IDaoFactory = ASC.Projects.Core.DataInterfaces.IDaoFactory;
 
 namespace ASC.Projects.Engine

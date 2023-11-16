@@ -7,13 +7,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.People.UserControls
-{
-
-
-    public partial class ImportUsers
-    {
-
+namespace ASC.Web.People.UserControls {
+    
+    
+    public partial class ImportUsers {
+        
         /// <summary>
         /// limitPanel control.
         /// </summary>
@@ -22,7 +20,7 @@ namespace ASC.Web.People.UserControls
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::ASC.Web.Studio.Controls.Common.Container limitPanel;
-
+        
         /// <summary>
         /// icon control.
         /// </summary>
@@ -31,5 +29,14 @@ namespace ASC.Web.People.UserControls
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::ASC.Web.Studio.Controls.Common.Container icon;
+        
+        /// <summary>
+        /// Tariff control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder Tariff;
     }
 }

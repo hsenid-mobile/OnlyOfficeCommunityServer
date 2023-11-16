@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-using System.Collections.Generic;
 
 namespace ASC.Common.Data.Sql.Expressions
 {
@@ -51,9 +50,9 @@ namespace ASC.Common.Data.Sql.Expressions
                        : string.Format("{0} is {1}null", column, Not ? "not " : string.Empty);
         }
 
-        public override IEnumerable<object> GetParameters()
+        public override object[] GetParameters()
         {
-            return str == null ? new object[0] : new object[] { str };
+            return str == null ? new object[0] : new object[] {str};
         }
     }
 }

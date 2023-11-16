@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,12 +68,12 @@ ASC.CRM.myInvoiceContactFilter = {
                     $filteritem.removeClass("default-value");
                 });
 
-            $filterSwitcher.next().addBack().appendTo($filteritem.find('span.contact-selector:first'));
+            $filterSwitcher.next().andSelf().appendTo($filteritem.find('span.contact-selector:first'));
 
             if (!filter.isset) {
                 setTimeout(function () {
                     if ($filteritem.hasClass("default-value")) {
-                        $filterSwitcher.trigger("click");
+                        $filterSwitcher.click();
                     }
                 }, 0);
             }
@@ -86,7 +86,7 @@ ASC.CRM.myInvoiceContactFilter = {
         if (!$filterSwitcher.parent().is("#" + ASC.CRM.myInvoiceContactFilter.hiddenContainerId)) {
             $filterSwitcher.off("showList");
             $filterSwitcher.find(".inner-text .value").text(ASC.CRM.Resources.CRMCommonResource.Select);
-            $filterSwitcher.next().addBack().appendTo(jq('#' + ASC.CRM.myInvoiceContactFilter.hiddenContainerId));
+            $filterSwitcher.next().andSelf().appendTo(jq('#' + ASC.CRM.myInvoiceContactFilter.hiddenContainerId));
             $filterSwitcher.contactadvancedSelector("reset");
         }
     },
@@ -104,7 +104,7 @@ ASC.CRM.myInvoiceContactFilter = {
 
 ASC.CRM.ListInvoiceView = (function () {
 
-    //Teamlab.on(Teamlab.events.getException, _onGetException);
+    //Teamlab.bind(Teamlab.events.getException, _onGetException);
 
     function _onGetException(params, errors) {
         console.log('invoices.js ', errors);
@@ -152,8 +152,8 @@ ASC.CRM.ListInvoiceView = (function () {
                 default:
                     if (item.hasOwnProperty("apiparamname") && item.params.hasOwnProperty("value") && item.params.value != null) {
                         try {
-                            var apiparamnames = JSON.parse(item.apiparamname),
-                                apiparamvalues = JSON.parse(item.params.value);
+                            var apiparamnames = jq.parseJSON(item.apiparamname),
+                                apiparamvalues = jq.parseJSON(item.params.value);
                             if (apiparamnames.length != apiparamvalues.length) {
                                 settings[item.apiparamname] = item.params.value;
                             }
@@ -265,7 +265,7 @@ ASC.CRM.ListInvoiceView = (function () {
         jq("#invoiceTable tbody tr").remove();
         jq("#invoiceHeaderMenu, #invoiceList, #tableForInvoiceNavigation").hide();
         jq("#invoiceFilterContainer").show();
-        jq("#mainSelectAllInvoices").prop("disabled", true);
+        jq("#mainSelectAllInvoices").attr("disabled", true);
         jq("#invoiceEmptyScreen").hide();
         jq("#emptyContentForInvoiceFilter").show();
     };
@@ -282,15 +282,15 @@ ASC.CRM.ListInvoiceView = (function () {
 
         jq("#invoiceActionMenu .showProfileLink").attr("href", jq.format("Invoices.aspx?id={0}", invoiceID));
 
-        jq("#invoiceActionMenu .showProfileLinkNewTab").off("click").on("click", function () {
+        jq("#invoiceActionMenu .showProfileLinkNewTab").unbind("click").bind("click", function () {
             jq("#invoiceActionMenu").hide();
             jq("#invoiceTable .entity-menu.active").removeClass("active");
             window.open(jq.format("Invoices.aspx?id={0}", invoiceID), "_blank");
         });
 
-        jq("#invoiceActionMenu .downloadLink").off("click").on("click", function () { _downloadInvoice(invoiceItem); });
-        jq("#invoiceActionMenu .printLink").off("click").on("click", function () { _printInvoice(invoiceID); });
-        jq("#invoiceActionMenu .sendLink").off("click").on("click", function () { _sendInvoice(invoiceItem); });
+        jq("#invoiceActionMenu .downloadLink").unbind("click").bind("click", function () { _downloadInvoice(invoiceItem); });
+        jq("#invoiceActionMenu .printLink").unbind("click").bind("click", function () { _printInvoice(invoiceID); });
+        jq("#invoiceActionMenu .sendLink").unbind("click").bind("click", function () { _sendInvoice(invoiceItem); });
         jq("#invoiceActionMenu .duplicateInvoiceLink").attr("href", jq.format("Invoices.aspx?id={0}&action=duplicate", invoiceID));
 
         renderEditBtns();
@@ -304,13 +304,13 @@ ASC.CRM.ListInvoiceView = (function () {
             }
             
             if (invoiceItem.canDelete) {
-                jq("#invoiceActionMenu .deleteInvoiceLink").off("click").on("click", function () {
+                jq("#invoiceActionMenu .deleteInvoiceLink").unbind("click").bind("click", function () {
                     jq("#invoiceActionMenu").hide();
                     jq("#invoiceTable .entity-menu.active").removeClass("active");
                     ASC.CRM.ListInvoiceView.showConfirmationPanelForDelete(invoiceItem.number, invoiceID, true);
                 }).show();
             } else {
-                jq("#invoiceActionMenu .deleteInvoiceLink").off("click").hide();
+                jq("#invoiceActionMenu .deleteInvoiceLink").unbind("click").hide();
             }
 
             if (invoiceItem.canEdit || invoiceItem.canDelete) {
@@ -338,7 +338,7 @@ ASC.CRM.ListInvoiceView = (function () {
         }
         
         function addStatusBtn (status, text, classname) {
-            var a = jq("<a></a>").addClass("dropdown-item with-icon " + classname).text(text).on("click", function () {
+            var a = jq("<a></a>").addClass("dropdown-item with-icon " + classname).text(text).bind("click", function () {
                 _changeStatus(invoiceItem.id, status);
             });
             var $li = jq("<li></li>").addClass("status-btn").append(a);
@@ -348,9 +348,6 @@ ASC.CRM.ListInvoiceView = (function () {
 
     var _getInvoices = function (startIndex) {
         var filters = _getFilterSettings(startIndex);
-        if (!filters.hasOwnProperty("status")) {
-            ASC.CRM.ListContactView.clearCookieAnchor();
-        }
         Teamlab.getCrmInvoices({ startIndex: startIndex || 0 },
         {
             filter: filters,
@@ -440,7 +437,7 @@ ASC.CRM.ListInvoiceView = (function () {
             jq("#emptyContentForInvoiceFilter").hide();
             jq("#invoiceFilterContainer, #invoiceHeaderMenu, #invoiceList, #tableForInvoiceNavigation").show();
             jq("#invoiceTable tbody tr").remove();
-            jq("#mainSelectAllInvoices").prop("disabled", true);
+            jq("#mainSelectAllInvoices").attr("disabled", true);
 
             ASC.CRM.ListInvoiceView.Total = parseInt(jq("#totalInvoicesOnPage").text()) || 0;
 
@@ -459,7 +456,7 @@ ASC.CRM.ListInvoiceView = (function () {
         jq("#invoiceEmptyScreen").hide();
         jq("#invoiceFilterContainer").show();
         _resizeFilter();
-        jq("#mainSelectAllInvoices").prop("disabled", false);
+        jq("#mainSelectAllInvoices").removeAttr("disabled");
         var selectedIDs = new Array();
         for (var i = 0, n = ASC.CRM.ListInvoiceView.selectedItems.length; i < n; i++) {
             selectedIDs.push(ASC.CRM.ListInvoiceView.selectedItems[i].id);
@@ -720,7 +717,7 @@ ASC.CRM.ListInvoiceView = (function () {
         });
 
 
-        jq("body").off("contextmenu").on("contextmenu", function (event) {
+        jq("body").unbind("contextmenu").bind("contextmenu", function (event) {
             var e = jq.fixEvent(event);
 
             if (typeof e == "undefined" || !e) {
@@ -821,7 +818,7 @@ ASC.CRM.ListInvoiceView = (function () {
             addLeft: 0
         });
 
-        jq("#changeStatusDialog .dropdown-item").on("click", function () {
+        jq("#changeStatusDialog .dropdown-item").bind("click", function () {
             var status = jq(this).attr("data-value");
             _changeStatusBatch(status);
         });
@@ -952,7 +949,7 @@ ASC.CRM.ListInvoiceView = (function () {
 
         jq("#tableForInvoiceNavigation select:first")
             .val(entryCountOnPage)
-            .on("change", function () {
+            .change(function () {
                 ASC.CRM.ListInvoiceView.changeCountOfRows(this.value);
             })
             .tlCombobox();
@@ -1193,7 +1190,7 @@ ASC.CRM.ListInvoiceView = (function () {
         ASC.CRM.ListInvoiceView.advansedFilter = jq("#invoiceAdvansedFilter")
             .advansedFilter({
                 anykey      : false,
-                hintDefaultDisable: false,
+                hintDefaultDisable: true,
                 maxfilters  : -1,
                 colcount    : 2,
                 maxlength   : "100",
@@ -1208,8 +1205,8 @@ ASC.CRM.ListInvoiceView = (function () {
                             { id: "status", title: ASC.CRM.Resources.CRMInvoiceResource.Status, dsc: false, def: false }
                 ]
             })
-            .on("setfilter", ASC.CRM.ListInvoiceView.setFilter)
-            .on("resetfilter", ASC.CRM.ListInvoiceView.resetFilter);
+            .bind("setfilter", ASC.CRM.ListInvoiceView.setFilter)
+            .bind("resetfilter", ASC.CRM.ListInvoiceView.resetFilter);
     };
 
     var _initEmptyScreen = function (emptyListImgSrc, emptyFilterListImgSrc) {
@@ -1286,8 +1283,9 @@ ASC.CRM.ListInvoiceView = (function () {
                 page: 1,
                 countOnPage: jq("#tableForInvoiceNavigation select:first>option:first").val()
             },
+                key = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + location.pathname + location.search,
                 currentAnchor = location.hash,
-                cookieKey = ASC.CRM.ListContactView.getkey();
+                cookieKey = encodeURIComponent(key);
 
             currentAnchor = currentAnchor && typeof currentAnchor === 'string' && currentAnchor.charAt(0) === '#'
                 ? currentAnchor.substring(1)
@@ -1315,7 +1313,7 @@ ASC.CRM.ListInvoiceView = (function () {
 
             _initScrolledGroupMenu();
 
-            jq("#menuCreateNewTask").on("click", function () { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
+            jq("#menuCreateNewTask").bind("click", function () { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
 
             ASC.CRM.ListInvoiceView.initConfirmationPanelForDelete();
 
@@ -1334,7 +1332,7 @@ ASC.CRM.ListInvoiceView = (function () {
                 isTempLoad: true
             });
 
-            jq(window).on("afterResetSelectedContact", function (event, obj, objName) {
+            jq(window).bind("afterResetSelectedContact", function (event, obj, objName) {
                 if (objName === "invoiceContactSelectorForFilter" && ASC.CRM.myInvoiceContactFilter.filterId) {
                     jq('#' + ASC.CRM.myInvoiceContactFilter.filterId).advansedFilter('resize');
                 }
@@ -1344,6 +1342,13 @@ ASC.CRM.ListInvoiceView = (function () {
             jq(".containerBodyBlock").children(".loader-page").show();
 
             _initFilter();
+
+            /*tracking events*/
+            ASC.CRM.ListInvoiceView.advansedFilter.one("adv-ready", function () {
+                var crmAdvansedFilterContainer = jq("#invoiceAdvansedFilter .advansed-filter-list");
+                jq("#invoiceAdvansedFilter .btn-toggle-sorter").trackEvent(ga_Categories.invoice, ga_Actions.filterClick, "sort");
+                jq("#invoiceAdvansedFilter .advansed-filter-input").trackEvent(ga_Categories.invoice, ga_Actions.filterClick, "search_text", "enter");
+            });
 
             jq("#invoiceHeaderMenu").on("click", ".menuActionDelete.unlockAction", function () {
                 _showDeletePanel();
@@ -1476,7 +1481,7 @@ ASC.CRM.ListInvoiceView = (function () {
         showConfirmationPanelForDelete: function(title, invoiceID, isListView) {
             jq("#confirmationDeleteOneInvoicePanel .confirmationAction>b").text(jq.format(ASC.CRM.Resources.CRMInvoiceResource.DeleteInvoiceConfirmMessage, Encoder.htmlDecode(title)));
 
-            jq("#confirmationDeleteOneInvoicePanel .middle-button-container>.button.blue.middle").off("click").on("click", function () {
+            jq("#confirmationDeleteOneInvoicePanel .middle-button-container>.button.blue.middle").unbind("click").bind("click", function () {
                 ASC.CRM.ListInvoiceView.deleteInvoice(invoiceID, isListView);
             });
             PopupKeyUpActionProvider.EnableEsc = false;
@@ -1696,7 +1701,7 @@ ASC.CRM.InvoiceActionView = (function () {
             }
         });
 
-        jq(window).on("editContactInSelector", function (event, $itemObj, objName) {
+        jq(window).bind("editContactInSelector", function (event, $itemObj, objName) {
             changeClient(objName);
         });
 
@@ -1791,14 +1796,6 @@ ASC.CRM.InvoiceActionView = (function () {
             createNew(this);
         });
 
-        jq("#newItemPrice").on("focus", function () {
-            jq("#priceTip").show();
-        });
-
-        jq("#newItemPrice").on("blur", function () {
-            jq("#priceTip").hide();
-        });
-
         jq("#crm_invoiceMakerDialog #selectItemDialog").on("keyup", ".custom-input input", function () {
             findItems(this);
         });
@@ -1880,7 +1877,7 @@ ASC.CRM.InvoiceActionView = (function () {
     };
 
     var initOtherActionMenu = function () {
-        jq("#menuCreateNewTask").on("click", function () { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
+        jq("#menuCreateNewTask").bind("click", function () { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
     };
 
     var initNumberField = function () {
@@ -1894,9 +1891,9 @@ ASC.CRM.InvoiceActionView = (function () {
         }
 
         if (actionType == actionTypes.Edit || (window.invoiceSettings && window.invoiceSettings.autogenerated)) {
-            jq("#invoiceNumber").prop("readonly", true).addClass("disabled");
+            jq("#invoiceNumber").attr("readonly", true).addClass("disabled");
         } else {
-            jq("#invoiceNumber").trigger("focus");
+            jq("#invoiceNumber").focus();
         }
     };
 
@@ -1955,7 +1952,7 @@ ASC.CRM.InvoiceActionView = (function () {
             renderDealsList(obj.id);
         };
 
-        jq(window).on("editContactInSelector", function (event, $itemObj, objName) {
+        jq(window).bind("editContactInSelector", function (event, $itemObj, objName) {
             if (objName == "invoiceContactSelector") {
                 jq("#invoiceOpportunityBlock").hide();
                 jq("#linkOpportunityDialog").hide();
@@ -2119,7 +2116,6 @@ ASC.CRM.InvoiceActionView = (function () {
             li = jq("<li></li>").append(a);
         
         dialog.find(".custom-list").prepend(li);
-        return a;
     };
 
     var renderTaxesList = function () {
@@ -2143,7 +2139,7 @@ ASC.CRM.InvoiceActionView = (function () {
         if (objName == "invoiceContactSelector") {
             jq("#invoiceContactID").val("0");
             if (jq("#consigneeEqualClientCbx").is(":checked")) {
-                jq("#consigneeEqualClientCbx").trigger("click");
+                jq("#consigneeEqualClientCbx").click();
             }
             jq("#addressDialog").find("[name='billingAddressID']").val("0");
             window.invoiceContactInfo = null;
@@ -2256,7 +2252,7 @@ ASC.CRM.InvoiceActionView = (function () {
 
         if (window.invoiceJsonData) {
             try {
-                window.invoiceJsonData = JSON.parse(jq.base64.decode(window.invoiceJsonData));
+                window.invoiceJsonData = jq.parseJSON(jq.base64.decode(window.invoiceJsonData));
                 if (window.invoiceJsonData != null) {
                     if (!window.invoiceJsonData.hasOwnProperty("DeliveryAddressID") || isNaN(window.invoiceJsonData.DeliveryAddressID)) {
                         window.invoiceJsonData.DeliveryAddressID = 0;
@@ -2278,16 +2274,7 @@ ASC.CRM.InvoiceActionView = (function () {
                 console.log(e);
                 window.invoiceJsonData = null;
             }
-        } else {
-            window.invoiceJsonData = null;
-
-            if (window.invoiceContactInfo) {
-                var billingAddress = getInvoiceContactInfo(7, 3);
-                if (billingAddress) {
-                    jq("#addressDialog").find("[name='billingAddressID']").val(billingAddress.id);
-                }
-            }
-        }
+        } else { window.invoiceJsonData = null; }
     };
 
     var showAddressDialog = function (swithcer) {
@@ -2352,15 +2339,15 @@ ASC.CRM.InvoiceActionView = (function () {
             $dialog.find(".address_type_select").parent().hide();
         }
 
-        $dialog.find(".button.blue.middle").off().on("click", function () {
+        $dialog.find(".button.blue.middle").unbind().bind("click", function () {
 
             var categories = ["Home", "Postal", "Office", "Billing", "Other", "Work"],
                 ctg = $dialog.find(".address_category").val(),
-                str = $dialog.find(".contact_street").val().trim(),
-                cit = $dialog.find(".contact_city").val().trim(),
-                stt = $dialog.find(".contact_state").val().trim(),
-                zip = $dialog.find(".contact_zip").val().trim(),
-                cnt = $dialog.find(".contact_country").val().trim();
+                str = jq.trim($dialog.find(".contact_street").val()),
+                cit = jq.trim($dialog.find(".contact_city").val()),
+                stt = jq.trim($dialog.find(".contact_state").val()),
+                zip = jq.trim($dialog.find(".contact_zip").val()),
+                cnt = jq.trim($dialog.find(".contact_country").val());
 
             var data = {
                 id: address ? address.id : 0,
@@ -2397,7 +2384,7 @@ ASC.CRM.InvoiceActionView = (function () {
 
     var displayAddressData = function ($dialog, data) {
         if (data != null) {
-            var jsonData = JSON.parse(data);
+            var jsonData = jq.parseJSON(data);
             $dialog.find(".contact_street").val(jsonData.street);
             $dialog.find(".contact_city").val(jsonData.city);
             $dialog.find(".contact_state").val(jsonData.state);
@@ -2466,17 +2453,14 @@ ASC.CRM.InvoiceActionView = (function () {
                 itemId = getValueFromCustomInput(obj).id,
                 invoiceItem = getInvoiceItem(itemId);
 
-            var price = $line.find(".price input");
-
             autosize.update($line.find(".description textarea").val(invoiceItem.description));
-            price.val(roundTo(invoiceItem.price / exRate, 2).toFixed(2));
+            $line.find(".price input").val(roundTo(invoiceItem.price / exRate, 2).toFixed(2));
 
             var tax = getInvoiceTax(invoiceItem.invoiceTax1ID);
             setValueToCustomInput($line.find(".tax1 .custom-input"), tax ? tax.name : "", tax ? tax.id : 0);
 
             tax = getInvoiceTax(invoiceItem.invoiceTax2ID);
             setValueToCustomInput($line.find(".tax2 .custom-input"), tax ? tax.name : "", tax ? tax.id : 0);
-            checkPrice(price, invoiceItem.price);
         }
 
         if ($parent.is(".quantity") || $parent.is(".discount") || $parent.is(".price")) {
@@ -2486,20 +2470,10 @@ ASC.CRM.InvoiceActionView = (function () {
                 jq(obj).val(Number(val).toFixed(2));
             }
         }
-        checkPrice(obj, val);
+
         recalculateInvoiceLines();
     };
 
-    var checkPrice = function (obj, data) {
-        var $parent = jq(obj).parent();
-        if ($parent.is(".price")) {
-            var $row = getParentObj($parent, ".tbl-body-row");
-            $row.toggleClass("price-error", data > ASC.CRM.Data.MaxInvoiceItemPrice);
-            var $btns = jq("#crm_invoiceMakerDialog .middle-button-container a.button.big:not(.cancelSbmtFormBtn )");
-            var hasErrors = jq("#crm_invoiceMakerDialog .tbl-body-row.price-error").length > 0;
-            $btns.toggleClass("disable", hasErrors);
-        }
-    }
     var addNewLine = function (setFocus) {
         jq("#invoiceLineTableContainer .tbl-body").append(jq.tmpl("invoiceLineTmpl", getInvoiceLineTmplData()));
 
@@ -2508,7 +2482,7 @@ ASC.CRM.InvoiceActionView = (function () {
 
         recalculateInvoiceLines();
         if (setFocus === true) {
-            $line.find(".description:first textarea").trigger("focus");
+            $line.find(".description:first textarea").focus();
         }
     };
 
@@ -2669,9 +2643,9 @@ ASC.CRM.InvoiceActionView = (function () {
         }
 
         if (disable) {
-            jq(selector).prop("disabled", true).prop("readonly", true).addClass("disabled");
+            jq(selector).attr("disabled", true).attr("readonly", true).addClass("disabled");
         } else {
-            jq(selector).prop("disabled", false).prop("readonly", false).removeClass("disabled");
+            jq(selector).removeAttr("disabled").removeAttr("readonly").removeClass("disabled");
         }
     };
 
@@ -2704,9 +2678,9 @@ ASC.CRM.InvoiceActionView = (function () {
                 success: function (params, settings) {
                     window.invoiceSettings = settings;
                     if (data.autogenerated) {
-                        jq("#invoiceNumber").val(settings.prefix + settings.number).prop("readonly", true).addClass("disabled");
+                        jq("#invoiceNumber").val(settings.prefix + settings.number).attr("readonly", true).addClass("disabled");
                     } else {
-                        jq("#invoiceNumber").prop("readonly", false).removeClass("disabled");
+                        jq("#invoiceNumber").removeAttr("readonly").removeClass("disabled");
                     }
                     disableNumberFormatDialog(false, true);
                     LoadingBanner.hideLoaderBtn("#numberFormatDialog");
@@ -2735,9 +2709,9 @@ ASC.CRM.InvoiceActionView = (function () {
         var selector = "#defaultTerms";
 
         if (disable) {
-            jq(selector).prop("disabled", true).prop("readonly", true).addClass('disabled');
+            jq(selector).attr("disabled", true).attr("readonly", true).addClass('disabled');
         } else {
-            jq(selector).prop("disabled", false).prop("readonly", false).removeClass("disabled");
+            jq(selector).removeAttr("disabled").removeAttr("readonly").removeClass("disabled");
         }
     };
 
@@ -2818,7 +2792,7 @@ ASC.CRM.InvoiceActionView = (function () {
                 $leftSide.find(".create-btn").addClass("disable");
                 $leftSide.show();
                 $dialog.css("left", $dialog.position().left - $leftSide.outerWidth(true) + "px");
-                $leftSide.find("input:first").trigger("focus");
+                $leftSide.find("input:first").focus();
             }
         } else {
             if ($leftSide.is(":visible")) {
@@ -2862,10 +2836,9 @@ ASC.CRM.InvoiceActionView = (function () {
                     disableDialog($dialog, false);
                 },
                 success: function (params, data) {
-                    var newItem = addToItemsList($dialog, data);
+                    addToItemsList($dialog, data);
                     showSelectorLeftSide($dialog, false);
                     setInvoiceItem(data);
-                    selectItem(newItem);
                 }
             });
         }
@@ -3515,7 +3488,7 @@ ASC.CRM.InvoiceActionView = (function () {
 
             if (typeof (window.invoiceItems) != "undefined") {
                 try {
-                    window.invoiceItems = JSON.parse(jq.base64.decode(window.invoiceItems));
+                    window.invoiceItems = jq.parseJSON(jq.base64.decode(window.invoiceItems));
                 } catch (e) {
                     console.log(e);
                     window.invoiceItems = [];
@@ -3524,7 +3497,7 @@ ASC.CRM.InvoiceActionView = (function () {
 
             if (typeof (window.invoiceTaxes) != "undefined") {
                 try {
-                    window.invoiceTaxes = JSON.parse(jq.base64.decode(window.invoiceTaxes));
+                    window.invoiceTaxes = jq.parseJSON(jq.base64.decode(window.invoiceTaxes));
                 } catch (e) {
                     console.log(e);
                     window.invoiceTaxes = [];
@@ -3533,7 +3506,7 @@ ASC.CRM.InvoiceActionView = (function () {
 
             if (typeof (window.invoiceSettings) != "undefined") {
                 try {
-                    window.invoiceSettings = JSON.parse(jq.base64.decode(window.invoiceSettings));
+                    window.invoiceSettings = jq.parseJSON(jq.base64.decode(window.invoiceSettings));
                 } catch (e) {
                     console.log(e);
                     window.invoiceSettings = null;
@@ -3542,7 +3515,7 @@ ASC.CRM.InvoiceActionView = (function () {
 
             if (typeof (window.invoicePresetContact) != "undefined") {
                 try {
-                    window.invoicePresetContact = window.invoicePresetContact ? JSON.parse(jq.base64.decode(window.invoicePresetContact)) : null;
+                    window.invoicePresetContact = window.invoicePresetContact ? jq.parseJSON(jq.base64.decode(window.invoicePresetContact)) : null;
                 } catch (e) {
                     console.log(e);
                     window.invoicePresetContact = null;
@@ -3551,7 +3524,7 @@ ASC.CRM.InvoiceActionView = (function () {
 
             if (typeof (window.currencyRates) != "undefined") {
                 try {
-                    window.currencyRates = window.currencyRates ? JSON.parse(jq.base64.decode(window.currencyRates)) : null;
+                    window.currencyRates = window.currencyRates ? jq.parseJSON(jq.base64.decode(window.currencyRates)) : null;
                 } catch (e) {
                     console.log(e);
                     window.currencyRates = [];
@@ -3560,7 +3533,7 @@ ASC.CRM.InvoiceActionView = (function () {
 
             if (typeof (window.invoiceContactInfo) != "undefined") {
                 try {
-                    window.invoiceContactInfo = window.invoiceContactInfo ? JSON.parse(jq.base64.decode(window.invoiceContactInfo)).response : null;
+                    window.invoiceContactInfo = window.invoiceContactInfo ? jq.parseJSON(jq.base64.decode(window.invoiceContactInfo)).response : null;
                 } catch (e) {
                     console.log(e);
                     window.invoiceContactInfo = null;
@@ -3569,7 +3542,7 @@ ASC.CRM.InvoiceActionView = (function () {
 
             if (typeof (window.invoiceConsigneeInfo) != "undefined") {
                 try {
-                    window.invoiceConsigneeInfo = window.invoiceConsigneeInfo ? JSON.parse(jq.base64.decode(window.invoiceConsigneeInfo)).response : null;
+                    window.invoiceConsigneeInfo = window.invoiceConsigneeInfo ? jq.parseJSON(jq.base64.decode(window.invoiceConsigneeInfo)).response : null;
                 } catch (e) {
                     console.log(e);
                     window.invoiceConsigneeInfo = null;
@@ -3580,7 +3553,7 @@ ASC.CRM.InvoiceActionView = (function () {
 
             if (typeof (window.invoice) != "undefined") {
                 try {
-                    window.invoice = JSON.parse(jq.base64.decode(window.invoice)).response;
+                    window.invoice = jq.parseJSON(jq.base64.decode(window.invoice)).response;
                     initFields(contactSelectorType);
                     setBindings();
                     _bindLeaveThePageEvent();
@@ -3604,15 +3577,14 @@ ASC.CRM.InvoiceActionView = (function () {
         },
 
         submitForm: function (buttonUnicId) {
-            var $btn = jq('[id*=_saveButton]:first');
-            if ($btn.hasClass('disable') || $btn.hasClass('postInProcess')) {
+            if (jq('[id*=_saveButton]:first').hasClass('postInProcess')) {
                 return false;
             }
-            $btn.addClass('postInProcess');
+            jq('[id*=_saveButton]:first').addClass('postInProcess');
 
             try {
                 if (!checkValidation()) {
-                    $btn.removeClass('postInProcess');
+                    jq('[id*=_saveButton]:first').removeClass('postInProcess');
                     return false;
                 } else {
                     disablePage();
@@ -3626,7 +3598,7 @@ ASC.CRM.InvoiceActionView = (function () {
                             success: function (params, isExist) {
                                 if (isExist == true) {
                                     jq("#saveInvoiceError .saveInvoiceErrorText").text(ASC.CRM.Resources.CRMInvoiceResource.InvoiceNumberBusyError);
-                                    $btn.removeClass("postInProcess");
+                                    jq("[id*=_saveButton]:first").removeClass("postInProcess");
                                     StudioBlockUIManager.blockUI("#saveInvoiceError", 500);
                                     enablePage();
                                     return false;
@@ -3638,7 +3610,7 @@ ASC.CRM.InvoiceActionView = (function () {
                                 }
                             },
                             error: function (params) {
-                                $btn.removeClass('postInProcess');
+                                jq('[id*=_saveButton]:first').removeClass('postInProcess');
                                 return false;
                             }
                         });
@@ -3647,7 +3619,7 @@ ASC.CRM.InvoiceActionView = (function () {
                 }
             } catch (e) {
                 console.log(e);
-                $btn.removeClass('postInProcess');
+                jq('[id*=_saveButton]:first').removeClass('postInProcess');
                 return false;
             }
         }
@@ -3751,13 +3723,13 @@ ASC.CRM.InvoiceDetailsView = (function () {
     };
 
     var initOtherActionMenu = function () {
-        jq("#menuCreateNewTask").on("click", function () { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
+        jq("#menuCreateNewTask").bind("click", function () { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
     };
 
     var renderContent = function () {
         if (typeof (window.invoice) != "undefined") {
             try {
-                window.invoice = Teamlab.create("crm-invoice", null, JSON.parse(jq.base64.decode(window.invoice)).response);
+                window.invoice = Teamlab.create("crm-invoice", null, jq.parseJSON(jq.base64.decode(window.invoice)).response);
             } catch (e) {
                 console.log(e);
                 window.invoice = null;
@@ -3766,7 +3738,7 @@ ASC.CRM.InvoiceDetailsView = (function () {
         
         if (typeof (window.invoiceData) != "undefined") {
             try {
-                window.invoiceData = JSON.parse(jq.base64.decode(window.invoiceData));
+                window.invoiceData = jq.parseJSON(jq.base64.decode(window.invoiceData));
             } catch (e) {
                 console.log(e);
                 window.invoiceData = null;
@@ -3916,7 +3888,7 @@ ASC.CRM.InvoiceDetailsView = (function () {
         }
 
         function addStatusBtn (status, text) {
-            var a = jq("<a></a>").addClass("dropdown-item").text(text).on("click", function () {
+            var a = jq("<a></a>").addClass("dropdown-item").text(text).bind("click", function () {
                 changeStatus(window.invoice.id, status);
             });
             var $li = jq("<li></li>").addClass("status-btn").append(a);

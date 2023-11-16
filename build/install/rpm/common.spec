@@ -54,10 +54,6 @@ cp ../../Files/nginx/includes/* "$RPM_BUILD_ROOT/etc/nginx/includes/"
 mkdir -p "$RPM_BUILD_ROOT/etc/hyperfastcgi/"
 cp -r ../../Files/hyperfastcgi/* "$RPM_BUILD_ROOT/etc/hyperfastcgi/"
 
-#install mail config
-mkdir -p "$RPM_BUILD_ROOT/etc/%{package_sysname}/communityserver/"
-cp -r ../../Files/mail-config/* "$RPM_BUILD_ROOT/etc/%{package_sysname}/communityserver/"
-
 # rename
 find "$RPM_BUILD_ROOT/usr/bin/" \
 	 "$RPM_BUILD_ROOT/etc/hyperfastcgi/" \
@@ -66,7 +62,6 @@ find "$RPM_BUILD_ROOT/usr/bin/" \
 	 "$RPM_BUILD_ROOT%{nginx_conf_d}/" \
 	 "$RPM_BUILD_ROOT/etc/nginx/includes/" \
 	 "$RPM_BUILD_ROOT/var/www/%{package_sysname}/Tools/" \
-	 "$RPM_BUILD_ROOT/etc/%{package_sysname}/communityserver/" \
 -depth -type f \
 -exec sed -i 's/onlyoffice/%{package_sysname}/g' {} \; \
 -exec sed -i 's/ONLYOFFICE/%{package_sysname}/g' {} \; \
@@ -90,7 +85,7 @@ for FILE in `find "$RPM_BUILD_ROOT/var/www/%{package_sysname}/"`; do
 				echo "%%attr(-, %{package_sysname}, %{package_sysname}) %%config(noreplace) \"$RELFILE\"" >>onlyoffice.list
 			;;
 
-			*/WebStudio/[Ww]eb*.config | */ApiSystem/[Ww]eb*.config | */TeamLabSvc.exe.config | */ASC.Mail.EmlDownloader.exe.config )
+			*/WebStudio/[Ww]eb*.config | */ApiSystem/[Ww]eb*.config | */TeamLabSvc.exe.config | */ASC.Mail.StorageCleaner.exe.config | */ASC.Mail.Aggregator.CollectionService.exe.config | */ASC.Mail.Watchdog.Service.exe.config | */ASC.Mail.EmlDownloader.exe.config )
 				echo "%%attr(-, %{package_sysname}, %{package_sysname}) %%config \"$RELFILE\"" >>onlyoffice.list
 			;;
 
@@ -113,7 +108,6 @@ rm -rf "$RPM_BUILD_ROOT"
 %attr(-, root, root) /etc/nginx/includes/%{package_sysname}-communityserver-*
 %attr(-, root, root) /etc/hyperfastcgi/*
 %attr(-, root, root) /etc/god/
-%attr(-, %{package_sysname}, %{package_sysname}) %config /etc/%{package_sysname}/communityserver/*
 
 %pre
 getent group %{package_sysname} >/dev/null || groupadd -r %{package_sysname}
@@ -142,9 +136,6 @@ sed 's,{{SERVICE_SSO_AUTH_HOST_ADDR}},'"${SERVICE_SSO_AUTH_HOST_ADDR}"',' -i ${N
 sed '/web\.controlpanel\.url/s/\(value\s*=\s*\"\)[^\"]*\"/\1\/controlpanel\/\"/' -i  ${APP_ROOT_DIR}/web.appsettings.config;
 sed '/web\.controlpanel\.url/s/\(value\s*=\s*\"\)[^\"]*\"/\1\/controlpanel\/\"/' -i ${APP_SERVICES_ROOT_DIR}/TeamLabSvc/TeamLabSvc.exe.config;
 
-CORE_MACHINEKEY="$(sed -n '/"core.machinekey"/s!.*value\s*=\s*"\([^"]*\)".*!\1!p' ${DIR}/WebStudio/web.appsettings.config)";
-find "$DIR/controlpanel/www/config" -type f -name "*.json" -exec sed -i "s_\(\"core.machinekey\":\).*,_\1 \"${CORE_MACHINEKEY}\",_" {} \;
-
 if systemctl is-active monoserve | grep -q "active"; then
 	systemctl restart monoserve
 fi
@@ -161,12 +152,10 @@ DIR="/var/www/%{package_sysname}"
 
 python3 -m pip install --upgrade pip
 python3 -m pip install --upgrade requests
-python3 -m pip install --upgrade radicale==3.0.5
+python3 -m pip install --upgrade radicale
 python3 -m pip install --upgrade $DIR/Tools/radicale/plugins/app_auth_plugin/.
 python3 -m pip install --upgrade $DIR/Tools/radicale/plugins/app_store_plugin/.
 python3 -m pip install --upgrade $DIR/Tools/radicale/plugins/app_rights_plugin/.
-
-systemctl restart %{package_sysname}Radicale
 
 %triggerin -- %{package_sysname}-xmppserver
 
@@ -174,6 +163,7 @@ DIR=/var/www/%{package_sysname}
 APP_ROOT_DIR="$DIR/WebStudio";
 
 sed '/web\.talk/s/value=\"\S*\"/value=\"true\"/g' -i  ${APP_ROOT_DIR}/web.appsettings.config
+sed '/web\.chat/s/value=\"\S*\"/value=\"true\"/g' -i  ${APP_ROOT_DIR}/web.appsettings.config
 
 if systemctl is-active monoserve | grep -q "active"; then
 	systemctl restart monoserve
@@ -195,8 +185,8 @@ DOCUMENT_SERVER_HOST="localhost:8083";
 DOCUMENT_SERVER_HOST_PROXY="localhost\/ds-vpath";
 DOCUMENT_SERVER_API_URL="\/ds-vpath\/";
 
-DOCUMENT_SERVER_JWT_SECRET_FROM_DS=$(cat  /etc/%{package_sysname}/documentserver/local.json | jq -r '.services.CoAuthoring.secret.inbox.string')
-DOCUMENT_SERVER_JWT_HEADER_FROM_DS=$(cat  /etc/%{package_sysname}/documentserver/local.json | jq -r '.services.CoAuthoring.token.inbox.header')
+DOCUMENT_SERVER_JWT_SECRET_FROM_DS=$(cat  /etc/onlyoffice/documentserver/local.json | jq -r '.services.CoAuthoring.secret.inbox.string')
+DOCUMENT_SERVER_JWT_HEADER_FROM_DS=$(cat  /etc/onlyoffice/documentserver/local.json | jq -r '.services.CoAuthoring.token.inbox.header')
 DOCUMENT_SERVER_JWT_SECRET=${JWT_SECRET:-${DOCUMENT_SERVER_JWT_SECRET_FROM_DS:-"%{package_sysname}"}};
 DOCUMENT_SERVER_JWT_HEADER=${JWT_HEADER:-${DOCUMENT_SERVER_JWT_HEADER_FROM_DS:-"AuthorizationJwt"}};
 
@@ -238,13 +228,10 @@ EOF
 fi
 
 
-for SVC in monoserve %{package_sysname}Thumb %{package_sysname}ThumbnailBuilder
-do
-	if systemctl is-active $SVC | grep -q "active"; then
-		systemctl restart $SVC
-	fi
-done
-		
+if systemctl is-active monoserve | grep -q "active"; then
+	systemctl restart monoserve
+fi
+
 %post
 set -e
 
@@ -253,34 +240,6 @@ SERVICES_DIR="${DIR}/Services"
 APP_DATA_DIR="${DIR}/Data"
 
 mkdir -p "$APP_DATA_DIR"
-
-binDirs=("$DIR/ApiSystem/" "$DIR/WebStudio" "$DIR/controlpanel/www/config" "$SERVICES_DIR" "/etc/%{package_sysname}/communityserver")
-
-if [ -f $DIR/WebStudio/web.appsettings.config.rpmsave ]; then
-	CORE_MACHINEKEY="$(sed -n '/"core.machinekey"/s!.*value\s*=\s*"\([^"]*\)".*!\1!p' ${DIR}/WebStudio/web.appsettings.config.rpmsave)";
-else
-	CORE_MACHINEKEY="$(sed -n '/"core.machinekey"/s!.*value\s*=\s*"\([^"]*\)".*!\1!p' ${DIR}/WebStudio/web.appsettings.config)";
-fi
-
-sed "s^\(machine_key\)\s*=.*^\1 = ${CORE_MACHINEKEY}^g" -i ${SERVICES_DIR}/TeamLabSvc/radicale.config
-
-for i in "${!binDirs[@]}"; do
-	if [ -d "${binDirs[$i]}" ]; then
-		find "${binDirs[$i]}" -type f -name "*.[cC]onfig" -exec sed -i "/core.\machinekey/s_\(value\s*=\s*\"\)[^\"]*\"_\1${CORE_MACHINEKEY}\"_" {} \;
-		find "${binDirs[$i]}" -type f -name "*.json" -exec sed -i "s_\(\"core.machinekey\":\|\"machinekey\":\).*,_\1 \"${CORE_MACHINEKEY}\",_" {} \;
-	fi
-done
-
-#Mail configs changes
-if [ -f $DIR/WebStudio/web.appsettings.config.rpmsave ]; then
-	MAIL_IMAPSYNC_START_DATE="$(sed -n '/"mail.imap-sync-start-date"/s_.*value\s*=\s*"\([^"]*\)".*_\1_p' ${DIR}/WebStudio/web.appsettings.config.rpmsave)";	
-fi
-MAIL_IMAPSYNC_START_DATE="${MAIL_IMAPSYNC_START_DATE:-$(date '+%Y-%m-%dT%H:%M:%''S')}";
-sed 's_\(\"ImapSyncStartDate":\).*,_\1 "'${MAIL_IMAPSYNC_START_DATE}'",_' -i /etc/%{package_sysname}/communityserver/mail.production.json
-sed "/mail\.imap-sync-start-date/s/value=\"\S*\"/value=\"${MAIL_IMAPSYNC_START_DATE}\"/g" -i ${DIR}/WebStudio/web.appsettings.config
-
-sed "s!\"value\":.*!\"value\":\ \"${APP_DATA_DIR}\"!" -i /etc/%{package_sysname}/communityserver/storage.production.json
-sed "s!\"folder\":.*,!\"folder\":\ \"${SERVICES_DIR}\",!" -i /etc/%{package_sysname}/communityserver/appsettings.production.json
 
 if [ "$(ls -alhd ${APP_DATA_DIR} | awk '{ print $3 }')" != "%{package_sysname}" ]; then
 	  chown %{package_sysname}:%{package_sysname} ${APP_DATA_DIR}
@@ -305,31 +264,38 @@ chown %{package_sysname}:%{nginx_user} /var/run/%{package_sysname}
 chmod g+s+w /var/run/%{package_sysname}
 chmod +x /usr/bin/communityserver-configure.sh
 
-# clear cache
-rm -dfr /tmp/%{package_sysname}*
-rm -dfr /var/run/%{package_sysname}/*
-rm -dfr /var/cache/nginx/%{package_sysname}/*
-
 if [ $1 -ge 2 ]; then
 	if [ -d "$DIR" ]; then
 		CONN_STR=$(grep -oP "Server=[^\"]*(?=\")" $DIR/WebStudio/web.connections.config | head -1)
 		
-		binDirs=("$DIR/ApiSystem/" "$DIR/WebStudio" "$SERVICES_DIR/TeamLabSvc")
-		for i in "${!binDirs[@]}"; do
-			find "${binDirs[$i]}" -type f -name "*.[cC]onfig" -exec sed -i "s/connectionString=.*/connectionString=\"${CONN_STR}\" providerName=\"MySql.Data.MySqlClient\"\/>/" {} \;
-		done
-		sed -i "s!\(\"connectionString\":\).*,!\1 \"${CONN_STR//!/\\!}\",!" /etc/%{package_sysname}/communityserver/appsettings.production.json
+		if [ -f $DIR/WebStudio/web.appsettings.config.rpmsave ]; then
+			CORE_MACHINEKEY="$(sudo sed -n '/"core.machinekey"/s!.*value\s*=\s*"\([^"]*\)".*!\1!p' ${DIR}/WebStudio/web.appsettings.config.rpmsave)";
+		fi		
+
+		binDirs=("WebStudio" "ApiSystem" "Services/TeamLabSvc" "Services/MailAggregator" "Services/MailCleaner" "Services/MailWatchdog")
+
+		for i in "${!binDirs[@]}";
+		do
+			find "$DIR/${binDirs[$i]}" -type f -name "*.[cC]onfig" -exec sed -i "s/connectionString=.*/connectionString=\"$CONN_STR\" providerName=\"MySql.Data.MySqlClient\"\/>/" {} \;
+
+			if [ ! -z $CORE_MACHINEKEY ]; then
+				find "$DIR/${binDirs[$i]}" -type f -name "*.[cC]onfig" -exec sed -i '/core.\machinekey/s!\(value\s*=\s*\"\)[^\"]*\"!\1'${CORE_MACHINEKEY}'\"!' {} \;			
+			fi				
+		done				
 
 		MYSQL_SERVER_HOST=$(grep -oP "Server=[^\";]*" $DIR/WebStudio/web.connections.config | head -1 | cut -d'=' -f2);
 		MYSQL_SERVER_DB_NAME=$(grep -oP "Database=[^\";]*" $DIR/WebStudio/web.connections.config | head -1 | cut -d'=' -f2);
 		MYSQL_SERVER_USER=$(grep -oP "User ID=[^\";]*" $DIR/WebStudio/web.connections.config | head -1 | cut -d'=' -f2);
 		MYSQL_SERVER_PASS=$(grep -oP "Password=[^\";]*" $DIR/WebStudio/web.connections.config | head -1 | cut -d'=' -f2);
 		
-		find "${SERVICES_DIR}/ASC.UrlShortener/config" -type f -name "*.json" -exec sed -i \
-		-e "s!\(\"host\":\).*,!\1 \"${MYSQL_SERVER_HOST}\",!" \
-		-e "s!\(\"user\":\).*,!\1 \"${MYSQL_SERVER_USER}\",!" \
-		-e "s!\(\"password\":\).*,!\1 \"${MYSQL_SERVER_PASS//!/\\!}\",!" \
-		-e "s!\(\"database\":\).*!\1 \"${MYSQL_SERVER_DB_NAME}\"!" {} \;	
+		sed "s!\"host\":.*,!\"host\":\"${MYSQL_SERVER_HOST}\",!" -i ${SERVICES_DIR}/ASC.UrlShortener/config/config.json
+		sed "s!\"user\":.*,!\"user\":\"${MYSQL_SERVER_USER}\",!" -i ${SERVICES_DIR}/ASC.UrlShortener/config/config.json
+		sed "s!\"password\":.*,!\"password\":\"${MYSQL_SERVER_PASS//!/\\!}\",!" -i ${SERVICES_DIR}/ASC.UrlShortener/config/config.json
+		sed "s!\"database\":.*!\"database\":\"${MYSQL_SERVER_DB_NAME}\"!" -i ${SERVICES_DIR}/ASC.UrlShortener/config/config.json		
+
+		if [ ! -z $CORE_MACHINEKEY ]; then
+			sed "s!\"core\.machinekey\":.*!\"core\.machinekey\":\"${CORE_MACHINEKEY}\"!" -i ${SERVICES_DIR}/ASC.UrlShortener/config/config.json		
+		fi						
 
 		if ! mysqladmin ping -h ${MYSQL_SERVER_HOST} -u ${MYSQL_SERVER_USER} --password=${MYSQL_SERVER_PASS} --silent; then
 			echo "ERROR: mysql connection refused";
@@ -337,18 +303,12 @@ if [ $1 -ge 2 ]; then
 		fi
 		
 		if [ ! -d "$APP_INDEX_DIR" ]; then		
-			systemctl daemon-reload	
-			systemctl stop god %{package_sysname}Index elasticsearch
 			mysql --silent -h ${MYSQL_SERVER_HOST} -u ${MYSQL_SERVER_USER} --password=${MYSQL_SERVER_PASS} -D "$MYSQL_SERVER_DB_NAME" -e "TRUNCATE webstudio_index";
 		fi
 				
-		for i in $(ls $DIR/Sql/%{package_sysname}.upgrade*); do
+		for i in $(ls $DIR/Sql/onlyoffice.upgrade*); do
 				mysql --silent -h ${MYSQL_SERVER_HOST} -u ${MYSQL_SERVER_USER} --password=${MYSQL_SERVER_PASS} -D "$MYSQL_SERVER_DB_NAME" < ${i};
 		done
-
-		if [ -f /etc/god/conf.d/%{package_sysname}.god ]; then
-			rm -rf /etc/god/conf.d/%{package_sysname}.god
-		fi
 	fi
 fi
 
@@ -397,18 +357,6 @@ if grep -q "HeapDumpOnOutOfMemoryError" ${ELASTIC_SEARCH_JAVA_CONF_PATH}; then
 	sed "/-XX:+HeapDumpOnOutOfMemoryError/d" -i ${ELASTIC_SEARCH_JAVA_CONF_PATH}
 fi
 
-if ! grep -q "Dlog4j2.formatMsgNoLookups" ${ELASTIC_SEARCH_JAVA_CONF_PATH}; then
-	echo "-Dlog4j2.formatMsgNoLookups=true" >> ${ELASTIC_SEARCH_JAVA_CONF_PATH} 
-else
-	sed -i "s/Dlog4j2.formatMsgNoLookups.*/Dlog4j2.formatMsgNoLookups=true/" ${ELASTIC_SEARCH_JAVA_CONF_PATH} 
-fi
-
-if ! grep -q "ingest.geoip.downloader.enabled" ${ELASTIC_SEARCH_CONF_PATH}; then
-	echo "ingest.geoip.downloader.enabled: false" >> ${ELASTIC_SEARCH_CONF_PATH}
-else
-	sed -i "s/ingest.geoip.downloader.enabled.*/ingest.geoip.downloader.enabled: false/" ${ELASTIC_SEARCH_CONF_PATH}
-fi
-
 TOTAL_MEMORY=$(free -m | grep -oP '\d+' | head -n 1);
 MEMORY_REQUIREMENTS=12228; #RAM ~4*3Gb
 
@@ -431,16 +379,7 @@ if [ -d /etc/elasticsearch/ ]; then
 fi
 
 if systemctl is-active elasticsearch | grep -q "active"; then
-	#Checking that the elastic is not currently being updated
-	if [[ $(find /usr/share/elasticsearch/lib/ -name "elasticsearch-[0-9]*.jar" | wc -l) -eq 1 ]]; then
-		systemctl restart elasticsearch.service
-	fi
-fi
-
-if ! grep -q "client_max_body_size" /etc/nginx/nginx.conf; then
-	sed -i '/http {/a\    client_max_body_size 100m;' /etc/nginx/nginx.conf
-else
-	sed -i "s/\(client_max_body_size\).*\?\;/\1 100m;/" /etc/nginx/nginx.conf
+	systemctl restart elasticsearch.service	
 fi
 
 if [ ! -f /proc/net/if_inet6 ]; then
@@ -457,7 +396,7 @@ if %{getenforce} >/dev/null 2>&1; then
 		PORTS+=('9865') # teamlabJabber
 		PORTS+=('9871') # teamlabNotify
 		PORTS+=('9882') # teamlabBackup
-		PORTS+=('9866') # teamlabIndex    
+		PORTS+=('9866') # teamlabSearcher    
 		PORTS+=('9899') # SocketIO 
 		PORTS+=('5280') # Jabber http-pool  
 	;;
@@ -474,15 +413,13 @@ if %{getenforce} >/dev/null 2>&1; then
 	done
 fi
 
-systemctl daemon-reload
-if [ $1 -ge 2 ]; then
-	for SVC in %{package_services}; do
-		if [ -e /usr/lib/systemd/system/$SVC.service ]; then
-			systemctl enable $SVC
-			systemctl restart $SVC
-		fi
-	done
-fi
+for SVC in %{package_services}; do
+	if [ -e /usr/lib/systemd/system/$SVC.service ]; then
+		systemctl enable $SVC
+		systemctl stop $SVC
+		systemctl start $SVC || true
+	fi
+done
 
 if systemctl is-active monoserve | grep -q "active"; then
 	curl --silent --output /dev/null http://127.0.0.1/api/2.0/warmup/restart.json || true

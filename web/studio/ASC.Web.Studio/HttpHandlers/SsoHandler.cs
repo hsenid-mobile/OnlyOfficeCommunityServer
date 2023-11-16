@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 
 using System;
 using System.Web;
-
 using AjaxPro;
-
 using ASC.Common.Logging;
 using ASC.Common.Security.Authentication;
 using ASC.Common.Utils;
@@ -29,10 +27,9 @@ using ASC.MessagingSystem;
 using ASC.Web.Core;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Core.Users;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Statistics;
 using ASC.Web.Studio.Utility;
-
+using Resources;
 using LogoutSsoUserData = ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.LogoutSsoUserData;
 using SsoSettingsV2 = ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoSettingsV2;
 using SsoUserData = ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoUserData;
@@ -55,14 +52,15 @@ namespace ASC.Web.Studio.HttpHandlers
         {
             try
             {
-                if (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString()) && !CoreContext.Configuration.Standalone)
+                if (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString()))
                 {
                     _log.DebugFormat("Single sign-on settings are disabled");
                     context.Response.Redirect(AUTH_PAGE + "?am=" + (int)Auth.MessageKey.SsoSettingsDisabled,
                         false);
                     return;
                 }
-                if (!(CoreContext.Configuration.Standalone || CoreContext.TenantManager.GetTenantQuota(TenantProvider.CurrentTenantID).Sso))
+                if (CoreContext.Configuration.Standalone &&
+                    !CoreContext.TenantManager.GetTenantQuota(TenantProvider.CurrentTenantID).Sso)
                 {
                     _log.DebugFormat("Single sign-on settings are not paid");
                     context.Response.Redirect(
@@ -131,14 +129,14 @@ namespace ASC.Web.Studio.HttpHandlers
 
                     if (context.User != null && context.User.Identity != null && context.User.Identity.IsAuthenticated)
                     {
-                        var authenticatedUserInfo = CoreContext.UserManager.GetUsers(((IUserAccount)context.User.Identity).ID);
+                       var authenticatedUserInfo = CoreContext.UserManager.GetUsers(((IUserAccount)context.User.Identity).ID);
 
                         if (!Equals(userInfo, authenticatedUserInfo))
                         {
                             var loginName = authenticatedUserInfo.DisplayUserName(false);
-                            MessageService.Send(HttpContext.Current.Request, loginName, MessageAction.Logout);
                             CookiesManager.ResetUserCookie();
                             SecurityContext.Logout();
+                            MessageService.Send(HttpContext.Current.Request, loginName, MessageAction.Logout);
                         }
                         else
                         {
@@ -148,7 +146,11 @@ namespace ASC.Web.Studio.HttpHandlers
 
                     userInfo = AddUser(userInfo);
 
-                    var authKey = CookiesManager.AuthenticateMeAndSetCookies(userInfo.Tenant, userInfo.ID, MessageAction.LoginSuccessViaSSO);
+                    var authKey = SecurityContext.AuthenticateMe(userInfo.ID);
+
+                    CookiesManager.SetCookies(CookiesType.AuthKey, authKey);
+
+                    MessageService.Send(context.Request, MessageAction.LoginSuccessViaSSO);
 
                     context.Response.Redirect(CommonLinkUtility.GetDefault() + "?token=" + HttpUtility.UrlEncode(authKey), false);
                 }
@@ -183,14 +185,14 @@ namespace ASC.Web.Studio.HttpHandlers
                         return;
                     }
 
-                    SecurityContext.CurrentUser = userInfo.ID;
+                    SecurityContext.AuthenticateMe(userInfo.ID);
 
                     var loginName = userInfo.DisplayUserName(false);
-                    MessageService.Send(HttpContext.Current.Request, loginName, MessageAction.Logout);
 
                     CookiesManager.ResetUserCookie();
                     SecurityContext.Logout();
 
+                    MessageService.Send(HttpContext.Current.Request, loginName, MessageAction.Logout);
                     context.Response.Redirect(AUTH_PAGE, false);
                 }
             }
@@ -215,12 +217,12 @@ namespace ASC.Web.Studio.HttpHandlers
             {
                 newUserInfo = userInfo.Clone() as UserInfo;
 
-                if (newUserInfo == null)
+                if(newUserInfo == null)
                     return Constants.LostUser;
 
                 _log.DebugFormat("Adding or updating user in database, userId={0}", userInfo.ID);
 
-                SecurityContext.CurrentAccount = ASC.Core.Configuration.Constants.CoreSystem;
+                SecurityContext.AuthenticateMe(ASC.Core.Configuration.Constants.CoreSystem);
 
                 if (string.IsNullOrEmpty(newUserInfo.UserName))
                 {

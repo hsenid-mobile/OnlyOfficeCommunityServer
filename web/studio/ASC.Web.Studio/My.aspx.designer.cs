@@ -7,13 +7,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Studio
-{
-
-
-    public partial class MyStaff
-    {
-
+namespace ASC.Web.Studio {
+    
+    
+    public partial class MyStaff {
+        
         /// <summary>
         /// actionsHolder control.
         /// </summary>
@@ -22,7 +20,7 @@ namespace ASC.Web.Studio
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder actionsHolder;
-
+        
         /// <summary>
         /// _contentHolderForProfile control.
         /// </summary>
@@ -31,7 +29,7 @@ namespace ASC.Web.Studio
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder _contentHolderForProfile;
-
+        
         /// <summary>
         /// _phSubscriptionView control.
         /// </summary>
@@ -40,16 +38,7 @@ namespace ASC.Web.Studio
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder _phSubscriptionView;
-
-        /// <summary>
-        /// _phConnectionsView control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder _phConnectionsView;
-
+        
         /// <summary>
         /// _phTipsSettingsView control.
         /// </summary>
@@ -58,7 +47,7 @@ namespace ASC.Web.Studio
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder _phTipsSettingsView;
-
+        
         /// <summary>
         /// _contentHolderForEditForm control.
         /// </summary>
@@ -67,17 +56,15 @@ namespace ASC.Web.Studio
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder _contentHolderForEditForm;
-
+        
         /// <summary>
         /// Master property.
         /// </summary>
         /// <remarks>
         /// Auto-generated property.
         /// </remarks>
-        public new ASC.Web.Studio.Masters.BaseTemplate Master
-        {
-            get
-            {
+        public new ASC.Web.Studio.Masters.BaseTemplate Master {
+            get {
                 return ((ASC.Web.Studio.Masters.BaseTemplate)(base.Master));
             }
         }

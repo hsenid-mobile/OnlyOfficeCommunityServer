@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,7 @@ var TariffSettings = new function () {
         _maxTariff = 0,
         _minTariff = 0,
         _sliderVals = [],
-        _sliderClasses = [],
-        _monthPrice = 0,
-        _yearPrice = 0;
+        _sliderClasses = [];
 
     var init = function () {
         if (isInit === false) {
@@ -33,6 +31,14 @@ var TariffSettings = new function () {
         }
 
         jq.switcherAction("#switcherPayments", "#paymentsContainer");
+
+        jq.dropdownToggle({
+            switcherSelector: "#currencySelector",
+            dropdownID: "currencyList",
+            rightPos: true,
+        });
+
+        jq("#currencyHelpSwitcher").click(function () { jq(this).helper({BlockHelperID: "currencyHelp"}) });
 
         var country = jq(".text-edit-phone").attr("data-country");
         PhoneController.Init(jq(".text-edit-phone"), CountriesManager.countriesList, [country, "US"]);
@@ -42,8 +48,8 @@ var TariffSettings = new function () {
 
         updateSelectedTariff("year");
         updatePrices(_defaultTariff);
-        jq(".tarrifs-button-year").on("click", function() { updateSelectedTariff("year"); });
-        jq(".tarrifs-button-month").on("click", function() { updateSelectedTariff("month"); });
+        jq(".tarrifs-button-year").click(function() { updateSelectedTariff("year"); }); 
+        jq(".tarrifs-button-month").click(function() { updateSelectedTariff("month"); }); 
     };
 
     function updateSelectedTariff (t) {
@@ -84,9 +90,6 @@ var TariffSettings = new function () {
             _sliderVals.push(_maxTariff + i);
             _sliderClasses.push("darkGrey" + (i == 10 ? " rightRadius" : ""));
         }
-
-        _monthPrice = parseInt(jq("#monthPrice").val());
-        _yearPrice = parseInt(jq("#yearPrice").val());
     };
 
     var slideRefreshText = function (slideHandle, curUsrCount) {
@@ -139,11 +142,11 @@ var TariffSettings = new function () {
     }
 
     function updatePrices(value) {
-        jq('.tariffs-body-month .price-string').html((_monthPrice) + '<span class="tariff-price-cur">&#x20BD;</span>');
-        jq('.tariffs-body-month .tariffs-price').html(formatNumber((_monthPrice * value)) + '<span class="tariff-price-cur">&#x20BD;</span>');
+        jq('.tariffs-body-month .price-string').html((290) + '<span class="tariff-price-cur">&#x20BD;</span>');
+        jq('.tariffs-body-month .tariffs-price').html(formatNumber((290 * value)) + '<span class="tariff-price-cur">&#x20BD;</span>');
 
-        jq('.tariffs-body-year .price-string').html((_yearPrice) + '<span class="tariff-price-cur">&#x20BD;</span>');
-        jq('.tariffs-body-year .tariffs-price').html(formatNumber((_yearPrice * 12 * value)) + '<span class="tariff-price-cur">&#x20BD;</span>');
+        jq('.tariffs-body-year .price-string').html((175) + '<span class="tariff-price-cur">&#x20BD;</span>');
+        jq('.tariffs-body-year .tariffs-price').html(formatNumber((175 * 12 * value)) + '<span class="tariff-price-cur">&#x20BD;</span>');
 
         jq('.text-edit-csize').val(value>_maxTariff ? (">" + _maxTariff) : ("" + value));
     }
@@ -261,7 +264,7 @@ var TariffSettings = new function () {
         jq("#pricingPlanSlider").toggleClass("warn-slider", userMinWarn);
         jq(".tariff-user-warn-min").toggle(userMinWarn);
         jq(".tariff-user-warn-max").toggle(userMaxWarn);
-        jq(".tariffs-panel").toggle(!userMaxWarn);
+        jq(".tariffs-panel, .see-full-price, #currencyPanel").toggle(!userMaxWarn);
     };
 
     var requestTariff = function () {
@@ -275,12 +278,12 @@ var TariffSettings = new function () {
         var site = (jq(".text-edit-site").val() || "").trim();
         var message = (jq(".text-edit-message").val() || "").trim();
         if (!fname.length || !email.length || !phone.length || !ctitle.length || !csize.length) {
-            toastr.error(ASC.Resources.Master.ResourceJS.ErrorEmptyField);
+            toastr.error(ASC.Resources.Master.Resource.ErrorEmptyField);
             return;
         }
         if (!site.length && jq(".text-edit-site").is(":visible")
             || !message.length && jq(".text-edit-message").is(":visible")) {
-            toastr.error(ASC.Resources.Master.ResourceJS.ErrorEmptyField);
+            toastr.error(ASC.Resources.Master.Resource.ErrorEmptyField);
             return;
         }
 
@@ -290,7 +293,7 @@ var TariffSettings = new function () {
                     toastr.error(result.error.Message);
                     return;
                 }
-                toastr.success(ASC.Resources.Master.ResourceJS.SendTariffRequest1);
+                toastr.success(ASC.Resources.Master.Resource.SendTariffRequest1);
             });
     };
 
@@ -304,5 +307,5 @@ var TariffSettings = new function () {
 jq(function () {
     TariffSettings.init();
 
-    jq(".tariff-request").on("click", TariffSettings.requestTariff);
+    jq(".tariff-request").click(TariffSettings.requestTariff);
 });

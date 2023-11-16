@@ -80,13 +80,10 @@
                     var scrHeight = w.height();
                     var scrWidth = w.width();
 
-                    var maxHeight = jq.browser.mobile ? document.body.scrollHeight : topPadding + scrHeight;
-                    var maxWidth = jq.browser.mobile ? document.body.scrollWidth : leftPadding + scrWidth;
-
                     var elemPosTop = targetPos.top + (sideToggle ? 0 : selectorHeight);
                     if (alwaysUp
                         || (fixWinSize
-                            && (elemPosTop + addTop + ddiOuterHeight) > maxHeight
+                            && (elemPosTop + addTop + ddiOuterHeight) > (topPadding + scrHeight)
                             && (targetPos.top - ddiOuterHeight) > topPadding)) {
                         elemPosTop = targetPos.top - ddiOuterHeight + (sideToggle ? selectorHeight : 0);
                         addTop *= -1;
@@ -98,19 +95,19 @@
                             elemPosLeft = Math.max(0, targetPos.left - ddiOuterWidth + selectorWidth);
                         }
                     } else if (fixWinSize
-                        && (elemPosLeft + addLeft + ddiOuterWidth) > maxWidth) {
+                        && (elemPosLeft + addLeft + ddiOuterWidth) > (leftPadding + scrWidth)) {
                         if (sideToggle) {
                             elemPosLeft = Math.max(0, targetPos.left - ddiOuterWidth);
                             addLeft *= -1;
                         } else {
-                            elemPosLeft = Math.max(0, maxWidth - ddiOuterWidth) - addLeft;
+                            elemPosLeft = Math.max(0, leftPadding + scrWidth - ddiOuterWidth) - addLeft;
                         }
                     }
 
                     var top = elemPosTop + addTop;
                     var bottom = "auto";
 
-                    if (top + ddiOuterHeight > maxHeight) {
+                    if (top + ddiOuterHeight > document.body.clientHeight + topPadding) {
                         top = "auto";
                         bottom = "0";
                     }
@@ -184,8 +181,8 @@
                     _registerAutoHide(e, allSwitcherSelectors, "#" + options.dropdownID, options.hideFunction);
 
                 };
-                jq(document).off("click", hideFunc);
-                jq(document).on("click", hideFunc);
+                jq(document).unbind("click", hideFunc);
+                jq(document).bind("click", hideFunc);
             }
 
             return {

@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,16 @@
 #region Import
 
 using System;
-using System.Web;
-
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.UI.WebControls;
 using ASC.Web.CRM.Classes;
-
+using ASC.Web.CRM.Resources;
+using ASC.CRM.Core;
+using ASC.Web.CRM.Controls.Common;
+using ASC.Core;
+using ASC.Web.Studio.Core.Users;
+using System.Web;
 using Newtonsoft.Json;
 
 #endregion
@@ -30,7 +36,7 @@ namespace ASC.Web.CRM.Controls.Settings
 {
     public partial class InvoiceItemActionView : BaseUserControl
     {
-
+        
         #region Properies
 
         public static string Location { get { return PathProvider.GetFileStaticRelativePath("Settings/InvoiceSettings/InvoiceItemActionView.ascx"); } }
@@ -52,7 +58,7 @@ namespace ASC.Web.CRM.Controls.Settings
 
         #region Methods
 
-
+       
         private void RegisterScript()
         {
             var script = String.Format(@"
@@ -60,7 +66,7 @@ namespace ASC.Web.CRM.Controls.Settings
                         Global.EncodeTo64(JsonConvert.SerializeObject(TargetInvoiceItem)),
 
                         TargetInvoiceItem != null && !String.IsNullOrEmpty(TargetInvoiceItem.Currency) ?
-                                JsonConvert.SerializeObject(CurrencyProvider.Get(TargetInvoiceItem.Currency)) :
+                                JsonConvert.SerializeObject(CurrencyProvider.Get(TargetInvoiceItem.Currency)):
                                 JsonConvert.SerializeObject(Global.TenantSettings.DefaultCurrency)
                         );
 

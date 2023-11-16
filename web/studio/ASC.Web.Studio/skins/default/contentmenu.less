@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 *******************************************************************************/
 .contentMenu
 {
-    background: @contentMenu;
+    background: #fff;
     border-bottom: 1px solid @borderColor;
     color: @textColorBlackLight;
     display: none;
@@ -33,8 +33,8 @@
 
 li.menuActionSelectAll
 {
-    .bg-button-default-menuAction ();
-    .border-button-default-menuAction();
+    .bg-button-default ();
+    .border-button-default();
     color:@textColor;
     display: inline-block !important;
     min-width: 33px;
@@ -66,11 +66,10 @@ li.menuActionSelectAll
     background-color: @bg-button-default-disable;
     .borderButtons(@border-button-default-disable);
     .borderRadius();
-    .noneSelect();
 
     &.unlockAction {
-        .bg-button-default-menuAction();
-        .border-button-default-menuAction();
+        .bg-button-default();
+        .border-button-default();
         cursor: pointer;
         color: @grayButtonTextColor;
 
@@ -310,50 +309,45 @@ body.media-width-0-1024 .contentMenu {
 }
 
 
-#switchViewFolder {
+.menuSwitchViewFolder {
     float: right;
 
-    .switchToThumbnails,
     .switchToNormal,
     .switchToCompact {
         background-color: transparent;
         background-repeat: no-repeat;
         background-image: url("@{img-change-url}switch_view.png");
-        background-position-y: -26px;
-        cursor: pointer;
         display: inline-block;
         height: 21px;
-        width: 21px;
-
-        &:hover {
-            background-position-y: -52px;
-        }
-    }
-
-    .switchToThumbnails {
-        background-position-x: 0;
+        width: 24px;
     }
 
     .switchToNormal {
-        background-position-x: -23px;
+        margin-right: -3px;
     }
 
     .switchToCompact {
-        background-position-x: -46px;
+        background-position: -29px -26px;
+        cursor: pointer;
+
+        &:hover {
+            background-position: -29px -52px;
+        }
     }
 
-    &.thumbnails .switchToThumbnails {
-        background-position-y: 0;
-        cursor: default;
-    }
+    &.compact {
+        .switchToNormal {
+            background-position: 0 -26px;
+            cursor: pointer;
 
-    &.normal .switchToNormal {
-        background-position-y: 0;
-        cursor: default;
-    }
+            &:hover {
+                background-position: 0 -52px;
+            }
+        }
 
-    &.compact .switchToCompact {
-        background-position-y: 0;
-        cursor: default;
+        .switchToCompact {
+            background-position: -29px 0;
+            cursor: default;
+        }
     }
 }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@
 
 using System;
 using System.Web;
-
 using AjaxPro;
-
 using ASC.Blogs.Core;
-using ASC.Web.Core.Utility;
 using ASC.Web.Studio;
 using ASC.Web.Studio.Utility;
 
@@ -45,7 +42,7 @@ namespace ASC.Web.Community.Blogs
         /// </summary>
         protected void Page_Load(object sender, EventArgs e)
         {
-            Utility.RegisterTypeForAjax(typeof(AddBlog));
+            Utility.RegisterTypeForAjax(typeof (AddBlog));
             PageLoad();
             RenderScripts();
         }
@@ -62,22 +59,14 @@ namespace ASC.Web.Community.Blogs
 
         protected virtual string RenderRedirectUpload()
         {
-            return string.Format("{0}://{1}:{2}{3}", Request.GetUrlRewriter().Scheme, Request.GetUrlRewriter().Host, Request.GetUrlRewriter().Port, VirtualPathUtility.ToAbsolute("~/") + "fckuploader.ashx?esid=blogs");
+            return string.Format("{0}://{1}:{2}{3}", Request.GetUrlRewriter().Scheme, Request.GetUrlRewriter().Host, Request.GetUrlRewriter().Port, VirtualPathUtility.ToAbsolute("~/") + "fckuploader.ashx?newEditor=true&esid=blogs");
         }
 
         protected void RenderScripts()
         {
-            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
-            {
-                Page.RegisterStyle("~/Products/Community/App_Themes/dark/dark-blogstyle.less");
-            }
-            else
-            {
-                Page.RegisterStyle("~/Products/Community/Modules/Blogs/App_Themes/default/blogstyle.less");
-            }
-            
             Page.RegisterBodyScripts("~/Products/Community/Modules/Blogs/js/blogs.js",
                 "~/Products/Community/js/tagsautocompletebox.js")
+                .RegisterStyle("~/Products/Community/Modules/Blogs/App_Themes/default/blogstyle.css")
                 .RegisterInlineScript(@"
 function createSearchHelper() {
 

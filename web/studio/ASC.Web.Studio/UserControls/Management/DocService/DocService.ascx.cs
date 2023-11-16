@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Web;
 using System.Web.UI;
-
 using ASC.Data.Storage;
 using ASC.Web.Studio.Utility;
 
@@ -32,7 +31,7 @@ namespace ASC.Web.Studio.UserControls.Management
         protected void Page_Load(object sender, EventArgs e)
         {
             Page.RegisterBodyScripts("~/UserControls/Management/DocService/js/docservice.js");
-            Page.ClientScript.RegisterClientScriptBlock(GetType(), "docservice_style", "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + WebPath.GetPath("UserControls/Management/DocService/css/docservice.less") + "\">", false);
+            Page.ClientScript.RegisterClientScriptBlock(GetType(), "docservice_style", "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + WebPath.GetPath("UserControls/Management/DocService/css/docservice.css") + "\">", false);
         }
     }
 }

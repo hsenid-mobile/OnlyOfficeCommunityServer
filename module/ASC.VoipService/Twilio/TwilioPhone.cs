@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Security.Policy;
+using Twilio;
 using Twilio.Clients;
 using Twilio.Http;
 using Twilio.Rest.Api.V2010.Account;
@@ -30,7 +31,7 @@ namespace ASC.VoipService.Twilio
     {
         private readonly TwilioRestClient twilio;
 
-        public TwilioPhone(TwilioRestClient twilio)
+        public TwilioPhone(TwilioRestClient twilio) 
         {
             this.twilio = twilio;
             Settings = new TwilioVoipSettings();
@@ -49,7 +50,7 @@ namespace ASC.VoipService.Twilio
                 Url = new System.Uri(Settings.Connect(contactId: contactId))
             }, twilio);
 
-            return new VoipCall { Id = call.Sid, From = call.From, To = call.To };
+            return new VoipCall {Id = call.Sid, From = call.From, To = call.To};
         }
 
         public override VoipCall LocalCall(string to)
@@ -59,8 +60,8 @@ namespace ASC.VoipService.Twilio
 
         public override VoipCall RedirectCall(string callId, string to)
         {
-            var call = CallResource.Update(callId, url: new System.Uri(Settings.Redirect(to)), method: HttpMethod.Post, client: twilio);
-            return new VoipCall { Id = call.Sid, To = to };
+            var call =  CallResource.Update(callId, url: new System.Uri(Settings.Redirect(to)), method: HttpMethod.Post, client: twilio);
+            return new VoipCall {Id = call.Sid, To = to};
         }
 
         public override VoipCall HoldUp(string callId)
@@ -100,7 +101,7 @@ namespace ASC.VoipService.Twilio
             var calls = QueueCalls(queueId);
             if (calls.Contains(callId))
             {
-                MemberResource.Update(queueId, callId, new System.Uri(Settings.Dequeue(reject)), method: HttpMethod.Post,
+                MemberResource.Update(queueId, callId, new System.Uri(Settings.Dequeue(reject)), HttpMethod.Post,
                     client: twilio);
             }
         }

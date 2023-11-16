@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
 using ASC.Files.Core;
-using ASC.Files.Core.Security;
-using ASC.Web.Files.Core;
-using ASC.Web.Files.Core.Compress;
 using ASC.Web.Files.Core.Entries;
 using ASC.Web.Files.Helpers;
 using ASC.Web.Files.Services.WCFService.FileOperations;
-
 using File = ASC.Files.Core.File;
 using FileShare = ASC.Files.Core.Security.FileShare;
 
@@ -44,8 +39,6 @@ namespace ASC.Web.Files.Services.WCFService
 
         Folder CreateNewFolder(String parentId, String title);
 
-        Folder CreateNewFolders(String parentId, IEnumerable<string> relativePaths);
-
         Folder FolderRename(String folderId, String title);
 
         DataWrapper GetFolderItems(String parentId, int from, int count, FilterType filter, bool subjectGroup, String subjectID, String searchText, bool searchInContent, bool withSubfolders, OrderBy orderBy);
@@ -62,7 +55,7 @@ namespace ASC.Web.Files.Services.WCFService
 
         void ReassignStorage(Guid userFromId, Guid userToId);
 
-        void DeleteStorage(Guid userId, Guid initiatorId);
+        void DeleteStorage(Guid userId);
 
         #endregion
 
@@ -70,7 +63,7 @@ namespace ASC.Web.Files.Services.WCFService
 
         File GetFile(String fileId, int version);
 
-        File CreateNewFile(String parentId, String fileTitle, string templateId, bool enableExternalExt);
+        File CreateNewFile(String parentId, String fileTitle, string templateId);
 
         File FileRename(String fileId, String title);
 
@@ -90,7 +83,7 @@ namespace ASC.Web.Files.Services.WCFService
 
         File SaveEditing(String fileId, string fileExtension, string fileuri, Stream stream, String doc, bool forcesave);
 
-        File UpdateFileStream(String fileId, Stream stream, String fileExtension, bool encrypted, bool forcesave);
+        File UpdateFileStream(String fileId, Stream stream, bool encrypted, bool forcesave);
 
         string StartEdit(String fileId, bool editingAlone, String doc);
 
@@ -106,31 +99,21 @@ namespace ASC.Web.Files.Services.WCFService
 
         Web.Core.Files.DocumentService.FileLink GetPresignedUri(String fileId);
 
-        EntryProperties GetFileProperties(String fileId);
-
-        EntryProperties SetFileProperties(String fileId, EntryProperties fileProperties);
-
-        FileReference GetReferenceData(string fileKey, string instanceId, string sourceFileId, string path);
-
-        IEnumerable<FileEntry> GetFilterReadFiles(IEnumerable<string> fileIds);
-
         #endregion
 
         #region Favorites Manager
 
-        bool ToggleFileFavorite(String fileId, bool favorite);
+        ItemList<FileEntry> AddToFavorites(ItemList<String> foldersId, ItemList<String> filesId);
 
-        ItemList<FileEntry> AddToFavorites(ItemList<object> foldersId, ItemList<object> filesId);
-
-        ItemList<FileEntry> DeleteFavorites(ItemList<object> foldersId, ItemList<object> filesId);
+        ItemList<FileEntry> DeleteFavorites(ItemList<String> foldersId, ItemList<String> filesId);
 
         #endregion
 
         #region Templates Manager
 
-        ItemList<FileEntry> AddToTemplates(ItemList<object> filesId);
+        ItemList<FileEntry> AddToTemplates(ItemList<String> filesId);
 
-        ItemList<FileEntry> DeleteTemplates(ItemList<object> filesId);
+        ItemList<FileEntry> DeleteTemplates(ItemList<String> filesId);
 
         object GetTemplates(FilterType filter, int from, int count, bool subjectGroup, String ssubject, String searchText, bool searchInContent);
 
@@ -148,7 +131,7 @@ namespace ASC.Web.Files.Services.WCFService
 
         ItemList<FileOperationResult> TerminateTasks();
 
-        String GetShortenLink(String fileId, String linkId, bool isFolder);
+        String GetShortenLink(String fileId);
 
         bool StoreOriginal(bool store);
 
@@ -167,14 +150,6 @@ namespace ASC.Web.Files.Services.WCFService
         bool DisplayTemplates(bool value);
 
         bool ChangeDeleteConfrim(bool update);
-
-        AutoCleanUpData ChangeAutomaticallyCleanUp(bool set, DateToAutoCleanUp gap);
-
-        AutoCleanUpData GetSettingsAutomaticallyCleanUp();
-
-        List<FileShare> ChangeDafaultAccessRights(List<FileShare> value);
-
-        ICompress ChangeDownloadTarGz(bool update);
 
         String GetHelpCenter();
 
@@ -195,12 +170,6 @@ namespace ASC.Web.Files.Services.WCFService
         object GetNewItems(String folderId);
 
         bool SetAceLink(String fileId, FileShare share);
-
-        Tuple<File, FileShareRecord> ParseFileShareLinkKey(string key);
-
-        Tuple<File, FileShareRecord> GetFileShareLink(string fileId, Guid shareLinkId);
-        Tuple<Folder, FileShareRecord> ParseFolderShareLinkKey(string key);
-        Tuple<Folder, FileShareRecord> GetFolderShareLink(string folderId, Guid shareLinkId);
 
         ItemList<MentionWrapper> SharedUsers(String fileId);
 

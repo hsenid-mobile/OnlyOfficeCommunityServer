@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,30 +26,34 @@ namespace ASC.Core.Billing
 
         public int Status { get; set; }
 
-        public int PaymentSystemId { get; set; }
+        public string PaymentType { get; set; }
+
+        public double ExchangeRate { get; set; }
+
+        public double GrossSum { get; set; }
 
         public string CartId { get; set; }
 
-        public string FName { get; set; }
-
-        public string LName { get; set; }
+        public string Name { get; set; }
 
         public string Email { get; set; }
 
-        public DateTime PaymentDate { get; set; }
+        public DateTime Date { get; set; }
 
         public Decimal Price { get; set; }
 
-        public int Qty { get; set; }
+        public string Currency { get; set; }
 
-        public string PaymentCurrency { get; set; }
-
-        public string PaymentMethod { get; set; }
+        public string Method { get; set; }
 
         public int QuotaId { get; set; }
 
-        public string ProductRef { get; set; }
+        public string ProductId { get; set; }
 
-        public string CustomerId { get; set; }
+        public string TenantID { get; set; }
+
+        public string Country { get; set; }
+
+        public Decimal DiscountSum { get; set; }
     }
 }

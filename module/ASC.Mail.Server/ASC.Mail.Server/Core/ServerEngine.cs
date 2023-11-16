@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,11 @@ using System.Configuration;
 using System.Data;
 using System.Net;
 using System.Net.Mail;
-
 using ASC.Common.Data;
 using ASC.Mail.Server.Core.Dao;
 using ASC.Mail.Server.Core.Entities;
 using ASC.Mail.Server.Utils;
-
 using Newtonsoft.Json.Linq;
-
 using RestSharp;
 
 namespace ASC.Mail.Server.Core
@@ -165,7 +162,7 @@ namespace ASC.Mail.Server.Core
 
         public void RemoveDomain(string domain, bool withStorageClean = true)
         {
-            if (withStorageClean)
+            if(withStorageClean)
                 ClearDomainStorageSpace(domain);
 
             using (var db = new DbManager(_csName))
@@ -195,7 +192,7 @@ namespace ASC.Mail.Server.Core
 
         public string GetVersion()
         {
-            if (_serverApi == null)
+            if (_serverApi == null) 
                 return null;
 
             var client = GetApiClient();

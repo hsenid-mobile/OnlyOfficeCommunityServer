@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,19 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
-using ASC.Common;
 using ASC.Common.Security.Authentication;
-using ASC.Common.Web;
-using ASC.Core;
+using ASC.Data.Storage;
 using ASC.Files.Core;
 using ASC.MessagingSystem;
-using ASC.Security.Cryptography;
 using ASC.Web.Core.Files;
 using ASC.Web.Files.Classes;
-using ASC.Web.Files.Core.Compress;
 using ASC.Web.Files.Helpers;
 using ASC.Web.Files.Resources;
 using ASC.Web.Files.Utils;
+using ASC.Web.Studio.Core;
 
 using File = ASC.Files.Core.File;
 
@@ -50,8 +48,8 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
         }
 
 
-        public FileDownloadOperation(Dictionary<object, string> folders, Dictionary<object, string> files, Dictionary<string, string> headers, IEnumerable<System.Web.HttpCookie> httpCookies)
-            : base(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), cookies: httpCookies)
+        public FileDownloadOperation(Dictionary<object, string> folders, Dictionary<object, string> files, Dictionary<string, string> headers)
+            : base(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList())
         {
             this.files = files;
             this.headers = headers;
@@ -60,11 +58,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
 
         protected override void Do()
         {
-            List<File> filesForSend;
-            List<Folder> folderForSend;
-
-            var entriesPathId = GetEntriesPathId(out filesForSend, out folderForSend);
-
+            var entriesPathId = GetEntriesPathId();
             if (entriesPathId == null || entriesPathId.Count == 0)
             {
                 if (0 < Files.Count)
@@ -72,85 +66,23 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                 throw new DirectoryNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
             }
 
-            Total = entriesPathId.Count + 1;
-
             ReplaceLongPath(entriesPathId);
 
-            using (var stream = CompressTo(entriesPathId))
+            using (var stream = CompressToZip(entriesPathId))
             {
                 if (stream != null)
                 {
                     stream.Position = 0;
-
-                    string fileName;
-
-                    if (Folders.Count == 1 && Files.Count == 0)
-                    {
-                        fileName = String.Format(@"{0}{1}", FolderDao.GetFolder(Folders[0]).Title, CompressToArchive.Instance.ArchiveExtension);
-                    }
-                    else
-                    {
-                        fileName = String.Format(@"{0}-{1}-{2}{3}", CoreContext.TenantManager.GetCurrentTenant().TenantAlias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd"), CompressToArchive.Instance.ArchiveExtension);
-                    }
-
+                    const string fileName = FileConstant.DownloadTitle + ".zip";
                     var store = Global.GetStore();
-
-                    string path = null;
-                    string sessionKey = null;
-
-                    if (SecurityContext.IsAuthenticated)
-                    {
-                        path = string.Format(@"{0}\{1}", SecurityContext.CurrentAccount.ID, fileName);
-                    }
-                    else if (FileShareLink.TryGetSessionId(out var id) && FileShareLink.TryGetCurrentLinkId(out var linkId))
-                    {
-                        path = string.Format(@"{0}\{1}\{2}", linkId, id, fileName);
-                        sessionKey = FileShareLink.CreateDownloadSessionKey(linkId, id);
-                    }
-                    else
-                    {
-                        throw new System.Security.SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
-                    }
-
-                    if (store.IsFile(FileConstant.StorageDomainTmp, path))
-                    {
-                        store.Delete(FileConstant.StorageDomainTmp, path);
-                    }
-
                     store.Save(
                         FileConstant.StorageDomainTmp,
-                        path,
+                        string.Format(@"{0}\{1}", ((IAccount)Thread.CurrentPrincipal.Identity).ID, fileName),
                         stream,
-                        MimeMapping.GetMimeMapping(path),
-                        "attachment; filename=\"" + Uri.EscapeDataString(fileName) + "\"");
-
-                    Status = string.Format("{0}?{1}=bulk&filename={2}", FilesLinkUtility.FileHandlerPath, FilesLinkUtility.Action, Uri.EscapeDataString(InstanceCrypto.Encrypt(fileName)));
-
-                    if (!SecurityContext.IsAuthenticated)
-                    {
-                        Status += $"&session={System.Web.HttpUtility.UrlEncode(sessionKey)}";
-                    }
-
-                    ProgressStep();
+                        "application/zip",
+                        "attachment; filename=\"" + fileName + "\"");
+                    Status = string.Format("{0}?{1}=bulk", FilesLinkUtility.FileHandlerPath, FilesLinkUtility.Action);
                 }
-            }
-
-            foreach (var file in filesForSend)
-            {
-                var key = file.ID.ToString();
-                if (files.ContainsKey(key) && !string.IsNullOrEmpty(files[key]))
-                {
-                    FilesMessageService.Send(file, headers, MessageAction.FileDownloadedAs, file.Title, files[key]);
-                }
-                else
-                {
-                    FilesMessageService.Send(file, headers, MessageAction.FileDownloaded, file.Title);
-                }
-            }
-
-            foreach (var folder in folderForSend)
-            {
-                FilesMessageService.Send(folder, headers, MessageAction.FolderDownloaded, folder.Title);
             }
         }
 
@@ -176,40 +108,23 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
             return entriesPathId;
         }
 
-        private ItemNameValueCollection GetEntriesPathId(out List<File> filesForSend, out List<Folder> folderForSend)
+        private ItemNameValueCollection GetEntriesPathId()
         {
-            filesForSend = new List<File>();
-            folderForSend = new List<Folder>();
-
             var entriesPathId = new ItemNameValueCollection();
-
             if (0 < Files.Count)
             {
-                filesForSend = FilesSecurity.FilterDownload(FileDao.GetFiles(Files));
-                filesForSend.ForEach(file => entriesPathId.Add(ExecPathFromFile(file, string.Empty)));
+                var files = FileDao.GetFiles(Files.ToArray());
+                files = FilesSecurity.FilterRead(files).ToList();
+                files.ForEach(file => entriesPathId.Add(ExecPathFromFile(file, string.Empty)));
             }
             if (0 < Folders.Count)
             {
-                folderForSend = FolderDao.GetFolders(Folders);
-                folderForSend = FilesSecurity.FilterDownload(folderForSend);
-                folderForSend.ForEach(folder => FileMarker.RemoveMarkAsNew(folder));
+                FilesSecurity.FilterRead(FolderDao.GetFolders(Files.ToArray())).ToList().Cast<FileEntry>().ToList()
+                             .ForEach(folder => FileMarker.RemoveMarkAsNew(folder));
 
-                var filesInFolder = GetFilesInFolders(folderForSend.Select(x => x.ID), string.Empty);
+                var filesInFolder = GetFilesInFolders(Folders, string.Empty);
                 entriesPathId.Add(filesInFolder);
             }
-
-            if (Folders.Count == 1 && Files.Count == 0)
-            {
-                var entriesPathIdWithoutRoot = new ItemNameValueCollection();
-
-                foreach (var path in entriesPathId.AllKeys)
-                {
-                    entriesPathIdWithoutRoot.Add(path.Remove(0, path.IndexOf('/') + 1), entriesPathId[path]);
-                }
-
-                return entriesPathIdWithoutRoot;
-            }
-
             return entriesPathId;
         }
 
@@ -223,17 +138,17 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                 CancellationToken.ThrowIfCancellationRequested();
 
                 var folder = FolderDao.GetFolder(folderId);
-                if (folder == null || !FilesSecurity.CanDownload(folder)) continue;
+                if (folder == null || !FilesSecurity.CanRead(folder)) continue;
                 var folderPath = path + folder.Title + "/";
 
                 var files = FileDao.GetFiles(folder.ID, null, FilterType.None, false, Guid.Empty, string.Empty, true);
-                files = FilesSecurity.FilterDownload(files);
+                files = FilesSecurity.FilterRead(files).ToList();
                 files.ForEach(file => entriesPathId.Add(ExecPathFromFile(file, folderPath)));
 
                 FileMarker.RemoveMarkAsNew(folder);
 
                 var nestedFolders = FolderDao.GetFolders(folder.ID);
-                nestedFolders = FilesSecurity.FilterDownload(nestedFolders);
+                nestedFolders = FilesSecurity.FilterRead(nestedFolders).ToList();
                 if (files.Count == 0 && nestedFolders.Count == 0)
                 {
                     entriesPathId.Add(folderPath, String.Empty);
@@ -245,26 +160,23 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
             return entriesPathId;
         }
 
-        private Stream CompressTo(ItemNameValueCollection entriesPathId)
+        private Stream CompressToZip(ItemNameValueCollection entriesPathId)
         {
             var stream = TempStream.Create();
-
-            using (ICompress compressTo = new CompressToArchive(stream))
+            using (var zip = new Ionic.Zip.ZipOutputStream(stream, true))
             {
+                zip.CompressionLevel = Ionic.Zlib.CompressionLevel.Level3;
+                zip.AlternateEncodingUsage = Ionic.Zip.ZipOption.AsNecessary;
+                zip.AlternateEncoding = Encoding.UTF8;
+
                 foreach (var path in entriesPathId.AllKeys)
                 {
-                    if (string.IsNullOrEmpty(path))
-                    {
-                        ProgressStep();
-                        continue;
-                    }
-
                     var counter = 0;
                     foreach (var entryId in entriesPathId[path])
                     {
                         if (CancellationToken.IsCancellationRequested)
                         {
-                            compressTo.Dispose();
+                            zip.Dispose();
                             stream.Dispose();
                             CancellationToken.ThrowIfCancellationRequested();
                         }
@@ -282,6 +194,12 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                             if (file == null)
                             {
                                 Error = FilesCommonResource.ErrorMassage_FileNotFound;
+                                continue;
+                            }
+
+                            if (file.ContentLength > SetupInfo.AvailableFileSize)
+                            {
+                                Error = string.Format(FilesCommonResource.ErrorMassage_FileSizeZip, FileSizeComment.FilesSizeToString(SetupInfo.AvailableFileSize));
                                 continue;
                             }
 
@@ -309,10 +227,10 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                             }
                         }
 
+                        zip.PutNextEntry(newtitle);
+
                         if (!string.IsNullOrEmpty(entryId) && file != null)
                         {
-                            compressTo.CreateEntry(newtitle, file.ModifiedOn);
-
                             try
                             {
                                 if (FileConverter.EnableConvert(file, convertToExt))
@@ -320,14 +238,23 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                                     //Take from converter
                                     using (var readStream = FileConverter.Exec(file, convertToExt))
                                     {
-                                        compressTo.PutStream(readStream);
+                                        readStream.StreamCopyTo(zip);
+                                        if (!string.IsNullOrEmpty(convertToExt))
+                                        {
+                                            FilesMessageService.Send(file, headers, MessageAction.FileDownloadedAs, file.Title, convertToExt);
+                                        }
+                                        else
+                                        {
+                                            FilesMessageService.Send(file, headers, MessageAction.FileDownloaded, file.Title);
+                                        }
                                     }
                                 }
                                 else
                                 {
                                     using (var readStream = FileDao.GetFileStream(file))
                                     {
-                                        compressTo.PutStream(readStream);
+                                        readStream.StreamCopyTo(zip);
+                                        FilesMessageService.Send(file, headers, MessageAction.FileDownloaded, file.Title);
                                     }
                                 }
                             }
@@ -337,26 +264,9 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                                 Logger.Error(Error, ex);
                             }
                         }
-                        else
-                        {
-                            compressTo.CreateEntry(newtitle);
-
-                            compressTo.PutNextEntry();
-                        }
-
-                        compressTo.CloseEntry();
                         counter++;
-
-                        if (!string.IsNullOrEmpty(entryId) && file != null)
-                        {
-                            ProcessedFile(entryId);
-                        }
-                        else
-                        {
-                            ProcessedFolder(default(object));
-                        }
-
                     }
+
                     ProgressStep();
                 }
             }

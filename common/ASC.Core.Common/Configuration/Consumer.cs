@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
-
 using ASC.Common.Caching;
 using ASC.Core.Tenants;
-
 using Autofac;
 
 namespace ASC.Core.Common.Configuration
 {
     public class Consumer : IDictionary<string, string>
     {
-        private static readonly ICacheNotify Cache = AscCache.Notify;
+        private static ICacheNotify Cache = AscCache.Notify;
 
         public bool CanSet { get; private set; }
 
@@ -68,9 +66,6 @@ namespace ASC.Core.Common.Configuration
             }
         }
 
-        private ICollection<string> Optionals { get; set; }
-        private ICollection<string> Passwords { get; set; }
-
         private static readonly bool OnlyDefault;
 
         public bool IsSet
@@ -89,44 +84,28 @@ namespace ASC.Core.Common.Configuration
             Order = int.MaxValue;
             Props = new Dictionary<string, string>();
             Additional = new Dictionary<string, string>();
-            Optionals = new List<string>();
-            Passwords = new List<string>();
         }
 
-        public Consumer(string name, int order, Dictionary<string, Prop> additional)
+        public Consumer(string name, int order, Dictionary<string, string> additional)
         {
             Name = name;
             Order = order;
             Props = new Dictionary<string, string>();
-            Additional = ConvertToDictionaryString(additional);
-            Optionals = GetOptionalKeys(additional);
-            Passwords = GetPasswordsKeys(additional);
+            Additional = additional;
         }
 
-        public Consumer(string name, int order, Dictionary<string, Prop> props, Dictionary<string, Prop> additional)
+        public Consumer(string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional)
         {
             Name = name;
             Order = order;
-            Props = ConvertToDictionaryString(props) ?? new Dictionary<string, string>();
-            Additional = ConvertToDictionaryString(additional) ?? new Dictionary<string, string>();
-            Optionals = GetOptionalKeys(props, additional);
-            Passwords = GetPasswordsKeys(props, additional);
+            Props = props ?? new Dictionary<string, string>();
+            Additional = additional ?? new Dictionary<string, string>();
+
             if (props != null && props.Any())
             {
-                CanSet = props.All(r => string.IsNullOrEmpty(r.Value.value));
+                CanSet = props.All(r => string.IsNullOrEmpty(r.Value));
             }
         }
-
-        public bool IsOptional(string key)
-        {
-            return Optionals.Contains(key);
-        }
-
-        public bool IsPassword(string key)
-        {
-            return Passwords.Contains(key);
-        }
-
 
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
         {
@@ -146,7 +125,7 @@ namespace ASC.Core.Common.Configuration
         {
             if (!CanSet)
             {
-                throw new NotSupportedException("Key for read only. Consumer " + Name);
+                throw new NotSupportedException("Key for read only.");
             }
 
             foreach (var providerProp in Props)
@@ -154,7 +133,7 @@ namespace ASC.Core.Common.Configuration
                 this[providerProp.Key] = null;
             }
 
-            Cache.Publish(new ConsumerCacheItem { Name = this.Name, TenantId = CoreContext.TenantManager.GetCurrentTenant().TenantId }, CacheNotifyAction.Remove);
+            Cache.Publish(this, CacheNotifyAction.Remove);
         }
 
         public bool Contains(KeyValuePair<string, string> item)
@@ -228,7 +207,7 @@ namespace ASC.Core.Common.Configuration
         {
             if (!CanSet)
             {
-                throw new NotSupportedException("Key for read only. Key " + name);
+                throw new NotSupportedException("Key for read only.");
             }
 
             if (!ManagedKeys.Contains(name))
@@ -254,52 +233,6 @@ namespace ASC.Core.Common.Configuration
         {
             return "AuthKey_" + name;
         }
-
-        protected Dictionary<string, string> ConvertToDictionaryString(Dictionary<string, Prop> props)
-        {
-            if (props == null) return null;
-            return props.ToDictionary(r => r.Key, r => r.Value.value);
-        }
-
-        protected Dictionary<string, Prop> ConvertToDictionaryProp(Dictionary<string, string> props)
-        {
-            if (props == null) return null;
-            return props.ToDictionary(r => r.Key, r => new Prop() { value = r.Value , optional = Optionals.Contains(r.Key), password = Passwords.Contains(r.Key)});
-        }
-
-        private List<string> GetOptionalKeys(Dictionary<string, Prop> props)
-        {
-            if (props == null) return null;
-            return props.Where(r => r.Value.optional).Select(r=> r.Key).ToList();
-        }
-
-        private List<string> GetOptionalKeys(Dictionary<string, Prop> props1, Dictionary<string, Prop> props2)
-        {
-            if (props1 == null && props2 == null) return null;
-
-            props1 = props1 ?? new Dictionary<string, Prop>();
-            props2 = props2 ?? new Dictionary<string, Prop>();
-
-            var props = props1.Union(props2);
-            return props.Where(r => r.Value.optional).Select(r => r.Key).ToList();
-        }
-
-        private List<string> GetPasswordsKeys(Dictionary<string, Prop> props)
-        {
-            if (props == null) return null;
-            return props.Where(r => r.Value.password).Select(r => r.Key).ToList();
-        }
-
-        private List<string> GetPasswordsKeys(Dictionary<string, Prop> props1, Dictionary<string, Prop> props2)
-        {
-            if (props1 == null && props2 == null) return null;
-
-            props1 = props1 ?? new Dictionary<string, Prop>();
-            props2 = props2 ?? new Dictionary<string, Prop>();
-
-            var props = props1.Union(props2);
-            return props.Where(r => r.Value.password).Select(r => r.Key).ToList();
-        }
     }
 
     public class DataStoreConsumer : Consumer, ICloneable
@@ -312,16 +245,16 @@ namespace ASC.Core.Common.Configuration
 
         public DataStoreConsumer()
         {
-
+            
         }
 
-        public DataStoreConsumer(string name, int order, Dictionary<string, Prop> additional)
+        public DataStoreConsumer(string name, int order, Dictionary<string, string> additional)
             : base(name, order, additional)
         {
             Init(additional);
         }
 
-        public DataStoreConsumer(string name, int order, Dictionary<string, Prop> props, Dictionary<string, Prop> additional)
+        public DataStoreConsumer(string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional)
             : base(name, order, props, additional)
         {
             Init(additional);
@@ -329,7 +262,7 @@ namespace ASC.Core.Common.Configuration
 
         public override IEnumerable<string> AdditionalKeys
         {
-            get { return base.AdditionalKeys.Where(r => r != HandlerTypeKey && r != "cdn").ToList(); }
+            get { return base.AdditionalKeys.Where(r => r != HandlerTypeKey && r!= "cdn").ToList(); }
         }
 
         protected override string GetSettingsKey(string name)
@@ -337,16 +270,16 @@ namespace ASC.Core.Common.Configuration
             return base.GetSettingsKey(Name + name);
         }
 
-        private void Init(IReadOnlyDictionary<string, Prop> additional)
+        private void Init(IReadOnlyDictionary<string, string> additional)
         {
             if (additional == null || !additional.ContainsKey(HandlerTypeKey))
                 throw new ArgumentException(HandlerTypeKey);
 
-            HandlerType = Type.GetType(additional[HandlerTypeKey].value);
+            HandlerType = Type.GetType(additional[HandlerTypeKey]);
 
             if (additional.ContainsKey(CdnKey))
             {
-                Cdn = GetCdn(additional[CdnKey].value);
+                Cdn = GetCdn(additional[CdnKey]);
             }
         }
 
@@ -358,14 +291,12 @@ namespace ASC.Core.Common.Configuration
             var additional = fromConfig.AdditionalKeys.ToDictionary(prop => prop, prop => fromConfig[prop]);
             additional.Add(HandlerTypeKey, HandlerType.AssemblyQualifiedName);
 
-            return new DataStoreConsumer(fromConfig.Name, fromConfig.Order, ConvertToDictionaryProp(props), ConvertToDictionaryProp(additional));
+            return new DataStoreConsumer(fromConfig.Name, fromConfig.Order, props, additional);
         }
 
         public object Clone()
         {
-            var props = ConvertToDictionaryProp(Props);
-            var additional = ConvertToDictionaryProp(Additional);
-            return new DataStoreConsumer(Name, Order, props, additional);
+            return new DataStoreConsumer(Name, Order, Props.ToDictionary(r=> r.Key, r=> r.Value), Additional.ToDictionary(r=> r.Key, r=> r.Value));
         }
     }
 
@@ -404,7 +335,7 @@ namespace ASC.Core.Common.Configuration
             return new T();
         }
 
-        public static T Get<T>() where T : Consumer, new()
+        public static T Get<T>() where T : Consumer, new ()
         {
             T result;
             if (Builder.TryResolve(out result))
@@ -419,12 +350,5 @@ namespace ASC.Core.Common.Configuration
         {
             return Builder.Resolve<IEnumerable<T>>();
         }
-    }
-
-    public class ConsumerCacheItem
-    {
-        public string Name { get; set; }
-        public int TenantId { get; set; }
-
     }
 }

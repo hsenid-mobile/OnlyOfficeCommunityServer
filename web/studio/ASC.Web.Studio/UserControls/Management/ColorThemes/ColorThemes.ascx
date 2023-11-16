@@ -1,6 +1,6 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="ColorThemes.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Management.ColorThemes" %>
 <%@ Import Namespace="ASC.Web.Studio.Utility" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <div class="clearFix">
     <div id="colorThemeBlock" class="settings-block">
@@ -12,7 +12,7 @@
                 <label for="chk-<%= theme.Value %>"><%= theme.Title %></label>
             </div>
         <% } %>     
-        <div class="preview-theme-image <%= ChosenMode%> <%= ChosenTheme%>">
+        <div class="preview-theme-image <%= ChosenTheme%>">
         </div>
          <div class="middle-button-container">
             <a class="button blue" id="saveColorThemeBtn">

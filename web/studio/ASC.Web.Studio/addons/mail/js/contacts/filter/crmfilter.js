@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ window.crmFilter = (function($) {
                 anykey: true,
                 anykeytimeout: 1000,
                 maxfilters: -1,
-                hintDefaultDisable: false,
+                hintDefaultDisable: true,
                 sorters: [
                     { id: 'displayname', title: MailScriptResource.FilterByTitle, sortOrder: 'ascending', def: true },
                     { id: 'contacttype', title: MailScriptResource.FilterByContactStage, sortOrder: 'ascending' }
@@ -101,7 +101,7 @@ window.crmFilter = (function($) {
                         enable: false
                     }
                 ]
-            }).on('setfilter', onSetFilter).on('resetfilter', onResetFilter).on('resetallfilters', onResetAllFilters);
+            }).bind('setfilter', onSetFilter).bind('resetfilter', onResetFilter).bind('resetallfilters', onResetAllFilters);
 
             // filter object initialization should follow after advansed filter plugin call - because
             // its replace target element with new markup
@@ -112,7 +112,7 @@ window.crmFilter = (function($) {
             tagsManager.bind(tagsManager.events.OnCreate, onUpdateTags);
             tagsManager.bind(tagsManager.events.OnUpdate, onUpdateTags);
 
-            contactStages.events.on('update', onUpdateStages);
+            contactStages.events.bind('update', onUpdateStages);
         }
     };
 

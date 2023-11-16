@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
-
 using ASC.Core;
 using ASC.Core.Common.Settings;
 using ASC.Data.Storage;
@@ -47,9 +46,9 @@ namespace ASC.Web.Core.WhiteLabel
         public override ISettings GetDefault()
         {
             return new TenantInfoSettings
-            {
-                _isDefault = true
-            };
+                       {
+                           _isDefault = true
+                       };
         }
 
         public void RestoreDefault()
@@ -109,11 +108,11 @@ namespace ASC.Web.Core.WhiteLabel
             TenantLogoManager.RemoveMailLogoDataFromCache();
         }
 
-        public string GetAbsoluteCompanyLogoPath(bool dark)
+        public string GetAbsoluteCompanyLogoPath()
         {
             if (_isDefault)
             {
-                return WebImageSupplier.GetAbsoluteWebPath(dark ? "logo/dark_general.png" : "logo/light_general.png");
+                return WebImageSupplier.GetAbsoluteWebPath("onlyoffice_logo/dark_general.png");
             }
 
             var store = StorageFactory.GetStorage(TenantProvider.CurrentTenantID.ToString(), "logo");

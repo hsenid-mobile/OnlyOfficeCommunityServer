@@ -16,23 +16,6 @@
 <li>
     <a id="createPresentation" class="dropdown-item"><%= FilesUCResource.ButtonCreatePresentation %></a>
 </li>
-<% if (EnableCreateForm)
-   { %>
-<li>
-    <a id="createMasterFormPointer" class="dropdown-item dropdown-with-item"><%= FilesUCResource.ButtonCreateFormTemplate %></a>
-    <div id="createMasterFormPanel" class="studio-action-panel">
-        <ul class="dropdown-content">
-            <li>
-                <a id="createMasterFormFromFile" class="dropdown-item"><%= FilesUCResource.ButtonCreateMasterFormFromFile %></a>
-            </li>
-            <li>
-                <a id="createMasterForm" class="dropdown-item"><%= FilesUCResource.ButtonCreateMasterFormFromBlank %></a>
-            </li>
-        </ul>
-    </div>
-    <asp:PlaceHolder ID="FileChoisePopupHolder" runat="server"></asp:PlaceHolder>
-</li>
-<% } %>
 <% if (FileUtility.ExtsWebTemplate.Any())
    { %>
 <li>

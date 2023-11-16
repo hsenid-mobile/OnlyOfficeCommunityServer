@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Web;
-
 using ASC.Core;
 using ASC.Web.Core.Client.HttpHandlers;
 using ASC.Web.Studio.Core.Users;
 using ASC.Web.Studio.PublicResources;
+using Microsoft.Ajax.Utilities;
+using Resources;
 
 namespace ASC.Web.Studio.Masters.MasterResources
 {
@@ -59,7 +60,7 @@ namespace ASC.Web.Studio.Masters.MasterResources
 
             return new List<KeyValuePair<string, object>>(5)
             {
-                RegisterResourceSet("ResourceJS", ResourceJS.ResourceManager),
+                RegisterResourceSet("Resource", ResourceJS.ResourceManager),
                 RegisterResourceSet("FeedResource", FeedResource.ResourceManager),
                 RegisterResourceSet("ChatResource", ChatResource.ResourceManager),
                 RegisterResourceSet("UserControlsCommonResource", UserControlsCommonResource.ResourceManager),
@@ -102,7 +103,7 @@ namespace ASC.Web.Studio.Masters.MasterResources
                             Resource.In,
                             Yet2 = DateTimeExtension.Yet(2),
                             Yet3 = DateTimeExtension.Yet(3),
-                            AllRightsReservedText = string.Format(CultureInfo.InvariantCulture, CoreContext.Configuration.CustomMode ? CustomModeResource.AllRightsReservedCustomMode : Resource.AllRightsReservedText, DateTime.UtcNow.Year),
+                            AllRightsReservedText = (CoreContext.Configuration.CustomMode ? CustomModeResource.AllRightsReservedCustomMode : Resource.AllRightsReservedText).FormatInvariant(DateTime.UtcNow.Year),
                             Resource.LdapUsersListLockTitle,
                             Resource.LdapUserEditCanOnlyAdminTitle,
                             Resource.LdapSettingsSuccess,
@@ -113,18 +114,7 @@ namespace ASC.Web.Studio.Masters.MasterResources
                             Resource.TfaAppShowBackupCodesDescription,
                             Resource.PrintButton,
                             Resource.RequestNewButton,
-                            Resource.Choose,
-                            Resource.ConsumersS3EncryprionNone,
-                            Resource.ConsumersS3EncryprionSSE,
-                            Resource.ConsumersS3EncryprionCSE,
-                            Resource.ConsumersS3EncryprionSSES3,
-                            Resource.ConsumersS3EncryprionSSES3Help,
-                            Resource.ConsumersS3EncryprionSSEKMS,
-                            Resource.ConsumersS3EncryprionSSEKMSHelp,
-                            Resource.ConsumersS3EncryprionCMK,
-                            Resource.ConsumersS3EncryprionCMKDefault,
-                            Resource.ConsumersS3EncryprionCMKCustom,
-                            Resource.ConsumersS3EncryprionKey
+                            Resource.Choose
                         },
 
                         DatePattern = dateTimeFormat.ShortDatePattern.Replace("'", ""),
@@ -151,9 +141,7 @@ namespace ASC.Web.Studio.Masters.MasterResources
                         Resource.EmailOnDomainIsNotCreated,
                         Resource.NoMailServerDomainsMsg,
                         Resource.EmailAndPasswordCopiedToClipboard,
-                        Resource.CopyToClipboard,
-                        Resource.QuotaSettingsEditQuota,
-                        Resource.QuotaSettingsNoQuota
+                        Resource.CopyToClipboard
                     })
             };
         }

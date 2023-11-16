@@ -2,12 +2,10 @@
 <%@ Control Language="C#" AutoEventWireup="true" CodeBehind="UserEmailControl.ascx.cs"
     Inherits="ASC.Web.Studio.UserControls.Users.UserProfile.UserEmailControl" %>
 
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
-
 <% if (!String.IsNullOrEmpty(User.Email)) { %>
 <div class="field clearFix">
     <div class="field-title mail describe-text">
-        <%= Resource.Email%>:
+        <%= Resources.Resource.Email%>:
     </div>
     <div id="emailUserProfile" class="field-value">
     <% if (IsAdmin || Viewer.ID == User.ID) {
@@ -30,10 +28,10 @@
                { %>
             <a class="linkAction baseLinkAction" onclick="ASC.EmailOperationManager.showEmailChangeWindow('<%= User.Email.Replace("'", "\\'").HtmlEncode() %>', '<%=User.ID%>');return false;">&nbsp;</a>
             <% } %>
-            <div class="caption emailWarning"><%=Resource.EmailIsNotConfirmed%>
+            <div class="caption emailWarning"><%=Resources.Resource.EmailIsNotConfirmed%>
                 <% if (User.Status != EmployeeStatus.Terminated) { %>
                 <a id="linkNotActivatedActivation" href="javascript:void(0);" class="activate">
-                    <%=Resource.ActivateEmailAgain%>
+                    <%=Resources.Resource.ActivateEmailAgain%>
                 </a>
                 <% } %>
             </div>
@@ -52,10 +50,10 @@
                 <a class="linkAction baseLinkAction" id="linkPendingEmailChange">&nbsp;</a>
                 <% } %>
             <% } %>
-            <div class="caption emailWarning"><%=Resource.PendingTitle%> 
+            <div class="caption emailWarning"><%=Resources.Resource.PendingTitle%> 
                 <% if (User.Status != EmployeeStatus.Terminated) { %>
                 <a id="linkPendingActivation" href="javascript:void(0);" class="activate">
-                    <%=Resource.SendInviteAgain%>
+                    <%=Resources.Resource.SendInviteAgain%>
                 </a>
                 <% } %>
             </div>
@@ -70,9 +68,9 @@
             <a class="linkAction baseLinkAction" onclick="ASC.EmailOperationManager.showEmailChangeWindow('<%= User.Email.Replace("'", "\\'").HtmlEncode() %>', '<%=User.ID%>');return false;">&nbsp;</a>
             <% } %>
             <% if (!User.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)) { %>
-                <div class="caption emailWarning"><%=Resource.EmailIsNotConfirmed%>
+                <div class="caption emailWarning"><%=Resources.Resource.EmailIsNotConfirmed%>
                     <a id="linkNotActivatedActivation" href="javascript:void(0);" class="activate">
-                        <%=Resource.ActivateEmailAgain%>
+                        <%=Resources.Resource.ActivateEmailAgain%>
                     </a>
                 </div>
             <% } %>

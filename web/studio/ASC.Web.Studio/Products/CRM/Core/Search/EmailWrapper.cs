@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.Core;
 using ASC.CRM.Core;
 using ASC.CRM.Core.Entities;
@@ -76,7 +75,7 @@ namespace ASC.Web.CRM.Core.Search
         }
     }
 
-    public class EmailInfoWrapper : Wrapper
+    public class EmailInfoWrapper: Wrapper
     {
         [ColumnLastModified("last_modifed_on")]
         public override DateTime LastModifiedOn { get; set; }

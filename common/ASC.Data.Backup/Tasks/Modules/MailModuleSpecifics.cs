@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 */
 
 
+using ASC.Data.Backup.Tasks.Data;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -23,17 +24,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-
 using ASC.Common.Logging;
-using ASC.Data.Backup.Tasks.Data;
 using ASC.Data.Storage;
 
 namespace ASC.Data.Backup.Tasks.Modules
 {
     internal class MailModuleSpecifics : ModuleSpecificsBase
     {
-        private ILog Log = LogManager.GetLogger("ASC");
-
         private readonly TableInfo[] _tables = new[]
             {
                 new TableInfo("mail_attachment", "tenant", "id"),
@@ -111,24 +108,9 @@ namespace ASC.Data.Backup.Tasks.Modules
             switch (table.Name)
             {
                 case "mail_mailbox_provider":
-                    return string.Format("where t.id in " +
-                                            "(select distinct t2.id_provider from mail_mailbox t1 " +
-                                            "inner join mail_mailbox_server t2 on t2.id in (t1.id_in_server, t1.id_smtp_server) and t2.is_user_data = 1 " +
-                                            "where t1.tenant = {0} and t1.is_removed = 0)", tenantId);
-
-                // mail_mailbox_domain.id_provider not in index
                 case "mail_mailbox_domain":
-                    return string.Format("where t.id_provider in " +
-                                            "(select distinct t2.id_provider from mail_mailbox t1 " +
-                                            "inner join mail_mailbox_server t2 on t2.id in (t1.id_in_server, t1.id_smtp_server) and t2.is_user_data = 1 " +
-                                            "where t1.tenant = {0} and t1.is_removed = 0)", tenantId);
-
                 case "mail_mailbox_server":
-                    return string.Format("where t.id in " +
-                                            "(select distinct t2.id from mail_mailbox t1 " +
-                                            "inner join mail_mailbox_server t2 on t2.id in (t1.id_in_server, t1.id_smtp_server) and t2.is_user_data = 1 " +
-                                            "where t1.tenant = {0} and t1.is_removed = 0)", tenantId);
-
+                    return "";
                 case "mail_mailbox":
                     return string.Format("where t.is_removed = 0 and t.tenant = {0}", tenantId);
 
@@ -174,7 +156,7 @@ namespace ASC.Data.Backup.Tasks.Modules
         {
             if (table.Name == "mail_mailbox")
             {
-                var boxType = row["is_server_mailbox"];
+                var boxType = row["is_teamlab_mailbox"];
                 if (boxType != null && Convert.ToBoolean(int.Parse(boxType.ToString())))
                 {
                     preparedRow = null;
@@ -245,7 +227,7 @@ namespace ASC.Data.Backup.Tasks.Modules
                 }
                 catch (Exception err)
                 {
-                    Log.ErrorFormat("Can not prepare value {0}: {1}", value, err);
+                    LogManager.GetLogger("ASC").ErrorFormat("Can not prepare value {0}: {1}", value, err);
                     value = null;
                 }
                 return true;
@@ -272,7 +254,7 @@ namespace ASC.Data.Backup.Tasks.Modules
                     }
                     catch (Exception ex)
                     {
-                        Log.ErrorFormat("Can not prepare data {0}: {1}", row[address] as string, ex);
+                        LogManager.GetLogger("ASC").ErrorFormat("Can not prepare data {0}: {1}", row[address] as string, ex);
                         data.Rows.Remove(row);
                         i--;
                     }
@@ -287,7 +269,7 @@ namespace ASC.Data.Backup.Tasks.Modules
             using (var streamReader = new StreamReader(stream, Encoding.UTF8, true, 1024, true))
             {
                 var data = streamReader.ReadToEnd();
-                data = Regex.Replace(data, @"(htmleditorfiles|aggregator)(\/0\/|\/[\d]+\/\d\d\/\d\d\/)([-\w]+(?=/))",
+                data = Regex.Replace(data, @"(htmleditorfiles|aggregator)(\/0\/|\/[\d]+\/\d\d\/\d\d\/)([-\w]+(?=/))", 
                     match => "/" + TenantPath.CreatePath(columnMapper.GetTenantMapping().ToString()) + "/" + columnMapper.GetUserMapping(match.Groups[3].Value));
 
                 var content = Encoding.UTF8.GetBytes(data);

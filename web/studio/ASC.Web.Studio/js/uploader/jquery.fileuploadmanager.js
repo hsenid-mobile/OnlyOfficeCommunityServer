@@ -255,7 +255,7 @@ var FileUploadManager = new function() {
 
         buttonObj.on("click", function (e) {
             e.preventDefault();
-            jq("#fileupload").trigger("click");
+            jq("#fileupload").click();
         });
     };
 
@@ -271,7 +271,7 @@ var FileUploadManager = new function() {
     var bindEvents = function (uploader) {
 
         uploader
-            .on("fileuploadstart", function () {
+            .bind("fileuploadstart", function () {
                 if (config.Events.OnPreUploadStart) {
                     config.Events.OnPreUploadStart();
                 }
@@ -282,19 +282,19 @@ var FileUploadManager = new function() {
                 }
             })
 
-            .on("fileuploadadd", config.Events.OnUploadAdd ? config.Events.OnUploadAdd : FileUploadManager._uploadAdd)
+            .bind("fileuploadadd", config.Events.OnUploadAdd ? config.Events.OnUploadAdd : FileUploadManager._uploadAdd)
 
-            .on("fileuploadsubmit", config.Events.OnUploadSubmit ? config.Events.OnUploadSubmit : FileUploadManager._uploadSubmit)
+            .bind("fileuploadsubmit", config.Events.OnUploadSubmit ? config.Events.OnUploadSubmit : FileUploadManager._uploadSubmit)
 
-            .on("fileuploadsend", config.Events.OnUploadSend ? config.Events.OnUploadSend : FileUploadManager._uploadSend)
+            .bind("fileuploadsend", config.Events.OnUploadSend ? config.Events.OnUploadSend : FileUploadManager._uploadSend)
 
-            .on("fileuploadprogress", config.Events.OnUploadProgress ? config.Events.OnUploadProgress : FileUploadManager._uploadProgress)
+            .bind("fileuploadprogress", config.Events.OnUploadProgress ? config.Events.OnUploadProgress : FileUploadManager._uploadProgress)
 
-            .on("fileuploaddone", config.Events.OnUploadDone ? config.Events.OnUploadDone : FileUploadManager._uploadDone)
+            .bind("fileuploaddone", config.Events.OnUploadDone ? config.Events.OnUploadDone : FileUploadManager._uploadDone)
 
-            .on("fileuploadfail", config.Events.OnUploadFail ? config.Events.OnUploadFail : FileUploadManager._uploadFail)
+            .bind("fileuploadfail", config.Events.OnUploadFail ? config.Events.OnUploadFail : FileUploadManager._uploadFail)
 
-            .on("fileuploadstop", function () {
+            .bind("fileuploadstop", function () {
                 if (config.Events.OnUploadStop) {
                     config.Events.OnUploadStop();
                 } else {
@@ -309,10 +309,10 @@ var FileUploadManager = new function() {
 
         if (dragDropEnabled && config.DropZone) {
             jq("#" + config.DropZone)
-                .on("dragenter", FileUploadManager._dragEnter)
-                .on("dragleave", FileUploadManager._dragLeave)
-                .on("dragover", FileUploadManager._dragOver)
-                .on("drop", FileUploadManager._drop);
+		       .bind("dragenter", FileUploadManager._dragEnter)
+		       .bind("dragleave", FileUploadManager._dragLeave)
+	           .bind("dragover", FileUploadManager._dragOver)
+		       .bind("drop", FileUploadManager._drop);
         }
 
         jq(document).on("click", "#" + config.TargetContainerID + " .fu_item_delete", function (e) {
@@ -327,7 +327,7 @@ var FileUploadManager = new function() {
         });
 
         if (!autoUpload) {
-            jq("#" + config.UploadButton).on("click", function (e) {
+            jq("#" + config.UploadButton).click(function (e) {
                 FileUploadManager.StartUpload();
                 e.preventDefault();
             });

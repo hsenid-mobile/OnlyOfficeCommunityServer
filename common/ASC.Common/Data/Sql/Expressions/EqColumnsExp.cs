@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
 */
 
 
-using System.Collections.Generic;
-
 namespace ASC.Common.Data.Sql.Expressions
 {
     public class EqColumnsExp : Exp
@@ -26,13 +24,13 @@ namespace ASC.Common.Data.Sql.Expressions
 
         public EqColumnsExp(string column1, string column2)
         {
-            this.column1 = (SqlIdentifier)column1;
-            this.column2 = (SqlIdentifier)column2;
+            this.column1 = (SqlIdentifier) column1;
+            this.column2 = (SqlIdentifier) column2;
         }
 
         public EqColumnsExp(string column1, SqlQuery query)
         {
-            this.column1 = (SqlIdentifier)column1;
+            this.column1 = (SqlIdentifier) column1;
             column2 = new AsExp(query);
         }
 
@@ -44,7 +42,7 @@ namespace ASC.Common.Data.Sql.Expressions
                                  column2.ToString(dialect));
         }
 
-        public override IEnumerable<object> GetParameters()
+        public override object[] GetParameters()
         {
             return column2.GetParameters();
         }

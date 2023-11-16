@@ -6,7 +6,7 @@
 <%@ Import Namespace="ASC.Web.Studio.Utility" %>
 <%@ Import Namespace="ASC.Web.UserControls.Forum" %>
 <%@ Import Namespace="ASC.Web.UserControls.Forum.Common" %>
-<%@ Import Namespace="ASC.Web.Community.Modules.Forum.UserControls.Resources" %>
+<%@ Import Namespace="ASC.Web.UserControls.Forum.Resources" %>
 
 <input id="forum_postType" name="forum_postType" type="hidden" value="<%=(int)PostType%>" />
 <input id="forum_attachments" name="forum_attachments" type="hidden" value="<%=_attachmentsString%>" />
@@ -22,7 +22,7 @@
             <b><%=ForumUCResource.Message%>:</b>
         </div>
         <div>
-            <textarea id="ckEditor" name="forum_text" style="width:100%; height:400px;visibility:hidden;" autocomplete="off"><%:_text%></textarea>
+            <textarea id="ckEditor" name="forum_text" style="width:100%; height:400px;visibility:hidden;" autocomplete="off"><%=_text%></textarea>
         </div>
     </div>
     <%if (PostAction == PostAction.Edit)%>

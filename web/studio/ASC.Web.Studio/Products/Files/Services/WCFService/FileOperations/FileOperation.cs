@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,13 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Security;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
-
 using ASC.Common.Logging;
+using ASC.Common.Security.Authentication;
 using ASC.Common.Security.Authorizing;
 using ASC.Common.Threading;
 using ASC.Core;
@@ -35,9 +33,6 @@ using ASC.Files.Core;
 using ASC.Files.Core.Security;
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Resources;
-using ASC.Web.Files.Utils;
-
-using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations
 {
@@ -54,32 +49,12 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
         public const string FINISHED = "Finished";
         public const string HOLD = "Hold";
 
-        public static Guid CurrentUserId
-        {
-            get
-            {
-                if (SecurityContext.IsAuthenticated)
-                {
-                    return SecurityContext.CurrentAccount.ID;
-                }
-
-                if (FileShareLink.TryGetSessionId(out var id))
-                {
-                    return id;
-                }
-
-                return default;
-            }
-        }
-
         private readonly IPrincipal principal;
         private readonly string culture;
+        private int total;
         private int processed;
         private int successProcessed;
-        private string contextUrl;
 
-
-        public int Total { get; set; }
 
         protected DistributedTask TaskInfo { get; private set; }
 
@@ -97,8 +72,6 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
 
         protected ITagDao TagDao { get; private set; }
 
-        protected ILinkDao LinkDao { get; private set; }
-
         protected IProviderDao ProviderDao { get; private set; }
 
         protected ILog Logger { get; private set; }
@@ -111,20 +84,14 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
 
         protected bool HoldResult { get; private set; }
 
-        protected IEnumerable<HttpCookie> Cookies { get; private set; }
-
         public abstract FileOperationType OperationType { get; }
-        public Guid LinkId { get; }
-        public Guid SessionId { get; }
-        public string PasswordKey { get; }
 
 
-        protected FileOperation(List<object> folders, List<object> files, bool holdResult = true, Tenant tenant = null, IEnumerable<HttpCookie> cookies = null)
+        protected FileOperation(List<object> folders, List<object> files, bool holdResult = true, Tenant tenant = null)
         {
             CurrentTenant = tenant ?? CoreContext.TenantManager.GetCurrentTenant();
             principal = Thread.CurrentPrincipal;
             culture = Thread.CurrentThread.CurrentCulture.Name;
-            Cookies = cookies ?? new List<HttpCookie>();
 
             Folders = folders ?? new List<object>();
             Files = files ?? new List<object>();
@@ -132,26 +99,12 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
             HoldResult = holdResult;
 
             TaskInfo = new DistributedTask();
-            contextUrl = HttpContext.Current != null ? HttpContext.Current.Request.GetUrlRewriter().ToString() : null;
-            
-            LinkId = FileShareLink.TryGetCurrentLinkId(out var linkId) ? linkId : default;
-            SessionId = FileShareLink.TryGetSessionId(out var sessionId) ? sessionId : default;
-            PasswordKey = FileShareLink.GetPasswordKey(linkId);
         }
 
         public void RunJob(DistributedTask _, CancellationToken cancellationToken)
         {
             try
             {
-                if (HttpContext.Current == null && !WorkContext.IsMono && !string.IsNullOrEmpty(contextUrl))
-                {
-                    HttpContext.Current = new HttpContext(
-                        new HttpRequest("hack", contextUrl, string.Empty),
-                        new HttpResponse(new StringWriter()));
-                }
-                
-                FileShareLink.SetCurrentLinkData(LinkId, SessionId, PasswordKey);
-
                 CancellationToken = cancellationToken;
 
                 CoreContext.TenantManager.SetCurrentTenant(CurrentTenant);
@@ -164,11 +117,10 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                 TagDao = Global.DaoFactory.GetTagDao();
                 ProviderDao = Global.DaoFactory.GetProviderDao();
                 FilesSecurity = new FileSecurity(Global.DaoFactory);
-                LinkDao = Global.GetLinkDao();
 
                 Logger = Global.Logger;
 
-                Total = InitTotalProgressSteps();
+                total = InitTotalProgressSteps();
 
                 Do();
             }
@@ -198,7 +150,6 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                     FolderDao.Dispose();
                     FileDao.Dispose();
                     TagDao.Dispose();
-                    LinkDao.Dispose();
 
                     if (ProviderDao != null)
                         ProviderDao.Dispose();
@@ -213,13 +164,14 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
             return TaskInfo;
         }
 
+
         protected virtual void FillDistributedTask()
         {
-            var progress = Total != 0 ? 100 * processed / Total : 0;
+            var progress = total != 0 ? 100 * processed / total : 0;
 
             TaskInfo.SetProperty(SOURCE, string.Join(SPLIT_CHAR, Folders.Select(f => "folder_" + f).Concat(Files.Select(f => "file_" + f)).ToArray()));
             TaskInfo.SetProperty(OPERATION_TYPE, OperationType);
-            TaskInfo.SetProperty(OWNER, CurrentUserId);
+            TaskInfo.SetProperty(OWNER, ((IAccount)Thread.CurrentPrincipal.Identity).ID);
             TaskInfo.SetProperty(PROGRESS, progress < 100 ? progress : 100);
             TaskInfo.SetProperty(RESULT, Status);
             TaskInfo.SetProperty(ERROR, Error);

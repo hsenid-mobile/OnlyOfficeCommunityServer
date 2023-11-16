@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 using ASC.Core.Notify;
 using ASC.Notify.Model;
 using ASC.Notify.Patterns;
-using ASC.Web.Community.Modules.Blogs.Core.Service;
+
 
 namespace ASC.Blogs.Core.Service
 {

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,15 @@ using System;
 using System.Data;
 using System.Data.Common;
 
-using MySql.Data.MySqlClient;
-
 namespace ASC.Common.Data.AdoProxy
 {
     class DbConnectionProxy : DbConnection
     {
         private readonly DbConnection connection;
-        private DbCommandProxy dbCommandProxy;
         private readonly ProxyContext context;
         private bool disposed;
-        private int threadId;
 
-
+        
         public DbConnectionProxy(DbConnection connection, ProxyContext ctx)
         {
             if (connection == null) throw new ArgumentNullException("connection");
@@ -39,14 +35,13 @@ namespace ASC.Common.Data.AdoProxy
 
             this.connection = connection;
             context = ctx;
-            threadId = GetThreadId();
         }
 
         protected override System.Data.Common.DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
         {
-            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent("BeginTransaction", dur, GetThreadId())))
+            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, "BeginTransaction", dur)))
             {
-                return new DbTransactionProxy(connection.BeginTransaction(), context, GetThreadId());
+                return new DbTransactionProxy(connection.BeginTransaction(), context);
             }
         }
 
@@ -60,7 +55,7 @@ namespace ASC.Common.Data.AdoProxy
             connection.Close();
         }
 
-        public override string ConnectionString
+        public override string  ConnectionString
         {
             get { return connection.ConnectionString; }
             set { connection.ConnectionString = value; }
@@ -73,13 +68,7 @@ namespace ASC.Common.Data.AdoProxy
 
         protected override DbCommand CreateDbCommand()
         {
-            if (dbCommandProxy != null)
-            {
-                dbCommandProxy.Parameters.Clear();
-                return dbCommandProxy;
-            }
-            dbCommandProxy = new DbCommandProxy(connection.CreateCommand(), context, this);
-            return dbCommandProxy;
+            return new DbCommandProxy(connection.CreateCommand(), context);
         }
 
         public override string Database
@@ -94,7 +83,7 @@ namespace ASC.Common.Data.AdoProxy
 
         public override void Open()
         {
-            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent("Open", dur, GetThreadId())))
+            using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, "Open", dur)))
             {
                 connection.Open();
             }
@@ -110,32 +99,14 @@ namespace ASC.Common.Data.AdoProxy
             get { return connection.State; }
         }
 
-        internal int GetThreadId()
-        {
-            if (threadId != 0) return threadId;
-
-            if (connection is MySqlConnection mySqlConnection &&
-                connection.State > ConnectionState.Closed)
-            {
-                threadId = mySqlConnection.ServerThread;
-            }
-
-            return threadId;
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (!disposed)
             {
                 if (disposing)
                 {
-                    var threadId = GetThreadId();
-                    using (ExecuteHelper.Begin(dur => context.FireExecuteEvent("Dispose", dur, threadId)))
+                    using (ExecuteHelper.Begin(dur => context.FireExecuteEvent(this, "Dispose", dur)))
                     {
-                        if (dbCommandProxy != null)
-                        {
-                            dbCommandProxy.Dispose();
-                        }
                         connection.Dispose();
                     }
                 }

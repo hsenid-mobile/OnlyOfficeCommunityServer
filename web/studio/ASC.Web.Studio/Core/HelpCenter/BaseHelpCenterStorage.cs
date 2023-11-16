@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,17 @@ using System.Configuration;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 using ASC.Common.Caching;
 using ASC.Common.Logging;
 using ASC.Common.Threading;
-using ASC.Common.Web;
 using ASC.Web.Core.Client;
 
 namespace ASC.Web.Studio.Core.HelpCenter
@@ -170,7 +171,7 @@ namespace ASC.Web.Studio.Core.HelpCenter
             }
             catch (Exception e)
             {
-                Log.Error("Error GetHelpCenter", e);
+                Log.Error("Error GetVideoGuide", e);
             }
 
             if (data == null)
@@ -210,7 +211,7 @@ namespace ASC.Web.Studio.Core.HelpCenter
             {
                 using (var stream = File.OpenRead(FilePath))
                 {
-                    return ReadFromStream(stream);
+                    return FromStream(stream);
                 }
             }
 
@@ -221,42 +222,44 @@ namespace ASC.Web.Studio.Core.HelpCenter
         {
             try
             {
-                var directoryName = Path.GetDirectoryName(FilePath);
-
-                if (!Directory.Exists(directoryName))
-                {
-                    Directory.CreateDirectory(directoryName);
-                }
-
                 using (var filesStream = File.Open(FilePath, FileMode.Create))
+                using (var stream = ToStream(obj))
                 {
-                    WriteToStream(filesStream, obj);
+                    if (stream.CanSeek)
+                    {
+                        stream.Seek(0, SeekOrigin.Begin);
+                    }
+                    var buffer = new byte[4096];
+                    int readed;
+                    while ((readed = stream.Read(buffer, 0, 4096)) != 0)
+                    {
+                        filesStream.Write(buffer, 0, readed);
+                    }
                 }
             }
             catch (Exception e)
             {
-                Log.Error("Error UpdateHelpCenter", e);
+                Log.Error("Error UpdateVideoGuide", e);
             }
         }
 
-        private static void WriteToStream(FileStream fileStream, Dictionary<string, T> obj)
+        private static MemoryStream ToStream(Dictionary<string, T> obj)
         {
-            using (var gzipStream = new GZipStream(fileStream, CompressionMode.Compress, true))
-            using (var memoryStream = new MemoryStream())
+            var stream = new MemoryStream();
+            using (var gzip = new GZipStream(stream, CompressionMode.Compress, true))
             {
-                var serializer = new DataContractJsonSerializer(typeof(Dictionary<string, T>));
-                serializer.WriteObject(memoryStream, obj);
-                memoryStream.Position = 0;
-                memoryStream.CopyTo(gzipStream);
+                var formatter = new BinaryFormatter();
+                formatter.Serialize(gzip, obj);
             }
+            return stream;
         }
 
-        private static Dictionary<string, T> ReadFromStream(FileStream fileStream)
+        private static Dictionary<string, T> FromStream(Stream stream)
         {
-            using (var gzip = new GZipStream(fileStream, CompressionMode.Decompress, true))
+            var formatter = new BinaryFormatter();
+            using (var gzip = new GZipStream(stream, CompressionMode.Decompress, true))
             {
-                var serializer = new DataContractJsonSerializer(typeof(Dictionary<string, T>));
-                return (Dictionary<string, T>)serializer.ReadObject(gzip);
+                return (Dictionary<string, T>)formatter.Deserialize(gzip);
             }
         }
 
@@ -279,21 +282,12 @@ namespace ASC.Web.Studio.Core.HelpCenter
         public Action<HelpCenterRequest, string> Starter { get; set; }
         private static bool stopRequesting;
         private static readonly ILog Log;
-        private static HttpClient httpClient;
 
         protected DistributedTask TaskInfo { get; private set; }
 
         static HelpCenterRequest()
         {
             Log = LogManager.GetLogger("ASC.Web.HelpCenter");
-
-            var httpHandler = new HttpClientHandler
-            {
-                AllowAutoRedirect = true
-            };
-
-            httpClient = HttpClientFactory.CreateClient(nameof(HelpCenterRequest), httpHandler);
-            httpClient.DefaultRequestHeaders.Add("Accept-Language", "en");
         }
 
         public HelpCenterRequest()
@@ -322,12 +316,36 @@ namespace ASC.Web.Studio.Core.HelpCenter
             }
             try
             {
-                Func<Task<string>> requestFunc = async () =>
-                {
-                    return await httpClient.GetStringAsync(Url);
-                };
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create(Url);
 
-                result = Task.Run(() => ResiliencePolicyManager.GetStringWithPoliciesAsync("SendRequest", requestFunc)).Result;
+                httpWebRequest.AllowAutoRedirect = true;
+                httpWebRequest.Timeout = 15000;
+                httpWebRequest.Method = "GET";
+                httpWebRequest.Headers["Accept-Language"] = "en"; // get correct en lang
+
+                var countTry = 0;
+                const int maxTry = 3;
+                while (countTry < maxTry)
+                {
+                    try
+                    {
+                        countTry++;
+                        using (var httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+                        using (var stream = httpWebResponse.GetResponseStream())
+                        using (var reader = new StreamReader(stream, Encoding.GetEncoding(httpWebResponse.CharacterSet)))
+                        {
+                            result = reader.ReadToEnd();
+                            break;
+                        }
+                    }
+                    catch (WebException ex)
+                    {
+                        if (ex.Status != WebExceptionStatus.Timeout)
+                        {
+                            throw;
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {

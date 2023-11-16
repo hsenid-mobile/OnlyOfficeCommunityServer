@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Community.Modules.Bookmarking.UserControls.Resources {
+namespace ASC.Web.UserControls.Bookmarking.Resources {
     using System;
     
     
@@ -341,7 +341,7 @@ namespace ASC.Web.Community.Modules.Bookmarking.UserControls.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to View bookmarks which store useful information directly on your portal. Saved links to web resources allow users to easily get back to their favorite places..
+        ///   Looks up a localized string similar to Create your bookmarks, store and share useful information with your colleagues directly on your portal saving links to web resources which allow you to easily get back to your favorite place..
         /// </summary>
         public static string EmptyScreenTextVisitor {
             get {
@@ -373,6 +373,15 @@ namespace ASC.Web.Community.Modules.Bookmarking.UserControls.Resources {
         public static string MostRecentLabel {
             get {
                 return ResourceManager.GetString("MostRecentLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bookmarks.
+        /// </summary>
+        public static string PageTitle {
+            get {
+                return ResourceManager.GetString("PageTitle", resourceCulture);
             }
         }
         

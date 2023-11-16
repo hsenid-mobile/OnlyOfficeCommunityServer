@@ -13,17 +13,9 @@
     <% if (IsBlank)
        { %>
         <style type="text/css">
-            body,
-            #studioPageContent .page-content {
-                overflow: visible;
-            }
-            #studioPageContent {
-                min-width: auto;
-            }
             #studioPageContent .studio-top-panel.mainPageLayout,
             #studioPageContent .mainPageLayout,
             #studioPageContent .mainPageTableSidePanel,
-            #studioPageContent .bar-content,
             #studioPageContent .borderBase {
                 display: none;
             }
@@ -353,7 +345,7 @@
                     </div>
                 </li>
                 <li class="menu-action-on-top">
-                    <a class="on-top-link" onclick=" javascript:window.scrollTo(0, 0) || document.querySelector('.mainPageContent').scrollTo(0, 0);">
+                    <a class="on-top-link" onclick=" javascript:window.scrollTo(0, 0); ">
                         <%= MailResource.OnTopLabel %>
                     </a>
                 </li>
@@ -368,14 +360,7 @@
     <asp:PlaceHolder ID="BlankModalPH" runat="server" />
     <div class="mainContainerClass">
         <asp:PlaceHolder ID="MailControlContainer" runat="server" />
-        <div id="blankPage" class="hidden page_content">            
-        </div>
-        <div class="menu-action-on-top">
-                    <a class="on-top-link" onclick=" javascript:window.scrollTo(0, 0) || document.querySelector('.mainPageContent').scrollTo(0, 0); ">
-                        <%= MailResource.OnTopLabel %>
-                    </a>
-                </div>
-        <div class="header-menu-spacer">&nbsp;</div>
+        <div id="blankPage" class="hidden page_content"></div>
         <div id="tagsColorsPanel" class="actionPanel">
             <div id="tagsColorsContent">
                 <div class="tag1" colorstyle="1"></div>

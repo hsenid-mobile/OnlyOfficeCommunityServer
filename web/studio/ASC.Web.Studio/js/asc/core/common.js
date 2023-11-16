@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ toastr.options.hideDuration = 100;
 toastr.options.timeOut = 8000;
 
 jQuery.extend(
-    jQuery.expr.pseudos,
+    jQuery.expr[":"],
     {
         reallyvisible: function (a) {
             return !(jQuery(a).is(':hidden') || jQuery(a).parents(':hidden').length);
@@ -134,8 +134,8 @@ jQuery.extend(
 );
 
 jQuery.fn.yellowFade = function () {
-    return (this.css({ backgroundColor: ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#ffffcc" : "rgba(204, 184, 102, 0.2)" }).animate(
-        { backgroundColor: ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#ffffff" : "#333"},
+    return (this.css({backgroundColor: "#ffffcc"}).animate(
+        {backgroundColor: "#ffffff"},
         1500,
         function () {
             jq(this).css({backgroundColor: ""});
@@ -152,6 +152,43 @@ jQuery.fn.colorFade = function(color, tiemout, cb) {
                 cb();
             }
         }));
+};
+
+// google analytics track
+var trackingGoogleAnalytics = function (ctg, act, lbl) {
+    try {
+        if (window.ga) {
+            window.ga('www.send', 'event', ctg, act, lbl);
+            window.ga('testTracker.send', 'event', ctg, act, lbl);
+        }
+    } catch (err) {
+    }
+};
+
+jQuery.fn.trackEvent = function (category, action, label, typeAction) { // only for static objects (don't use for elements added dynamically)
+
+    switch (typeAction) {
+        case "click":
+            jq(this).on("click", function () {
+                trackingGoogleAnalytics(category, action, label);
+                return true;
+            });
+            break;
+        case "enter":
+            jq(this).keypress(function (e) {
+                if (e.which == 13) {
+                    trackingGoogleAnalytics(category, action, label);
+                }
+                return true;
+            });
+            break;
+        default:
+            jq(this).on("click", function () {
+                trackingGoogleAnalytics(category, action, label);
+                return true;
+            });
+            break;
+    }
 };
 
 if (!jQuery.fn.zIndex) {
@@ -341,11 +378,6 @@ jQuery.extend({
             new RegExp(ASC.Resources.Master.EmailRegExpr, "i").test(email);
     },
 
-    isNumber: function (value) {
-        var type = typeof value;
-        return ("number" === type || "string" === type) && !isNaN(parseFloat(value)) && isFinite(value);
-    },
-
     switcherAction: function(el, block) {
         var elem = jq(el);
         elem.on("click", function() {
@@ -367,7 +399,7 @@ jQuery.extend({
     confirmBeforeUnload: function(check){
         window.onbeforeunload = function (e) {
             if (typeof (check) != "function" || check())
-                return ASC.Resources.Master.ResourceJS.WarningMessageBeforeUnload;
+                return ASC.Resources.Master.Resource.WarningMessageBeforeUnload;
         };
     },
 
@@ -396,25 +428,23 @@ jQuery.extend({
             ddiWidth = dropdownItem.innerWidth(),
 
             w = jq(window),
-            wideScreen = w.width() >= 1200,
             scrScrollTop = w.scrollTop(),
-            scrHeight = w.height(),
-            maxHeight = jq.browser.mobile ? document.body.scrollHeight : scrHeight + scrScrollTop;
+            scrHeight = w.height();
 
         if (target.is(".entity-menu") || target.is(".menu-small")) {
             target.addClass("active");
 
-            var position = target.offset();
+            var position = jq.browser.mobile ? target.position() : target.offset();
             var baseTop = position.top + target.outerHeight() - 2;
             var correctionY =
                 ddiHeight > position.top
                     ? 0
-                    : (maxHeight - baseTop > ddiHeight ? 0 : ddiHeight);
+                    : (scrHeight + scrScrollTop - baseTop > ddiHeight ? 0 : ddiHeight);
 
             var top = baseTop - correctionY + (correctionY == 0 ? 2 : -target.outerHeight() - 2);
             var bottom = "auto";
 
-            if (wideScreen && top + ddiHeight > maxHeight) {
+            if (top + ddiHeight > document.body.clientHeight + scrScrollTop) {
                 top = "auto";
                 bottom = "0";
             }
@@ -430,12 +460,12 @@ jQuery.extend({
             correctionY =
                 ddiHeight > evt.pageY
                     ? 0
-                    : (maxHeight - evt.pageY > ddiHeight ? 0 : ddiHeight);
+                    : (scrHeight + scrScrollTop - evt.pageY > ddiHeight ? 0 : ddiHeight);
 
             var top = evt.pageY - correctionY;
             var bottom = "auto";
 
-            if (wideScreen && top + ddiHeight > maxHeight) {
+            if (top + ddiHeight > document.body.clientHeight + scrScrollTop) {
                 top = "auto";
                 bottom = "0";
             }
@@ -566,7 +596,7 @@ var FCKCommentsController = new function () {
  */
 var PopupKeyUpActionProvider = new function () {
     //close dialog by esc
-    jq(document).on("keyup", function (event) {
+    jq(document).keyup(function (event) {
         if (!PopupKeyUpActionProvider.ForceBinding && !jq('.popupContainerClass').is(':visible'))
             return;
 
@@ -765,11 +795,11 @@ var StudioManager = new function () {
             }
 
 
-            jq(optionsList).on('selectstart', function () {
+            jq(optionsList).bind('selectstart', function () {
                 return false;
-            }).on("mousedown", function () {
+            }).mousedown(function () {
                 return false;
-            }).on("click", function (evt) {
+            }).click(function (evt) {
                 var $target = jq(evt.target);
                 if ($target.hasClass('option')) {
                     var containerNewValue = evt.target.getAttribute('value'),
@@ -783,24 +813,23 @@ var StudioManager = new function () {
                     $container.find('div.title:first').html($target.html() || '&nbsp;')
                         .attr('className', 'title ' + containerNewValue)
                         .attr('class', 'title ' + containerNewValue);
-                    $container.find('select.originalSelect:first').val(containerNewValue).trigger("change");
+                    $container.find('select.originalSelect:first').val(containerNewValue).change();
                 }
             });
             if (jq.browser.msie && jq.browser.version < 7) {
-                jq(optionsList).find('li.option')
-                    .on("mouseenter", function () {
+                jq(optionsList).find('li.option').hover(
+                    function () {
                         jq(this).addClass('hover');
-                    })
-                    .on("mouseleave", function () {
+                    }, function () {
                         jq(this).removeClass('hover');
                     });
             }
 
-            jq(selector).add(title).on('selectstart', function () {
+            jq(selector).add(title).bind('selectstart', function () {
                 return false;
-            }).on("mousedown", function () {
+            }).mousedown(function () {
                 return false;
-            }).on("click", function (evt) {
+            }).click(function (evt) {
                 var $options = jq(this.parentNode).find('ul.options:first');
                 if ($options.is(':hidden')) {
                     $options.css({
@@ -848,10 +877,10 @@ var StudioManager = new function () {
     };
 
     this.initImageZoom = function (options) {
-        jq(".mediafile, .screenzoom").on("click", function (event) {
+        jq(".mediafile, .screenzoom").click(function (event) {
             event.stopPropagation();
 
-            jq(window).trigger("click");
+            jq(window).click();
 
             var playlist = [];
             var selIndex = 0;
@@ -895,7 +924,7 @@ var StudioManager = new function () {
                 for (var i = 0; i < pendingRequests.length; i++) {
                     pendingRequests[i].apply();
                 }
-            }, 1000);
+            }, 3600);
         }
     };
 };
@@ -905,17 +934,14 @@ function ShowRequiredError (item, withouthScroll, withouthFocus) {
     jq("div[class='infoPanel alert']").hide();
     jq("div[class='infoPanel alert']").empty();
     var parentBlock = jq(item).parents(".requiredField");
+    jq(parentBlock).addClass("requiredFieldError");
 
-    if (parentBlock.length) {
-        jq(parentBlock).addClass("requiredFieldError");
-
-        if (typeof (withouthScroll) == "undefined" || withouthScroll == false) {
-            jq.scrollTo(jq(parentBlock).position().top - 50, { speed: 500 });
-        }
+    if (typeof(withouthScroll) == "undefined" || withouthScroll == false) {
+        jq.scrollTo(jq(parentBlock).position().top - 50, {speed: 500});
     }
 
     if (typeof (withouthFocus) == "undefined" || withouthFocus == false) {
-        jq(item).trigger("focus");
+        jq(item).focus();
     }
 }
 
@@ -1004,9 +1030,9 @@ ASC.EmailOperationManager = (function () {
         
         openPopupDialog();
         
-        jq("#btEmailOperationSend").off("click");
+        jq("#btEmailOperationSend").unbind("click");
 
-        jq("#btEmailOperationSend").on("click", function () {
+        jq("#btEmailOperationSend").click(function () {
             if (jq(this).hasClass("disable")) return false;
             var newEmail = jq("#emailOperation_email").val();
             sendEmailChangeInstructions(newEmail, userID, responseAction);
@@ -1021,7 +1047,7 @@ ASC.EmailOperationManager = (function () {
                     var sendButton = jq("#btEmailOperationSend");
                     sendButton.removeClass("disable");
                     if (getKeyCode(key) == 13) {
-                        sendButton.trigger("click");
+                        sendButton.click();
                     }
                 } else {
                     jq("#btEmailOperationSend").addClass("disable");
@@ -1074,9 +1100,9 @@ ASC.EmailOperationManager = (function () {
         
         openPopupDialog();
 
-        jq("#btEmailOperationSend").off("click");
+        jq("#btEmailOperationSend").unbind("click");
 
-        jq("#btEmailOperationSend").on("click", function () {
+        jq("#btEmailOperationSend").click(function () {
             var newEmail = jq("#emailOperation_email").val();
             sendEmailActivationInstructions(newEmail, userID, responseAction);
             return false;
@@ -1088,7 +1114,7 @@ ASC.EmailOperationManager = (function () {
         StudioBlockUIManager.blockUI("#studio_emailChangeDialog", 425);
 
         PopupKeyUpActionProvider.ClearActions();
-        PopupKeyUpActionProvider.EnterAction = "jq(\"#btEmailOperationSend\").trigger('click');";
+        PopupKeyUpActionProvider.EnterAction = "jq(\"#btEmailOperationSend\").click();";
     };
 
     function closeEmailOperationWindow () {
@@ -1201,7 +1227,7 @@ LoadingBanner = function () {
                 return;
 
             jq(btnContainer).siblings(".error-popup, .success-popup").each(function() {jq(this).hide();});
-            btnContainer.find(".button").addClass("disable").prop("disabled", true);
+            btnContainer.find(".button").addClass("disable").attr("disabled" , true);
             jq(btnContainer).append("<div class=\"loader-container\">{0}</div>".format(LoadingBanner.strLoading));
 
         },
@@ -1209,7 +1235,7 @@ LoadingBanner = function () {
         hideLoaderBtn: function (block) {
             var btnContainer = jq(block).find("[class*=\"button-container\"]");
             btnContainer.find(".loader-container").remove();
-            btnContainer.find(".button").removeClass("disable").prop("disabled", false);
+            btnContainer.find(".button").removeClass("disable").attr("disabled", false);
         },
 
         showMesInfoBtn: function (block, text, type) {
@@ -1346,9 +1372,9 @@ var LeftMenuManager = new function () {
                 addLeft: 0
             });
 
-            jq(".menu-main-button .main-button-text").on("click", function (event) {
+            jq(".menu-main-button .main-button-text").click(function (event) {
                 if (!jq(this).hasClass("override")) {
-                    jq(".menu-main-button .white-combobox").trigger("click");
+                    jq(".menu-main-button .white-combobox").click();
                     event.stopPropagation();
                 }
             });
@@ -1393,14 +1419,14 @@ var LeftMenuManager = new function () {
 var ScrolledGroupMenu = new function () {
 
     var init = function (options) {
-        jq(window).on("scroll", function () {
+        jq(window).scroll(function () {
             stickMenuToTheTop(options);
         });
-        jq(window).on("resize", function () {
+        jq(window).resize(function () {
             resizeContentHeaderWidth(options.menuSelector);
         });
 
-        jq(window).on("resizeWinTimerWithMaxDelay", function (event) {
+        jq(window).bind("resizeWinTimerWithMaxDelay", function (event) {
             resizeContentHeaderWidth(options.menuSelector);
         });
     };
@@ -1593,7 +1619,7 @@ less = {}; less.env = 'development';
 window.UserManager = new function() {
     var usersCache = null;
     var usersDisabledCache = null;
-    var personCache = {};
+    var personCache = [];
 
     function init() {
         if (usersCache != null)
@@ -1601,15 +1627,6 @@ window.UserManager = new function() {
 
         var master = ASC.Resources.Master;
         usersCache = {};
-
-        if (!master.IsAuthenticated){
-            var anonymous = {
-                id: ASC.Files.Constants.GUEST_USER_ID,
-            }
-
-            usersCache[anonymous.id] = anonymous;
-            return;
-        }
 
         var activeUsers = master.ApiResponses_ActiveProfiles.response;
         var activeUsersLength = activeUsers.length;
@@ -1648,7 +1665,7 @@ window.UserManager = new function() {
 
         return null;
     }
-
+    
     function getPerson(id, personConstructor) {
         if (!id)
             return null;
@@ -1714,7 +1731,8 @@ window.UserManager = new function() {
  */
 window.GroupManager = new function () {
     var groups = null;
-    var groupsCache = null;
+    var groupItems = null;
+    var groupsCache = [];
 
     function comparer (a, b) {
         var compA = a.name.toLowerCase(),
@@ -1723,52 +1741,64 @@ window.GroupManager = new function () {
     }
 
     function init() {
-        if (groupsCache != null)
+        if (groups != null)
             return;
-
-        groupsCache = {};
-
-        if (!ASC.Resources.Master.IsAuthenticated){
-            return;
-        }
 
         groups = ASC.Resources.Master.ApiResponses_Groups.response.sort(comparer);
+    }
 
-        for (var i = 0, k = groups.length; i < k; i++) {
-            var group = groups[i];
-            group.users = [];
-            groupsCache[group.id] = group;
+    function initGroupItems() {
+        if (groupItems != null)
+            return;
+
+        init();
+
+        groupItems = {};
+
+        var i, j, k, n, groupId;
+
+        for (i = 0, j = groups.length; i < j; i++) {
+            groupId = groups[i].id;
+            groupItems[groupId] = [];
         }
 
         var users = window.UserManager.getAllUsers();
 
         for (var userId in users) {
-            var user = users[userId];
+            if (!users.hasOwnProperty(userId)) continue;
 
-            for (var j = 0, l = user.groups.length; j < l; j++) {
-                var userGroup = groupsCache[user.groups[j]];
-                if (userGroup) {
-                    userGroup.users.push(userId);
-                }
+            var user = users[userId];
+            for (j = 0, k = user.groups.length; j < k; j++) {
+                groupId = user.groups[j];
+                groupItems[groupId] ? groupItems[groupId].push(userId) : groupItems[groupId] = [userId];
             }
         }
-
-        delete ASC.Resources.Master.ApiResponses_Groups;
     }
 
     function getAllGroups() {
         init();
-
-        return groupsCache;
+        return groups;
     }
 
     function getGroup(groupId) {
         if (!groupId)
             return null;
 
+        var fromCache = groupsCache[groupId];
+
+        if (fromCache) return fromCache;
+
         init();
 
-        return groupsCache[groupId] || null;
+        for (var i = 0, j = groups.length; i < j; i++) {
+            var groupItem = groups[i];
+            if (groupItem.id === groupId) {
+                groupsCache[groupId] = groupItem;
+                return groupItem;
+            }
+        }
+
+        return null;
     }
 
     function getGroups(ids) {
@@ -1779,12 +1809,9 @@ window.GroupManager = new function () {
 
         var result = [];
 
-        for (var i = 0, k = ids.length; i < k; i++) {
-            var group = groupsCache[ids[i]];
-            if (group) {
-                result.push(group);
-            }
-        }
+        for (var i = 0; i < groups.length; i++)
+            if (~ids.indexOf(groups[i].id))
+                result.push(groups[i]);
 
         return result;
     }
@@ -1793,36 +1820,16 @@ window.GroupManager = new function () {
         if (!groupId)
             return null;
 
-        init();
+        initGroupItems();
 
-        var group = groupsCache[groupId];
-        if (group) {
-            return group.users;
-        }
-
-        return null;
-    }
-
-    function getGroupsArray(constructor) {
-        init();
-
-        if (typeof constructor == "function") {
-            var result = [];
-            for (var groupId in groupsCache) {
-                result.push(constructor(groupsCache[groupId]));
-            }
-            return result;
-        }
-
-        return groups;
+        return groupItems[groupId];
     }
 
     return {
         getAllGroups: getAllGroups,
         getGroup: getGroup,
         getGroups: getGroups,
-        getGroupItems: getGroupItems,
-        getGroupsArray: getGroupsArray
+        getGroupItems: getGroupItems
     };
 };
 
@@ -1888,40 +1895,3 @@ window.TipsManager = new function() {
         neverShowTips: neverShowTips
     };
 };
-
-function AddPaddingWithoutScrollTo($formBlock, $baseForm) {
-    if (jq(window).width() > 592) {
-        var minPadding = 112,
-            maxPadding = 184;
-        if ($formBlock == $baseForm) {
-            minPadding = 48;
-        }
-        var windowHeight = jq(window).height();
-        var baseFormHeight = $baseForm.height();
-        var oneSidePadding = (windowHeight - baseFormHeight) / 2;
-        if (oneSidePadding < minPadding) {
-            oneSidePadding = minPadding;
-        }
-        if (oneSidePadding > maxPadding) {
-            oneSidePadding = maxPadding;
-        }
-        $formBlock.css({ "paddingTop": oneSidePadding, "paddingBottom": oneSidePadding });
-    } else {
-        $formBlock.css({ "paddingTop": "", "paddingBottom": "" });
-    }
-};
-
-(function () {
-    var paging = document.querySelector("main .paging-content");
-    var spacer = document.querySelector("main .page-content .layout-bottom-spacer");
-
-    var outputsize = function () {
-        spacer.classList.toggle("display-none", paging.offsetHeight > 0)
-    }
-
-    outputsize();
-
-    if (window.ResizeObserver) {
-        new ResizeObserver(outputsize).observe(paging);
-    }
-})();

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
-using ASC.Common;
 using ASC.FederatedLogin;
 
 using Box.V2;
@@ -125,7 +124,7 @@ namespace ASC.Files.Thirdparty.Box
                 return str;
             }
 
-            var tempBuffer = TempStream.Create();
+            var tempBuffer = new FileStream(Path.GetTempFileName(), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 8096, FileOptions.DeleteOnClose);
             if (str != null)
             {
                 str.CopyTo(tempBuffer);

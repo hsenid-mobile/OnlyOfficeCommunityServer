@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Web;
-
 using ASC.Core.Billing;
-
 using Newtonsoft.Json;
 
 
@@ -65,43 +63,37 @@ namespace ASC.Core
 
         public IEnumerable<PaymentInfo> GetTariffPayments(int tenant)
         {
-            return tariffService.GetPayments(tenant);
+            return GetTariffPayments(tenant, DateTime.MinValue, DateTime.MaxValue);
         }
 
-        // used in www
-        public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(params string[] productIds)
+        public IEnumerable<PaymentInfo> GetTariffPayments(int tenant, DateTime from, DateTime to)
+        {
+            return tariffService.GetPayments(tenant, from, to);
+        }
+
+        public Invoice GetPaymentInvoice(string paymentId)
+        {
+            return tariffService.GetInvoice(paymentId);
+        }
+
+        public IDictionary<string, IEnumerable<Tuple<string, decimal>>> GetProductPriceInfo(params string[] productIds)
         {
             return tariffService.GetProductPriceInfo(productIds);
         }
 
-        // used in www
-        public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(string[] productIds, BillingClient.PaymentSystem paymentSystem = BillingClient.PaymentSystem.Avangate)
+        public Uri GetShoppingUri(int tenant, int quotaId, string currency = null, string language = null, string customerId = null)
         {
-            return tariffService.GetProductPriceInfo(productIds, paymentSystem);
+            return tariffService.GetShoppingUri(tenant, quotaId, null, currency, language, customerId);
         }
 
-
-        public Uri GetShoppingUri(int quotaId, bool forCurrentTenant = true, string affiliateId = null, string currency = null, string language = null, string customerId = null, string quantity = null)
+        public Uri GetShoppingUri(int quotaId, bool forCurrentTenant = true, string affiliateId = null, string currency = null, string language = null, string customerId = null)
         {
-            return tariffService.GetShoppingUri(forCurrentTenant ? CoreContext.TenantManager.GetCurrentTenant().TenantId : (int?)null, quotaId, affiliateId, currency, language, customerId, quantity);
+            return tariffService.GetShoppingUri(forCurrentTenant ? CoreContext.TenantManager.GetCurrentTenant().TenantId : (int?)null, quotaId, affiliateId, currency, language, customerId);
         }
 
-        // used in www
-        public Uri GetShoppingUri(int quotaId, string affiliateId, string currency = null, string language = null, string customerId = null, string quantity = null)
+        public Uri GetShoppingUri(int quotaId, string affiliateId, string currency = null, string language = null, string customerId = null)
         {
-            return tariffService.GetShoppingUri(null, quotaId, affiliateId, currency, language, customerId, quantity);
-        }
-
-        // used in www
-        public Uri GetShoppingUri(string productId, string currency = null, string language = null, string customerId = null, string customerEmail = null, string backUrl = null, string quantity = null, string affiliateId = null, BillingClient.PaymentSystem paymentSystem = BillingClient.PaymentSystem.Avangate)
-        {
-            return tariffService.GetShoppingUri(new[] { productId }, affiliateId, currency, language, customerId, customerEmail, backUrl, quantity, paymentSystem);
-        }
-
-        // used in www
-        public Uri GetShoppingUri(string[] productIds, string currency = null, string language = null, string customerId = null, string customerEmail = null, string backUrl = null, string quantity = null, string affiliateId = null, BillingClient.PaymentSystem paymentSystem = BillingClient.PaymentSystem.Avangate)
-        {
-            return tariffService.GetShoppingUri(productIds, affiliateId, currency, language, customerId, customerEmail, backUrl, quantity, paymentSystem);
+            return tariffService.GetShoppingUri(null, quotaId, affiliateId, currency, language, customerId);
         }
 
 

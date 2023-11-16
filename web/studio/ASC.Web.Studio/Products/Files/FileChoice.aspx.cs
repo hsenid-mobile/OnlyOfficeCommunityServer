@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web;
-
 using ASC.Files.Core;
 using ASC.Web.Core.Client.Bundling;
 using ASC.Web.Core.Files;
-using ASC.Web.Core.Utility;
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Controls;
 using ASC.Web.Files.Resources;
@@ -41,13 +39,10 @@ namespace ASC.Web.Files
 
         public static string GetUrlForEditor
         {
-            get
-            {
-                return Location + string.Format("?{0}=true&{1}={{{1}}}&{2}={{{2}}}",
-               FromEditorParam,
-               FilterExtParam,
-               FileTypeParam);
-            }
+            get {return Location + string.Format("?{0}=true&{1}={{{1}}}&{2}={{{2}}}",
+                FromEditorParam,
+                FilterExtParam,
+                FileTypeParam);}
         }
 
         public static string GetUrl(string ext = null,
@@ -82,7 +77,12 @@ namespace ASC.Web.Files
         {
             get
             {
-                return (Request[FilterExtParam] ?? "").Trim().ToLower();
+                var ext = (Request[FilterExtParam] ?? "").Trim().ToLower();
+                //todo: obsolete since DS v5.3
+                return
+                    ext == "{" + FilterExtParam.ToLower() + "}"
+                        ? "xlsx"
+                        : ext;
             }
         }
 
@@ -105,20 +105,15 @@ namespace ASC.Web.Files
             get { return !string.IsNullOrEmpty(Request["onlyFolder"]); }
         }
 
-        private bool DisplayPrivacy
-        {
-            get { return !string.IsNullOrEmpty(Request["displayPrivacy"]); }
-        }
-
         protected void Page_Load(object sender, EventArgs e)
         {
             Master.Master.DisabledSidePanel = true;
             Master.Master.DisabledTopStudioPanel = true;
             Master.Master
-                  .AddStaticStyles(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark ? GetStaticDarkStyleSheet() : GetStaticStyleSheet())
+                  .AddStaticStyles(GetStaticStyleSheet())
                   .AddStaticBodyScripts(GetStaticJavaScript());
 
-            var fileSelector = (FileSelector)LoadControl(FileSelector.Location);
+            var fileSelector = (FileSelector) LoadControl(FileSelector.Location);
             fileSelector.IsFlat = true;
             fileSelector.OnlyFolder = OnlyFolder;
             fileSelector.Multiple = (Request[MultiSelectParam] ?? "").Trim().ToLower() == "true";
@@ -166,19 +161,18 @@ namespace ASC.Web.Files
             }
 
             var originForPost = "*";
-            if (FromEditor && !string.IsNullOrEmpty(FilesLinkUtility.DocServiceApiUrl) && !FilesLinkUtility.DocServiceApiUrl.StartsWith("/"))
+            if (FromEditor && !FilesLinkUtility.DocServiceApiUrl.StartsWith("/"))
             {
-                var origin = new Uri(FilesLinkUtility.DocServiceApiUrl);
+                var origin = new Uri(FilesLinkUtility.DocServiceApiUrl ?? "");
                 originForPost = origin.Scheme + "://" + origin.Host + ":" + origin.Port;
             }
 
-            script.AppendFormat("ASC.Files.FileChoice.init(\"{0}\", ({1} == true), \"{2}\", ({3} == true), \"{4}\", ({5} == true));",
+            script.AppendFormat("ASC.Files.FileChoice.init(\"{0}\", ({1} == true), \"{2}\", ({3} == true), \"{4}\");",
                                 (Request[FilesLinkUtility.FolderId] ?? "").Replace("\"", "\\\""),
                                 OnlyFolder.ToString().ToLower(),
                                 (Request[ThirdPartyParam] ?? "").ToLower().Replace("\"", "\\\""),
                                 FromEditor.ToString().ToLower(),
-                                originForPost,
-                                DisplayPrivacy.ToString().ToLower());
+                                originForPost);
 
             Page.RegisterInlineScript(script.ToString());
         }
@@ -208,28 +202,16 @@ namespace ASC.Web.Files
         {
             return (StyleBundleData)
                    new StyleBundleData("fileschoice", "files")
-                       .AddSource(PathProvider.GetFileStaticRelativePath, "filechoice.less")
+                       .AddSource(PathProvider.GetFileStaticRelativePath, "filechoice.css")
                        .AddSource(r => FilesLinkUtility.FilesBaseAbsolutePath + r,
-                                  "Controls/FileSelector/fileselector.less",
-                                  "Controls/ThirdParty/thirdparty.less",
-                                  "Controls/ContentList/contentlist.less",
-                                  "Controls/EmptyFolder/emptyfolder.less",
-                                  "Controls/Tree/tree.less"
+                                  "Controls/FileSelector/fileselector.css",
+                                  "Controls/ThirdParty/thirdparty.css",
+                                  "Controls/ContentList/contentlist.css",
+                                  "Controls/EmptyFolder/emptyfolder.css",
+                                  "Controls/Tree/tree.css"
                        );
         }
-        public StyleBundleData GetStaticDarkStyleSheet()
-        {
-            return (StyleBundleData)
-                   new StyleBundleData("dark-fileschoice", "files")
-                       .AddSource(PathProvider.GetFileStaticRelativePath, "filechoice.less")
-                       .AddSource(r => FilesLinkUtility.FilesBaseAbsolutePath + r,
-                                  "Controls/FileSelector/fileselector.less",
-                                  "Controls/ThirdParty/dark-thirdparty.less",
-                                  "Controls/ContentList/dark-contentlist.less",
-                                  "Controls/EmptyFolder/emptyfolder.less",
-                                  "Controls/Tree/dark-tree.less"
-                       );
-        }
+
         public string GetTypeString(FilterType filterType)
         {
             switch (filterType)

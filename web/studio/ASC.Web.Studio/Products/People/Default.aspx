@@ -6,7 +6,7 @@
 <%@ Import Namespace="ASC.Core.Users" %>
 <%@ Import Namespace="ASC.Web.People.Resources" %>
 <%@ Import Namespace="ASC.Web.Studio.Utility" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="TitleContent">
     <div class="clearFix default-title profile-title header-with-menu display-none">
@@ -111,7 +111,6 @@
     <asp:PlaceHolder ID="userEmailChange" runat="server"/>
     <asp:PlaceHolder ID="userPwdChange" runat="server"/>
     <asp:PlaceHolder ID="userConfirmationDelete" runat="server"/>
-    <asp:PlaceHolder ID="confirmationImpersonateUser" runat="server"/>
 
     <% if (IsAdmin) { %>
 
@@ -149,17 +148,7 @@
             </div>
         </div>
         <div id="visitorTypeInfo">
-            <% if (DisplayPayments)
-               { %>
             <div class="block-cnt-splitter">
-                <span class="tariff-limit"></span>
-                <%= PeopleResource.ChangeTypeDialogConstraint %>&nbsp;
-                <% if (IsFreeTariff && !string.IsNullOrEmpty(HelpLink)) { %>
-                <%= String.Format(PeopleResource.ReadAboutNonProfit, "<a class='link underline' href='" + HelpLink + "/gettingstarted/configuration.aspx#PublicPortals' target='_blank'>", "</a>") %>
-                <% } %>
-            </div>
-            <% } %>
-            <div class="block-cnt-splitter action-info">
                 <%= CustomNamingPeople.Substitute<PeopleResource>("ChangeTypeDialogToGuest").HtmlEncode() %>
                 <br/>
                 <%= PeopleResource.ChangeTypeDialogRestriction %>
@@ -176,49 +165,27 @@
             </div>
         </div>
         <div class="error-popup display-none"></div>
-        <div class="middle-button-container userContainer">
-            <% if (!DisplayPaymentsFirstUser)
+        <div class="middle-button-container">
+            <% if (!DisplayPaymentsFirst)
                { %>
-            <a class="changeTypeDialogOk button blue middle"><%= PeopleResource.ChangeType %></a>
+            <a id="changeTypeDialogOk" class="button blue middle"><%= PeopleResource.ChangeType %></a>
             <span class="splitter-buttons"></span>
             <% } %>
 
             <% if (DisplayPayments)
                { %>
-            <a class="changeTypeDialogTariff button <%= DisplayPaymentsFirstUser ? "blue" : "gray" %> middle" href="<%= TenantExtra.GetTariffPageLink() %>">
+            <a id="changeTypeDialogTariff" class="button <%= DisplayPaymentsFirst ? "blue" : "gray" %> middle" href="<%= TenantExtra.GetTariffPageLink() %>">
                 <%= UserControlsCommonResource.UpgradeButton %></a>
             <span class="splitter-buttons"></span>
 
-            <% if (DisplayPaymentsFirstUser)
+            <% if (DisplayPaymentsFirst)
                { %>
-            <a class=" changeTypeDialogOk button gray middle"><%= PeopleResource.ChangeType %></a>
+            <a id="changeTypeDialogOk" class="button gray middle"><%= PeopleResource.ChangeType %></a>
             <span class="splitter-buttons"></span>
             <% } %>
 
             <% } %>
-            <a class="changeTypeDialogCancel button gray middle"><%= PeopleResource.LblCancelButton%></a>
-        </div>
-        <div class="middle-button-container visitorContainer">
-            <% if (!DisplayPaymentsFirstGuest)
-               { %>
-            <a class="changeTypeDialogOk button blue middle"><%= PeopleResource.ChangeType %></a>
-            <span class="splitter-buttons"></span>
-            <% } %>
-
-            <% if (DisplayPayments)
-               { %>
-            <a class="changeTypeDialogTariff button <%= DisplayPaymentsFirstGuest ? "blue" : "gray" %> middle" href="<%= TenantExtra.GetTariffPageLink() %>">
-                <%= UserControlsCommonResource.UpgradeButton %></a>
-            <span class="splitter-buttons"></span>
-
-            <% if (DisplayPaymentsFirstGuest)
-               { %>
-            <a class="changeTypeDialogOk button gray middle"><%= PeopleResource.ChangeType %></a>
-            <span class="splitter-buttons"></span>
-            <% } %>
-
-            <% } %>
-            <a class=" changeTypeDialogCancel button gray middle"><%= PeopleResource.LblCancelButton%></a>
+            <a id="changeTypeDialogCancel" class="button gray middle"><%= PeopleResource.LblCancelButton%></a>
         </div>
     </div>
 
@@ -274,19 +241,19 @@
         </div>
         <div class="error-popup display-none"></div>
         <div class="middle-button-container">
-            <% if (!DisplayPaymentsFirstUser)
+            <% if (!DisplayPaymentsFirst)
                { %>
             <a id="changeStatusOkBtn" class="button blue middle"><%= PeopleResource.ChangeStatusButton %></a>
             <span class="splitter-buttons"></span>
             <% } %>
 
-            <% if (DisplayPaymentsFirstUser)
+            <% if (DisplayPayments)
                { %>
-            <a id="changeStatusTariff" class="button <%= DisplayPaymentsFirstUser || DisplayPaymentsFirstGuest ? "blue" : "gray" %> middle" href="<%= TenantExtra.GetTariffPageLink() %>">
+            <a id="changeStatusTariff" class="button <%= DisplayPaymentsFirst ? "blue" : "gray" %> middle" href="<%= TenantExtra.GetTariffPageLink() %>">
                 <%= UserControlsCommonResource.UpgradeButton %></a>
             <span class="splitter-buttons"></span>
 
-            <% if (DisplayPaymentsFirstUser)
+            <% if (DisplayPaymentsFirst)
                { %>
             <a id="changeStatusOkBtn" class="button gray middle"><%= PeopleResource.ChangeStatusButton %></a>
             <span class="splitter-buttons"></span>

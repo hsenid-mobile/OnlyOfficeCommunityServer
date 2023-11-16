@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Configuration;
-
 using ASC.Common.Logging;
 
 namespace ASC.MessagingSystem.DbSender
@@ -25,12 +24,6 @@ namespace ASC.MessagingSystem.DbSender
     public class DbMessageSender : IMessageSender
     {
         private readonly ILog log = LogManager.GetLogger("ASC.Messaging");
-        private MessagesRepository messagesRepository;
-
-        public DbMessageSender()
-        {
-            messagesRepository = new MessagesRepository();
-        }
 
         private static bool MessagingEnabled
         {
@@ -42,21 +35,19 @@ namespace ASC.MessagingSystem.DbSender
         }
 
 
-        public int Send(EventMessage message)
+        public void Send(EventMessage message)
         {
             try
             {
-                if (!MessagingEnabled) return 0;
-
-                if (message == null) return 0;
-
-                var id = messagesRepository.Add(message);
-                return id;
+                if (!MessagingEnabled) return;
+                
+                if (message == null) return;
+                
+                MessagesRepository.Add(message);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 log.Error("Failed to send a message", ex);
-                return 0;
             }
         }
     }

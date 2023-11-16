@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,43 +70,23 @@ namespace ASC.ElasticSearch.Core
             }
         }
 
-        public static bool CanIndexByContent<T>(int tenantId) where T : Wrapper, new()
+        public bool CanSearchByContent<T>() where T : Wrapper, new()
         {
-            return CanIndexByContent(typeof(T), tenantId);
-        }
-
-        public static bool CanIndexByContent(Type t, int tenantId)
-        {
-            if (!t.IsSubclassOf(typeof(WrapperWithDoc)))
+            if (!typeof(T).IsSubclassOf(typeof(WrapperWithDoc)))
             {
                 return false;
             }
 
             if (Convert.ToBoolean(ConfigurationManagerExtension.AppSettings["core.search-by-content"] ?? "false")) return true;
 
-            if (!CoreContext.Configuration.Standalone) return true;
+            if (!SearchByContentEnabled) return false;
 
-            var settings = LoadForTenant(tenantId);
-
-            return settings.IsEnabled(((WrapperWithDoc)Activator.CreateInstance(t)).IndexName);
-        }
-
-        public static bool CanSearchByContent<T>() where T : Wrapper, new()
-        {
-            return CanSearchByContent(typeof(T));
-        }
-
-        public static bool CanSearchByContent(Type t)
-        {
-            var tenantId = CoreContext.TenantManager.GetCurrentTenant().TenantId;
-            if (!CanIndexByContent(t, tenantId)) return false;
-
-            return CoreContext.Configuration.Standalone || CoreContext.TenantManager.GetTenantQuota(tenantId).ContentSearch;
+            return IsEnabled(new T().IndexName);
         }
 
         public static List<SearchSettingsItem> GetAllItems()
         {
-            if (!CoreContext.Configuration.Standalone) return new List<SearchSettingsItem>();
+            if (!SearchByContentEnabled) return new List<SearchSettingsItem>();
 
             var settings = Load();
 
@@ -120,7 +100,7 @@ namespace ASC.ElasticSearch.Core
 
         public static void Set(List<SearchSettingsItem> items)
         {
-            if (!CoreContext.Configuration.Standalone) return;
+            if (!SearchByContentEnabled) return;
 
             var settings = Load();
 
@@ -133,6 +113,14 @@ namespace ASC.ElasticSearch.Core
             using (var service = new ServiceClient())
             {
                 service.ReIndex(toReIndex.Select(r => r.ID).ToList(), CoreContext.TenantManager.GetCurrentTenant().TenantId);
+            }
+        }
+
+        private static bool SearchByContentEnabled
+        {
+            get
+            {
+                return CoreContext.Configuration.Standalone;
             }
         }
 

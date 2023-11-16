@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ window.ASC.Controls.TfaAppResetApp = (function () {
             $errorBox.hide();
             Teamlab.tfaAppNewApp(jq("#tfaHiddenUserInfoId")[0].value, {
                 success: function () {
-                    toastr.success(ASC.Resources.Master.ResourceJS.SavedTitle);
+                    toastr.success(ASC.Resources.Master.Resource.SavedTitle);
                     PopupKeyUpActionProvider.CloseDialog();
                     window.location.reload(true);
                     return false;

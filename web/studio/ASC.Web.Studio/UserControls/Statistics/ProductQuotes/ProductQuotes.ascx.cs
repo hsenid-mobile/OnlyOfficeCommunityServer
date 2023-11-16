@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
-
 using ASC.Core;
-using ASC.Core.Tenants;
-using ASC.Core.Users;
+using ASC.Core.Billing;
 using ASC.Web.Core;
-using ASC.Web.Core.Client.Bundling;
-using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Utility;
 
@@ -40,44 +36,15 @@ namespace ASC.Web.Studio.UserControls.Statistics
         private long MaxTotalSpace { get; set; }
 
         private long UsedSpace { get; set; }
-        public bool EnableUserQuota { get; set; }
-
-        public string LastUpdate { get; set; }
-        public string DefaultUserQuota { get; set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
-            {
-                Page
-                .RegisterStyle("~/UserControls/Statistics/ProductQuotes/css/dark_productquotes_style.less");
-            }
-            else
-            {
-                Page
-                .RegisterStyle("~/UserControls/Statistics/ProductQuotes/css/productquotes_style.less");
-            }
-
             Page
-                .RegisterStaticScripts(GetStaticJavaScript())
-                .RegisterBodyScripts("~/UserControls/Statistics/ProductQuotes/js/product_quotes.js")
-                .RegisterBodyScripts("~/UserControls/Statistics/ProductQuotes/js/jq_quota_extensions.js")
-                .RegisterBodyScripts("~/UserControls/Statistics/ProductQuotes/js/user_quota_controller.js")
-                .RegisterBodyScripts("~/UserControls/Statistics/ProductQuotes/js/navigatorhandler.js");
+                .RegisterStyle("~/UserControls/Statistics/ProductQuotes/css/productquotes_style.less")
+                .RegisterBodyScripts("~/UserControls/Statistics/ProductQuotes/js/product_quotes.js");
 
             MaxTotalSpace = TenantExtra.GetTenantQuota().MaxTotalSize;
             UsedSpace = TenantStatisticsProvider.GetUsedSize();
-            var quotaSettings = TenantUserQuotaSettings.Load();
-            EnableUserQuota = quotaSettings.EnableUserQuota;
-            LastUpdate = quotaSettings.LastRecalculateDate != DateTime.MinValue ? TimeZoneInfo.ConvertTimeFromUtc(quotaSettings.LastRecalculateDate, CoreContext.TenantManager.GetCurrentTenant().TimeZone).ToString() : null;
-            DefaultUserQuota = FileSizeComment.FilesSizeToString(quotaSettings.DefaultUserQuota);
-        }
-
-        public ScriptBundleData GetStaticJavaScript()
-        {
-            var result = new ScriptBundleData("quota", "studio");
-            result.AddSource(ResolveUrl, new ClientTemplateResources());
-            return result;
         }
 
         protected IEnumerable<IWebItem> GetWebItems()
@@ -100,7 +67,7 @@ namespace ASC.Web.Studio.UserControls.Statistics
             var result = TenantStatisticsProvider.GetUsersCount().ToString();
 
             var maxActiveUsers = TenantExtra.GetTenantQuota().ActiveUsers;
-            if (!CoreContext.Configuration.Standalone || maxActiveUsers != Constants.MaxEveryoneCount)
+            if (!CoreContext.Configuration.Standalone || maxActiveUsers != LicenseReader.MaxUserCount)
             {
                 result += " / " + maxActiveUsers;
             }
@@ -120,7 +87,7 @@ namespace ASC.Web.Studio.UserControls.Statistics
 
         protected String RenderUsedSpaceClass()
         {
-            return !CoreContext.Configuration.Standalone && UsedSpace > MaxTotalSpace * 9 / 10 ? "red-text" : string.Empty;
+            return !CoreContext.Configuration.Standalone && UsedSpace > MaxTotalSpace*9/10 ? "red-text" : string.Empty;
         }
     }
 }

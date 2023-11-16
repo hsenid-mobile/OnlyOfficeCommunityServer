@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using ASC.CRM.Core;
+using ASC.CRM.Core.Entities;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
-using ASC.CRM.Core;
 using ASC.CRM.Core.Dao;
-using ASC.CRM.Core.Entities;
-using ASC.Web.CRM.Resources;
-
 using LumenWorks.Framework.IO.Csv;
+using ASC.Web.CRM.Resources;
 
 #endregion
 

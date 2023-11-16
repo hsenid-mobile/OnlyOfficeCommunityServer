@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,10 +61,13 @@ window.tagsPanel = (function($) {
 
         var $html = $(html);
 
-        $html.on("click", function(e) {
+        $html.click(function(e) {
             if (e.isPropagationStopped()) {
                 return;
             }
+
+            // google analytics
+            window.ASC.Mail.ga_track(ga_Categories.leftPanel, ga_Actions.filterClick, 'tag');
 
             var tagid = $(this).attr('labelid');
 

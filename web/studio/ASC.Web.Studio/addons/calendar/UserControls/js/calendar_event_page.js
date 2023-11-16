@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@
                 });
             }
 
-            if (Array.isArray(value))
+            if (jq.isArray(value))
                 attendees = value;
 
             var result = [];
@@ -109,7 +109,7 @@
 
         this.addItem = function (value, insertOrganizer) {
 
-            var hasValue = Array.isArray(value) ? value.length : value;
+            var hasValue = jq.isArray(value) ? value.length : value;
 
             var parsedItems = self.parseEmails(value);
 
@@ -287,7 +287,7 @@
                     });
                 },
                 create: function() {
-                    jq(window).on("resize", function () {
+                    jq(window).resize(function () {
                         self.closeSelector();
                     });
                 },
@@ -343,9 +343,9 @@
             self.addItem(items);
             
             if (self.canEdit) {
-                self.input.prop("disabled", false).parents(".input-container").removeClass("display-none").find(".button").removeClass("disable");
+                self.input.removeAttr("disabled").parents(".input-container").removeClass("display-none").find(".button").removeClass("disable");
             } else {
-                self.input.prop("disabled", true).parents(".input-container").addClass("display-none").find(".button").addClass("disable");
+                self.input.attr("disabled", true).parents(".input-container").addClass("display-none").find(".button").addClass("disable");
             }
             
             if (items.length){

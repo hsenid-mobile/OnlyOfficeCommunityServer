@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ using System.Configuration;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text.RegularExpressions;
+
+using StackExchange.Redis.Extensions.Core.Extensions;
 
 namespace ASC.Common.Caching
 {
@@ -98,44 +100,38 @@ namespace ASC.Common.Caching
         public IDictionary<string, T> HashGetAll<T>(string key)
         {
             var cache = GetCache();
-            var dic = (ConcurrentDictionary<string, T>)cache.Get(key);
-
-            return dic != null ? new ConcurrentDictionary<string, T>(dic) : new ConcurrentDictionary<string, T>();
+            var dic = (IDictionary<string, T>)cache.Get(key);
+            return dic != null ? new Dictionary<string, T>(dic) : new Dictionary<string, T>();
         }
 
         public T HashGet<T>(string key, string field)
         {
             var cache = GetCache();
             T value;
-            var dic = (ConcurrentDictionary<string, T>)cache.Get(key);
-
+            var dic = (IDictionary<string, T>)cache.Get(key);
             if (dic != null && dic.TryGetValue(field, out value))
             {
                 return value;
             }
-
             return default(T);
         }
 
         public void HashSet<T>(string key, string field, T value)
         {
             var cache = GetCache();
-            var dic = (ConcurrentDictionary<string, T>)cache.Get(key);
+            var dic = (IDictionary<string, T>)cache.Get(key);
             if (value != null)
             {
                 if (dic == null)
                 {
-                    dic = new ConcurrentDictionary<string, T>();
+                    dic = new Dictionary<string, T>();
                 }
-
-                dic.AddOrUpdate(field, value, (k, v) => value);
-
+                dic[field] = value;
                 cache.Set(key, dic, null);
             }
             else if (dic != null)
             {
-                dic.TryRemove(field, out _);
-
+                dic.Remove(field);
                 if (dic.Count == 0)
                 {
                     cache.Remove(key);
@@ -175,7 +171,7 @@ namespace ASC.Common.Caching
 
             if (onchange != null)
             {
-                onchange.ToList().ForEach(r => r(obj, action));
+                onchange.ToArray().ForEach(r => r(obj, action));
             }
         }
 

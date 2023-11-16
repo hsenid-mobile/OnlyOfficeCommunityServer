@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ ASC.Projects.Tab.prototype.select = function () {
         var currentHash = location.hash.substring(1);
 
         if (currentHash === this.emptyScreen.button.hash && $addFirstElement.length > 0) {
-            $addFirstElement.trigger("click");
+            $addFirstElement.click();
         }
 
     } else if (this.$container) {
@@ -122,7 +122,7 @@ ASC.Projects.DescriptionTab = (function () {
             var $statusSelector = $tab.find(".status");
             $statusSelector.advancedSelector(
                 {
-                    height: 30 * statuses.length,
+                    height: 26 * statuses.length,
                     itemsChoose: statuses,
                     itemsSelectedIds: [description.status.current.id],
                     showSearch: false,
@@ -394,8 +394,7 @@ ASC.Projects.DescriptionPanel = (function() {
     };
 
     function checkProperty(prop) {
-        if (!prop) return false;
-        return typeof prop == "string" ? prop.trim() != "" : true;
+        return typeof prop !== 'undefined' && jq.trim(prop) !== "" && prop != null;
     }
 
     function showDescPanelByObject($targetObject) {
@@ -513,7 +512,7 @@ ASC.Projects.GroupActionPanel = (function () {
 
                 for (var k = 0; k < action.multi.length; k++) {
                     addActionHandler(action.multi[k], function () {
-                        return !$action.hasClass(unlockAction) || jq(this).find("a").hasClass(disable);
+                        return !$action.hasClass(unlockAction) && jq(this).find("a").hasClass(disable);
                     });
                 }
 
@@ -829,19 +828,14 @@ ASC.Projects.StatusList = (function () {
 
     function getDefaultById(id) {
         return currentSettings.statuses.find(function(item) {
-            return item.hasOwnProperty("statusType") ?
-                item.statusType === id && item.isDefault :
-                item.id === id;
+            return item.statusType === id && item.isDefault;
         });
     }
 
     function getByData(data) {
-        var result;
-        if (typeof data.customTaskStatus !== 'undefined') {
-            result = getById(data.customTaskStatus);
-        } else {
-            result = getDefaultById(data.status);
-        }
+        var id = typeof data.customTaskStatus !== 'undefined' ? data.customTaskStatus : data.status;
+        var result = getById(id);
+
         return result || getDefaultById(data.status);
     }
 

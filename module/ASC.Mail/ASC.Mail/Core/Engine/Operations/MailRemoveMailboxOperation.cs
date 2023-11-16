@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-
 using ASC.Common.Logging;
 using ASC.Common.Security.Authentication;
 using ASC.Core;
@@ -26,7 +25,7 @@ using ASC.Mail.Data.Contracts;
 
 namespace ASC.Mail.Core.Engine.Operations
 {
-    public class MailRemoveMailboxOperation : MailOperation
+    public class MailRemoveMailboxOperation: MailOperation
     {
         private readonly MailBoxData _mailBoxData;
 
@@ -51,11 +50,11 @@ namespace ASC.Mail.Core.Engine.Operations
         {
             try
             {
-                SetProgress((int?)MailOperationRemoveMailboxProgress.Init, "Setup tenant and user");
+                SetProgress((int?) MailOperationRemoveMailboxProgress.Init, "Setup tenant and user");
 
                 CoreContext.TenantManager.SetCurrentTenant(CurrentTenant);
 
-                SecurityContext.CurrentAccount = CurrentUser;
+                SecurityContext.AuthenticateMe(CurrentUser);
 
                 var engine = new EngineFactory(_mailBoxData.TenantId, _mailBoxData.UserId);
 
@@ -88,6 +87,6 @@ namespace ASC.Mail.Core.Engine.Operations
             }
         }
 
-
+        
     }
 }

@@ -1,6 +1,6 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="TariffHistory.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Management.TariffHistory" %>
 <%@ Import Namespace="ASC.Web.Studio.Utility" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <asp:Repeater runat="server" ID="PaymentsRepeater">
     <HeaderTemplate>
@@ -18,10 +18,12 @@
     <ItemTemplate>
                 <tr class="borderBase">
                     <td>#<%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).CartId %></td> 
-                    <td><%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).FName %> <%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).LName %></td>
+                    <td><%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).Method %></td>
+                    <td><%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).Name %></td>
                     <td><%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).Email %></td>
-                    <td><%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).PaymentDate.ToShortDateString() %> <%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).PaymentDate.ToShortTimeString() %></td>
-                    <td><%# (((ASC.Core.Billing.PaymentInfo)Container.DataItem).Qty * ((ASC.Core.Billing.PaymentInfo)Container.DataItem).Price).ToString("###,##") %> <%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).PaymentCurrency %></td>
+                    <td><%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).Date.ToShortDateString() %> <%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).Date.ToShortTimeString() %></td>
+                    <td><%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).Price.ToString("###,##") %> <%# ((ASC.Core.Billing.PaymentInfo)Container.DataItem).Currency %></td>
+                    <td><a class="link bold" href="<%# CommonLinkUtility.ToAbsolute("~/tariffs/invoice.ashx") + "?pid=" + ((ASC.Core.Billing.PaymentInfo)Container.DataItem).CartId %>" target="_blank"><%= Resource.TariffInvoice %></a></td>
                 </tr>
     </ItemTemplate>
     <FooterTemplate>

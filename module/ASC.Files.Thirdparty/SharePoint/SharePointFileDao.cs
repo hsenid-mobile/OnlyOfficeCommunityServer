@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-
 using ASC.Core;
 using ASC.Files.Core;
 using ASC.Web.Core.Files;
-
 using File = ASC.Files.Core.File;
 
 namespace ASC.Files.Thirdparty.SharePoint
@@ -71,14 +68,14 @@ namespace ASC.Files.Thirdparty.SharePoint
             return new List<File> { GetFile(fileId) };
         }
 
-        public List<File> GetFiles(IEnumerable<object> fileIds)
+        public List<File> GetFiles(object[] fileIds)
         {
             return fileIds.Select(fileId => ProviderInfo.ToFile(ProviderInfo.GetFileById(fileId))).ToList();
         }
 
-        public List<File> GetFilesFiltered(IEnumerable<object> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
+        public List<File> GetFilesFiltered(object[] fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
         {
-            if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly) return new List<File>();
+            if (fileIds == null || fileIds.Length == 0 || filterType == FilterType.FoldersOnly) return new List<File>();
 
             var files = GetFiles(fileIds).AsEnumerable();
 
@@ -118,10 +115,7 @@ namespace ASC.Files.Thirdparty.SharePoint
                     break;
                 case FilterType.ByExtension:
                     if (!string.IsNullOrEmpty(searchText))
-                    {
-                        searchText = searchText.Trim().ToLower();
-                        files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(searchText));
-                    }
+                        files = files.Where(x => FileUtility.GetFileExtension(x.Title).Contains(searchText));
                     break;
             }
 
@@ -179,10 +173,7 @@ namespace ASC.Files.Thirdparty.SharePoint
                     break;
                 case FilterType.ByExtension:
                     if (!string.IsNullOrEmpty(searchText))
-                    {
-                        searchText = searchText.Trim().ToLower();
-                        files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(searchText));
-                    }
+                        files = files.Where(x => FileUtility.GetFileExtension(x.Title).Contains(searchText));
                     break;
             }
 
@@ -224,7 +215,7 @@ namespace ASC.Files.Thirdparty.SharePoint
             if (fileToDownload == null)
                 throw new ArgumentNullException("file", Web.Files.Resources.FilesCommonResource.ErrorMassage_FileNotFound);
 
-            var fileStream = ProviderInfo.GetFileStream(fileToDownload.ServerRelativeUrl, (int)offset);
+            var fileStream = ProviderInfo.GetFileStream(fileToDownload.ServerRelativeUrl, (int) offset);
 
             return fileStream;
         }
@@ -273,10 +264,7 @@ namespace ASC.Files.Thirdparty.SharePoint
         {
             return SaveFile(file, fileStream);
         }
-        public void DeleteFile(object fileId, Guid ownerId)
-        {
-            DeleteFile(fileId);
-        }
+
         public void DeleteFile(object fileId)
         {
             ProviderInfo.DeleteFile((string)fileId);
@@ -308,8 +296,8 @@ namespace ASC.Files.Thirdparty.SharePoint
 
         public object FileRename(File file, string newTitle)
         {
-            var newFileId = ProviderInfo.RenameFile((string)file.ID, newTitle);
-            UpdatePathInDB(ProviderInfo.MakeId((string)file.ID), (string)newFileId);
+            var newFileId = ProviderInfo.RenameFile((string) file.ID, newTitle);
+            UpdatePathInDB(ProviderInfo.MakeId((string) file.ID), (string) newFileId);
             return newFileId;
         }
 
@@ -336,7 +324,7 @@ namespace ASC.Files.Thirdparty.SharePoint
             return new ChunkedUploadSession(FixId(file), contentLength) { UseChunks = false };
         }
 
-        public File UploadChunk(ChunkedUploadSession uploadSession, Stream chunkStream, long chunkLength)
+        public void UploadChunk(ChunkedUploadSession uploadSession, Stream chunkStream, long chunkLength)
         {
             if (!uploadSession.UseChunks)
             {
@@ -345,7 +333,7 @@ namespace ASC.Files.Thirdparty.SharePoint
 
                 uploadSession.File = SaveFile(uploadSession.File, chunkStream);
                 uploadSession.BytesUploaded = chunkLength;
-                return uploadSession.File;
+                return;
             }
 
             throw new NotImplementedException();
@@ -369,11 +357,11 @@ namespace ASC.Files.Thirdparty.SharePoint
 
         #region Only in TMFileDao
 
-        public void ReassignFiles(IEnumerable<object> fileIds, Guid newOwnerId)
+        public void ReassignFiles(object[] fileIds, Guid newOwnerId)
         {
         }
 
-        public List<File> GetFiles(IEnumerable<object> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
+        public List<File> GetFiles(object[] parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
         {
             return new List<File>();
         }
@@ -406,45 +394,6 @@ namespace ASC.Files.Thirdparty.SharePoint
         public bool ContainChanges(object fileId, int fileVersion)
         {
             return false;
-        }
-
-        public void SaveThumbnail(File file, Stream thumbnail)
-        {
-            //Do nothing
-        }
-
-        public Stream GetThumbnail(File file)
-        {
-            return null;
-        }
-
-        public Task<Stream> GetFileStreamAsync(File file)
-        {
-            return Task.FromResult(GetFileStream(file));
-        }
-
-        public Task<bool> IsExistOnStorageAsync(File file)
-        {
-            return Task.FromResult(IsExistOnStorage(file));
-        }
-
-        public EntryProperties GetProperties(object fileId)
-        {
-            return null;
-        }
-
-        public void SaveProperties(object fileId, EntryProperties entryProperties)
-        {
-        }
-
-        public Task UploadChunkAsync(ChunkedUploadSession uploadSession, Stream chunkStream, long chunkLength)
-        {
-            throw new NotImplementedException();
-        }
-
-        public File FinalizeUploadSession(ChunkedUploadSession uploadSession)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion

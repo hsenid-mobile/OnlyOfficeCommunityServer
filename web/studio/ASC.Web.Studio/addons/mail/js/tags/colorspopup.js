@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ window.tagsColorsPopup = (function($) {
     function init() {
         panel = $('#tagsColorsPanel');
 
-        panel.find('div[colorstyle]').on('click', function() {
+        panel.find('div[colorstyle]').bind('click', function() {
             var style = $(this).attr('colorstyle');
             callback(obj, style);
         });
@@ -38,7 +38,7 @@ window.tagsColorsPopup = (function($) {
         var y = $obj.offset().top + $obj.height();
         panel.css({ left: x - 2, top: y, display: 'block', 'z-index': 2001 });
 
-        $('body').on('click.tagsColorsPopup', function(event) {
+        $('body').bind('click.tagsColorsPopup', function(event) {
             var elt = (event.target) ? event.target : event.srcElement;
             if (!($(elt).is('.square') || $(elt).is('.square *') || $(elt).is('.leftRow span'))) {
                 hide();
@@ -48,7 +48,7 @@ window.tagsColorsPopup = (function($) {
 
     function hide() {
         panel.hide();
-        $('body').off("click.tagsColorsPopup");
+        $('body').unbind("click.tagsColorsPopup");
     }
 
     return {

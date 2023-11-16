@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Web;
-
 using ASC.Core;
-using ASC.Core.ChunkedUploader;
 using ASC.Data.Storage.Configuration;
-using ASC.Data.Storage.ZipOperators;
 using ASC.Security.Cryptography;
 
 namespace ASC.Data.Storage
@@ -36,7 +32,6 @@ namespace ASC.Data.Storage
         #region IDataStore Members
 
         internal string _modulename;
-        internal bool _cache;
         internal DataList _dataList;
         internal string _tenant;
         internal Dictionary<string, TimeSpan> _domainsExpires = new Dictionary<string, TimeSpan>();
@@ -138,33 +133,23 @@ namespace ASC.Data.Storage
         }
 
         public abstract Stream GetReadStream(string domain, string path);
-        public abstract Stream GetReadStream(string domain, string path, long offset);
-        public abstract Task<Stream> GetReadStreamAsync(string domain, string path, long offset);
+        public abstract Stream GetReadStream(string domain, string path, int offset);
 
         public abstract Uri Save(string domain, string path, Stream stream);
-        public abstract Uri Save(string domain, string path, Stream stream, Guid ownerId);
         public abstract Uri Save(string domain, string path, Stream stream, ACL acl);
 
         public Uri Save(string domain, string path, Stream stream, string attachmentFileName)
         {
-            return Save(domain, path, Guid.Empty, stream, attachmentFileName);
-        }
-
-        public Uri Save(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
-        {
             if (!string.IsNullOrEmpty(attachmentFileName))
             {
-                return SaveWithAutoAttachment(domain, path, ownerId, stream, attachmentFileName);
+                return SaveWithAutoAttachment(domain, path, stream, attachmentFileName);
             }
-            return Save(domain, path, stream, ownerId);
+            return Save(domain, path, stream);
         }
 
         protected abstract Uri SaveWithAutoAttachment(string domain, string path, Stream stream, string attachmentFileName);
-        protected abstract Uri SaveWithAutoAttachment(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName);
 
         public abstract Uri Save(string domain, string path, Stream stream, string contentType,
-                                 string contentDisposition);
-        public abstract Uri Save(string domain, string path, Guid ownerId, Stream stream, string contentType,
                                  string contentDisposition);
         public abstract Uri Save(string domain, string path, Stream stream, string contentEncoding, int cacheDays);
 
@@ -188,11 +173,6 @@ namespace ASC.Data.Storage
             throw new NotImplementedException();
         }
 
-        public virtual Task<string> UploadChunkAsync(string domain, string path, string uploadId, Stream stream, long defaultChunkSize, int chunkNumber, long chunkLength)
-        {
-            throw new NotImplementedException();
-        }
-
         public virtual Uri FinalizeChunkedUpload(string domain, string path, string uploadId, Dictionary<int, string> eTags)
         {
             throw new NotImplementedException();
@@ -205,32 +185,21 @@ namespace ASC.Data.Storage
 
         public virtual bool IsSupportChunking { get { return false; } }
 
-        public virtual IDataWriteOperator CreateDataWriteOperator(
-            CommonChunkedUploadSession chunkedUploadSession,
-            CommonChunkedUploadSessionHolder sessionHolder)
-        {
-            return null;
-        }
-
         #endregion
 
         public abstract void Delete(string domain, string path);
-        public abstract void DeleteFiles(string domain, string folderPath, string pattern, bool recursive, Guid ownerId);
         public abstract void DeleteFiles(string domain, string folderPath, string pattern, bool recursive);
         public abstract void DeleteFiles(string domain, List<string> paths);
         public abstract void DeleteFiles(string domain, string folderPath, DateTime fromDate, DateTime toDate);
         public abstract void MoveDirectory(string srcdomain, string srcdir, string newdomain, string newdir);
-        public abstract Uri Move(string srcdomain, string srcpath, string newdomain, string newpath, bool quotaCheckFileSize = true);
+        public abstract Uri Move(string srcdomain, string srcpath, string newdomain, string newpath);
         public abstract Uri SaveTemp(string domain, out string assignedPath, Stream stream);
         public abstract string[] ListDirectoriesRelative(string domain, string path, bool recursive);
         public abstract string[] ListFilesRelative(string domain, string path, string pattern, bool recursive);
         public abstract bool IsFile(string domain, string path);
-        public abstract Task<bool> IsFileAsync(string domain, string path);
         public abstract bool IsDirectory(string domain, string path);
-        public abstract void DeleteDirectory(string domain, string path, Guid ownerId);
         public abstract void DeleteDirectory(string domain, string path);
         public abstract long GetFileSize(string domain, string path);
-        public abstract Task<long> GetFileSizeAsync(string domain, string path);
         public abstract long GetDirectorySize(string domain, string path);
         public abstract long ResetQuota(string domain);
         public abstract long GetUsedQuota(string domain);
@@ -300,10 +269,7 @@ namespace ASC.Data.Storage
         {
             return IsDirectory(string.Empty, path);
         }
-        public void DeleteDirectory(Guid ownerId, string path)
-        {
-            DeleteDirectory(string.Empty, path, ownerId);
-        }
+
         public void DeleteDirectory(string path)
         {
             DeleteDirectory(string.Empty, path);
@@ -347,54 +313,33 @@ namespace ASC.Data.Storage
         public abstract string GetUploadForm(string domain, string directoryPath, string redirectTo, long maxUploadSize,
                                              string contentType, string contentDisposition, string submitLabel);
 
+        public abstract string GetUploadedUrl(string domain, string directoryPath);
         public abstract string GetUploadUrl();
 
         public abstract string GetPostParams(string domain, string directoryPath, long maxUploadSize, string contentType,
                                              string contentDisposition);
 
         #endregion
-        internal void QuotaUsedAdd(string domain, long size, bool quotaCheckFileSize = true)
-        {
-            QuotaUsedAdd(domain, size, Guid.Empty, quotaCheckFileSize);
-        }
-        internal void QuotaUsedAdd(string domain, long size, Guid ownerId, bool quotaCheckFileSize = true)
+
+        internal void QuotaUsedAdd(string domain, long size)
         {
             if (QuotaController != null)
             {
-                QuotaController.QuotaUsedAdd(_modulename, domain, _dataList.GetData(domain), size, ownerId, quotaCheckFileSize);
+                QuotaController.QuotaUsedAdd(_modulename, domain, _dataList.GetData(domain), size);
             }
         }
+
         internal void QuotaUsedDelete(string domain, long size)
-        {
-            QuotaUsedDelete(domain, size, Guid.Empty);
-        }
-        internal void QuotaUsedDelete(string domain, long size, Guid ownerId)
         {
             if (QuotaController != null)
             {
-                QuotaController.QuotaUsedDelete(_modulename, domain, _dataList.GetData(domain), size, ownerId);
+                QuotaController.QuotaUsedDelete(_modulename, domain, _dataList.GetData(domain), size);
             }
         }
 
         internal static string EnsureLeadingSlash(string str)
         {
             return "/" + str.TrimStart('/');
-        }
-
-        protected abstract DateTime GetLastModificationDate(string domain, string path);
-
-        public bool TryGetFileEtag(string domain, string path, out string etag)
-        {
-            etag = "";
-
-            if (_cache)
-            {
-                var lastModificationDate = GetLastModificationDate(domain, path);
-                etag = '"' + lastModificationDate.Ticks.ToString("X8", CultureInfo.InvariantCulture) + '"';
-                return true;
-            }
-
-            return false;
         }
 
         internal class MonoUri : Uri

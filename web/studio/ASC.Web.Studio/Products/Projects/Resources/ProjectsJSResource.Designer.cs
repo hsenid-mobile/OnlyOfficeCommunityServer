@@ -70,11 +70,47 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create new task.
+        /// </summary>
+        public static string AddNewTask {
+            get {
+                return ResourceManager.GetString("AddNewTask", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add This Task.
+        /// </summary>
+        public static string AddThisTask {
+            get {
+                return ResourceManager.GetString("AddThisTask", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All projects.
+        /// </summary>
+        public static string AllProjects {
+            get {
+                return ResourceManager.GetString("AllProjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Apply.
         /// </summary>
         public static string ApplyBtn {
             get {
                 return ResourceManager.GetString("ApplyBtn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to B.
+        /// </summary>
+        public static string B {
+            get {
+                return ResourceManager.GetString("B", resourceCulture);
             }
         }
         
@@ -88,11 +124,11 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to All unsaved data will be lost. Continue?.
+        ///   Looks up a localized string similar to Hide.
         /// </summary>
-        public static string ConfirmContinueMessage {
+        public static string Collapse {
             get {
-                return ResourceManager.GetString("ConfirmContinueMessage", resourceCulture);
+                return ResourceManager.GetString("Collapse", resourceCulture);
             }
         }
         
@@ -237,6 +273,24 @@ namespace ASC.Web.Projects.Resources {
         public static string EmptyProjectTitle {
             get {
                 return ResourceManager.GetString("EmptyProjectTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Each task must have a title.
+        /// </summary>
+        public static string EmptyTaskTitle {
+            get {
+                return ResourceManager.GetString("EmptyTaskTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Note: the file size cannot exceed 100 MB..
+        /// </summary>
+        public static string FileSizeNote {
+            get {
+                return ResourceManager.GetString("FileSizeNote", resourceCulture);
             }
         }
         
@@ -468,6 +522,15 @@ namespace ASC.Web.Projects.Resources {
         /// <summary>
         ///   Looks up a localized string similar to week.
         /// </summary>
+        public static string GanttWeek {
+            get {
+                return ResourceManager.GetString("GanttWeek", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to week.
+        /// </summary>
         public static string GanttWeekShort {
             get {
                 return ResourceManager.GetString("GanttWeekShort", resourceCulture);
@@ -507,6 +570,24 @@ namespace ASC.Web.Projects.Resources {
         public static string InvalidTime {
             get {
                 return ResourceManager.GetString("InvalidTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please wait....
+        /// </summary>
+        public static string Loading {
+            get {
+                return ResourceManager.GetString("Loading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to member(s).
+        /// </summary>
+        public static string Members {
+            get {
+                return ResourceManager.GetString("Members", resourceCulture);
             }
         }
         
@@ -588,6 +669,15 @@ namespace ASC.Web.Projects.Resources {
         public static string NoMilestone {
             get {
                 return ResourceManager.GetString("NoMilestone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Notify the project manager by email.
+        /// </summary>
+        public static string NotifyProjectLeader {
+            get {
+                return ResourceManager.GetString("NotifyProjectLeader", resourceCulture);
             }
         }
         
@@ -682,6 +772,15 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string Remove {
+            get {
+                return ResourceManager.GetString("Remove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Report building.
         /// </summary>
         public static string ReportBuilding {
@@ -691,7 +790,7 @@ namespace ASC.Web.Projects.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You can always see, download, edit, or delete all the generated reports in {0}Documents/My documents{1}.
+        ///   Looks up a localized string similar to All generated reports you can always see, download, edit, or delete them in {0}Documents/My Documents{1}.
         /// </summary>
         public static string ReportBuildingInfo {
             get {
@@ -714,6 +813,24 @@ namespace ASC.Web.Projects.Resources {
         public static string ReportTmplNotFound {
             get {
                 return ResourceManager.GetString("ReportTmplNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save Changes.
+        /// </summary>
+        public static string SaveChanges {
+            get {
+                return ResourceManager.GetString("SaveChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Saving message....
+        /// </summary>
+        public static string SavingMessage {
+            get {
+                return ResourceManager.GetString("SavingMessage", resourceCulture);
             }
         }
         
@@ -957,6 +1074,15 @@ namespace ASC.Web.Projects.Resources {
         public static string ToTaskList {
             get {
                 return ResourceManager.GetString("ToTaskList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uploading....
+        /// </summary>
+        public static string Uploading {
+            get {
+                return ResourceManager.GetString("Uploading", resourceCulture);
             }
         }
         

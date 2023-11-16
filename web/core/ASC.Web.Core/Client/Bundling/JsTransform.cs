@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 
 using System.Text;
 using System.Web.Optimization;
-
 using ASC.Web.Core.Client.HttpHandlers;
-
-using NUglify;
+using Microsoft.Ajax.Utilities;
 
 namespace ASC.Web.Core.Client.Bundling
 {
@@ -34,10 +32,10 @@ namespace ASC.Web.Core.Client.Bundling
             if (includedVirtualPath.EndsWith("html"))
             {
                 ClientScript.GetTemplateData(input, stringBuilder);
-                return Uglify.Js(stringBuilder.ToString()).Code;
+                return new Minifier().MinifyJavaScript(stringBuilder.ToString());
             }
 
-            return Uglify.Js(input).Code;
+            return new Minifier().MinifyJavaScript(input);
         }
 
         public void Process(BundleContext context, BundleResponse response)

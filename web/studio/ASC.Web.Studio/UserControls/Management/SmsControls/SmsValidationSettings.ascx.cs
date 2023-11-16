@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,8 @@
 using System;
 using System.Web;
 using System.Web.UI;
-
 using AjaxPro;
-
 using ASC.Web.Core.Sms;
-using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Core.SMS;
 using ASC.Web.Studio.Core.TFA;
 using ASC.Web.Studio.Utility;
@@ -35,25 +32,19 @@ namespace ASC.Web.Studio.UserControls.Management
     {
         public const string Location = "~/UserControls/Management/SmsControls/SmsValidationSettings.ascx";
 
-        protected bool SmsVisible;
-        protected bool SmsAvailable;
         protected bool SmsEnable;
+
         protected bool TfaAppEnable;
-        protected bool ThirdPartyVisible;
 
         protected string HelpLink { get; set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             AjaxPro.Utility.RegisterTypeForAjax(GetType());
-            Page.RegisterBodyScripts("~/UserControls/Management/SmsControls/js/smsvalidation.js")
-                .RegisterStyle("~/UserControls/Management/SmsControls/css/smsvalidationsettings.less");
+            Page.RegisterBodyScripts("~/UserControls/Management/SmsControls/js/smsvalidation.js");
 
-            SmsVisible = StudioSmsNotificationSettings.IsVisibleSettings;
-            SmsAvailable = StudioSmsNotificationSettings.IsAvailableSettings;
-            SmsEnable = SmsAvailable && SmsProviderManager.Enabled();
+            SmsEnable = StudioSmsNotificationSettings.IsVisibleSettings && SmsProviderManager.Enabled();
             TfaAppEnable = TfaAppAuthSettings.IsVisibleSettings;
-            ThirdPartyVisible = SetupInfo.IsVisibleSettings(ManagementType.ThirdPartyAuthorization.ToString());
 
             HelpLink = CommonLinkUtility.GetHelpLink();
         }

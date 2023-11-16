@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
-
-using ASC.Api.Calendar.BusinessObjects;
 using ASC.Web.Core.Calendars;
+using ASC.Api.Calendar.BusinessObjects;
+using System.Collections.Generic;
 
 namespace ASC.Api.Calendar.Wrappers
 {
@@ -32,14 +31,13 @@ namespace ASC.Api.Calendar.Wrappers
         public SubscriptionWrapper(BaseCalendar calendar, UserViewSettings userViewSettings)
             : base(calendar, userViewSettings) { }
 
-        ///<example name="isSubscribed">false</example>
-        ///<order>100</order>
+
         [DataMember(Name = "isSubscribed", Order = 100)]
         public bool IsAccepted
         {
             get
             {
-                if (UserCalendar is Calendar.BusinessObjects.Calendar)
+                if(UserCalendar is Calendar.BusinessObjects.Calendar)
                     return _userViewSettings != null && _userViewSettings.IsAccepted;
 
                 return this.IsAcceptedSubscription;
@@ -47,27 +45,23 @@ namespace ASC.Api.Calendar.Wrappers
             set { }
         }
 
-        ///<example name="isNew">true</example>
-        ///<order>140</order>
+
         [DataMember(Name = "isNew", Order = 140)]
         public bool IsNew
         {
             get
             {
-                return _userViewSettings == null;
+                return _userViewSettings==null;
             }
             set { }
         }
 
-        ///<example name="group">Personal Calendars</example>
-        ///<order>130</order>
         [DataMember(Name = "group", Order = 130)]
-        public string Group
+        public string Group 
         {
-            get
-            {
+            get {
 
-                if (UserCalendar.IsiCalStream())
+                if(UserCalendar.IsiCalStream())
                     return Resources.CalendarApiResource.iCalCalendarsGroup;
 
                 return String.IsNullOrEmpty(UserCalendar.Context.Group) ? Resources.CalendarApiResource.SharedCalendarsGroup : UserCalendar.Context.Group;
@@ -75,9 +69,8 @@ namespace ASC.Api.Calendar.Wrappers
             set { }
         }
 
-        ///<type>ASC.Api.Calendar.Wrappers.CalendarPermissions, ASC.Api.Calendar</type>
         [DataMember(IsRequired=false)]
-        public override CalendarPermissions Permissions { get; set; }
+        public override CalendarPermissions Permissions{get; set;}
 
         public new static object GetSample()
         {

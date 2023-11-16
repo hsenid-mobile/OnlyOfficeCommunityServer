@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
 using ASC.ActiveDirectory.Base.Settings;
 using ASC.ActiveDirectory.ComplexOperations;
-using ASC.Common.DependencyInjection;
-using ASC.Common.Threading;
 using ASC.Core;
 using ASC.Core.Tenants;
+using ASC.Common.DependencyInjection;
+using ASC.Common.Threading;
 using ASC.Notify;
 using ASC.Notify.Model;
 
@@ -75,18 +74,25 @@ namespace ASC.ActiveDirectory.Base
         {
             var task = new Task(() =>
             {
-                var tenants = CoreContext.TenantManager.GetTenants(new LdapSettings().GetTenants());
+                var tenants = CoreContext.TenantManager.GetTenants();
                 foreach (var t in tenants)
                 {
                     var tId = t.TenantId;
 
-                    var ldapSettings = LdapSettings.LoadForTenant(tId);
-                    if (!ldapSettings.EnableLdapAuthentication) continue;
-
                     var cronSettings = LdapCronSettings.LoadForTenant(tId);
-                    if (string.IsNullOrEmpty(cronSettings.Cron)) continue;
 
-                    RegisterAutoSync(t, cronSettings.Cron);
+                    if (string.IsNullOrEmpty(cronSettings.Cron))
+                        continue;
+
+                    if (LdapSettings.LoadForTenant(tId).EnableLdapAuthentication)
+                    {
+                        RegisterAutoSync(t, cronSettings.Cron);
+                    }
+                    else
+                    {
+                        cronSettings.Cron = null;
+                        cronSettings.Save();
+                    }
                 }
             }, TaskCreationOptions.LongRunning);
 

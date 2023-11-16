@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-
-using ASC.Core.Tenants;
-using ASC.Core;
 using ASC.Files.Core;
 using ASC.MessagingSystem;
-using ASC.Web.Core;
 using ASC.Web.Core.Files;
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Helpers;
@@ -48,8 +43,8 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
             get { return _copy ? FileOperationType.Copy : FileOperationType.Move; }
         }
 
-        public FileMoveCopyOperation(List<object> folders, List<object> files, string toFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult = true, Dictionary<string, string> headers = null, IEnumerable<HttpCookie> cookies = null)
-            : base(folders, files, holdResult, cookies: cookies)
+        public FileMoveCopyOperation(List<object> folders, List<object> files, string toFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult = true, Dictionary<string, string> headers = null)
+            : base(folders, files, holdResult)
         {
             _toFolderId = toFolderId;
             _copy = copy;
@@ -107,10 +102,6 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                 {
                     Error = FilesCommonResource.ErrorMassage_SecurityException_ReadFolder;
                 }
-                else if (!FilesSecurity.CanDownload(folder))
-                {
-                    Error = FilesCommonResource.ErrorMassage_SecurityException;
-                }
                 else if (folder.RootFolderType == FolderType.Privacy
                     && (copy || toFolder.RootFolderType != FolderType.Privacy))
                 {
@@ -149,8 +140,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                                 }
                             }
 
-                            if (toFolder.ProviderId == folder.ProviderId // crossDao operation is always recursive
-                                && FolderDao.UseRecursiveOperation(folder.ID, toFolderId))
+                            if (FolderDao.UseRecursiveOperation(folder.ID, toFolderId))
                             {
                                 MoveOrCopyFiles(FileDao.GetFiles(folder.ID), newFolder, copy);
                                 MoveOrCopyFolders(FolderDao.GetFolders(folder.ID).Select(f => f.ID).ToList(), newFolder, copy);
@@ -205,7 +195,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
 
                                         newFolderId = FolderDao.MoveFolder(folder.ID, toFolderId, CancellationToken);
                                         newFolder = FolderDao.GetFolder(newFolderId);
-                                        FilesMessageService.Send(folder, toFolder, _headers, MessageAction.FolderMovedWithOverwriting, folder.Title, toFolder.Title);
+                                        FilesMessageService.Send(folder.RootFolderType != FolderType.USER ? folder : newFolder, toFolder, _headers, MessageAction.FolderMovedWithOverwriting, folder.Title, toFolder.Title);
 
                                         if (isToFolder)
                                             _needToMark.Add(newFolder);
@@ -232,11 +222,10 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                             else
                             {
                                 FileMarker.RemoveMarkAsNewForAll(folder);
-                                var parentFolder = FolderDao.GetFolder(folder.RootFolderId);
 
                                 var newFolderId = FolderDao.MoveFolder(folder.ID, toFolderId, CancellationToken);
                                 newFolder = FolderDao.GetFolder(newFolderId);
-                                FilesMessageService.Send(folder, toFolder, _headers, MessageAction.FolderMovedFrom, folder.Title, parentFolder.Title, toFolder.Title);
+                                FilesMessageService.Send(folder.RootFolderType != FolderType.USER ? folder : newFolder, toFolder, _headers, MessageAction.FolderMoved, folder.Title, toFolder.Title);
 
                                 if (isToFolder)
                                     _needToMark.Add(newFolder);
@@ -276,10 +265,6 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                 else if (!FilesSecurity.CanRead(file))
                 {
                     Error = FilesCommonResource.ErrorMassage_SecurityException_ReadFile;
-                }
-                else if (!FilesSecurity.CanDownload(file))
-                {
-                    Error = FilesCommonResource.ErrorMassage_SecurityException;
                 }
                 else if (file.RootFolderType == FolderType.Privacy
                     && (copy || toFolder.RootFolderType != FolderType.Privacy))
@@ -342,45 +327,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
 
                                     var newFileId = FileDao.MoveFile(file.ID, toFolderId);
                                     newFile = FileDao.GetFile(newFileId);
-                                    FilesMessageService.Send(file, toFolder, _headers, MessageAction.FileMoved, file.Title, parentFolder.Title, toFolder.Title);
-
-                                    if (file.RootFolderType == FolderType.TRASH
-                                        && newFile.ThumbnailStatus == Thumbnail.NotRequired)
-                                    {
-                                        newFile.ThumbnailStatus = Thumbnail.Waiting;
-                                        FileDao.SaveThumbnail(newFile, null);
-                                    }
-                                    if (file.RootFolderType == FolderType.TRASH && (toFolder.FolderType == FolderType.COMMON || ((toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) && SecurityContext.CurrentAccount.ID != toFolder.CreateBy)))
-                                    {
-                                        CoreContext.TenantManager.SetTenantQuotaRow(
-                                                new TenantQuotaRow
-                                                {
-                                                    Tenant = CoreContext.TenantManager.GetCurrentTenant().TenantId,
-                                                    Path = string.Format("/{0}/{1}", FileConstant.ModuleId, ""),
-                                                    Counter = -1 * file.ContentLength,
-                                                    Tag = WebItemManager.DocumentsProductID.ToString(),
-                                                    UserId = SecurityContext.CurrentAccount.ID
-                                                },
-                                                true);
-                                        if ((toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) && SecurityContext.CurrentAccount.ID != toFolder.CreateBy)
-                                        {
-                                            CoreContext.TenantManager.SetTenantQuotaRow(
-                                                new TenantQuotaRow
-                                                {
-                                                    Tenant = CoreContext.TenantManager.GetCurrentTenant().TenantId,
-                                                    Path = string.Format("/{0}/{1}", FileConstant.ModuleId, ""),
-                                                    Counter = file.ContentLength,
-                                                    Tag = WebItemManager.DocumentsProductID.ToString(),
-                                                    UserId = toFolder.CreateBy
-                                                },
-                                                true);
-                                        }
-                                    }
-
-                                    if (newFile.ProviderEntry)
-                                    {
-                                        LinkDao.DeleteAllLink(file.ID);
-                                    }
+                                    FilesMessageService.Send(file.RootFolderType != FolderType.USER ? file : newFile, toFolder, _headers, MessageAction.FileMoved, file.Title, parentFolder.Title, toFolder.Title);
 
                                     if (Equals(toFolderId.ToString(), _toFolderId))
                                     {
@@ -419,7 +366,6 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                                     newFile.ConvertedType = file.ConvertedType;
                                     newFile.Comment = FilesCommonResource.CommentOverwrite;
                                     newFile.Encrypted = file.Encrypted;
-                                    newFile.ThumbnailStatus = Thumbnail.Waiting;
 
                                     using (var stream = FileDao.GetFileStream(file))
                                     {
@@ -427,17 +373,6 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
 
                                         newFile = FileDao.SaveFile(newFile, stream);
                                     }
-
-                                    if (file.ThumbnailStatus == Thumbnail.Created)
-                                    {
-                                        using (var thumbnail = FileDao.GetThumbnail(file))
-                                        {
-                                            FileDao.SaveThumbnail(newFile, thumbnail);
-                                        }
-                                        newFile.ThumbnailStatus = Thumbnail.Created;
-                                    }
-
-                                    LinkDao.DeleteAllLink(newFile.ID);
 
                                     _needToMark.Add(newFile);
 
@@ -469,9 +404,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
                                             {
                                                 FileDao.DeleteFile(file.ID);
 
-                                                LinkDao.DeleteAllLink(file.ID);
-
-                                                FilesMessageService.Send(file, toFolder, _headers, MessageAction.FileMovedWithOverwriting, file.Title, parentFolder.Title, toFolder.Title);
+                                                FilesMessageService.Send(file.RootFolderType != FolderType.USER ? file : newFile, toFolder, _headers, MessageAction.FileMovedWithOverwriting, file.Title, parentFolder.Title, toFolder.Title);
 
                                                 if (ProcessedFile(fileId))
                                                 {

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,24 @@
 */
 
 
-using System;
 using System.Collections.Generic;
-
 using ASC.Core.Tenants;
 
 namespace ASC.Core
 {
     public interface IQuotaService
     {
-        IEnumerable<TenantQuota> GetTenantQuotas(bool useCache = true);
+        IEnumerable<TenantQuota> GetTenantQuotas();
 
-        TenantQuota GetTenantQuota(int id, bool useCache = true);
+        TenantQuota GetTenantQuota(int id);
 
         TenantQuota SaveTenantQuota(TenantQuota quota);
 
         void RemoveTenantQuota(int id);
 
-
-        IEnumerable<TenantQuotaRow> FindTenantQuotaRows(int tenantId);
-        IEnumerable<TenantQuotaRow> FindUserQuotaRows(int tenantId, Guid userId, bool useCache);
         
-        TenantQuotaRow FindUserQuotaRow(int tenantId, Guid userId, Guid tag);
+        IEnumerable<TenantQuotaRow> FindTenantQuotaRows(TenantQuotaRowQuery query);
+
         void SetTenantQuotaRow(TenantQuotaRow row, bool exchange);
     }
 }

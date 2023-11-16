@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ namespace ASC.Notify.Engine
 
         public SendInterceptorSkeleton(string name, InterceptorPlace preventPlace, InterceptorLifetime lifetime, Func<NotifyRequest, InterceptorPlace, bool> sendInterceptor)
         {
-            if (string.IsNullOrEmpty(name)) throw new ArgumentException("Empty name.", "name");
-            if (sendInterceptor == null) throw new ArgumentNullException("sendInterceptor");
+            if (String.IsNullOrEmpty("name")) throw new ArgumentNullException("name");
+            if (String.IsNullOrEmpty("sendInterceptor")) throw new ArgumentNullException("sendInterceptor");
 
             method = sendInterceptor;
             Name = name;

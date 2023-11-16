@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ ASC.Projects.PageNavigator = (function () {
         paginationKey,
         self,
         pgNavigator,
-        ProjectsJSResource,
+        resources,
         $rowCounter,
         $totalCount = jq("#totalCount"),
         currentObj,
@@ -40,7 +40,7 @@ ASC.Projects.PageNavigator = (function () {
     var init = function (obj, settings) {
         self = this;
         paginationKey = settings.pagination;
-        ProjectsJSResource = ASC.Projects.Resources.ProjectsJSResource;
+        resources = ASC.Projects.Resources.ProjectsJSResource;
         currentObj = obj;
 
         var currentProjectId = jq.getURLParam('prjID');
@@ -53,7 +53,7 @@ ASC.Projects.PageNavigator = (function () {
         if (typeof $rowCounter === "undefined") {
             $rowCounter = jq("#countOfRows");
             $rowCounter.advancedSelector({
-                    height: 30*4, //magic: itemsCount*itemHeight
+                    height: 26*4, //magic: itemsCount*itemHeight
                     width: 60,
                     itemsSelectedIds: entryCountOnPage,
                     onechosen: true,
@@ -87,8 +87,8 @@ ASC.Projects.PageNavigator = (function () {
                 entryCountOnPage,
                 parseInt(ASC.Projects.Master.VisiblePageCount),
                 currentPage + 1,
-                ProjectsJSResource.PreviousPage,
-                ProjectsJSResource.NextPage);
+                resources.PreviousPage,
+                resources.NextPage);
             pgNavigator.NavigatorParent = '#divForTaskPager';
         } else {
             pgNavigator.EntryCountOnPage = entryCountOnPage;
@@ -220,13 +220,13 @@ ASC.Projects.Base = (function () {
         pageNavigator,
         filter,
         resources,
-        TaskResource,
-        ProjectsCommonResource,
+        tasksResource,
+        commonResource,
         projectResource,
         milestoneResource,
         timeTrackingResource,
         messageResource,
-        ProjectTemplatesResource,
+        templatesResource,
         popup,
         selfGetFunc;
 
@@ -259,33 +259,33 @@ ASC.Projects.Base = (function () {
         pageNavigator = ASC.Projects.PageNavigator,
         filter = ASC.Projects.ProjectsAdvansedFilter,
         resources = ASC.Projects.Resources,
-        TaskResource = resources.TaskResource,
-        ProjectsCommonResource = resources.ProjectsCommonResource,
+        tasksResource = resources.TasksResource,
+        commonResource = resources.CommonResource,
         projectResource = resources.ProjectResource,
         milestoneResource = resources.MilestoneResource,
         timeTrackingResource = resources.TimeTrackingResource,
         messageResource = resources.MessageResource,
-        ProjectTemplatesResource = resources.ProjectTemplatesResource,
+        templatesResource = resources.ProjectTemplatesResource,
         popup = {
-            projectRemoveWarning: createPopupData([projectResource.DeleteProjectPopup, ProjectsCommonResource.PopupNoteUndone], projectResource.DeleteProject, projectResource.DeleteProject),
-            projectsRemoveWarning: createPopupData([projectResource.DeleteProjectsPopup, ProjectsCommonResource.PopupNoteUndone], projectResource.DeleteProjects, projectResource.DeleteProjects),
-            taskRemoveWarning: createPopupData([TaskResource.RemoveTaskPopup, ProjectsCommonResource.PopupNoteUndone], TaskResource.RemoveTask, TaskResource.RemoveTask),
-            tasksRemoveWarning: createPopupData([TaskResource.RemoveTasksPopup, ProjectsCommonResource.PopupNoteUndone], TaskResource.RemoveTasks, TaskResource.RemoveTasks),
-            milestoneRemoveWarning: createPopupData([milestoneResource.DeleteMilestonePopup, ProjectsCommonResource.PopupNoteUndone], milestoneResource.DeleteMilestone, milestoneResource.DeleteMilestone),
-            milestonesRemoveWarning: createPopupData([milestoneResource.DeleteMilestonesPopup, ProjectsCommonResource.PopupNoteUndone], milestoneResource.DeleteMilestones, milestoneResource.DeleteMilestones),
-            trackingRemoveWarning: createPopupData([timeTrackingResource.DeleteTimersQuestion, ProjectsCommonResource.PopupNoteUndone], timeTrackingResource.DeleteTimers, timeTrackingResource.DeleteTimers),
-            discussionRemoveWarning: createPopupData([messageResource.DeleteDiscussionPopup, ProjectsCommonResource.PopupNoteUndone], messageResource.DeleteMessage, messageResource.DeleteMessage),
-            projectTemplateRemoveWarning: createPopupData([ProjectTemplatesResource.RemoveQuestion, ProjectsCommonResource.PopupNoteUndone], ProjectTemplatesResource.RemoveTemplateTitlePopup, ProjectTemplatesResource.RemoveTemplateTitlePopup),
+            projectRemoveWarning: createPopupData([projectResource.DeleteProjectPopup, commonResource.PopupNoteUndone], projectResource.DeleteProject, projectResource.DeleteProject),
+            projectsRemoveWarning: createPopupData([projectResource.DeleteProjectsPopup, commonResource.PopupNoteUndone], projectResource.DeleteProjects, projectResource.DeleteProjects),
+            taskRemoveWarning: createPopupData([tasksResource.RemoveTaskPopup, commonResource.PopupNoteUndone], tasksResource.RemoveTask, tasksResource.RemoveTask),
+            tasksRemoveWarning: createPopupData([tasksResource.RemoveTasksPopup, commonResource.PopupNoteUndone], tasksResource.RemoveTasks, tasksResource.RemoveTasks),
+            milestoneRemoveWarning: createPopupData([milestoneResource.DeleteMilestonePopup, commonResource.PopupNoteUndone], milestoneResource.DeleteMilestone, milestoneResource.DeleteMilestone),
+            milestonesRemoveWarning: createPopupData([milestoneResource.DeleteMilestonesPopup, commonResource.PopupNoteUndone], milestoneResource.DeleteMilestones, milestoneResource.DeleteMilestones),
+            trackingRemoveWarning: createPopupData([timeTrackingResource.DeleteTimersQuestion, commonResource.PopupNoteUndone], timeTrackingResource.DeleteTimers, timeTrackingResource.DeleteTimers),
+            discussionRemoveWarning: createPopupData([messageResource.DeleteDiscussionPopup, commonResource.PopupNoteUndone], messageResource.DeleteMessage, messageResource.DeleteMessage),
+            projectTemplateRemoveWarning: createPopupData([templatesResource.RemoveQuestion, commonResource.PopupNoteUndone], templatesResource.RemoveTemplateTitlePopup, templatesResource.RemoveTemplateTitlePopup),
 
-            taskLinksRemoveWarning: createPopupData([jq.format(ProjectsCommonResource.TaskMoveNote, "")], ProjectsCommonResource.OneTaskMoveButton, ProjectsCommonResource.MoveTaskHeader),
-            taskLinksRemoveDeadlineWarning: createPopupData([jq.format(ProjectsCommonResource.UpdateDeadlineNote, "")], ProjectsCommonResource.TaskUpdateButton, ProjectsCommonResource.UpdateDeadlineHeader),
+            taskLinksRemoveWarning: createPopupData([jq.format(commonResource.TaskMoveNote, "")], commonResource.OneTaskMoveButton, commonResource.MoveTaskHeader),
+            taskLinksRemoveDeadlineWarning: createPopupData([jq.format(commonResource.UpdateDeadlineNote, "")], commonResource.TaskUpdateButton, commonResource.UpdateDeadlineHeader),
 
-            closedTaskQuestion: createPopupData([TaskResource.TryingToCloseTheTask, TaskResource.BetterToReturn], TaskResource.EndAllSubtasksCloseTask, TaskResource.ClosingTheTask),
-            closedTasksQuestion: createPopupData([TaskResource.TryingToCloseTasks, TaskResource.BetterToReturnTasks], TaskResource.EndAllSubtasksCloseTasks, TaskResource.ClosingTasks),
+            closedTaskQuestion: createPopupData([tasksResource.TryingToCloseTheTask, tasksResource.BetterToReturn], tasksResource.EndAllSubtasksCloseTask, tasksResource.ClosingTheTask),
+            closedTasksQuestion: createPopupData([tasksResource.TryingToCloseTasks, tasksResource.BetterToReturnTasks], tasksResource.EndAllSubtasksCloseTasks, tasksResource.ClosingTasks),
             projectOpenTaskWarning: createPopupData([projectResource.NotClosePrjWithActiveTasks], projectResource.ViewActiveTasks, projectResource.ViewActiveTasks),
             projectOpenMilestoneWarning: createPopupData([projectResource.NotClosedPrjWithActiveMilestone], projectResource.ViewActiveMilestones, projectResource.CloseProject),
             closeMilestoneWithOpenTasks: createPopupData([milestoneResource.NotCloseMilWithActiveTasks], projectResource.ViewActiveTasks, milestoneResource.CloseMilestone),
-            createNewLinkError: createPopupData([TaskResource.ErrorCreateNewLink], projectResource.OkButton, TaskResource.ErrorCreateNewLink)
+            createNewLinkError: createPopupData([tasksResource.ErrorCreateNewLink], projectResource.OkButton, tasksResource.ErrorCreateNewLink)
         };
     };
 
@@ -363,7 +363,7 @@ ASC.Projects.Base = (function () {
             .on(clickEvent, ".blue", okButtonHandler || function () { jq.unblockUI(); })
             .on(clickEvent, ".gray", cancelButtonHandler || function () { jq.unblockUI(); });
 
-        PopupKeyUpActionProvider.EnterAction = "jq('.commonPopupContent .blue').trigger('click');";
+        PopupKeyUpActionProvider.EnterAction = "jq('.commonPopupContent .blue').click();";
 
         StudioBlockUIManager.blockUI($commonPopupContainer, 400);
     };
@@ -556,7 +556,7 @@ ASC.Projects.Base = (function () {
                 return true;
             }
 
-            getSelectedActionCombobox($elt).find(entityMenuClass).trigger("click");
+            getSelectedActionCombobox($elt).find(entityMenuClass).click();
             if (!$actionPanel) return true;
 
             var e = jq.fixEvent(event),
@@ -637,13 +637,13 @@ ASC.Projects.Base = (function () {
 
     function unbindEvents() {
         if (typeof $describePanel != "undefined") {
-            $describePanel.off();
+            $describePanel.unbind();
         }
         if (typeof $actionPanel != "undefined") {
-            $actionPanel.off();
+            $actionPanel.unbind();
         }
-        $commonListContainer.off();
-        $commonPopupContainer.off();
+        $commonListContainer.unbind();
+        $commonPopupContainer.unbind();
         eventBinder.unbind();
     }
 

@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
-
 using ASC.Common.Logging;
 using ASC.Mail.Core.Entities;
 using ASC.Mail.Data.Contracts;
 using ASC.Mail.Data.Search;
 using ASC.Mail.Enums;
 using ASC.Mail.Extensions;
-
 using MimeKit;
-
 using ContactInfo = ASC.Mail.Core.Entities.ContactInfo;
 
 namespace ASC.Mail.Utils
@@ -48,39 +45,39 @@ namespace ASC.Mail.Utils
             var host = address.Host.ToLowerInvariant();
 
             tempList.AddRange(from outServer in config.EmailProvider.OutgoingServer
-                              from inServer in config.EmailProvider.IncomingServer
-                              let smtpAuthenticationType = outServer.Authentication.ToSaslMechanism()
-                              select new MailBoxData
-                              {
-                                  EMail = address,
-                                  Name = "",
-                                  UserId = user,
-                                  TenantId = tenant,
-                                  Enabled = true,
-                                  BeginDate = DateTime.UtcNow.Subtract(new TimeSpan(MailBoxData.DefaultMailLimitedTimeDelta)),
-                                  Imap = inServer.Type == "imap",
-                                  Account =
-                                      inServer.Username.Replace("%EMAILADDRESS%", address.Address)
-                                          .Replace("%EMAILLOCALPART%", address.User)
-                                          .Replace("%EMAILDOMAIN%", host)
-                                          .Replace("%EMAILHOSTNAME%", Path.GetFileNameWithoutExtension(host)),
-                                  Password = password,
-                                  Server = inServer.Hostname.Replace("%EMAILDOMAIN%", host),
-                                  Port = inServer.Port,
-                                  Authentication = inServer.Authentication.ToSaslMechanism(),
-                                  Encryption = inServer.SocketType.ToEncryptionType(),
-                                  SmtpAccount =
-                                      outServer.Username.Replace("%EMAILADDRESS%", address.Address)
-                                          .Replace("%EMAILLOCALPART%", address.User)
-                                          .Replace("%EMAILDOMAIN%", host)
-                                          .Replace("%EMAILHOSTNAME%", Path.GetFileNameWithoutExtension(host)),
-                                  SmtpPassword = password,
-                                  SmtpServer = outServer.Hostname.Replace("%EMAILDOMAIN%", host),
-                                  SmtpPort = outServer.Port,
+                from inServer in config.EmailProvider.IncomingServer
+                let smtpAuthenticationType = outServer.Authentication.ToSaslMechanism()
+                select new MailBoxData
+                {
+                    EMail = address,
+                    Name = "",
+                    UserId = user,
+                    TenantId = tenant,
+                    Enabled = true,
+                    BeginDate = DateTime.UtcNow.Subtract(new TimeSpan(MailBoxData.DefaultMailLimitedTimeDelta)),
+                    Imap = inServer.Type == "imap",
+                    Account =
+                        inServer.Username.Replace("%EMAILADDRESS%", address.Address)
+                            .Replace("%EMAILLOCALPART%", address.User)
+                            .Replace("%EMAILDOMAIN%", host)
+                            .Replace("%EMAILHOSTNAME%", Path.GetFileNameWithoutExtension(host)),
+                    Password = password,
+                    Server = inServer.Hostname.Replace("%EMAILDOMAIN%", host),
+                    Port = inServer.Port,
+                    Authentication = inServer.Authentication.ToSaslMechanism(),
+                    Encryption = inServer.SocketType.ToEncryptionType(),
+                    SmtpAccount =
+                        outServer.Username.Replace("%EMAILADDRESS%", address.Address)
+                            .Replace("%EMAILLOCALPART%", address.User)
+                            .Replace("%EMAILDOMAIN%", host)
+                            .Replace("%EMAILHOSTNAME%", Path.GetFileNameWithoutExtension(host)),
+                    SmtpPassword = password,
+                    SmtpServer = outServer.Hostname.Replace("%EMAILDOMAIN%", host),
+                    SmtpPort = outServer.Port,
 
-                                  SmtpAuthentication = smtpAuthenticationType,
-                                  SmtpEncryption = outServer.SocketType.ToEncryptionType()
-                              });
+                    SmtpAuthentication = smtpAuthenticationType,
+                    SmtpEncryption = outServer.SocketType.ToEncryptionType()
+                });
 
             tempList = tempList.OrderByDescending(t => t.Imap).ToList();
 
@@ -129,8 +126,6 @@ namespace ASC.Mail.Utils
                     return SaslMechanism.None;
                 case Defines.PASSWORD_ENCRYPTED:
                     return SaslMechanism.CramMd5;
-                case Defines.PASSWORD_NTLM:
-                    return SaslMechanism.Ntlm;
                 default:
                     throw new ArgumentException("Unknown mail server authentication type: " + type);
             }
@@ -146,8 +141,6 @@ namespace ASC.Mail.Utils
                     return Defines.NONE;
                 case SaslMechanism.CramMd5:
                     return Defines.PASSWORD_ENCRYPTED;
-                case SaslMechanism.Ntlm:
-                    return Defines.PASSWORD_NTLM;
                 default:
                     throw new ArgumentException("Unknown mail server SaslMechanism: " + Enum.GetName(typeof(SaslMechanism), saslType));
             }
@@ -162,17 +155,18 @@ namespace ASC.Mail.Utils
             var localpart = mailparts[0];
             var domain = mailparts[1];
             var hostNameVariant1 = Path.GetFileNameWithoutExtension(domain);
+            var hostNameVariant2 = domain.Split('.')[0];
 
             var resultFormat = usernameLower.Replace(addressLower, "%EMAILADDRESS%");
-
             var pos = resultFormat.IndexOf(localpart, StringComparison.InvariantCulture);
             if (pos >= 0)
+            {
                 resultFormat = resultFormat.Substring(0, pos) + "%EMAILLOCALPART%" + resultFormat.Substring(pos + localpart.Length);
-
+            }
             resultFormat = resultFormat.Replace(domain, "%EMAILDOMAIN%");
-
             if (hostNameVariant1 != null)
                 resultFormat = resultFormat.Replace(hostNameVariant1, "%EMAILHOSTNAME%");
+            resultFormat = resultFormat.Replace(hostNameVariant2, "%EMAILHOSTNAME%");
 
             return resultFormat == usernameLower ? null : resultFormat;
         }
@@ -214,8 +208,7 @@ namespace ASC.Mail.Utils
                 Importance = message.Important,
                 HasAttachments = message.HasAttachments,
                 WithCalendar = !string.IsNullOrEmpty(message.CalendarUid),
-                LastModifiedOn = now,
-                Stream = message.StreamId
+                LastModifiedOn = now
             };
 
             if (message.Folder == FolderType.UserFolder && message.UserFolderId.HasValue)
@@ -288,7 +281,7 @@ namespace ASC.Mail.Utils
                 TenantId = contactCard.ContactInfo.Tenant,
                 User = Guid.Parse(contactCard.ContactInfo.User),
                 Name = contactCard.ContactInfo.ContactName,
-                ContactType = (int)contactCard.ContactInfo.Type,
+                ContactType = (int) contactCard.ContactInfo.Type,
                 Description = contactCard.ContactInfo.Description,
                 InfoList = infoList,
                 LastModifiedOn = now

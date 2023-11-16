@@ -1,6 +1,6 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="PwdTool.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Users.UserProfile.PwdTool" %>
 <%@ Import Namespace="ASC.Web.Core.Utility.Skins" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 
 <%@ Register TagPrefix="sc" Namespace="ASC.Web.Studio.Controls.Common" Assembly="ASC.Web.Studio" %>
 
@@ -18,9 +18,6 @@
                 <input type="hidden" id="studio_pwdReminderInfoID" value="<%=_pwdRemainderContainer.ClientID%>_InfoPanel" />
                 <div id="pswdRecoveryDialogText" class="display-none">
                     <%= Resource.MessageSendPasswordRecoveryInstructionsOnEmail.HtmlEncode() %>
-                    <% if (!ASC.Core.CoreContext.Configuration.Personal) { %>
-                    <p id="pswdRecoveryInfoText"><%= Resource.MessageSendPasswordRecoveryInfo %></p>
-                    <% } %>
                     <input type="email" id="studio_emailPwdReminder" class="textEdit" />
                 </div>
                 <div id="pswdChangeDialogText" class="display-none">

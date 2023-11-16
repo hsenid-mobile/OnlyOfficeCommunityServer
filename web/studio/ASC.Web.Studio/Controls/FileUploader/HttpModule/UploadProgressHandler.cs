@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 
 using System;
 using System.Web;
-
 using AjaxPro;
-
 using ASC.Common.Web;
 
 namespace ASC.Web.Studio.Controls.FileUploader.HttpModule
@@ -33,6 +31,14 @@ namespace ASC.Web.Studio.Controls.FileUploader.HttpModule
             public string FileURL { get; set; }
             public object Data { get; set; }
             public string Message { get; set; }
+        }
+
+        public virtual string GetFileName(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return string.Empty;
+
+            var ind = path.LastIndexOf('\\');
+            return ind != -1 ? path.Substring(ind + 1) : path;
         }
 
         public abstract FileUploadResult ProcessUpload(HttpContext context);
@@ -53,10 +59,10 @@ namespace ASC.Web.Studio.Controls.FileUploader.HttpModule
                 catch (Exception ex)
                 {
                     result = new FileUploadHandler.FileUploadResult
-                    {
-                        Success = false,
-                        Message = ex.Message.HtmlEncode(),
-                    };
+                        {
+                            Success = false,
+                            Message = ex.Message.HtmlEncode(),
+                        };
                 }
 
                 //NOTE: Don't set content type. ie cant parse it

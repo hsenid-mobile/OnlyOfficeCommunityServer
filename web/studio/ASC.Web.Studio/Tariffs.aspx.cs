@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,8 @@
 using System;
 using System.Linq;
 using System.Web;
-
 using ASC.Core;
-using ASC.Core.Tenants;
 using ASC.Web.Core.Files;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Management;
 using ASC.Web.Studio.UserControls.Statistics;
 using ASC.Web.Studio.Utility;
@@ -44,17 +41,12 @@ namespace ASC.Web.Studio
             if (CoreContext.Configuration.Personal)
                 Context.Response.Redirect(FilesLinkUtility.FilesBaseAbsolutePath);
 
-            if (!TenantExtra.EnableTariffSettings)
+            if (!TenantExtra.EnableTarrifSettings ||
+                (TariffSettings.HidePricingPage &&
+                 !CoreContext.UserManager.IsUserInGroup(SecurityContext.CurrentAccount.ID, ASC.Core.Users.Constants.GroupAdmin.ID)))
                 Response.Redirect("~/", true);
 
-            var isAdmin = CoreContext.UserManager.IsUserInGroup(SecurityContext.CurrentAccount.ID, ASC.Core.Users.Constants.GroupAdmin.ID);
-            if (!isAdmin && (TariffSettings.HidePricingPage || CoreContext.Configuration.Standalone))
-                Response.Redirect("~/", true);
-
-            if (CoreContext.Configuration.Standalone && TenantControlPanelSettings.Instance.LimitedAccess)
-                Response.Redirect("~/", true);
-
-            if (TenantExtra.EnableControlPanel && !CoreContext.Configuration.CustomMode)
+            if (TenantExtra.EnableControlPanel)
                 Response.Redirect(TenantExtra.GetTariffPageLink(), true);
         }
 
@@ -70,7 +62,7 @@ namespace ASC.Web.Studio
                 Master.TopStudioPanel.DisableGift = true;
             }
 
-            Title = HeaderStringHelper.GetPageTitle(Resource.Tariffs);
+            Title = HeaderStringHelper.GetPageTitle(Resources.Resource.Tariffs);
 
             if (Request.DesktopApp())
             {
@@ -89,7 +81,7 @@ namespace ASC.Web.Studio
                 }
                 else
                 {
-                    pageContainer.Controls.Add(LoadControl(TariffSaas.Location));
+                    pageContainer.Controls.Add(LoadControl(TariffUsage.Location));
                 }
 
                 var payments = CoreContext.PaymentManager.GetTariffPayments(TenantProvider.CurrentTenantID).ToList();

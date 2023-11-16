@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,15 @@ using System;
 using System.IO;
 using System.Web;
 using System.Web.UI;
-
 using AjaxPro;
-
 using ASC.Core;
+using ASC.Core.Common.Settings;
 using ASC.MessagingSystem;
 using ASC.Web.Core.Users;
-using ASC.Web.Core.Utility;
 using ASC.Web.Core.WhiteLabel;
 using ASC.Web.Studio.Core;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
+using Resources;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -42,12 +40,11 @@ namespace ASC.Web.Studio.UserControls.Management
         {
             get
             {
-                return !TenantLogoManager.IsVisibleWhiteLabelSettings && !TenantLogoManager.WhiteLabelEnabled;
+                return !TenantLogoManager.WhiteLabelEnabled;
             }
         }
 
         protected TenantInfoSettings _tenantInfoSettings;
-        protected string _logoPath;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -62,10 +59,6 @@ namespace ASC.Web.Studio.UserControls.Management
                 "~/UserControls/Management/GreetingSettings/js/greetinglogosettings.js");
 
             _tenantInfoSettings = TenantInfoSettings.Load();
-
-            var theme = ModeThemeSettings.GetModeThemesSettings().ModeThemeName;
-
-            _logoPath = _tenantInfoSettings.GetAbsoluteCompanyLogoPath(theme == ModeTheme.light);
 
             RegisterScript();
         }
@@ -115,16 +108,22 @@ namespace ASC.Web.Studio.UserControls.Management
                 var tenantId = TenantProvider.CurrentTenantID;
 
                 _tenantInfoSettings = TenantInfoSettings.Load();
-                _tenantInfoSettings.RestoreDefaultLogo();
+                _tenantInfoSettings.RestoreDefault();
                 _tenantInfoSettings.Save();
 
-                var theme = ModeThemeSettings.GetModeThemesSettings().ModeThemeName;
+                if (TenantLogoManager.WhiteLabelEnabled)
+                {
+
+                    var _tenantWhiteLabelSettings = TenantWhiteLabelSettings.Load();
+                    _tenantWhiteLabelSettings.RestoreDefault(WhiteLabelLogoTypeEnum.Dark);
+                    _tenantWhiteLabelSettings.Save(tenantId);
+                }
 
                 return new
                 {
                     Status = 1,
                     Message = Resource.SuccessfullySaveGreetingSettingsMessage,
-                    LogoPath = _tenantInfoSettings.GetAbsoluteCompanyLogoPath(theme == ModeTheme.light)
+                    LogoPath = _tenantInfoSettings.GetAbsoluteCompanyLogoPath()
                 };
             }
             catch (Exception e)

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,28 @@
 
 
 using System;
-using System.Configuration;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Web;
-
+using System.Text;
+using System.Linq;
+using System.IO;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Configuration;
 using ASC.Common.Notify.Patterns;
 using ASC.Core;
 using ASC.Notify.Messages;
 using ASC.Notify.Patterns;
-using ASC.Notify.Textile.Resources;
 using ASC.Web.Core.WhiteLabel;
-
 using Textile;
 using Textile.Blocks;
+using ASC.Notify.Textile.Resources;
 
 namespace ASC.Notify.Textile
 {
     public class TextileStyler : IPatternStyler
     {
         private static readonly Regex VelocityArguments = new Regex(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-        private static readonly Regex SupReplacement = new Regex(@"(\S+)\[(.*?)\]", RegexOptions.Compiled);
+
         static TextileStyler()
         {
             const string file = "ASC.Notify.Textile.Resources.style.css";
@@ -61,10 +59,11 @@ namespace ASC.Notify.Textile
             }
 
             if (string.IsNullOrEmpty(message.Body)) return;
-            message.Body = SupReplacement.Replace(message.Body, @"$1&#91;$2&#93;");
+
             formatter.Format(message.Body);
 
             var template = GetTemplate(message);
+            var analytics = GetAnalytics(message);
             var imagePath = GetImagePath(message);
             var logoImg = GetLogoImg(message, imagePath);
             var logoText = GetLogoText(message);
@@ -76,7 +75,8 @@ namespace ASC.Notify.Textile
 
             InitFooter(message, mailSettings, out footerContent, out footerSocialContent);
 
-            message.Body = template.Replace("%CONTENT%", output.GetFormattedText())
+            message.Body = template.Replace("%ANALYTICS%", analytics)
+                                   .Replace("%CONTENT%", output.GetFormattedText())
                                    .Replace("%LOGO%", logoImg)
                                    .Replace("%LOGOTEXT%", logoText)
                                    .Replace("%SITEURL%", mailSettings == null ? MailWhiteLabelSettings.DefaultMailSiteUrl : mailSettings.SiteUrl)
@@ -105,6 +105,12 @@ namespace ASC.Notify.Textile
             return template;
         }
 
+        private static string GetAnalytics(NoticeMessage message)
+        {
+            var analyticsTag = message.GetArgument("Analytics");
+            return analyticsTag == null ? string.Empty : (string)analyticsTag.Value;
+        }
+
         private static string GetImagePath(NoticeMessage message)
         {
             var imagePathTag = message.GetArgument("ImagePath");
@@ -117,7 +123,7 @@ namespace ASC.Notify.Textile
 
             if (CoreContext.Configuration.Personal && !CoreContext.Configuration.CustomMode)
             {
-                logoImg = imagePath + "/mail_logo.svg";
+                logoImg = imagePath + "/mail_logo.png";
             }
             else
             {
@@ -131,7 +137,7 @@ namespace ASC.Notify.Textile
                     }
                     else
                     {
-                        logoImg = imagePath + "/mail_logo.svg";
+                        logoImg = imagePath + "/mail_logo.png";
                     }
                 }
             }
@@ -174,7 +180,7 @@ namespace ASC.Notify.Textile
 
             if (footer == null) return;
 
-            var footerValue = (string)footer.Value;
+            var footerValue = (string) footer.Value;
 
             if (string.IsNullOrEmpty(footerValue)) return;
 
@@ -187,13 +193,13 @@ namespace ASC.Notify.Textile
                     InitSocialFooter(settings, out footerSocialContent);
                     break;
                 case "personal":
-                    footerSocialContent = NotifyTemplateResource.SocialNetworksFooterV121;
+                    footerSocialContent = NotifyTemplateResource.SocialNetworksFooterV10;
                     break;
                 case "personalCustomMode":
                     break;
                 case "opensource":
-                    footerContent = NotifyTemplateResource.FooterOpensourceV121;
-                    footerSocialContent = NotifyTemplateResource.SocialNetworksFooterV121;
+                    footerContent = NotifyTemplateResource.FooterOpensourceV10;
+                    footerSocialContent = NotifyTemplateResource.SocialNetworksFooterV10;
                     break;
             }
         }
@@ -206,21 +212,21 @@ namespace ASC.Notify.Textile
             if (settings == null)
             {
                 footerContent =
-                    NotifyTemplateResource.FooterCommonV121
+                    NotifyTemplateResource.FooterCommonV10
                                           .Replace("%SUPPORTURL%", MailWhiteLabelSettings.DefaultMailSupportUrl)
                                           .Replace("%SALESEMAIL%", MailWhiteLabelSettings.DefaultMailSalesEmail)
                                           .Replace("%DEMOURL%", MailWhiteLabelSettings.DefaultMailDemoUrl);
-                footerSocialContent = NotifyTemplateResource.SocialNetworksFooterV121;
+                footerSocialContent = NotifyTemplateResource.SocialNetworksFooterV10;
 
             }
             else if (settings.FooterEnabled)
             {
                 footerContent =
-                    NotifyTemplateResource.FooterCommonV121
+                    NotifyTemplateResource.FooterCommonV10
                     .Replace("%SUPPORTURL%", String.IsNullOrEmpty(settings.SupportUrl) ? "mailto:" + settings.SalesEmail : settings.SupportUrl)
                     .Replace("%SALESEMAIL%", settings.SalesEmail)
                     .Replace("%DEMOURL%", String.IsNullOrEmpty(settings.DemoUrl) ? "mailto:" + settings.SalesEmail : settings.DemoUrl);
-                footerSocialContent = settings.FooterSocialEnabled ? NotifyTemplateResource.SocialNetworksFooterV121 : string.Empty;
+                footerSocialContent = settings.FooterSocialEnabled ? NotifyTemplateResource.SocialNetworksFooterV10 : string.Empty;
             }
         }
 
@@ -229,18 +235,18 @@ namespace ASC.Notify.Textile
             footerSocialContent = string.Empty;
 
             if (settings == null || (settings.FooterEnabled && settings.FooterSocialEnabled))
-                footerSocialContent = NotifyTemplateResource.SocialNetworksFooterV121;
+                footerSocialContent = NotifyTemplateResource.SocialNetworksFooterV10;
         }
 
         private static string GetUnsubscribeText(NoticeMessage message, MailWhiteLabelSettings settings)
         {
             var withoutUnsubscribe = message.GetArgument("WithoutUnsubscribe");
 
-            if (withoutUnsubscribe != null && (bool)withoutUnsubscribe.Value)
+            if (withoutUnsubscribe != null && (bool) withoutUnsubscribe.Value)
                 return string.Empty;
 
             var rootPathArgument = message.GetArgument("__VirtualRootPath");
-            var rootPath = rootPathArgument == null ? string.Empty : (string)rootPathArgument.Value;
+            var rootPath = rootPathArgument == null ? string.Empty : (string) rootPathArgument.Value;
 
             if (string.IsNullOrEmpty(rootPath))
                 return string.Empty;
@@ -261,7 +267,7 @@ namespace ASC.Notify.Textile
 
             if (unsubscribeLinkArgument != null)
             {
-                var unsubscribeLink = (string)unsubscribeLinkArgument.Value;
+                var unsubscribeLink = (string) unsubscribeLinkArgument.Value;
 
                 if (!string.IsNullOrEmpty(unsubscribeLink))
                     return unsubscribeLink;

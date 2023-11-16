@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
 */
 
 
+using ASC.Common.Caching;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using ASC.Common.Caching;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ASC.Core.Common.Notify.Telegram
 {
@@ -69,10 +70,10 @@ namespace ASC.Core.Common.Notify.Telegram
         public TelegramUser GetUser(Guid userId, int tenantId)
         {
             var key = string.Format(PairKeyFormat, userId, tenantId);
-
+            
             var user = cache.Get<TelegramUser>(key);
             if (user != null) return user;
-
+            
             user = tgDao.GetUser(userId, tenantId);
             if (user != null) cache.Insert(key, user, Expiration);
             return user;
@@ -90,7 +91,7 @@ namespace ASC.Core.Common.Notify.Telegram
             return users;
         }
 
-        public void RegisterUser(Guid userId, int tenantId, long telegramId)
+        public void RegisterUser(Guid userId, int tenantId, int telegramId)
         {
             tgDao.RegisterUser(userId, tenantId, telegramId);
 

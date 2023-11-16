@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
-
 using ASC.Mail.Core;
 using ASC.Mail.Data.Contracts;
 
@@ -86,7 +85,7 @@ namespace ASC.Mail.Aggregator.CollectionService.Queue
             try
             {
                 if (!string.IsNullOrEmpty(ConfigurationManagerExtension.AppSettings["mail.folders-mapping"]))
-                // "sent:2|"drafts:3|trash:4|spam:5|junk:5"
+                    // "sent:2|"drafts:3|trash:4|spam:5|junk:5"
                 {
                     list = ConfigurationManagerExtension.AppSettings["mail.folders-mapping"]
                         .Split('|')

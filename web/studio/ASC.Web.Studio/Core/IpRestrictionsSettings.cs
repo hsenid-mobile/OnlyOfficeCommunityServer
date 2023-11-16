@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Runtime.Serialization;
-
 using ASC.Core.Common.Settings;
 
 namespace ASC.Web.Studio.Core
@@ -26,7 +25,6 @@ namespace ASC.Web.Studio.Core
     [DataContract]
     public class IPRestrictionsSettings : BaseSettings<IPRestrictionsSettings>
     {
-        ///<example>true</example>
         [DataMember(Name = "Enable")]
         public bool Enable { get; set; }
 
@@ -37,7 +35,7 @@ namespace ASC.Web.Studio.Core
 
         public override ISettings GetDefault()
         {
-            return new IPRestrictionsSettings { Enable = false };
+            return new IPRestrictionsSettings {Enable = false};
         }
     }
 }

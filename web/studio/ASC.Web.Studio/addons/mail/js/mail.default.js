@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,7 +250,7 @@ window.TMMail = (function($) {
     }
 
     function getErrorMessage(errors) {
-        if (Array.isArray(errors) && errors.length === 1) {
+        if ($.isArray(errors) && errors.length === 1) {
             return errors[0];
         }
 
@@ -559,7 +559,7 @@ window.TMMail = (function($) {
 
                 var fileIds = JSON.parse(decodeURIComponent(files));
 
-                return Array.isArray(fileIds) ? fileIds : undefined;
+                return jq.isArray(fileIds) ? fileIds : undefined;
             } catch (e) {
                 console.warn(e);
             }
@@ -835,7 +835,7 @@ window.TMMail = (function($) {
     }
 
     function fixMailtoLinks(element) {
-        element.find("a[href*='mailto:']").on("click", function() {
+        element.find("a[href*='mailto:']").click(function() {
             messagePage.setToEmailAddresses([$(this).attr('href').substr(7, $(this).attr('href').length - 1)]);
             window.location.href = "#composeto";
             return false;
@@ -906,17 +906,17 @@ window.TMMail = (function($) {
     function disableButton(button, disable) {
         button.toggleClass("disable", disable);
         if (disable) {
-            button.prop("disabled", true);
+            button.attr("disabled", "disabled");
         } else {
-            button.prop("disabled", false);
+            button.removeAttr("disabled");
         }
     }
 
     function disableInput(input, disable) {
         if (disable) {
-            input.prop("disabled", true);
+            input.attr('disabled', 'true');
         } else {
-            input.prop("disabled", false);
+            input.removeAttr('disabled');
         }
     }
 

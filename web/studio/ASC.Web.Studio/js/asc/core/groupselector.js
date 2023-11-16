@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ ASC.Controls.GroupSelector = function(selectorID, mobileVersion, withGroupEveryo
                 display: "block"
             });
 
-        jq("#grpselector_filter_" + this.ID).trigger("focus");
+        jq("#grpselector_filter_" + this.ID).focus();
     };
 
     this.Close = function() {
@@ -117,7 +117,7 @@ ASC.Controls.GroupSelector = function(selectorID, mobileVersion, withGroupEveryo
 
         if (this.MobileVersion) {
             jq("#grpselector_mgroupList_" + this.ID).html(jq.tmpl("groupSelectorListTemplate", { Groups: this._groups }));
-            jq("#grpselector_mgroupList_" + this.ID + " option[value='" + this.SelectedGroup + "']").prop("selected", true);
+            jq("#grpselector_mgroupList_" + this.ID + " option[value='" + this.SelectedGroup + "']").attr("selected", "selected");
             return;
         }
 
@@ -135,7 +135,7 @@ ASC.Controls.GroupSelector = function(selectorID, mobileVersion, withGroupEveryo
         this.Groups.push(ASC.Resources.Master.GroupSelector_WithGroupAdmin);
     }
 
-    Array.prototype.push.apply(this.Groups, window.GroupManager.getGroupsArray(function(group) {
+    Array.prototype.push.apply(this.Groups, window.GroupManager.getAllGroups().map(function(group) {
         return {
             Id: group.id,
             Name: group.name
@@ -145,13 +145,13 @@ ASC.Controls.GroupSelector = function(selectorID, mobileVersion, withGroupEveryo
     jq("#grpselector_filter_" + this.ID).on("keyup", function() { _groupSelector.SuggestGroups(); });
     jq("#grpselector_clearFilterBtn_" + this.ID).on("click", function() { _groupSelector.ClearFilter(); });
 
-    jq(document).on("click", function(event) {
+    jq(document).click(function(event) {
         if (!jq((event.target) ? event.target : event.srcElement).parents().addBack().is("#groupSelectorBtn_" + selectorID + ", #groupSelectorContainer_" + selectorID))
             jq("#groupSelectorContainer_" + selectorID).hide();
     });
 
     if (mobileVersion) {
-        jq("#grpselector_mgroupList_" + selectorID).on("change", function() {
+        jq("#grpselector_mgroupList_" + selectorID).bind("change", function() {
             var grpId = jq(this).val();
             if (grpId == "" || grpId == "-1") return;
             jq(_groupSelector.Groups).each(function(i, gpr) {
@@ -164,15 +164,15 @@ ASC.Controls.GroupSelector = function(selectorID, mobileVersion, withGroupEveryo
             _groupSelector.Close();
         });
     } else {
-        jq("#groupSelectorBtn_" + selectorID).on("click", function(evnt) {
+        jq("#groupSelectorBtn_" + selectorID).bind("click", function(evnt) {
             _groupSelector.Open();
         });
 
-        jq("#grpselector_clearFilterBtn_" + selectorID).on("click", function() {
+        jq("#grpselector_clearFilterBtn_" + selectorID).bind("click", function() {
             _groupSelector.ClearFilter();
         });
 
-        jq("#grpselector_groupList_" + selectorID).on("click", function(evnt) {
+        jq("#grpselector_groupList_" + selectorID).bind("click", function(evnt) {
             if (!jq(evnt.target).is("div.group"))
                 return;
 

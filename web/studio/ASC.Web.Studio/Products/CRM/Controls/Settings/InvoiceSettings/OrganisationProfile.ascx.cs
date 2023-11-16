@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 
 using System;
 using System.Web;
-
 using ASC.Web.Studio.Utility;
 
 #endregion
@@ -28,7 +27,7 @@ namespace ASC.Web.CRM.Controls.Settings
 {
     public partial class OrganisationProfile : BaseUserControl
     {
-
+        
         #region Properies
 
         public static string Location { get { return PathProvider.GetFileStaticRelativePath("Settings/InvoiceSettings/OrganisationProfile.ascx"); } }
@@ -54,7 +53,7 @@ namespace ASC.Web.CRM.Controls.Settings
 
         #region Methods
 
-
+       
         private void RegisterScript()
         {
             Page.RegisterInlineScript(@"ASC.CRM.SettingsOrganisationProfileView.init();");

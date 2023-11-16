@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Linq;
 using System.Web.Optimization;
-
 using ASC.Web.Core.WhiteLabel;
 
 namespace ASC.Web.Core.Client.Bundling
@@ -37,7 +36,7 @@ namespace ASC.Web.Core.Client.Bundling
             var settings = CompanyWhiteLabelSettings.Instance;
 
             if (!settings.IsLicensor)
-                settings = (CompanyWhiteLabelSettings)settings.GetDefault();
+                settings = (CompanyWhiteLabelSettings) settings.GetDefault();
 
             var copyrigth = string.Format(CopyrigthText, settings.CompanyName, settings.Site);
 

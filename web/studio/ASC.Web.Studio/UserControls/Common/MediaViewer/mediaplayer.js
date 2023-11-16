@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,25 +108,25 @@ window.ASC.Files.MediaPlayer = (function () {
             playerLoading = jq(".jp-loading");
             playerNoSolution = jq(".jp-no-solution");
 
-            jq("#mediaPlayerClose").on("click", closePlayer);
+            jq("#mediaPlayerClose").click(closePlayer);
 
-            jq("#videoViewerOverlay").on("click", closePlayer);
+            jq("#videoViewerOverlay").click(closePlayer);
 
-            playerRef.on("click", function () { jq(".jp-play").trigger("click"); });
+            playerRef.click(function () { jq(".jp-play").click(); });
 
-            playerProgressSeek.on("mousedown.mediaPlayer", function (e) {
+            playerProgressSeek.bind("mousedown.mediaPlayer", function (e) {
                 isSeeking = true;
                 barPos = e.clientX - e.offsetX;
                 barLength = jq(this).width();
             });
-            playerVolume.on("mousedown.mediaPlayer", function (e) {
+            playerVolume.bind("mousedown.mediaPlayer", function (e) {
                 isChangingVolume = true;
                 barPos = e.clientY - e.offsetY;
                 barLength = jq(this).height();
                 playerVolume.parent().addClass("isChanging");
             });
 
-            jq(window).on("mouseup.mediaPlayer", function (e) {
+            jq(window).bind("mouseup.mediaPlayer", function (e) {
                 if (isSeeking) {
                     isSeeking = false;
                     var perc = calcBarPerc(e.clientX);
@@ -140,7 +140,7 @@ window.ASC.Files.MediaPlayer = (function () {
                 }
             });
 
-            jq(window).on("mousemove.mediaPlayer", function (e) {
+            jq(window).bind("mousemove.mediaPlayer", function (e) {
                 if (isSeeking) {
                     var perc = calcBarPerc(e.clientX);
                     playerProgressSeek.children().width(perc * 100 + "%");
@@ -151,17 +151,17 @@ window.ASC.Files.MediaPlayer = (function () {
                 }
             });
 
-            jq("#videoDelete").on("click", deleteFile);
+            jq("#videoDelete").click(deleteFile);
 
-            jq("#videoDownload").on("click", function () {
+            jq("#videoDownload").click(function () {
                 location.href = options.downloadAction(currentFileId);
             });
 
-            jq("#mediaPrev").on("click", function () {
+            jq("#mediaPrev").click(function () {
                 if (playlist.length > 1)
                     prevMedia();
             });
-            jq("#mediaNext").on("click", function () {
+            jq("#mediaNext").click(function () {
                 if (playlist.length > 1)
                     nextMedia();
             });
@@ -294,7 +294,7 @@ window.ASC.Files.MediaPlayer = (function () {
             case keyCodes.spaceBar:
             case keyCodes.enter:
                 if (!isImage) {
-                    jq(".jp-play").trigger("click");
+                    jq(".jp-play").click();
                 }
                 return false;
 
@@ -308,7 +308,7 @@ window.ASC.Files.MediaPlayer = (function () {
 
             case keyCodes.S:
                 if (e.ctrlKey) {
-                    jq("#videoDownload").trigger("click");
+                    jq("#videoDownload").click();
                     return false;
                 }
         }
@@ -367,7 +367,7 @@ window.ASC.Files.MediaPlayer = (function () {
             options.onMediaChangedAction(fileId);
         }
 
-        if (options.deleteAction && options.canDelete && options.canDelete(currentFileId) && ASC.Resources.Master.IsAuthenticated) {
+        if (options.deleteAction && options.canDelete && options.canDelete(currentFileId)) {
             jq("#videoDelete").show();
         } else {
             jq("#videoDelete").hide();
@@ -375,14 +375,14 @@ window.ASC.Files.MediaPlayer = (function () {
 
         if (!isImage) {
             playerRef.show();
-            jq(document).off("mousewheel.mediaPlayer");
-            jq(document).on("mousewheel.mediaPlayer", function (event, delta) {
+            jq(document).unbind("mousewheel.mediaPlayer");
+            jq(document).bind("mousewheel.mediaPlayer", function (event, delta) {
                 changeVolume(delta > 0 ? scrollVolumeStep : -scrollVolumeStep)
             });
         }
         
-        jq(document).off("keydown.mediaPlayer");
-        jq(document).on("keydown.mediaPlayer", keyDownEvent);
+        jq(document).unbind("keydown.mediaPlayer");
+        jq(document).bind("keydown.mediaPlayer", keyDownEvent);
 
         if (isImage
             || (mapSupplied[ext].type == audio && playerRef.children("video").length)
@@ -438,19 +438,19 @@ window.ASC.Files.MediaPlayer = (function () {
                     loadeddata: function () {
                         positionControls();
                         playerLoading.hide();
-                        jq(window).off("resize.mediaPlayer");
-                        jq(window).on("resize.mediaPlayer", positionControls);
-                        jq(document).off("webkitfullscreenchange.mediaPlayer");
-                        jq(document).off("fullscreenchange.mediaPlayer");
-                        jq(document).on("webkitfullscreenchange.mediaPlayer", positionControls);
-                        jq(document).on("fullscreenchange.mediaPlayer", positionControls);
+                        jq(window).unbind("resize.mediaPlayer");
+                        jq(window).bind("resize.mediaPlayer", positionControls);
+                        jq(document).unbind("webkitfullscreenchange.mediaPlayer");
+                        jq(document).unbind("fullscreenchange.mediaPlayer");
+                        jq(document).bind("webkitfullscreenchange.mediaPlayer", positionControls);
+                        jq(document).bind("fullscreenchange.mediaPlayer", positionControls);
 
                         var vid = playerRef.children("video");
 
-                        vid.on('enterpictureinpicture.vjp', function (event) {
+                        vid.bind('enterpictureinpicture.vjp', function (event) {
                             pipMode = true;
                         });
-                        vid.on('leavepictureinpicture.vjp', function (event) {
+                        vid.bind('leavepictureinpicture.vjp', function (event) {
                             pipMode = false;
                             pipModeExit = new Date();
                         });
@@ -461,7 +461,7 @@ window.ASC.Files.MediaPlayer = (function () {
                         if (mapSupplied[ext].type == audio) {
                             media.poster = "/UserControls/Common/MediaViewer/Images/volume.svg";
                         } else {
-                            playerRef.on("dblclick", function () {
+                            playerRef.dblclick(function () {
                                 playerRef.jPlayer("option", "fullScreen", !playerRef.jPlayer("option", "fullScreen"));
                             });
 
@@ -580,7 +580,7 @@ window.ASC.Files.MediaPlayer = (function () {
         if (createOverlay) {
             createOverlay = false;
             playerRef.append("<div id=\"videoOverlay\" title=\"" + ASC.Resources.Master.UserControlsCommonResource.MediaViewerPlay + "\"></div>");
-            overlayRef = jq("#videoOverlay").on("click", function () { playerRef.jPlayer("play"); });
+            overlayRef = jq("#videoOverlay").click(function () { playerRef.jPlayer("play"); });
         }
         if (overlayRef)
             overlayRef.css({
@@ -607,11 +607,11 @@ window.ASC.Files.MediaPlayer = (function () {
 
         hideError();
 
-        jq(window).off("resize.mediaPlayer");
-        jq(document).off("webkitfullscreenchange.mediaPlayer");
-        jq(document).off("fullscreenchange.mediaPlayer");
-        jq(document).off("mousewheel.mediaPlayer");
-        jq(document).off("keydown.mediaPlayer");
+        jq(window).unbind("resize.mediaPlayer");
+        jq(document).unbind("webkitfullscreenchange.mediaPlayer");
+        jq(document).unbind("fullscreenchange.mediaPlayer");
+        jq(document).unbind("mousewheel.mediaPlayer");
+        jq(document).unbind("keydown.mediaPlayer");
         jq("html").removeClass("scroll-fix");
 
         exitPipMode();
@@ -652,7 +652,7 @@ window.ASC.Files.MediaPlayer = (function () {
     };
 
     var deleteFile = function () {
-        if (!options.canDelete || !options.canDelete(currentFileId) || !options.deleteAction || !ASC.Resources.Master.IsAuthenticated) {
+        if (!options.canDelete || !options.canDelete(currentFileId) || !options.deleteAction) {
             return;
         }
 

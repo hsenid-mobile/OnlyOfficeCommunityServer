@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.CRM.Core;
-using ASC.CRM.Core.Dao;
 using ASC.CRM.Core.Entities;
-
+using ASC.Web.CRM.Resources;
 using LumenWorks.Framework.IO.Csv;
-
 using Newtonsoft.Json.Linq;
+using ASC.Common.Threading.Progress;
+using ASC.CRM.Core.Dao;
 
 #endregion
 
@@ -152,7 +151,7 @@ namespace ASC.Web.CRM.Classes
                 }
 
                 ImportDataCache.Insert(EntityType.Case, (ImportDataOperation)Clone());
-
+                              
                 var newIDs = casesDao.SaveCasesList(findedCases);
                 findedCases.ForEach(d => d.ID = newIDs[d.ID]);
 
@@ -169,7 +168,7 @@ namespace ASC.Web.CRM.Classes
                     throw new OperationCanceledException();
                 }
 
-                ImportDataCache.Insert(EntityType.Case, (ImportDataOperation)Clone());
+                ImportDataCache.Insert(EntityType.Case, (ImportDataOperation)Clone());               
 
                 foreach (var findedCasesMemberKey in findedCasesMembers.Keys)
                 {
@@ -185,7 +184,7 @@ namespace ASC.Web.CRM.Classes
                     throw new OperationCanceledException();
                 }
 
-                ImportDataCache.Insert(EntityType.Case, (ImportDataOperation)Clone());
+                ImportDataCache.Insert(EntityType.Case, (ImportDataOperation)Clone());               
 
 
                 foreach (var findedTagKey in findedTags.Keys)
@@ -206,7 +205,7 @@ namespace ASC.Web.CRM.Classes
                     throw new OperationCanceledException();
                 }
 
-                ImportDataCache.Insert(EntityType.Case, (ImportDataOperation)Clone());
+                ImportDataCache.Insert(EntityType.Case,(ImportDataOperation)Clone());               
 
             }
 

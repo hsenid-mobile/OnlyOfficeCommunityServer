@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Web;
 using System.Web.UI;
-
-using AjaxPro;
-
-using ASC.Core;
 using ASC.MessagingSystem;
+using AjaxPro;
+using ASC.Core;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Core.Users;
-using ASC.Web.Studio.PublicResources;
+using System.Web;
+using Resources;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -51,11 +49,11 @@ namespace ASC.Web.Studio.UserControls.Management
             foreach (var schema in CustomNamingPeople.GetSchemas())
             {
                 schemas.Add(new
-                {
-                    Id = schema.Key,
-                    Name = schema.Value,
-                    Current = string.Equals(schema.Key, currentSchemaId, StringComparison.InvariantCultureIgnoreCase)
-                });
+                    {
+                        Id = schema.Key,
+                        Name = schema.Value,
+                        Current = string.Equals(schema.Key, currentSchemaId, StringComparison.InvariantCultureIgnoreCase)
+                    });
             }
 
             namingSchemaRepeater.DataSource = schemas;
@@ -68,19 +66,18 @@ namespace ASC.Web.Studio.UserControls.Management
             var names = CustomNamingPeople.GetPeopleNames(schemaId);
 
             return new
-            {
-                names.Id,
-                names.UserCaption,
-                names.UsersCaption,
-                names.GroupCaption,
-                names.GroupsCaption,
-                names.UserPostCaption,
-                names.RegDateCaption,
-                names.GroupHeadCaption,
-                names.UserLeadCaption,
-                names.GuestCaption,
-                names.GuestsCaption,
-            };
+                {
+                    names.Id,
+                    names.UserCaption,
+                    names.UsersCaption,
+                    names.GroupCaption,
+                    names.GroupsCaption,
+                    names.UserPostCaption,
+                    names.RegDateCaption,
+                    names.GroupHeadCaption,
+                    names.GuestCaption,
+                    names.GuestsCaption,
+                };
         }
 
         [AjaxMethod(HttpSessionStateRequirement.ReadWrite)]
@@ -96,11 +93,11 @@ namespace ASC.Web.Studio.UserControls.Management
 
                 MessageService.Send(HttpContext.Current.Request, MessageAction.TeamTemplateChanged);
 
-                return new { Status = 1, Message = Resource.SuccessfullySaveSettingsMessage };
+                return new {Status = 1, Message = Resource.SuccessfullySaveSettingsMessage};
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                return new { Status = 0, e.Message };
+                return new {Status = 0, e.Message};
             }
         }
 
@@ -108,7 +105,7 @@ namespace ASC.Web.Studio.UserControls.Management
         [AjaxMethod(HttpSessionStateRequirement.ReadWrite)]
         public object SaveCustomNamingSettings(string usrCaption, string usrsCaption, string grpCaption, string grpsCaption,
                                                string usrStatusCaption, string regDateCaption,
-                                               string grpHeadCaption, string usrLeadCaption,
+                                               string grpHeadCaption,
                                                string guestCaption, string guestsCaption)
         {
             try
@@ -122,7 +119,6 @@ namespace ASC.Web.Studio.UserControls.Management
                 usrStatusCaption = (usrStatusCaption ?? "").Trim();
                 regDateCaption = (regDateCaption ?? "").Trim();
                 grpHeadCaption = (grpHeadCaption ?? "").Trim();
-                usrLeadCaption = (usrLeadCaption ?? "").Trim();
                 guestCaption = (guestCaption ?? "").Trim();
                 guestsCaption = (guestsCaption ?? "").Trim();
 
@@ -133,7 +129,6 @@ namespace ASC.Web.Studio.UserControls.Management
                     || String.IsNullOrEmpty(usrStatusCaption)
                     || String.IsNullOrEmpty(regDateCaption)
                     || String.IsNullOrEmpty(grpHeadCaption)
-                    || String.IsNullOrEmpty(usrLeadCaption)
                     || String.IsNullOrEmpty(guestCaption)
                     || String.IsNullOrEmpty(guestsCaption))
                 {
@@ -141,19 +136,18 @@ namespace ASC.Web.Studio.UserControls.Management
                 }
 
                 var names = new PeopleNamesItem
-                {
-                    Id = PeopleNamesItem.CustomID,
-                    UserCaption = usrCaption.Substring(0, Math.Min(30, usrCaption.Length)),
-                    UsersCaption = usrsCaption.Substring(0, Math.Min(30, usrsCaption.Length)),
-                    GroupCaption = grpCaption.Substring(0, Math.Min(30, grpCaption.Length)),
-                    GroupsCaption = grpsCaption.Substring(0, Math.Min(30, grpsCaption.Length)),
-                    UserPostCaption = usrStatusCaption.Substring(0, Math.Min(30, usrStatusCaption.Length)),
-                    RegDateCaption = regDateCaption.Substring(0, Math.Min(30, regDateCaption.Length)),
-                    GroupHeadCaption = grpHeadCaption.Substring(0, Math.Min(30, grpHeadCaption.Length)),
-                    UserLeadCaption = usrLeadCaption.Substring(0, Math.Min(30, usrLeadCaption.Length)),
-                    GuestCaption = guestCaption.Substring(0, Math.Min(30, guestCaption.Length)),
-                    GuestsCaption = guestsCaption.Substring(0, Math.Min(30, guestsCaption.Length)),
-                };
+                    {
+                        Id = PeopleNamesItem.CustomID,
+                        UserCaption = usrCaption.Substring(0, Math.Min(30, usrCaption.Length)),
+                        UsersCaption = usrsCaption.Substring(0, Math.Min(30, usrsCaption.Length)),
+                        GroupCaption = grpCaption.Substring(0, Math.Min(30, grpCaption.Length)),
+                        GroupsCaption = grpsCaption.Substring(0, Math.Min(30, grpsCaption.Length)),
+                        UserPostCaption = usrStatusCaption.Substring(0, Math.Min(30, usrStatusCaption.Length)),
+                        RegDateCaption = regDateCaption.Substring(0, Math.Min(30, regDateCaption.Length)),
+                        GroupHeadCaption = grpHeadCaption.Substring(0, Math.Min(30, grpHeadCaption.Length)),
+                        GuestCaption = guestCaption.Substring(0, Math.Min(30, guestCaption.Length)),
+                        GuestsCaption = guestsCaption.Substring(0, Math.Min(30, guestsCaption.Length)),
+                    };
 
                 CustomNamingPeople.SetPeopleNames(names);
 
@@ -161,11 +155,11 @@ namespace ASC.Web.Studio.UserControls.Management
 
                 MessageService.Send(HttpContext.Current.Request, MessageAction.TeamTemplateChanged);
 
-                return new { Status = 1, Message = Resource.SuccessfullySaveSettingsMessage };
+                return new {Status = 1, Message = Resource.SuccessfullySaveSettingsMessage};
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                return new { Status = 0, e.Message };
+                return new {Status = 0, e.Message};
             }
         }
     }

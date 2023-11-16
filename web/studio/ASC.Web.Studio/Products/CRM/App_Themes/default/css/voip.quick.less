@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 */
 
 
-@import "params.less";
+@import "base.less";
 
 #voip-quick-view {
     display: none;
@@ -38,7 +38,7 @@
 
     .number {
         &:hover .number-box {
-            background-color: @hover-row-color;
+            background-color: #f2f2f2;
         }
 
         &#existing-numbers-header {
@@ -68,10 +68,10 @@
         }
 
         .number-box {
-            border-bottom: 1px solid @border-color;
+            border-bottom: 1px solid #d1d1d1;
 
             &.selected, &.operator-selected {
-                background-color: @hover-row-color;
+                background-color: #f2f2f2;
             }
 
             &.selected .actions {
@@ -129,7 +129,7 @@
 
         .operators-box {
             display: none;
-            border-bottom: 1px solid @border-color;
+            border-bottom: 1px solid #d1d1d1;
             padding-left: 30px;
 
             &:last-child {
@@ -138,19 +138,19 @@
 
             .add-operators-box {
                 height: 32px;
-                border-bottom: 1px solid @border-color;
+                border-bottom: 1px solid #d1d1d1;
 
                 .add-operators-btn {
-                    margin-top: 6px;
+                    margin-top: 6px; 
                 }
             }
 
             .operator {
                 height: 32px;
-                border-bottom: 1px solid @border-color;
+                border-bottom: 1px solid #d1d1d1;
 
                 &.selected {
-                    background-color: @hover-row-color;
+                    background-color: #f2f2f2;
 
                     .actions {
                         background-position: center bottom;
@@ -158,7 +158,7 @@
                 }
 
                 &:hover {
-                    background-color: @hover-row-color;
+                    background-color: #f2f2f2;
                 }
 
                 .title {
@@ -288,7 +288,7 @@
 
     .numbers-loader {
         display: none;
-        background: url("../images/@{loader-gif-24}") no-repeat scroll left center transparent;
+        background: url("../images/loader_24.gif") no-repeat scroll left center transparent;
         font-size: 14px;
         margin: 50px 0 0 50px;
         padding: 10px 0 10px 40px;

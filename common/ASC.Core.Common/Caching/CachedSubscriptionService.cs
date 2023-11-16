@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
 */
 
 
+using ASC.Common.Caching;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using ASC.Common.Caching;
 
 namespace ASC.Core.Caching
 {
@@ -68,7 +67,7 @@ namespace ASC.Core.Caching
                     }
                 }
             });
-            notify.Subscribe<SubscriptionMethodCache>((m, a) =>
+            notify.Subscribe<SubscriptionMethod>((m, a) =>
             {
                 var store = GetSubsciptionsStore(m.Tenant, m.SourceId, m.ActionId);
                 lock (store)
@@ -95,16 +94,6 @@ namespace ASC.Core.Caching
             {
                 return store.GetSubscriptions(recipientId, objectId);
             }
-        }
-
-        public string[] GetRecipients(int tenant, string sourceID, string actionID, string objectID)
-        {
-            return service.GetRecipients(tenant, sourceID, actionID, objectID);
-        }
-
-        public string[] GetSubscriptions(int tenant, string sourceId, string actionId, string recipientId, bool checkSubscribe)
-        {
-            return service.GetSubscriptions(tenant, sourceId, actionId, recipientId, checkSubscribe);
         }
 
         public SubscriptionRecord GetSubscription(int tenant, string sourceId, string actionId, string recipientId, string objectId)
@@ -146,7 +135,7 @@ namespace ASC.Core.Caching
         public void SetSubscriptionMethod(SubscriptionMethod m)
         {
             service.SetSubscriptionMethod(m);
-            notify.Publish((SubscriptionMethodCache)m, CacheNotifyAction.Any);
+            notify.Publish(m, CacheNotifyAction.Any);
         }
 
 
@@ -163,10 +152,6 @@ namespace ASC.Core.Caching
             return store;
         }
 
-        public bool IsUnsubscribe(int tenant, string sourceId, string actionId, string recipientId, string objectId)
-        {
-            return service.IsUnsubscribe(tenant, sourceId, actionId, recipientId, objectId);
-        }
 
         private class SubsciptionsStore
         {

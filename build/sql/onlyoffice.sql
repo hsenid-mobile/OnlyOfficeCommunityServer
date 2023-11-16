@@ -36,8 +36,6 @@ CREATE TABLE IF NOT EXISTS `backup_backup` (
   `created_on` datetime NOT NULL,
   `expires_on` datetime NOT NULL DEFAULT '0001-01-01 00:00:00',
   `storage_params` TEXT NULL,
-  `hash` char(64) NOT NULL,
-  `removed` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `tenant_id` (`tenant_id`),
   KEY `expires_on` (`expires_on`),
@@ -227,8 +225,6 @@ CREATE TABLE IF NOT EXISTS `calendar_events` (
   `rrule` text NOT NULL,
   `uid` varchar(255) DEFAULT NULL,
   `status` smallint(6) NOT NULL DEFAULT '0',
-  `time_zone` varchar(255) NULL DEFAULT NULL,
-  `has_attachments` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `calendar_id` (`tenant`,`calendar_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -350,6 +346,7 @@ CREATE TABLE IF NOT EXISTS `core_user` (
   `workfromdate` datetime DEFAULT NULL,
   `terminateddate` datetime DEFAULT NULL,
   `title` varchar(64) DEFAULT NULL,
+  `department` varchar(128) DEFAULT NULL,
   `culture` varchar(20) DEFAULT NULL,
   `contacts` varchar(1024) DEFAULT NULL,
   `phone` varchar(255) DEFAULT NULL,
@@ -362,18 +359,10 @@ CREATE TABLE IF NOT EXISTS `core_user` (
   `removed` int(11) NOT NULL DEFAULT '0',
   `create_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_modified` datetime NOT NULL,
-  `user_lead` VARCHAR(36) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `last_modified` (`last_modified`),
   KEY `username` (`tenant`,`username`),
   KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `core_userdav` (
-  `tenant_id` int(11) NOT NULL,
-  `user_id` varchar(255) NOT NULL,
-  PRIMARY KEY (`user_id`),
-  KEY `tenant_id` (`tenant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `core_usergroup` (
@@ -399,6 +388,7 @@ CREATE TABLE IF NOT EXISTS `core_usersecurity` (
   `tenant` int(11) NOT NULL,
   `userid` varchar(38) NOT NULL,
   `pwdhash` varchar(512) DEFAULT NULL,
+  `pwdhashsha512` varchar(512) DEFAULT NULL,
   `LastModified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`userid`),
   KEY `pwdhash` (`pwdhash`(255)),
@@ -945,10 +935,8 @@ CREATE TABLE IF NOT EXISTS `feed_readed` (
 CREATE TABLE IF NOT EXISTS `feed_users` (
   `feed_id` varchar(88) NOT NULL,
   `user_id` char(38) NOT NULL,
-  `aggregated_date` datetime DEFAULT NULL,
   PRIMARY KEY (`feed_id`,`user_id`),
-  KEY `user_id` (`user_id`),
-  KEY `aggregated_date` (`aggregated_date`)
+  KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `files_bunch_objects` (
@@ -985,7 +973,6 @@ CREATE TABLE IF NOT EXISTS `files_file` (
   `changes` mediumtext,
   `encrypted` int(1) NOT NULL DEFAULT '0',
   `forcesave` int(1) NOT NULL DEFAULT '0',
-  `thumb` INT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`tenant_id`,`id`,`version`),
   KEY `modified_on` (`modified_on`),
   KEY `folder_id` (`folder_id`),
@@ -1017,32 +1004,14 @@ CREATE TABLE IF NOT EXISTS `files_folder_tree` (
   KEY `folder_id` (`folder_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `files_link` (
-  `source_id` varchar(32) NOT NULL,
-  `linked_id` varchar(32) NOT NULL,
-  `linked_for` char(38) NOT NULL,
-  `tenant_id` int(10) NOT NULL,
-  PRIMARY KEY (`tenant_id`, `source_id`, `linked_id`),
-  KEY `linked_for` (`tenant_id`, `source_id`, `linked_id`, `linked_for`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `files_properties` (
-  `tenant_id` int(10) NOT NULL,
-  `entry_id` varchar(32) NOT NULL,
-  `data` MEDIUMTEXT NOT NULL,
-  PRIMARY KEY (`tenant_id`, `entry_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE IF NOT EXISTS `files_security` (
   `tenant_id` int(10) NOT NULL,
   `entry_id` varchar(50) NOT NULL,
   `entry_type` int(10) NOT NULL,
   `subject` char(38) NOT NULL,
-  `subject_type` tinyint(1) UNSIGNED NOT NULL,
   `owner` char(38) NOT NULL,
   `security` int(11) NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `options` TEXT NULL,
   PRIMARY KEY (`tenant_id`,`entry_id`,`entry_type`,`subject`),
   KEY `owner` (`owner`),
   KEY `tenant_id` (`tenant_id`,`entry_type`,`entry_id`,`owner`)
@@ -1076,15 +1045,14 @@ CREATE TABLE IF NOT EXISTS `files_thirdparty_account` (
   `provider` varchar(50) NOT NULL DEFAULT '0',
   `customer_title` varchar(400) NOT NULL,
   `user_name` varchar(100) NOT NULL,
-  `password` varchar(512) NOT NULL,
+  `password` varchar(100) NOT NULL,
   `token` text,
   `user_id` varchar(38) NOT NULL,
   `folder_type` int(11) NOT NULL DEFAULT '0',
   `create_on` datetime NOT NULL,
   `url` text,
   `tenant_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `tenant_id` (`tenant_id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `files_thirdparty_app` (
@@ -1103,17 +1071,6 @@ CREATE TABLE IF NOT EXISTS `files_thirdparty_id_mapping` (
   PRIMARY KEY (`hash_id`),
   KEY `index_1` (`tenant_id`,`hash_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `firebase_users` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
-  `user_id` varchar(36) NOT NULL,
-  `tenant_id` int(11) NOT NULL,
-  `firebase_device_token` varchar(255) NOT NULL,
-  `is_subscribed` tinyint(1) NOT NULL DEFAULT '0',
-  `application` varchar(20) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `forum_answer` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -1310,10 +1267,8 @@ CREATE TABLE IF NOT EXISTS `jabber_offmessage` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `jid` varchar(255) NOT NULL,
   `message` mediumtext,
-  `stamp` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `jabber_offmessage_jid` (`jid`),
-  KEY `jabber_offmessage_stamp` (`stamp`)
+  KEY `jabber_offmessage_jid` (`jid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `jabber_offpresence` (
@@ -1395,11 +1350,9 @@ CREATE TABLE IF NOT EXISTS `login_events` (
   `page` varchar(300) DEFAULT NULL,
   `action` int(11) DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
-  `active` int(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `date` (`date`),
-  KEY `tenant_id` (`tenant_id`,`user_id`),
-  KEY `active` (`active`)
+  KEY `tenant_id` (`tenant_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `mail_alerts` (
@@ -1582,7 +1535,6 @@ CREATE TABLE IF NOT EXISTS `mail_mail` (
   `mime_in_reply_to` varchar(255) DEFAULT NULL,
   `chain_id` varchar(255) DEFAULT NULL,
   `chain_date` datetime NOT NULL DEFAULT '1975-01-01 00:00:00',
-  `read_request_status` int(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `chain_index_folders` (`chain_id`,`id_mailbox`,`folder`),
   KEY `uidl` (`uidl`,`id_mailbox`),
@@ -1591,7 +1543,7 @@ CREATE TABLE IF NOT EXISTS `mail_mail` (
   KEY `list_conversations` (`tenant`, `id_user`, `folder`, `chain_date`),
   KEY `list_messages` (`tenant`, `id_user`, `folder`, `date_sent`),
   KEY `time_modified` (`time_modified`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 CREATE TABLE IF NOT EXISTS `mail_mailbox` (
   `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -2284,7 +2236,6 @@ CREATE TABLE IF NOT EXISTS `tenants_iprestrictions` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `tenant` int(10) NOT NULL,
   `ip` varchar(50) NOT NULL,
-  `for_admin` TINYINT(1) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tenant` (`tenant`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -2306,6 +2257,7 @@ CREATE TABLE IF NOT EXISTS `tenants_quota` (
   `active_users` int(10) NOT NULL DEFAULT '0',
   `features` text,
   `price` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `price2` decimal(10,2) NOT NULL DEFAULT '0.00',
   `avangate_id` varchar(128) DEFAULT NULL,
   `visible` int(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`tenant`)
@@ -2317,8 +2269,7 @@ CREATE TABLE IF NOT EXISTS `tenants_quotarow` (
   `counter` bigint(20) NOT NULL DEFAULT '0',
   `tag` varchar(1024) DEFAULT NULL,
   `last_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `user_id` varchar(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
-  PRIMARY KEY (`tenant`,`path`,`user_id`),
+  PRIMARY KEY (`tenant`,`path`),
   KEY `last_modified` (`last_modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -2327,7 +2278,7 @@ CREATE TABLE IF NOT EXISTS `tenants_tariff` (
   `tenant` int(10) NOT NULL,
   `tariff` int(10) NOT NULL,
   `stamp` datetime NOT NULL,
-  `quantity` int(10) NOT NULL DEFAULT 1,
+  `tariff_key` varchar(64) DEFAULT NULL,
   `comment` varchar(255) DEFAULT NULL,
   `create_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -2360,8 +2311,7 @@ CREATE TABLE IF NOT EXISTS `tenants_tenants` (
   UNIQUE KEY `alias` (`alias`),
   KEY `last_modified` (`last_modified`),
   KEY `mappeddomain` (`mappeddomain`),
-  KEY `version` (`version`),
-  KEY `status` (`status`)
+  KEY `version` (`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `tenants_version` (

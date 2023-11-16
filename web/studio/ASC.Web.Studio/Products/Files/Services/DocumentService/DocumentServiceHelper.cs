@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ using System.IO;
 using System.Linq;
 using System.Security;
 using System.Text;
-
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.Files.Core;
@@ -30,13 +29,9 @@ using ASC.Web.Files.Classes;
 using ASC.Web.Files.Resources;
 using ASC.Web.Files.Utils;
 using ASC.Web.Studio.Core;
-
 using JWT;
-using JWT.Algorithms;
-
 using File = ASC.Files.Core.File;
 using FileShare = ASC.Files.Core.Security.FileShare;
-using FileSecurity = ASC.Files.Core.Security.FileSecurity;
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Web.Files.Services.DocumentService
@@ -52,7 +47,7 @@ namespace ASC.Web.Files.Services.DocumentService
 
             using (var fileDao = Global.DaoFactory.GetFileDao())
             {
-                linkRight = FileShareLink.Check(doc, fileDao, out file, out Guid linkId);
+                linkRight = FileShareLink.Check(doc, fileDao, out file);
 
                 if (file == null)
                 {
@@ -67,13 +62,6 @@ namespace ASC.Web.Files.Services.DocumentService
                     {
                         file = curFile;
                     }
-                }
-
-                if (!SecurityContext.IsAuthenticated && FileConverter.MustConvert(file) && 
-                    linkRight != FileShare.Read && linkRight != FileShare.Restrict && 
-                    !FileShareLink.TryGetCurrentLinkId(out _))
-                {
-                    linkRight = FileShare.Read;
                 }
             }
             return GetParams(file, lastVersion, linkRight, true, true, editPossible, tryEdit, tryCoauth, out configuration);
@@ -235,16 +223,9 @@ namespace ASC.Web.Files.Services.DocumentService
             var docKey = GetDocKey(fileStable);
             var modeWrite = (editPossible || reviewPossible || fillFormsPossible || commentPossible) && tryEdit;
 
-            if (file.FolderID != null)
-            {
-                EntryManager.SetFileStatus(file);
-            }
-
-            var rightToDownload = CanDownload(fileSecurity, file, linkRight);
-
             configuration = new Configuration(file)
-            {
-                Document =
+                {
+                    Document =
                         {
                             Key = docKey,
                             Permissions =
@@ -255,17 +236,15 @@ namespace ASC.Web.Files.Services.DocumentService
                                     FillForms = rightToFillForms && lastVersion,
                                     Comment = rightToComment && lastVersion,
                                     ChangeHistory = rightChangeHistory,
-                                    ModifyFilter = rightModifyFilter,
-                                    Print = rightToDownload,
-                                    Download = rightToDownload
+                                    ModifyFilter = rightModifyFilter
                                 }
                         },
-                EditorConfig =
+                    EditorConfig =
                         {
                             ModeWrite = modeWrite,
                         },
-                ErrorMessage = strError,
-            };
+                    ErrorMessage = strError,
+                };
 
             if (!lastVersion)
             {
@@ -276,40 +255,12 @@ namespace ASC.Web.Files.Services.DocumentService
         }
 
 
-        private static bool CanDownload(FileSecurity fileSecurity, File file, FileShare linkRight)
-        {
-            if (!file.DenyDownload) return true;
-
-            var canDownload = linkRight != FileShare.Restrict && linkRight != FileShare.Read && linkRight != FileShare.Comment;
-
-            if (canDownload || SecurityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-            {
-                return canDownload;
-            }
-
-            if (linkRight == FileShare.Read || linkRight == FileShare.Comment)
-            {
-                using (var fileDao = Global.DaoFactory.GetFileDao())
-                {
-                    file = fileDao.GetFile(file.ID); // reset Access prop
-                }
-            }
-
-            canDownload = fileSecurity.CanDownload(file);
-
-            return canDownload;
-        }
-
         public static string GetSignature(object payload)
         {
             if (string.IsNullOrEmpty(FileUtility.SignatureSecret)) return null;
 
-            var encoder = new JwtEncoder(new HMACSHA256Algorithm(),
-                                         new Web.Core.Files.DocumentService.JwtSerializer(),
-                                         new JwtBase64UrlEncoder());
-
-
-            return encoder.Encode(payload, FileUtility.SignatureSecret);
+            JsonWebToken.JsonSerializer = new Web.Core.Files.DocumentService.JwtSerializer();
+            return JsonWebToken.Encode(payload, FileUtility.SignatureSecret, JwtHashAlgorithm.HS256);
         }
 
 
@@ -346,7 +297,7 @@ namespace ASC.Web.Files.Services.DocumentService
                 || fileSecurity.CanReview(file, FileConstant.ShareLinkId)
                 || fileSecurity.CanFillForms(file, FileConstant.ShareLinkId)
                 || fileSecurity.CanComment(file, FileConstant.ShareLinkId);
-            //TODO: IsLink?
+
             var usersDrop = FileTracker.GetEditingBy(file.ID)
                                        .Where(uid =>
                                            {

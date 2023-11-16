@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web;
-
 using ASC.Core;
 using ASC.Core.Users;
 
@@ -63,9 +61,6 @@ namespace ASC.Web.Studio.Core.Users
 
                 UserInfo = CoreContext.UserManager.GetUsers(userID);
             }
-
-            UserInfo.UsedSpace = Math.Max(0, CoreContext.TenantManager.FindUserQuotaRows(CoreContext.TenantManager.GetCurrentTenant().TenantId, UserInfo.ID).Where(r => !string.IsNullOrEmpty(r.Tag)).Where(r => r.Tag != Guid.Empty.ToString()).Sum(r => r.Counter));
-
         }
 
         public List<MyContact> Phones
@@ -121,13 +116,13 @@ namespace ASC.Web.Studio.Core.Users
             var template = node != null ? node.GetElementsByTagName("template")[0].InnerXml : "{0}";
 
             return new MyContact
-            {
-                type = type,
-                classname = type,
-                label = title,
-                text = HttpUtility.HtmlEncode(value),
-                link = String.Format(template, HttpUtility.HtmlEncode(value))
-            };
+                {
+                    type = type,
+                    classname = type,
+                    label = title,
+                    text = HttpUtility.HtmlEncode(value),
+                    link = String.Format(template, HttpUtility.HtmlEncode(value))
+                };
         }
 
         private List<MyContact> GetContacts()
@@ -201,7 +196,6 @@ namespace ASC.Web.Studio.Core.Users
                     case "extskype":
                     case "msn":
                     case "aim":
-                    case "telegram":
                     case "icq":
                     case "gtalk":
                         messengers.Add(contacts[i]);
@@ -235,7 +229,6 @@ namespace ASC.Web.Studio.Core.Users
                     case "extskype":
                     case "msn":
                     case "aim":
-                    case "telegram":
                     case "icq":
                     case "gtalk":
                         continue;

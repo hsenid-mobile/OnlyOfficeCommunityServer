@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Runtime.Serialization;
-
 using ASC.Mail.Enums;
 using ASC.Mail.Enums.Filter;
 
@@ -32,15 +31,12 @@ namespace ASC.Mail.Data.Contracts
             ApplyTo = new MailSieveFilterOptionsApplyToData();
         }
 
-        ///<example name="matchMultiConditions" type="int">1</example>
         [DataMember(Name = "matchMultiConditions")]
         public MatchMultiConditionsType MatchMultiConditions { get; set; }
 
-        ///<type name="applyTo">ASC.Mail.Data.Contracts.MailSieveFilterOptionsApplyToData, ASC.Mail</type>
         [DataMember(Name = "applyTo")]
         public MailSieveFilterOptionsApplyToData ApplyTo { get; set; }
 
-        ///<example name="ignoreOther">true</example>
         [DataMember(Name = "ignoreOther")]
         public bool IgnoreOther { get; set; }
     }
@@ -51,20 +47,16 @@ namespace ASC.Mail.Data.Contracts
     {
         public MailSieveFilterOptionsApplyToData()
         {
-            Folders = new[] { (int)FolderType.Inbox };
-            Mailboxes = new int[] { };
+            Folders = new[] {(int) FolderType.Inbox};
+            Mailboxes = new int[] {};
         }
-        ///<example name="folders" type="int">1</example>
-        ///<collection>list</collection>
+
         [DataMember(Name = "folders")]
         public int[] Folders { get; set; }
 
-        ///<example name="mailboxes" type="int">1</example>
-        ///<collection>list</collection>
         [DataMember(Name = "mailboxes")]
         public int[] Mailboxes { get; set; }
 
-        ///<example name="withAttachments" type="int">1</example>
         [DataMember(Name = "withAttachments")]
         public ApplyToAttachmentsType WithAttachments { get; set; }
     }

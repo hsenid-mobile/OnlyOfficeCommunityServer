@@ -1,7 +1,7 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="SmallChat.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Common.SmallChat.SmallChat" %>
 <%@ Import Namespace="ASC.Core" %>
 <%@ Import Namespace="ASC.Data.Storage" %>
-<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="Resources" %>
 <%@ Import Namespace="ASC.Web.Studio.Core.Users" %>
 
 <div class="small_chat_main_window" data-error="<%= ChatResource.ServerError %>">
@@ -132,12 +132,10 @@
                 <span class="characteristic"><%= Resource.UserType%>:</span>
                 <span class="small_chat_post">${UserType}</span>
             </div>
-            {{if Email != "" && Email != undefined}}
             <div class="small_chat_character">
                 <span class="characteristic"><%= Resource.Email%>:</span>
                 <a class="small_chat_mail mail link" target="_blank" href="/addons/mail/#composeto/email=${Email}" title="${Email}">${Email}</a>
             </div>
-            {{/if}}
             {{if Departments != undefined}}
             <div class="small_chat_character">
                 <span class="characteristic"><%= CustomNamingPeople.Substitute<Resource>("Department").HtmlEncode()%>:</span>

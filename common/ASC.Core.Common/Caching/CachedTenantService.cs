@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
 */
 
 
+using ASC.Common.Caching;
+using ASC.Core.Common.Settings;
+using ASC.Core.Tenants;
 using System;
 using System.Collections.Generic;
-
-using ASC.Common.Caching;
-using ASC.Core.Tenants;
 
 namespace ASC.Core.Caching
 {
@@ -53,7 +53,7 @@ namespace ASC.Core.Caching
             CacheExpiration = TimeSpan.FromMinutes(2);
             SettingsExpiration = TimeSpan.FromMinutes(2);
             cacheNotify = AscCache.Notify;
-            cacheNotify.Subscribe<TenantCacheItem>((t, a) =>
+            cacheNotify.Subscribe<Tenant>((t, a) =>
             {
                 var tenants = GetTenantStore();
                 tenants.Remove(t.TenantId);
@@ -79,11 +79,6 @@ namespace ASC.Core.Caching
         public IEnumerable<Tenant> GetTenants(DateTime from, bool active = true)
         {
             return service.GetTenants(from, active);
-        }
-
-        public IEnumerable<Tenant> GetTenants(List<int> ids)
-        {
-            return service.GetTenants(ids);
         }
 
         public Tenant GetTenant(int id)
@@ -134,14 +129,14 @@ namespace ASC.Core.Caching
         public Tenant SaveTenant(Tenant tenant)
         {
             tenant = service.SaveTenant(tenant);
-            cacheNotify.Publish(new TenantCacheItem() { TenantId = tenant.TenantId }, CacheNotifyAction.InsertOrUpdate);
+            cacheNotify.Publish(new Tenant() { TenantId = tenant.TenantId }, CacheNotifyAction.InsertOrUpdate);
             return tenant;
         }
 
         public void RemoveTenant(int id, bool auto = false)
         {
             service.RemoveTenant(id, auto);
-            cacheNotify.Publish(new TenantCacheItem() { TenantId = id }, CacheNotifyAction.InsertOrUpdate);
+            cacheNotify.Publish(new Tenant() { TenantId = id }, CacheNotifyAction.InsertOrUpdate);
         }
 
         public IEnumerable<TenantVersion> GetTenantVersions()
@@ -251,7 +246,7 @@ namespace ASC.Core.Caching
 
             internal void Clear()
             {
-                if (!CoreContext.Configuration.Standalone) return;
+                if(!CoreContext.Configuration.Standalone) return;
                 lock (locker)
                 {
                     byId.Clear();
@@ -259,10 +254,5 @@ namespace ASC.Core.Caching
                 }
             }
         }
-    }
-
-    public class TenantCacheItem
-    {
-        public int TenantId { get; set; }
     }
 }

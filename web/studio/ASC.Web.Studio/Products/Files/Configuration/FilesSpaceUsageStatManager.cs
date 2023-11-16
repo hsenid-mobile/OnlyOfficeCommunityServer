@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Core;
-using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.Files.Core;
 using ASC.Web.Core;
@@ -67,7 +66,7 @@ namespace ASC.Web.Files
                                       if (user.Equals(Constants.LostUser))
                                       {
                                           item.Name = FilesUCResource.CorporateFiles;
-                                          item.ImgUrl = PathProvider.GetImagePath("corporatefiles_big.svg");
+                                          item.ImgUrl = PathProvider.GetImagePath("corporatefiles_big.png");
                                           item.Url = PathProvider.GetFolderUrl(Global.FolderCommon);
                                       }
                                       else
@@ -93,27 +92,11 @@ namespace ASC.Web.Files
                     .InnerJoin("files_folder_tree t", Exp.EqColumns("f.folder_id", "t.folder_id"))
                     .InnerJoin("files_bunch_objects b", Exp.EqColumns("f.tenant_id", "b.tenant_id") & Exp.EqColumns("CONVERT(t.parent_id USING utf8)", "b.left_node"))
                     .Where("b.tenant_id", TenantProvider.CurrentTenantID)
-                    .Where(Exp.Like("b.right_node", "files/my/"+ userId, SqlLike.StartWith) | Exp.Like("b.right_node", "files/trash/"+ userId, SqlLike.StartWith));
+                    .Where("f.create_by", userId)
+                    .Where(Exp.Like("b.right_node", "files/my/", SqlLike.StartWith) | Exp.Like("b.right_node", "files/trash/", SqlLike.StartWith));
 
                 return db.ExecuteScalar<long>(query);
             }
-        }
-
-        public void RecalculateUserQuota(int TenantId, Guid userId)
-        {
-            CoreContext.TenantManager.SetCurrentTenant(TenantId);
-
-            var size = GetUserSpaceUsage(userId);
-
-            CoreContext.TenantManager.SetTenantQuotaRow(
-                new TenantQuotaRow { 
-                    Tenant = TenantId, 
-                    Path = $"/{FileConstant.ModuleId}/", 
-                    Counter = size, 
-                    Tag = WebItemManager.DocumentsProductID.ToString(), 
-                    UserId = userId
-                },
-               false);
         }
     }
 }

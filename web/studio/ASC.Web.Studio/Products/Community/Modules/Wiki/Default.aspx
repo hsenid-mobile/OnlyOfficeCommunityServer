@@ -6,7 +6,7 @@
 
 <%@ Import Namespace="ASC.Web.Community.Product" %>
 <%@ Import Namespace="ASC.Web.UserControls.Wiki" %>
-<%@ Import Namespace="ASC.Web.Community.Modules.Wiki.Resources" %>
+<%@ Import Namespace="ASC.Web.UserControls.Wiki.Resources" %>
 <%@ Import Namespace="ASC.Web.Community.Wiki" %>
 
 <%@ Register Src="WikiUC/ViewPage.ascx" TagName="ucViewPage" TagPrefix="wiki" %>
@@ -16,7 +16,7 @@
 <%@ Register TagPrefix="scl" Namespace="ASC.Web.Studio.UserControls.Common.Comments" Assembly="ASC.Web.Studio" %>
 
 <asp:Content ContentPlaceHolderID="HeadContent" runat="Server">
-    <link href="<%=VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Wiki/App_Themes/default/css/wikicssprint.less")%>"
+    <link href="<%=VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Wiki/App_Themes/default/css/wikicssprint.css")%>"
         rel="stylesheet" type="text/css" media="print" />
 </asp:Content>
 

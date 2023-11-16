@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 
 @import "base.less";
-@import "params.less";
-
 .crm-settings-color-base() {
     width: 16px;
     height: 16px;
@@ -83,7 +81,7 @@
         background-image: url("../images/drag.png") !important;
         background-position: center center;
         background-repeat: no-repeat;
-        border-left: 1px solid @border-color !important;
+        border-left: 1px solid #D1D1D1 !important;
         cursor: move;
         display: none;
         left: 0;
@@ -98,7 +96,7 @@
 
 
     li:hover {
-        background-color: @hover-row-color;
+        background-color: #F2F2F2;
         z-index: 500;
 
         .count_link_items > a {
@@ -113,12 +111,6 @@
     .currentColor {
         .crm-settings-color-base();
         margin: 2px;
-    }
-
-    @media (min-width: 1200px) {
-        li, li:hover {
-            margin: 0 0 -1px 0;
-        }
     }
 }
 
@@ -169,7 +161,7 @@
     }
 
     .headerCollapse, .headerExpand {
-        color: @text-color;
+        color: #333333;
         cursor: pointer;
         padding: 0 0 0 20px !important;
         position: relative;
@@ -185,7 +177,7 @@
 
     .headerCollapse:after {
             border-bottom: 6px solid transparent;
-            border-left: 6px solid @generalListEdit-after;
+            border-left: 6px solid #83888D;
             border-top: 6px solid transparent;
             left: 5px;
             margin-top: -7px;
@@ -194,7 +186,7 @@
     .headerExpand:after {
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
-        border-top: 6px solid @generalListEdit-after;
+        border-top: 6px solid #83888D;
         left: 2px;
         margin-top: -4px;
     }
@@ -260,8 +252,8 @@
 }
 
 #addOptionButton {
-    border-bottom-color: @option-button-bor;
-    color: @option-button-col;
+    border-bottom-color: #8E908F;
+    color: #272727;
     margin-top: 8px;
     display: inline-block;
 }

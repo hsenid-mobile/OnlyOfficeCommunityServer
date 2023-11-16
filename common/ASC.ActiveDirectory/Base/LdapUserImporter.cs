@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ using ASC.ActiveDirectory.Base.Settings;
 using ASC.ActiveDirectory.ComplexOperations;
 using ASC.Common.Logging;
 using ASC.Core;
-using ASC.Core.Tenants;
 using ASC.Core.Users;
 // ReSharper disable RedundantToStringCall
 
@@ -97,8 +96,8 @@ namespace ASC.ActiveDirectory.Base
 
             if (!AllDomainUsers.Any() && !TryLoadLDAPUsers())
                 return users;
-            var quotaSettings = TenantUserQuotaSettings.Load();
-            var usersToAdd = AllDomainUsers.Select(ldapObject => ldapObject.ToUserInfo(this, quotaSettings, _log));
+
+            var usersToAdd = AllDomainUsers.Select(ldapObject => ldapObject.ToUserInfo(this, _log));
 
             users.AddRange(usersToAdd);
 
@@ -135,7 +134,6 @@ namespace ASC.ActiveDirectory.Base
             _log.DebugFormat("LdapUserImporter.GetGroupUsers(Group name: {0})", groupInfo.Name);
 
             var users = new List<UserInfo>();
-            var quotaSettings = TenantUserQuotaSettings.Load();
 
             if (!AllDomainGroups.Any() && !TryLoadLDAPGroups())
                 return users;
@@ -184,7 +182,7 @@ namespace ASC.ActiveDirectory.Base
                     continue;
                 }
 
-                var userInfo = ldapUser.ToUserInfo(this, quotaSettings, _log);
+                var userInfo = ldapUser.ToUserInfo(this, _log);
 
                 if (!users.Exists(u => u.Sid == userInfo.Sid))
                     users.Add(userInfo);
@@ -197,7 +195,7 @@ namespace ASC.ActiveDirectory.Base
 
                 foreach (var ldapUser in ldapUsers)
                 {
-                    var userInfo = ldapUser.ToUserInfo(this, quotaSettings, _log);
+                    var userInfo = ldapUser.ToUserInfo(this, _log);
 
                     if (!users.Exists(u => u.Sid == userInfo.Sid))
                         users.Add(userInfo);
@@ -688,8 +686,6 @@ namespace ASC.ActiveDirectory.Base
 
             var searchTerm = exps.Count > 1 ? Criteria.Any(exps.ToArray()).ToString() : exps.First().ToString();
 
-            var quotaSettings = TenantUserQuotaSettings.Load();
-
             var users = LdapHelper.GetUsers(searchTerm, !string.IsNullOrEmpty(email) ? -1 : 1)
                 .Where(user => user != null)
                 .ToLookup(lu =>
@@ -703,7 +699,7 @@ namespace ASC.ActiveDirectory.Base
                             _ldapDomain = LdapUtils.DistinguishedNameToDomain(lu.DistinguishedName);
                         }
 
-                        ui = lu.ToUserInfo(this, quotaSettings, _log);
+                        ui = lu.ToUserInfo(this, _log);
                     }
                     catch (Exception ex)
                     {
@@ -818,14 +814,9 @@ namespace ASC.ActiveDirectory.Base
                         var ldapUserObject = ldapUser.Item2;
 
                         if (ldapUserInfo.Equals(Constants.LostUser)
-                            || ldapUserObject == null)
+                            || ldapUserObject == null
+                            || string.IsNullOrEmpty(ldapUserObject.DistinguishedName))
                         {
-                            continue;
-                        }
-                        else if (string.IsNullOrEmpty(ldapUserObject.DistinguishedName)
-                            || string.IsNullOrEmpty(ldapUserObject.Sid))
-                        {
-                            _log.DebugFormat("LdapUserImporter->Login(login: '{0}', dn: '{1}') failed. Error: missing DN or SID", login, ldapUserObject.Sid);
                             continue;
                         }
 

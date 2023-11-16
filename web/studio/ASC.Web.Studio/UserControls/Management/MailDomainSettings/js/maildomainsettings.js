@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 
 jq(function () {
-    jq('#saveMailDomainSettingsBtn').on("click", MailDomainSettingsManager.SaveSettings);
-    jq('input[name="signInType"]').on("click", MailDomainSettingsManager.SwitchSignInType);
-    jq('#addTrustDomainBtn').on("click", MailDomainSettingsManager.AddTrustedDomain);
+    jq('#saveMailDomainSettingsBtn').click(MailDomainSettingsManager.SaveSettings);
+    jq('input[name="signInType"]').click(MailDomainSettingsManager.SwitchSignInType);
+    jq('#addTrustDomainBtn').click(MailDomainSettingsManager.AddTrustedDomain);
     jq("input[type=radio][name=signInType][checked=checked]").prop("checked", true);
 });
 
@@ -45,6 +45,9 @@ MailDomainSettingsManager = new function() {
 
     this.RemoveTrustedDomain = function(number) {
         jq('#studio_domain_box_' + number).remove();
+        var count = jq('div[id^="studio_domain_box_"]').length;
+        if (count < 10)
+            jq('#addTrustDomainBtn').show();
     };
 
     this.AddTrustedDomain = function () {
@@ -64,6 +67,10 @@ MailDomainSettingsManager = new function() {
         sb += '</div>';
 
         jq('#studio_domainListBox').append(sb);
+
+        var count = jq('div[id^="studio_domain_box_"]').length;
+        if (count >= 10)
+            jq('#addTrustDomainBtn').hide();
 
         document.getElementById('studio_domain_' + maxNumb).focus();
     };

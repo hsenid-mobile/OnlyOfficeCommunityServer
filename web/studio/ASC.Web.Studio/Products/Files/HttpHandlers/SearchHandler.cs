@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
-
 using ASC.Common.Utils;
 using ASC.Files.Core;
 using ASC.Web.Core.Files;
@@ -43,7 +42,7 @@ namespace ASC.Web.Files.Configuration
 
         public override ImageOptions Logo
         {
-            get { return new ImageOptions { ImageFileName = "common_search_icon.svg" }; }
+            get { return new ImageOptions { ImageFileName = "common_search_icon.png" }; }
         }
 
         public override Guid ModuleID
@@ -97,45 +96,36 @@ namespace ASC.Web.Files.Configuration
             using (var folderDao = Global.DaoFactory.GetFolderDao())
             {
                 var result = SearchFiles(text)
-                    .Select(r =>
-                    {
-                        var folders = EntryManager.GetBreadCrumbs(r.FolderID, folderDao);
-                        return new SearchResultItem
+                    .Select(r => new SearchResultItem
                         {
                             Name = r.Title ?? string.Empty,
                             Description = string.Empty,
                             URL = FilesLinkUtility.GetFileWebPreviewUrl(r.Title, r.ID),
                             Date = r.ModifiedOn,
                             Additional = new Dictionary<string, object>
-                            {
-                                { "Author", r.CreateByString.HtmlEncode() },
-                                { "Path", FolderPathBuilder(folders) },
-                                { "FullPath", FolderFullPathBuilder(folders) },
-                                { "FolderUrl", PathProvider.GetFolderUrl(r.FolderID) },
-                                { "Size", FileSizeComment.FilesSizeToString(r.ContentLength) }
-                            }
-                        };
-                    });
+                                {
+                                    { "Author", r.CreateByString.HtmlEncode() },
+                                    { "Path", FolderPathBuilder(EntryManager.GetBreadCrumbs(r.FolderID, folderDao)) },
+                                    { "Size", FileSizeComment.FilesSizeToString(r.ContentLength) }
+                                }
+                        }
+                    );
 
                 var resultFolder = SearchFolders(text)
                     .Select(f =>
-                    {
-                        var folders = EntryManager.GetBreadCrumbs(f.ID, folderDao);
-                        return new SearchResultItem
-                        {
-                            Name = f.Title ?? string.Empty,
-                            Description = String.Empty,
-                            URL = PathProvider.GetFolderUrl(f),
-                            Date = f.ModifiedOn,
-                            Additional = new Dictionary<string, object>
-                            {
-                                { "Author", f.CreateByString.HtmlEncode() },
-                                { "Path", FolderPathBuilder(folders) },
-                                { "FullPath", FolderFullPathBuilder(folders) },
-                                { "IsFolder", true }
-                            }
-                        };
-                    });
+                            new SearchResultItem
+                                {
+                                    Name = f.Title ?? string.Empty,
+                                    Description = String.Empty,
+                                    URL = PathProvider.GetFolderUrl(f),
+                                    Date = f.ModifiedOn,
+                                    Additional = new Dictionary<string, object>
+                                        {
+                                            { "Author", f.CreateByString.HtmlEncode() },
+                                            { "Path", FolderPathBuilder(EntryManager.GetBreadCrumbs(f.ID, folderDao)) },
+                                            { "IsFolder", true }
+                                        }
+                                });
 
                 return result.Concat(resultFolder).ToArray();
             }
@@ -153,13 +143,6 @@ namespace ASC.Web.Files.Configuration
             return 4 < titles.Count
                        ? string.Join(separator, new[] { titles.First(), "...", titles.ElementAt(titles.Count - 2), titles.Last() })
                        : string.Join(separator, titles.ToArray());
-        }
-
-        private static String FolderFullPathBuilder(IEnumerable<Folder> folders)
-        {
-            var titles = folders.Select(f => f.Title).ToList();
-            const string separator = " \\ ";
-            return string.Join(separator, titles.ToArray());
         }
     }
 
@@ -182,8 +165,7 @@ namespace ASC.Web.Files.Configuration
                 writer.AddAttribute(HtmlTextWriterAttribute.Class, "borderBase left-column gray-text");
                 writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-                var isFolder = srGroup.Additional.ContainsKey("IsFolder") && srGroup.Additional["IsFolder"].Equals(true);
-                var typeTitle = isFolder ? FilesCommonResource.Folder : FilesCommonResource.File;
+                var typeTitle = srGroup.Additional.ContainsKey("IsFolder") && srGroup.Additional["IsFolder"].Equals(true) ? FilesCommonResource.Folder : FilesCommonResource.File;
 
                 writer.AddAttribute(HtmlTextWriterAttribute.Title, typeTitle);
                 writer.RenderBeginTag(HtmlTextWriterTag.Div);
@@ -231,11 +213,7 @@ namespace ASC.Web.Files.Configuration
 
                 writer.AddAttribute(HtmlTextWriterAttribute.Class, "borderBase right-column gray-text");
                 writer.RenderBeginTag(HtmlTextWriterTag.Td);
-
-                writer.AddAttribute(HtmlTextWriterAttribute.Href, isFolder ? srGroup.URL : srGroup.Additional["FolderUrl"].ToString());
-                writer.AddAttribute(HtmlTextWriterAttribute.Title, srGroup.Additional["FullPath"].ToString());
-                writer.AddAttribute(HtmlTextWriterAttribute.Class, "link gray-text");
-                writer.RenderBeginTag(HtmlTextWriterTag.A);
+                writer.RenderBeginTag(HtmlTextWriterTag.Div);
                 writer.Write(srGroup.Additional["Path"]);
                 writer.RenderEndTag();
                 writer.RenderEndTag();

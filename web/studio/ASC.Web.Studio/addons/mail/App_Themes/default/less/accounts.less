@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  *
 */
 
+
+@import 'settings.less';
 
 .accounts_list {
     @border-style: @messages-border-style;
@@ -50,12 +52,6 @@
             .accountname {
                 margin-left: @message-spliter-width;
             }
-
-            .imap_sync_icon {
-                width: 16px;
-                height: 16px;
-                margin-left: 5px;
-            }
         }
 
         .aliases_list {
@@ -66,7 +62,7 @@
                 margin: 0px;
                 max-width: 73%;
                 height: 18px;
-                color: @text-color;
+                color: #333333;
                 font-size: 12px;
                 text-decoration: none;
                 text-overflow: ellipsis;
@@ -211,8 +207,4 @@
     .default_account_icon {
         background-position: 0px -32px;
     }
-}
-
-.imap_sync_icon {
-    background: url(../../../../../skins/default/images/svg/documents/rotategray.svg);
 }

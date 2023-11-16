@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 
 (function ($) {
-    var ProjectsJSResource = ASC.Projects.Resources.ProjectsJSResource, teamlab = Teamlab, ResourceJS = ASC.Resources.Master.ResourceJS;
+    var resources = ASC.Projects.Resources.ProjectsJSResource, teamlab = Teamlab, masterResource = ASC.Resources.Master.Resource;
 
     var tagsadvancedSelector = function (element, options) {
         this.$element = $(element);
@@ -31,9 +31,9 @@
             var that = this,
                 opts = {
                     newoptions: [
-                      { title: ProjectsJSResource.TagsSelectorTitle, type: "input", tag: "title" }
+                      { title: resources.TagsSelectorTitle, type: "input", tag: "title" }
                     ],
-                    newbtn: ResourceJS.CreateButton
+                    newbtn: masterResource.CreateButton
                 };
 
             that.displayAddItemBlock.call(that, opts);
@@ -62,14 +62,14 @@
             var newTag = { data: $addPanel.find(".title input").val().trim() };
 
             if (!newTag.data) {
-                that.showErrorField.call(that, { field: $addPanel.find(".title"), error: ProjectsJSResource.TagsSelectorEmptyTitleError });
-                $addPanel.find(".error input").first().trigger("focus");
+                that.showErrorField.call(that, { field: $addPanel.find(".title"), error: resources.TagsSelectorEmptyTitleError });
+                $addPanel.find(".error input").first().focus();
                 return;
             }
             
             teamlab.addPrjTag({}, newTag, {
                 before: function () {
-                    that.displayLoadingBtn.call(that, { btn: $btn, text: ProjectsJSResource.LoadingProcessing });
+                    that.displayLoadingBtn.call(that, { btn: $btn, text: resources.LoadingProcessing });
                 },
                 error: function (params, errors) {
                     that.showServerError.call(that, { field: $btn, error: errors });
@@ -106,10 +106,10 @@
     };
 
     $.fn.tagsadvancedSelector.defaults = $.extend({}, $.fn.advancedSelector.defaults, {
-        addtext: ProjectsJSResource.TagsSelectorAddText,
-        noresults: ProjectsJSResource.TagsSelectorNoResult,
-        noitems: ProjectsJSResource.TagsSelectorNoItems,
-        emptylist: ProjectsJSResource.TagsSelectorEmptyList
+        addtext: resources.TagsSelectorAddText,
+        noresults: resources.TagsSelectorNoResult,
+        noitems: resources.TagsSelectorNoItems,
+        emptylist: resources.TagsSelectorEmptyList
     });
 
 })(jQuery);

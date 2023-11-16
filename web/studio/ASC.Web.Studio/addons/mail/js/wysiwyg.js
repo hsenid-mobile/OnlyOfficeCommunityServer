@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 window.wysiwygEditor = (function ($) {
     var editorInstance,
-        supportedCustomEvents = { OnChange: "onchange" },
+        supportedCustomEvents = { OnChange: "onchange", OnFocus: "onfocus" },
         eventsHandler = $({}),
         isEditorReady,
         signatureOnload,
@@ -43,7 +43,7 @@ window.wysiwygEditor = (function ($) {
         if (button) {
             var $button = $(button);
 
-            $button.off("click").on("click", function () {
+            $button.unbind("click").bind("click", function () {
                 showQuote(this);
             });
 
@@ -57,7 +57,7 @@ window.wysiwygEditor = (function ($) {
                 showQuote($button);
             }
 
-            $button.off("contextmenu").on("contextmenu", function (event) {
+            $button.unbind("contextmenu").bind("contextmenu", function (event) {
                 event.stopPropagation ? event.stopPropagation() : (event.cancelBubble = true);
             });
         }
@@ -117,13 +117,7 @@ window.wysiwygEditor = (function ($) {
         });
 
         $body.find(".mailmessage-filelink-link .file-name").dotdotdot({ wrap: "letter", height: 18 });
-
-        $body.one("focus", function (e) {
-            if (e.isDefaultPrevented()) return;
-            window.messagePage.bindSend($body);
-            e.preventDefault();
-        });
-    }    
+    }
 
     function init() {
         close();
@@ -131,9 +125,7 @@ window.wysiwygEditor = (function ($) {
         var config = {
             toolbar: "Mail",
             removePlugins: "magicline",
-            extraPlugins:"mentions",
-            filebrowserUploadUrl: "fckuploader.ashx?esid=mail",
-            height: 200,
+            filebrowserUploadUrl: "fckuploader.ashx?newEditor=true&esid=mail",
             tabIndex: 5,
             resize_dir: "vertical",
             on: {
@@ -168,8 +160,6 @@ window.wysiwygEditor = (function ($) {
             if (bodyOnload) {
                 setBody(bodyOnload);
             }
-
-            initMentions();
         });
     }
 
@@ -193,19 +183,13 @@ window.wysiwygEditor = (function ($) {
 
     function setFocus() {
         if (editorInstance) {
-            if (!isEditorReady) {
+            if (isEditorReady) {
+                editorInstance.focus();
+                eventsHandler.trigger(supportedCustomEvents.OnFocus);
+            } else {
                 needCkFocus = true;
             }
         }
-    }
-
-    function initMentions() {
-        // listen custom event
-        editorInstance.on('autocompleteCommit', function (evt) {
-            var user = UserManager.getUser(evt.data);
-            jq("#newmessageTo").AdvancedEmailSelector('addItem', user.email);
-            editorInstance.focus();
-        });
     }
 
     function setReply(message) {
@@ -367,11 +351,11 @@ window.wysiwygEditor = (function ($) {
     }
 
     function bind(eventName, fn) {
-        return eventsHandler.on(eventName, fn);
+        return eventsHandler.bind(eventName, fn);
     }
 
     function unbind(eventName) {
-        return eventsHandler.off(eventName);
+        return eventsHandler.unbind(eventName);
     }
 
     function insertFileLinks(files) {

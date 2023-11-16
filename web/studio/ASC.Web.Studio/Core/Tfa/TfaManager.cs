@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,19 +23,15 @@ using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
-
 using ASC.Common.Caching;
 using ASC.Common.Utils;
 using ASC.Core;
 using ASC.Core.Users;
-using ASC.MessagingSystem;
 using ASC.Security.Cryptography;
 using ASC.Web.Core;
-using ASC.Web.Core.Utility;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Common;
-
 using Google.Authenticator;
+using Resources;
 
 
 namespace ASC.Web.Studio.Core.TFA
@@ -79,15 +75,15 @@ namespace ASC.Web.Studio.Core.TFA
         private static readonly TwoFactorAuthenticator Tfa = new TwoFactorAuthenticator();
         private static readonly ICache Cache = AscCache.Memory;
 
-        public static SetupCode GenerateSetupCode(this UserInfo user)
+        public static SetupCode GenerateSetupCode(this UserInfo user, int size)
         {
-            return Tfa.GenerateSetupCode(SetupInfo.TfaAppSender, user.Email, GenerateAccessToken(user), false, 4);
+            return Tfa.GenerateSetupCode(SetupInfo.TfaAppSender, user.Email, GenerateAccessToken(user), size, size, true);
         }
 
-        public static bool ValidateAuthCode(this UserInfo user, string code, bool checkBackup = true, bool isEntryPoint = false)
+        public static bool ValidateAuthCode(this UserInfo user, string code, bool checkBackup = true)
         {
             if (!TfaAppAuthSettings.IsVisibleSettings
-                || !TfaAppAuthSettings.TfaEnabledForUser(user.ID))
+                || !TfaAppAuthSettings.Enable)
             {
                 return false;
             }
@@ -98,11 +94,9 @@ namespace ASC.Web.Studio.Core.TFA
 
             if (string.IsNullOrEmpty(code)) throw new Exception(Resource.ActivateTfaAppEmptyCode);
 
-            var attemptsCount = LoginSettings.Load().AttemptCount;
-
             int counter;
             int.TryParse(Cache.Get<string>("tfa/" + user.ID), out counter);
-            if (++counter > attemptsCount)
+            if (++counter > SetupInfo.LoginThreshold)
             {
                 throw new Authorize.BruteForceCredentialException(Resource.TfaTooMuchError);
             }
@@ -124,8 +118,8 @@ namespace ASC.Web.Studio.Core.TFA
 
             if (!SecurityContext.IsAuthenticated)
             {
-                var action = isEntryPoint ? MessageAction.LoginSuccessViaApiTfa : MessageAction.LoginSuccesViaTfaApp;
-                CookiesManager.AuthenticateMeAndSetCookies(user.Tenant, user.ID, action);
+                var cookiesKey = SecurityContext.AuthenticateMe(user.ID);
+                CookiesManager.SetCookies(CookiesType.AuthKey, cookiesKey);
             }
 
             if (!TfaAppUserSettings.EnableForUser(user.ID))

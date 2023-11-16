@@ -123,13 +123,13 @@ namespace ASC.Web.Studio.Masters
         protected global::ASC.Web.Studio.Controls.Common.FeedControl feadControl;
 
         /// <summary>
-        /// FirstScripts control.
+        /// GoogleAnalyticsScriptPlaceHolder control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::ASC.Web.Studio.Masters.FirstScripts FirstScripts;
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder GoogleAnalyticsScriptPlaceHolder;
 
         /// <summary>
         /// Form control.
@@ -175,6 +175,15 @@ namespace ASC.Web.Studio.Masters
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder InvitePanelHolder;
+
+        /// <summary>
+        /// BannerHolder control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder BannerHolder;
 
         /// <summary>
         /// SmallChatHolder control.
@@ -328,14 +337,5 @@ namespace ASC.Web.Studio.Masters
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::ASC.Web.Studio.Controls.Common.InlineScript InlineScript;
-
-        /// <summary>
-        /// LiveChatHolder control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder LiveChatHolder;
     }
 }

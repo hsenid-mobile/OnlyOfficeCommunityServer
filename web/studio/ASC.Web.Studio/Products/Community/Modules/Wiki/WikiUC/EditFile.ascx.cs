@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,10 @@
 using System;
 using System.Web;
 using System.Web.UI.WebControls;
-
 using ASC.Core.Tenants;
 using ASC.Data.Storage;
-using ASC.Web.Community.Modules.Wiki.Resources;
 using ASC.Web.UserControls.Wiki.Data;
 using ASC.Web.UserControls.Wiki.Handlers;
-
 using IO = System.IO;
 
 namespace ASC.Web.UserControls.Wiki.UC
@@ -86,7 +83,7 @@ namespace ASC.Web.UserControls.Wiki.UC
                 return string.Format(@"<a class=""linkMedium"" href=""{0}"" title=""{1}"">{2}</a>",
                                      ResolveUrl(string.Format(ImageHandlerUrlFormat, FileName)),
                                      file.FileName,
-                                     WikiUCResource.wikiFileDownloadCaption);
+                                     Resources.WikiUCResource.wikiFileDownloadCaption);
             }
 
             return string.Format(@"<img src=""{0}"" style=""max-width:300px; max-height:200px"" />",
@@ -95,7 +92,7 @@ namespace ASC.Web.UserControls.Wiki.UC
 
         private static string GetFileLocation(string fileName)
         {
-            var letter = (byte)fileName[0];
+            var letter = (byte) fileName[0];
 
             var secondFolder = letter.ToString("x");
             var firstFolder = secondFolder.Substring(0, 1);
@@ -130,13 +127,13 @@ namespace ASC.Web.UserControls.Wiki.UC
             var fileName = toFileName;
             var fileLocation = GetFileLocation(fileName);
             var file = new File
-            {
-                FileName = fileName,
-                UploadFileName = fileName,
-                UserID = userId,
-                FileLocation = fileLocation,
-                FileSize = (int)storage.GetFileSize(section.DataStorage.TempDomain, fromFileName),
-            };
+                           {
+                               FileName = fileName,
+                               UploadFileName = fileName,
+                               UserID = userId,
+                               FileLocation = fileLocation,
+                               FileSize = (int) storage.GetFileSize(section.DataStorage.TempDomain, fromFileName),
+                           };
 
             var wiki = new WikiEngine();
             wiki.SaveFile(file);
@@ -157,7 +154,7 @@ namespace ASC.Web.UserControls.Wiki.UC
 
             try
             {
-                file = wikiEngine.CreateOrUpdateFile(new File { FileName = fuFile.FileName, FileSize = fuFile.FileBytes.Length });
+                file = wikiEngine.CreateOrUpdateFile(new File {FileName = fuFile.FileName, FileSize = fuFile.FileBytes.Length});
                 FileContentSave(file.FileLocation, fuFile.FileBytes, section, configLocation, tenantId, context);
             }
             catch (TenantQuotaException)
@@ -202,7 +199,7 @@ namespace ASC.Web.UserControls.Wiki.UC
             if (!fuFile.HasFile)
                 return SaveResult.FileEmpty;
 
-            var file = CurrentFile ?? new File { FileName = fuFile.FileName, UploadFileName = fuFile.FileName };
+            var file = CurrentFile ?? new File {FileName = fuFile.FileName, UploadFileName = fuFile.FileName};
 
             file.FileSize = fuFile.FileBytes.Length;
 

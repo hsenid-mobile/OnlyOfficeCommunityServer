@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ window.tagsDropdown = (function($) {
         var cbx = popup.find("#markallrecipients");
         cbx.prop('checked', false);
         cbx.show();
-        cbx.off('click').on('click', manageCrmTags);
+        cbx.unbind('click').bind('click', manageCrmTags);
 
         var cbxLbl = popup.find("#markallrecipientsLabel");
         cbxLbl.show();
@@ -172,7 +172,7 @@ window.tagsDropdown = (function($) {
         popup.find(".existsTags").html(tagContent);
 
         var $tag = popup.find(".tag.inactive");
-        $tag.off('click').on('click', function (e) {
+        $tag.unbind('click').bind('click', function (e) {
             var el = $(this);
 
             if (el.hasClass("disabled")) return;
@@ -186,7 +186,7 @@ window.tagsDropdown = (function($) {
         });
 
         $tag = popup.find(".tag.tagArrow");
-        $tag.off('click').on('click', function (e) {
+        $tag.unbind('click').bind('click', function (e) {
             var el = $(this);
 
             if (el.hasClass("disabled")) return;
@@ -217,8 +217,8 @@ window.tagsDropdown = (function($) {
         dropdown.regScroll(draw);
 
         popup.find('.entertag_button')
-            .off('click')
-            .on('click',
+            .unbind('click')
+            .bind('click',
                 function () {
                     createLabel(options);
                 });
@@ -229,7 +229,7 @@ window.tagsDropdown = (function($) {
         tagsColorsPopup.hide();
         dropdown.unregHide(filteredHide);
         dropdown.unregHide(draw);
-        popup.find('.entertag_button').off('click');
+        popup.find('.entertag_button').unbind('click');
     }
 
     return {

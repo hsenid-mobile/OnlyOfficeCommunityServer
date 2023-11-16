@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
 */
 
 
+using ASC.FederatedLogin.Helpers;
+using ASC.FederatedLogin.LoginProviders;
+using ASC.FederatedLogin.Profile;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,16 +27,13 @@ using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.Security;
 using System.Web.Services;
-
-using ASC.FederatedLogin.Helpers;
-using ASC.FederatedLogin.LoginProviders;
-using ASC.FederatedLogin.Profile;
+using System.Web.SessionState;
 
 namespace ASC.FederatedLogin
 {
     [WebService(Namespace = "http://tempuri.org/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
-    public class Login : IHttpHandler
+    public class Login : IHttpHandler, IRequiresSessionState
     {
         private Dictionary<string, string> _params;
 
@@ -58,8 +58,8 @@ namespace ASC.FederatedLogin
             }
             else
             {
-                _params = ((Dictionary<string, object>)new JavaScriptSerializer().DeserializeObject(
-                    Encoding.UTF8.GetString(HttpServerUtility.UrlTokenDecode(context.Request["p"])))).ToDictionary(x => x.Key, y => (string)y.Value);
+                _params = ((Dictionary<string, object>) new JavaScriptSerializer().DeserializeObject(
+                    Encoding.UTF8.GetString(HttpServerUtility.UrlTokenDecode(context.Request["p"])))).ToDictionary(x => x.Key, y => (string) y.Value);
             }
 
             if (!string.IsNullOrEmpty(Auth))
@@ -123,7 +123,7 @@ namespace ASC.FederatedLogin
             {
                 if (!string.IsNullOrEmpty(_params.Get("mode")))
                 {
-                    return (LoginMode)Enum.Parse(typeof(LoginMode), _params.Get("mode"), true);
+                    return (LoginMode) Enum.Parse(typeof (LoginMode), _params.Get("mode"), true);
                 }
                 return LoginMode.Popup;
             }
@@ -171,7 +171,12 @@ namespace ASC.FederatedLogin
             if (useMinimalProfile)
                 profile = profile.GetMinimalProfile(); //Only id and provider
 
-            if (HttpRuntime.Cache != null && !useMinimalProfile)
+            if (context.Session != null && !useMinimalProfile)
+            {
+                //Store in session
+                context.Response.Redirect(new Uri(ReturnUrl, UriKind.Absolute).AddProfileSession(profile, context).ToString(), true);
+            }
+            else if (HttpRuntime.Cache != null && !useMinimalProfile)
             {
                 context.Response.Redirect(new Uri(ReturnUrl, UriKind.Absolute).AddProfileCache(profile).ToString(), true);
             }

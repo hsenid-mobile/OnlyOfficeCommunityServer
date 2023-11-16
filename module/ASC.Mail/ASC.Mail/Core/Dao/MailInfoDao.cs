@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
@@ -87,9 +86,7 @@ namespace ASC.Mail.Core.Dao
                     MailTable.Columns.Stream.Prefix(MM_ALIAS),
                     MailTable.Columns.Uidl.Prefix(MM_ALIAS),
                     MailTable.Columns.IsRemoved.Prefix(MM_ALIAS),
-                    MailTable.Columns.Introduction.Prefix(MM_ALIAS),
-                    MailTable.Columns.ReadRequestStatus.Prefix(MM_ALIAS));
-
+                    MailTable.Columns.Introduction.Prefix(MM_ALIAS));
 
             if (exp.TagIds != null && exp.TagIds.Any())
             {
@@ -341,8 +338,8 @@ namespace ASC.Mail.Core.Dao
                 IsAnswered = Convert.ToBoolean(r[11]),
                 IsForwarded = Convert.ToBoolean(r[12]),
                 LabelsString = Convert.ToString(r[13]),
-                FolderRestore = (FolderType)Convert.ToInt32(r[14]),
-                Folder = (FolderType)Convert.ToInt32(r[15]),
+                FolderRestore = (FolderType) Convert.ToInt32(r[14]),
+                Folder = (FolderType) Convert.ToInt32(r[15]),
                 ChainId = Convert.ToString(r[16]),
                 ChainDate = Convert.ToDateTime(r[17]),
                 MailboxId = Convert.ToInt32(r[18]),
@@ -350,8 +347,7 @@ namespace ASC.Mail.Core.Dao
                 Stream = Convert.ToString(r[20]),
                 Uidl = Convert.ToString(r[21]),
                 IsRemoved = Convert.ToBoolean(r[22]),
-                Intoduction = Convert.ToString(r[23]),
-                ReadRequestStatus = Convert.ToBoolean(r[24])
+                Intoduction = Convert.ToString(r[23])
             };
 
             return mailInfo;

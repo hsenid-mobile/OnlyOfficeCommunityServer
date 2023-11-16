@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,15 @@
 using System;
 using System.IO;
 using System.Web;
-
 using ASC.CRM.Core;
 using ASC.VoipService;
 using ASC.Web.Core.Files;
 using ASC.Web.Core.Utility;
+using ASC.Web.CRM.Configuration;
 using ASC.Web.Studio;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
-
 using Global = ASC.Web.CRM.Classes.Global;
+using StudioResources = Resources;
 
 namespace ASC.Web.CRM.Controls.Settings
 {
@@ -49,7 +48,7 @@ namespace ASC.Web.CRM.Controls.Settings
 
             if (file.ContentLength <= 0 || file.ContentLength > maxFileSize * 1024L * 1024L)
             {
-                return Error(Resource.FileSizeMaxExceed);
+                return Error(StudioResources.Resource.FileSizeMaxExceed);
             }
 
             try
@@ -64,13 +63,13 @@ namespace ASC.Web.CRM.Controls.Settings
 
                 var uri = Global.GetStore().Save("voip", path, file.InputStream, MimeMapping.GetMimeMapping(file.FileName), ContentDispositionUtil.GetHeaderValue(file.FileName, withoutBase: true));
                 return Success(new VoipUpload
-                {
-                    AudioType = audioType,
-                    Name = file.FileName,
-                    Path = CommonLinkUtility.GetFullAbsolutePath(uri.ToString())
-                });
+                    {
+                        AudioType = audioType,
+                        Name = file.FileName,
+                        Path = CommonLinkUtility.GetFullAbsolutePath(uri.ToString())
+                    });
             }
-            catch (Exception error)
+            catch(Exception error)
             {
                 return Error(error.Message);
             }
@@ -79,19 +78,19 @@ namespace ASC.Web.CRM.Controls.Settings
         private static FileUploadResult Success(VoipUpload file)
         {
             return new FileUploadResult
-            {
-                Success = true,
-                Data = file
-            };
+                {
+                    Success = true,
+                    Data = file
+                };
         }
 
         private static FileUploadResult Error(string messageFormat, params object[] args)
         {
             return new FileUploadResult
-            {
-                Success = false,
-                Message = string.Format(messageFormat, args)
-            };
+                {
+                    Success = false,
+                    Message = string.Format(messageFormat, args)
+                };
         }
     }
 

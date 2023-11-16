@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Web;
-
 using ASC.FederatedLogin.Helpers;
 using ASC.FederatedLogin.LoginProviders;
 using ASC.Web.Core;
@@ -54,8 +53,7 @@ namespace ASC.Web.Studio.ThirdParty
                     OAuth20TokenHelper.RequestCode<DropboxLoginProvider>(HttpContext.Current,
                                                                          additionalArgs: new Dictionary<string, string>
                                                                              {
-                                                                                 { "force_reauthentication", "true" },
-                                                                                 { "token_access_type","offline" }
+                                                                                 { "force_reauthentication", "true" }
                                                                              });
                 }
                 else

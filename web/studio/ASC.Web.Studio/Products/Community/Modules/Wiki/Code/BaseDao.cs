@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 
@@ -26,7 +25,7 @@ namespace ASC.Web.UserControls.Wiki.Data
     {
         private const string TenantColumn = "tenant";
 
-        protected readonly IDbManager db;
+        protected readonly DbManager db;
         protected readonly int tenant;
 
 
@@ -42,7 +41,7 @@ namespace ASC.Web.UserControls.Wiki.Data
             db.Dispose();
         }
 
-
+        
         protected SqlQuery Query(string table)
         {
             return new SqlQuery(table).Where(GetTenantColumnName(table), tenant);

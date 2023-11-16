@@ -1,6 +1,6 @@
-﻿/*
+/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,22 @@ using System.Net;
 using System.Threading;
 using System.Web;
 using System.Web.UI;
-
 using ASC.Common.Utils;
 using ASC.Core;
+using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.FederatedLogin;
 using ASC.FederatedLogin.Profile;
 using ASC.MessagingSystem;
 using ASC.Web.Core;
 using ASC.Web.Core.Users;
-using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Core.Notify;
 using ASC.Web.Studio.Core.Users;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Statistics;
 using ASC.Web.Studio.UserControls.Users.UserProfile;
 using ASC.Web.Studio.Utility;
+using Resources;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -61,7 +60,7 @@ namespace ASC.Web.Studio.UserControls.Management
 
         protected ConfirmType _type
         {
-            get { return typeof(ConfirmType).TryParseEnum(Request["type"] ?? "", ConfirmType.EmpInvite); }
+            get { return typeof (ConfirmType).TryParseEnum(Request["type"] ?? "", ConfirmType.EmpInvite); }
         }
 
         protected EmployeeType _employeeType
@@ -114,25 +113,14 @@ namespace ASC.Web.Studio.UserControls.Management
             return String.IsNullOrEmpty(value) ? account.LastName : value;
         }
 
-        protected bool isPersonal
-        {
+        protected bool isPersonal {
             get { return CoreContext.Configuration.Personal; }
         }
 
-        protected Web.Core.Utility.PasswordSettings TenantPasswordSettings;
-
         protected void Page_Load(object sender, EventArgs e)
         {
-            Page.RegisterBodyScripts("~/js/third-party/xregexp.js", "~/UserControls/Management/ConfirmInviteActivation/js/confirm_invite_activation.js");
-
-            if (ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
-            {
-                Page.RegisterStyle("~/UserControls/Management/ConfirmInviteActivation/css/dark-confirm_invite_activation.less");
-            }
-            else
-            {
-                Page.RegisterStyle("~/UserControls/Management/ConfirmInviteActivation/css/confirm_invite_activation.less");
-            }
+            Page.RegisterBodyScripts("~/js/third-party/xregexp.js", "~/UserControls/Management/ConfirmInviteActivation/js/confirm_invite_activation.js")
+                .RegisterStyle("~/UserControls/Management/ConfirmInviteActivation/css/confirm_invite_activation.less");
 
             var uid = Guid.Empty;
             try
@@ -147,7 +135,7 @@ namespace ASC.Web.Studio.UserControls.Management
 
             if (_type != ConfirmType.Activation && AccountLinkControl.IsNotEmpty && !CoreContext.Configuration.Personal)
             {
-                var thrd = (AccountLinkControl)LoadControl(AccountLinkControl.Location);
+                var thrd = (AccountLinkControl) LoadControl(AccountLinkControl.Location);
                 thrd.InviteView = true;
                 thrd.ClientCallback = "loginJoinCallback";
                 thrdParty.Visible = true;
@@ -159,7 +147,7 @@ namespace ASC.Web.Studio.UserControls.Management
             UserInfo user;
             try
             {
-                SecurityContext.CurrentAccount = ASC.Core.Configuration.Constants.CoreSystem;
+                SecurityContext.AuthenticateMe(ASC.Core.Configuration.Constants.CoreSystem);
 
                 user = CoreContext.UserManager.GetUserByEmail(email);
                 var usr = CoreContext.UserManager.GetUsers(uid);
@@ -179,19 +167,10 @@ namespace ASC.Web.Studio.UserControls.Management
 
             if (_type == ConfirmType.LinkInvite || _type == ConfirmType.EmpInvite)
             {
-                if (!CoreContext.Configuration.Personal)
+                if (TenantStatisticsProvider.GetUsersCount() >= TenantExtra.GetTenantQuota().ActiveUsers && _employeeType == EmployeeType.User)
                 {
-                    if (_employeeType == EmployeeType.User && TenantStatisticsProvider.GetUsersCount() >= TenantExtra.GetTenantQuota().ActiveUsers)
-                    {
-                        ShowError(UserControlsCommonResource.TariffUserLimitReason);
-                        return;
-                    }
-
-                    if (_employeeType == EmployeeType.Visitor && !(CoreContext.Configuration.Standalone || TenantStatisticsProvider.GetVisitorsCount() < TenantExtra.GetTenantQuota().ActiveUsers * Constants.CoefficientOfVisitors))
-                    {
-                        ShowError(UserControlsCommonResource.TariffVisitorLimitReason);
-                        return;
-                    }
+                    ShowError(UserControlsCommonResource.TariffUserLimitReason);
+                    return;
                 }
 
                 if (!user.ID.Equals(Constants.LostUser.ID))
@@ -220,14 +199,12 @@ namespace ASC.Web.Studio.UserControls.Management
             if (tenant != null)
             {
                 var settings = IPRestrictionsSettings.Load();
-                if (settings.Enable && !IPSecurity.IPSecurity.Verify(tenant, email))
+                if (settings.Enable && !IPSecurity.IPSecurity.Verify(tenant))
                 {
                     ShowError(Resource.ErrorAccessRestricted);
                     return;
                 }
             }
-
-            TenantPasswordSettings = Web.Core.Utility.PasswordSettings.Load();
 
             if (!IsPostBack)
                 return;
@@ -236,6 +213,7 @@ namespace ASC.Web.Studio.UserControls.Management
             var lastName = GetLastName();
 
             var passwordHash = (Request["passwordHash"] ?? "").Trim();
+            var analytics = (Request["analytics"] ?? "").Trim() == "True"; 
             var mustChangePassword = false;
             LoginProfile thirdPartyProfile;
 
@@ -295,10 +273,10 @@ namespace ASC.Web.Studio.UserControls.Management
             var userID = Guid.Empty;
             try
             {
-                SecurityContext.CurrentAccount = ASC.Core.Configuration.Constants.CoreSystem;
+                SecurityContext.AuthenticateMe(ASC.Core.Configuration.Constants.CoreSystem);
                 if (_type == ConfirmType.EmpInvite || _type == ConfirmType.LinkInvite)
                 {
-                    if (!CoreContext.Configuration.Personal && TenantStatisticsProvider.GetUsersCount() >= TenantExtra.GetTenantQuota().ActiveUsers && _employeeType == EmployeeType.User)
+                    if (TenantStatisticsProvider.GetUsersCount() >= TenantExtra.GetTenantQuota().ActiveUsers && _employeeType == EmployeeType.User)
                     {
                         ShowError(UserControlsCommonResource.TariffUserLimitReason);
                         return;
@@ -312,8 +290,14 @@ namespace ASC.Web.Studio.UserControls.Management
 
                         var messageAction = _employeeType == EmployeeType.User ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
                         MessageService.Send(HttpContext.Current.Request, MessageInitiator.System, messageAction, MessageTarget.Create(newUser.ID), newUser.DisplayUserName(false));
-
+                        
                         userID = newUser.ID;
+
+                        var settings = TenantAnalyticsSettings.LoadForCurrentUser();
+                        settings.Analytics = analytics;
+
+                        settings.SaveForCurrentUser();
+
                     }
 
                     if (Request["__EVENTTARGET"] == "thirdPartyLogin")
@@ -330,7 +314,7 @@ namespace ASC.Web.Studio.UserControls.Management
 
                         var messageAction = _employeeType == EmployeeType.User ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
                         MessageService.Send(HttpContext.Current.Request, MessageInitiator.System, messageAction, MessageTarget.Create(newUser.ID), newUser.DisplayUserName(false));
-
+                        
                         userID = newUser.ID;
                         if (!String.IsNullOrEmpty(thirdPartyProfile.Avatar))
                         {
@@ -356,8 +340,7 @@ namespace ASC.Web.Studio.UserControls.Management
                     userID = user.ID;
 
                     //notify
-                    if (user.IsVisitor())
-                    {
+                    if (user.IsVisitor()) { 
                         StudioNotifyService.Instance.GuestInfoAddedAfterInvite(user);
                         MessageService.Send(HttpContext.Current.Request, MessageInitiator.System, MessageAction.GuestActivated, MessageTarget.Create(user.ID), user.DisplayUserName(false));
                     }
@@ -386,8 +369,9 @@ namespace ASC.Web.Studio.UserControls.Management
             user = CoreContext.UserManager.GetUsers(userID);
             try
             {
-                CookiesManager.AuthenticateMeAndSetCookies(user.Email, passwordHash, MessageAction.LoginSuccess);
-
+                var cookiesKey = SecurityContext.AuthenticateMe(user.Email, passwordHash);
+                CookiesManager.SetCookies(CookiesType.AuthKey, cookiesKey);
+                MessageService.Send(HttpContext.Current.Request, MessageAction.LoginSuccess);
                 StudioNotifyService.Instance.UserHasJoin();
 
                 if (mustChangePassword)
@@ -467,7 +451,7 @@ namespace ASC.Web.Studio.UserControls.Management
                 userInfo.CultureName = CoreContext.Configuration.CustomMode ? "ru-RU" : Thread.CurrentThread.CurrentUICulture.Name;
             }
 
-            return UserManagerWrapper.AddUser(userInfo, passwordHash, true, true, isVisitor, fromInviteLink, true, true);
+            return UserManagerWrapper.AddUser(userInfo, passwordHash, true, true, isVisitor, fromInviteLink);
         }
     }
 }

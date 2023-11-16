@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 */
 
 
-@import "params.less";
 #tableListProjects {
     tr {
         &.noActiveProj {
@@ -60,7 +59,7 @@
             text-align: center;
 
             a {
-                color: @text-color;
+                color: #333333;
                 text-decoration: none;
             }
         }
@@ -74,13 +73,13 @@
             width: 200px;
 
             .userLink.my {
-                color: @grey-text;
+                color: #666;
                 font-weight: bold;
             }
 
             a.participants {
                 margin-right: 8px;
-                color: @grey-text;
+                color: #666;
                 float: right;
                 text-decoration: none;
             }

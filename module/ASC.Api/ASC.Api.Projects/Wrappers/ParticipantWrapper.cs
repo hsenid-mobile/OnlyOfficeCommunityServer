@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,41 +16,32 @@
 
 
 using System.Runtime.Serialization;
-
 using ASC.Api.Employee;
 using ASC.Projects.Core.Domain;
 
 namespace ASC.Api.Projects.Wrappers
 {
-    ///<inherited>ASC.Api.Employee.EmployeeWraperFull, ASC.Api.Employee</inherited>
     [DataContract(Name = "participant", Namespace = "")]
     public class ParticipantWrapper : EmployeeWraperFull
     {
-        ///<example>true</example>
         [DataMember]
         public bool CanReadFiles { get; set; }
 
-        ///<example>true</example>
         [DataMember]
         public bool CanReadMilestones { get; set; }
 
-        ///<example>true</example>
         [DataMember]
         public bool CanReadMessages { get; set; }
 
-        ///<example>true</example>
         [DataMember]
         public bool CanReadTasks { get; set; }
 
-        ///<example>true</example>
         [DataMember]
         public bool CanReadContacts { get; set; }
 
-        ///<example>true</example>
         [DataMember]
         public bool IsAdministrator { get; set; }
 
-        ///<example>true</example>
         [DataMember]
         public bool IsRemovedFromTeam { get; set; }
 

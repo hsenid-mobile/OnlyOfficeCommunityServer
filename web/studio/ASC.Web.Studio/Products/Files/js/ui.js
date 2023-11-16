@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 window.ASC.Files.UI = (function () {
     var isInit = false;
-    var resizeTimer = null;
 
     var canSetDocumentTitle = true;
 
@@ -28,8 +27,6 @@ window.ASC.Files.UI = (function () {
     var amountPage = 0;
     var countTotal = 0;
 
-    var autoCleanUpSetting = null;
-
     var lastSelectedEntry = null;
 
     var filesUserProfileInfo = new PopupBox("pb_filesUserProfileInfo", 320, 140, "tintLight", "borderBaseShadow", "",
@@ -38,95 +35,23 @@ window.ASC.Files.UI = (function () {
             tmplName: "userProfileCardTmpl"
         });
 
-    var awaitingThumbnails = function () {
-        var folderId = null;
-        var fileIds = [];
-
-        return {
-            getFiles: function () {
-                return fileIds;
-            },
-            setFolder: function (folder) {
-                if (folder != folderId) {
-                    folderId = folder;
-                    fileIds = [];
-                }
-            },
-            setFile: function (file) {
-                if (fileIds.indexOf(file) < 0) {
-                    fileIds.push(file)
-                }
-            }
-        }
-    }();
-
     var init = function () {
         if (isInit === false) {
             isInit = true;
         }
 
-        jq(window).on("resize", function () {
-            fixContentHeaderLeft();
-            ASC.Files.UI.fixContentHeaderWidth();
-
-            resizeVersionsBlock();
-        });
-
-        jq(window).on("resizeWinTimerWithMaxDelay", function (event) {
+        jq(window).resize(function () {
             fixContentHeaderLeft();
             ASC.Files.UI.fixContentHeaderWidth();
         });
 
-        if (!ASC.Resources.Master.IsAuthenticated){
-            ASC.Files.UI.autoCleanUpSetting = {
-                isAutoCleanUp: false
-            };
-            
-            return;
-        }
-        
-        var onGetAutoCleanup = function (data, params, errorMessage) {
-            var isAutoCleanUpOn = data.IsAutoCleanUp;
-            var autoCleanUpGap = data.Gap
-
-            ASC.Files.UI.autoCleanUpSetting = {
-                isAutoCleanUp: isAutoCleanUpOn,
-                gap: autoCleanUpGap
-            };
-
-            if (!isAutoCleanUpOn) {
-                jq("#selectGapToAutoCleanUp").val("1").trigger("change");
-            }
-        };
-
-        if (ASC.Files.ServiceManager) {
-            ASC.Files.ServiceManager.bind(ASC.Files.ServiceManager.events.GetAutoCleanup, onGetAutoCleanup);
-            ASC.Files.ServiceManager.getAutoCleanup(ASC.Files.ServiceManager.events.GetAutoCleanup);
-        }
+        jq(window).bind("resizeWinTimerWithMaxDelay", function (event) {
+            fixContentHeaderLeft();
+            ASC.Files.UI.fixContentHeaderWidth();
+        });
     };
-
-    var resizeVersionsBlock = function () {
-        if (jq("#filesMainContent").hasClass("thumbnails")) {
-            jq("#contentVersions").remove();
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function () {
-                var row = jq(".display-versions");
-                if (row.length) {
-                    ASC.Files.Folders.showVersions(row);
-                }
-            }, 500);
-        }
-    }
 
     var filesSelectedHandler = function () {
-    };
-
-    var removeEntryObject = function (entryObject) {
-        entryObject = jq(entryObject);
-        if (entryObject.hasClass("display-versions")) {
-            ASC.Files.Folders.closeVersions();
-        }
-        entryObject.remove();
     };
 
     var getEntryObject = function (entryType, entryId) {
@@ -152,8 +77,6 @@ window.ASC.Files.UI = (function () {
             if (entryObject.is(".jstree *")) {
                 selectorObject = ".tree-node";
                 selectorData = "> a input:hidden[name=\"entry_data\"]";
-            } else if (entryObject.closest("#contentVersions").length) {
-                entryObject = jq(".display-versions");
             }
             entryObject = entryObject.closest(selectorObject);
         }
@@ -191,35 +114,14 @@ window.ASC.Files.UI = (function () {
         result.provider_id = dataObject.attr("data-provider_id") | 0;
         result.provider_key = dataObject.attr("data-provider_key");
         result.shared = dataObject.attr("data-shared") === "true";
-        result.deny_download = dataObject.attr("data-deny_download") === "true";
-        result.deny_sharing = dataObject.attr("data-deny_sharing") === "true";
         result.title = (dataObject.attr("data-title") || "").trim();
         result.version = dataObject.attr("data-version") | 0;
         result.version_group = dataObject.attr("data-version_group") | 0;
         result.folderUrl = dataObject.attr("data-folder_url") ;
         result.folder_id = dataObject.attr("data-folder_id");
-        result.folder_is_favorite = dataObject.attr("data-folder_is_favorite");
         result.encrypted = dataObject.attr("data-encrypted") === "true";
-        result.thumbnail_status = dataObject.attr("data-thumbnail_status");
-        result.deleted_permanently_date = dataObject.attr("data-deleted_permanently_date");
 
         return result;
-    };
-
-    var setObjectData = function (entryObject, key, value) {
-        entryObject = jq(entryObject);
-
-        if (entryObject.length == 0) {
-            return;
-        }
-
-        var selectorData = "input:hidden[name=\"entry_data\"]";
-        var dataObject = entryObject.find(selectorData);
-        if (!dataObject.length) {
-            return;
-        }
-
-        dataObject.attr(key, value);
     };
 
     var parseItemId = function (itemId) {
@@ -289,43 +191,16 @@ window.ASC.Files.UI = (function () {
         ASC.Files.Folders.getFolderItems(false);
     };
 
-    var switchFolderView = function (toStyleIcon) {
+    var switchFolderView = function (toCompact) {
         var storageKey = ASC.Files.Constants.storageKeyCompactView;
-
-        if (typeof toStyleIcon == "undefined") {
-            var currentStorageValueView = localStorageManager.getItem(storageKey) || false;
-            toStyleIcon = currentStorageValueView;
-            if (typeof currentStorageValueView == "boolean") {
-                toStyleIcon = currentStorageValueView ? "compact" : "normal";
-            }
+        if (typeof toCompact == "undefined") {
+            toCompact = localStorageManager.getItem(storageKey) === true;
         }
+        localStorageManager.setItem(storageKey, toCompact);
 
-        ASC.Files.Folders.closeVersions();
-
-        jq("#switchViewFolder, #filesMainContent").removeClass("thumbnails normal compact");
-        jq("#switchViewFolder, #filesMainContent").addClass(toStyleIcon);
-
-        localStorageManager.setItem(storageKey, toStyleIcon);
-
-        if (toStyleIcon == "thumbnails") {
-            jq("#filesMainContent").find(".file-row .thumb-img img[src='']").each(function () {
-                var img = jq(this);
-                var src = img.attr("data-src");
-                img.on("error", ASC.Files.EventHandler.onThumbnailError).attr("src", src);
-            });
-
-            jq("#filesMainContent").css("display", "grid");
-
-            var filesAwaitingThumbnails = awaitingThumbnails.getFiles();
-            if (filesAwaitingThumbnails.length) {
-                Teamlab.createThumbnails(null, { fileIds: filesAwaitingThumbnails });
-            }
-        }
-        else {
-            jq("#filesMainContent").css("display", "block");
-        }
-
-        if (ASC.Files.Folders.showMore && toStyleIcon != "compact") {
+        jq("#switchViewFolder").toggleClass("compact", toCompact === true);
+        jq("#filesMainContent").toggleClass("compact", toCompact === true);
+        if (ASC.Files.Folders.showMore && toCompact !== true) {
             ASC.Files.UI.trackShowMore();
         }
 
@@ -419,7 +294,7 @@ window.ASC.Files.UI = (function () {
 
     var trackShowMore = function(wideScreen) {
         if (typeof(wideScreen) == "undefined") {
-            wideScreen = jq(window).width() >= 1200 || ASC.Desktop;
+            wideScreen = jq(window).width() >= 1200;
         }
         if (wideScreen) {
             if (jq(".files-content-panel").height() - jq(".mainPageContent").height() <= jq(".mainPageContent").scrollTop() + 350) {
@@ -462,7 +337,7 @@ window.ASC.Files.UI = (function () {
             }
         } else {
             entryObj.unblock();
-            entryObj.css("position", "");
+            entryObj.css("position", "static");
         }
 
         var selectedNow = entryObj.hasClass("row-selected");
@@ -505,11 +380,6 @@ window.ASC.Files.UI = (function () {
 
     var addRowHandlers = function (entryObject) {
         var listEntry = (entryObject || jq("#filesMainContent .file-row"));
-        var hasSplitter = jq("#filesMainContent .files-separator").length > 0;
-
-        awaitingThumbnails.setFolder(ASC.Files.Folders.currentFolder.id);
-
-        var isAutoCleanUp = ASC.Files.UI.autoCleanUpSetting.isAutoCleanUp;
 
         listEntry.each(function () {
             var entryData = ASC.Files.UI.getObjectData(this);
@@ -520,7 +390,6 @@ window.ASC.Files.UI = (function () {
             var entryTitle = entryData.title;
 
             if (ASC.Files.Folders.folderContainer == "trash") {
-
                 entryObj.find(".file-lock").remove();
                 entryObj.find(".template-action").remove();
                 entryObj.find(".entry-descr .title-created").remove();
@@ -529,22 +398,8 @@ window.ASC.Files.UI = (function () {
                     entryObj.find(".create-date").remove();
                     entryObj.find(".modified-date").show();
                 }
-                if (isAutoCleanUp) {
-                    entryObj.find(".entry-descr .title-removed").remove();
-                    entryObj.find(".create-date").remove();
-                    entryObj.find(".modified-date").remove();
-                    entryObj.find(".deleted-permanently").show();
-                    entryObj.find(".entry-descr .title-removed-permanently").show();
-                } else {
-                    entryObj.find(".entry-descr .title-removed-permanently").remove();
-                    entryObj.find(".entry-descr .title-removed").show();
-                    entryObj.find(".deleted-permanently-date").remove();
-                    entryObj.find(".modified-date").show();
-                }
             } else {
                 entryObj.find(".entry-descr .title-removed").remove();
-                entryObj.find(".entry-descr .title-removed-permanently").remove();
-                entryObj.find(".deleted-permanently-date").remove();
                 if (entryType == "folder") {
                     entryObj.find(".modified-date").remove();
                 }
@@ -552,31 +407,10 @@ window.ASC.Files.UI = (function () {
             var rowLink = entryObj.find(".entry-title .name a");
 
             var ftClass = (entryType == "file" ? ASC.Files.Utility.getCssClassByFileTitle(entryTitle) : ASC.Files.Utility.getFolderCssClass());
-            entryObj.find(".thumb-img, .thumb-" + entryType).addClass(ftClass);
-
-            if (entryData.thumbnail_status == 0
-                && !(ASC.Files.ThirdParty && ASC.Files.ThirdParty.isThirdParty(entryData))) {
-                awaitingThumbnails.setFile(entryId);
-            }
-
-            if (entryData.thumbnail_status == 1) {
-                entryObj.find(".thumb-img img").attr("data-src", ASC.Files.Utility.GetFileThumbnailUrl(entryId, entryData.version));
-            }
-
-            if (entryType == "folder" && ASC.Files.Folders.folderContainer != "forme" && !entryObj.hasClass("new-folder")) {
-                entryObj.addClass("min");
-            }
-
-            if (entryType == "file" && !hasSplitter && ASC.Files.Folders.folderContainer != "forme") {
-                entryObj.before("<div class='files-separator'></div>");
-                hasSplitter = true;
-            }
+            entryObj.find(".thumb-" + entryType).addClass(ftClass);
 
             if (!entryObj.hasClass("checkloading")) {
-                if (!ASC.Resources.Master.IsAuthenticated){
-                    entryObj.addClass("without-share");
-                }
-                
+
                 if (entryType == "file") {
                     if (rowLink.is(":not(:has(.file-extension))")) {
                         ASC.Files.UI.highlightExtension(rowLink, entryTitle);
@@ -589,10 +423,10 @@ window.ASC.Files.UI = (function () {
                         var lockObj = entryObj.find(".file-lock");
                         if (ASC.Files.UI.accessEdit(entryData, entryObj)) {
                             if (entryObj.hasClass("file-locked")) {
-                                var lockHint = ASC.Files.FilesJSResource.TitleLockedFile;
+                                var lockHint = ASC.Files.FilesJSResources.TitleLockedFile;
                                 if (ASC.Files.UI.lockedForMe(entryObj)) {
                                     var lockedBy = lockObj.attr("data-name");
-                                    lockHint = ASC.Files.FilesJSResource.TitleLockedFileBy.format(lockedBy);
+                                    lockHint = ASC.Files.FilesJSResources.TitleLockedFileBy.format(lockedBy);
                                     if (ASC.Files.Constants.ADMIN || ASC.Files.Folders.folderContainer == "my") {
                                         entryObj.addClass("file-can-unlock");
                                     }
@@ -606,31 +440,17 @@ window.ASC.Files.UI = (function () {
 
                     if (ASC.Files.Utility.MustConvert(entryTitle) && !entryData.encrypted) {
                         entryObj.find(".pencil:not(.convert-action)").remove();
-                        if ((!ASC.Resources.Master.IsAuthenticated || Teamlab.profile.isVisitor) && !ASC.Files.UI.accessEdit()
-                            || ASC.Files.UI.denyDownload(entryData)
+                        if (Teamlab.profile.isVisitor && !ASC.Files.UI.accessEdit()
                             || ASC.Files.Folders.folderContainer == "trash") {
                             entryObj.find(".convert-action").remove();
                         } else {
                             entryObj.find(".convert-action").show();
                         }
-                    } else if (ASC.Files.Utility.CanWebRestrictedEditing(entryTitle) && !entryData.encrypted) {
-                        entryObj.find(".pencil:not(.fillform-action)").remove();
-                        if (!ASC.Files.UI.editableFile(entryData)) {
-                            entryObj.find(".fillform-action").remove();
-                        }
-                        else {
-                            entryObj.find(".fillform-action").show();
-                        }
                     } else {
                         if (entryData.encrypted) {
-                            if (!ASC.Desktop) {
-                                rowLink.removeAttr("href");
-                                entryObj.find(".file-edit").removeAttr("href");
-                            } else {
-                                entryUrl = ASC.Files.Utility.GetFileWebEditorUrl(entryId);
-                                rowLink.attr("href", entryUrl);
-                                entryObj.find(".file-edit").attr("href", entryUrl);
-                            }
+                            entryUrl = ASC.Files.Utility.GetFileDownloadUrl(entryId);
+                            rowLink.attr("href", entryUrl);
+                            entryObj.find(".file-edit").attr("href", entryUrl);
                         }
 
                         if (ASC.Files.UI.editableFile(entryData)
@@ -639,7 +459,7 @@ window.ASC.Files.UI = (function () {
                                 && ASC.Files.Utility.CanWebEncrypt(entryTitle)
                                 && ASC.Desktop && ASC.Desktop.encryptionSupport())) {
                             ASC.Files.UI.lockEditFile(entryObj, ASC.Files.UI.editingFile(entryObj));
-                            entryObj.find(".convert-action, .fillform-action").remove();
+                            entryObj.find(".convert-action").remove();
                             if (ASC.Files.Utility.CanCoAuhtoring(entryTitle) && !entryObj.hasClass("on-edit-alone")) {
                                 entryObj.addClass("can-coauthoring");
                             }
@@ -675,17 +495,12 @@ window.ASC.Files.UI = (function () {
                     rowLink.attr("href", ASC.Files.UI.getEntryLink("folder", ASC.Files.Folders.currentFolder.id));
                 }
 
-                if (!jq("#filesMainContent").hasClass("without-share")) {
-                    if (ASC.Files.Folders.folderContainer == "forme" && (!ASC.Files.UI.accessEdit(entryData, entryObj) || ASC.Files.UI.denySharing(entryData))
-                        || ASC.Files.Folders.folderContainer == "privacy" && (entryType == "folder" || (!ASC.Files.UI.accessEdit(entryData, entryObj) || ASC.Files.UI.denySharing(entryData)))
+                if (!jq("#filesMainContent").hasClass("without-share")
+                    && (ASC.Files.Folders.folderContainer == "forme" && !ASC.Files.UI.accessEdit(entryData, entryObj)
+                        || ASC.Files.Folders.folderContainer == "privacy" && (entryType == "folder" || !ASC.Files.UI.accessEdit(entryData, entryObj))
                         || ASC.Resources.Master.Personal && entryType == "folder"
-                        || Teamlab.profile.isVisitor === true) {
-                        entryObj.addClass("without-share");
-                    }
-                } else {
-                    if (ASC.Files.Folders.folderContainer == "forme" && entryData.access == ASC.Files.Constants.AceStatusEnum.ReadWrite && !entryData.deny_sharing && !Teamlab.profile.isVisitor) {
-                        entryObj.addClass("can-share");
-                    }
+                        || Teamlab.profile.isVisitor === true)) {
+                    entryObj.addClass("without-share");
                 }
 
                 if (jq.browser.msie) {
@@ -693,7 +508,7 @@ window.ASC.Files.UI = (function () {
                 }
             }
         });
-        
+
         if (jq("#switchToNormal").length) {
             ASC.Files.UI.switchFolderView();
         }
@@ -753,7 +568,7 @@ window.ASC.Files.UI = (function () {
     };
 
     var updateMainContentHeader = function () {
-        ASC.Files.UI.resetSelectAll(jq("#filesMainContent .file-row:has(.checkbox input[type=checkbox]:not(:checked))").length == 0);
+        ASC.Files.UI.resetSelectAll(jq("#filesMainContent .file-row:has(.checkbox input:visible:not(:checked))").length == 0);
         if (jq("#filesMainContent .file-row:has(.checkbox input:checked)").length == 0) {
             jq("#mainContentHeader .menuAction.unlockAction").removeClass("unlockAction");
             if (ASC.Files.Folders.folderContainer == "trash") {
@@ -970,8 +785,8 @@ window.ASC.Files.UI = (function () {
         }
 
         if (access == ASC.Files.Constants.AceStatusEnum.Restrict) {
-            ASC.Files.UI.removeEntryObject(entryObj);
-            ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.AceStatusEnum_Restrict, true);
+            entryObj.remove();
+            ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.AceStatusEnum_Restrict, true);
             return false;
         }
 
@@ -992,25 +807,6 @@ window.ASC.Files.UI = (function () {
 
     };
 
-    var denyDownload = function (entryData) {
-        if (!entryData || !entryData.deny_download)
-            return false;
-
-        return entryData.access == ASC.Files.Constants.AceStatusEnum.Read
-            || entryData.access == ASC.Files.Constants.AceStatusEnum.Comment;
-    }
-
-    var denySharing = function (entryData) {
-        if (!entryData)
-            return false;
-
-        if (entryData.access != ASC.Files.Constants.AceStatusEnum.None
-            && entryData.access != ASC.Files.Constants.AceStatusEnum.ReadWrite)
-            return true;
-
-        return entryData.access == ASC.Files.Constants.AceStatusEnum.ReadWrite && entryData.deny_sharing;
-    }
-
     var lockEditFileById = function (fileId, edit, listBy) {
         var fileObj = ASC.Files.UI.getEntryObject("file", fileId);
         return ASC.Files.UI.lockEditFile(fileObj, edit, listBy);
@@ -1024,9 +820,9 @@ window.ASC.Files.UI = (function () {
         if (edit) {
             fileObj.addClass("on-edit");
 
-            var strBy = ASC.Files.FilesJSResource.TitleEditingFile;
+            var strBy = ASC.Files.FilesJSResources.TitleEditingFile;
             if (listBy) {
-                strBy = ASC.Files.FilesJSResource.TitleEditingFileBy.format(listBy);
+                strBy = ASC.Files.FilesJSResources.TitleEditingFileBy.format(listBy);
             }
 
             fileObj.find(".pencil.file-editing").attr("title", strBy);
@@ -1060,7 +856,6 @@ window.ASC.Files.UI = (function () {
     var displayEntryTooltip = function (entryObj, entryType, entryId) {
         entryObj = entryObj || ASC.Files.UI.getEntryObject(entryType, entryId);
 
-        var isThumbView = localStorageManager.getItem(ASC.Files.Constants.storageKeyCompactView) == "thumbnails" ? true : false;
         var entryData = ASC.Files.UI.getObjectData(entryObj);
 
         var jsonData = {
@@ -1085,9 +880,6 @@ window.ASC.Files.UI = (function () {
                                 : entryData.create_on)),
                     version: entryData.version, //file
                     length_string: entryData.content_length_string, //file
-                    thumbnail: entryData.thumbnail_status == 1 && !isThumbView
-                        ? ASC.Files.Utility.GetFileThumbnailUrl(entryId, entryData.version)
-                        : false,
                     error: entryData.error,
 
                     provider_key: entryData.provider_key,
@@ -1101,7 +893,7 @@ window.ASC.Files.UI = (function () {
 
         var htmlTootlip = ASC.Files.TemplateManager.translateFromString(stringData);
 
-        var $selector = entryObj.find(".checkbox");
+        var $selector = entryObj.find(".thumb-" + entryType);
         var $dropdown = jq("#entryTooltip");
         var $window = jq(window);
         var addTop = 12;
@@ -1152,11 +944,11 @@ window.ASC.Files.UI = (function () {
     };
 
     var checkCharacter = function (input) {
-        jq(input).off("keyup").on("keyup", function () {
+        jq(input).unbind("keyup").bind("keyup", function () {
             var str = jq(this).val();
             if (str.search(ASC.Files.Common.characterRegExp) != -1) {
                 jq(this).val(ASC.Files.Common.replaceSpecCharacter(str));
-                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.ErrorMassage_SpecCharacter.format(ASC.Files.Common.characterString), true);
+                ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.ErrorMassage_SpecCharacter.format(ASC.Files.Common.characterString), true);
             }
         });
     };
@@ -1217,23 +1009,21 @@ window.ASC.Files.UI = (function () {
     var displayCommonSetting = function () {
         ASC.Files.UI.hideAllContent();
         LoadingBanner.hideLoading();
-        jq("#treeViewContainer .node-selected").removeClass("node-selected");
         jq("#treeSetting").addClass("currentCategory open");
         jq(".settings-link-common").addClass("active");
         jq("#settingCommon").show();
 
-        ASC.Files.UI.setDocumentTitle(ASC.Files.FilesJSResource.TitleSettingsCommon);
+        ASC.Files.UI.setDocumentTitle(ASC.Files.FilesJSResources.TitleSettingsCommon);
     };
 
     var displayAdminSetting = function () {
         ASC.Files.UI.hideAllContent();
         LoadingBanner.hideLoading();
-        jq("#treeViewContainer .node-selected").removeClass("node-selected");
         jq("#treeSetting").addClass("currentCategory open");
         jq(".settings-link-admin").addClass("active");
         jq("#settingAdmin").show();
 
-        ASC.Files.UI.setDocumentTitle(ASC.Files.FilesJSResource.TitleSettingsAdmin);
+        ASC.Files.UI.setDocumentTitle(ASC.Files.FilesJSResources.TitleSettingsAdmin);
     };
 
     var displayMoreFeaturs = function () {
@@ -1242,7 +1032,7 @@ window.ASC.Files.UI = (function () {
         ASC.Files.CreateMenu.disableMenu();
         jq("#moreFeatures").show();
 
-        ASC.Files.UI.setDocumentTitle(ASC.Files.FilesJSResource.TitleMoreFeaturs);
+        ASC.Files.UI.setDocumentTitle(ASC.Files.FilesJSResources.TitleMoreFeaturs);
     };
 
     var displayPersonalLimitStorageExceed = function () {
@@ -1327,10 +1117,8 @@ window.ASC.Files.UI = (function () {
     return {
         init: init,
         parseItemId: parseItemId,
-        removeEntryObject: removeEntryObject,
         getEntryObject: getEntryObject,
         getObjectData: getObjectData,
-        setObjectData: setObjectData,
         getSelectorId: getSelectorId,
 
         getEntryTitle: getEntryTitle,
@@ -1341,7 +1129,6 @@ window.ASC.Files.UI = (function () {
         currentPage: currentPage,
         amountPage: amountPage,
         countTotal: countTotal,
-        autoCleanUpSetting: autoCleanUpSetting,
 
         updateFolderView: updateFolderView,
         switchFolderView: switchFolderView,
@@ -1378,9 +1165,6 @@ window.ASC.Files.UI = (function () {
 
         accessEdit: accessEdit,
         accessDelete: accessDelete,
-
-        denyDownload: denyDownload,
-        denySharing: denySharing,
 
         checkCharacter: checkCharacter,
         canSetDocumentTitle: canSetDocumentTitle,
@@ -1424,15 +1208,12 @@ window.ASC.Files.UI = (function () {
     ASC.Files.UI.init();
 
     $(function () {
-        jq("#switchToNormal").on("click", function () {
-            ASC.Files.UI.switchFolderView("normal");
+        jq("#switchToNormal").click(function () {
+            ASC.Files.UI.switchFolderView(false);
         });
 
-        jq("#switchToCompact").on("click", function () {
-            ASC.Files.UI.switchFolderView("compact");
-        });
-        jq("#switchToThumbnails").on("click", function () {
-            ASC.Files.UI.switchFolderView("thumbnails");
+        jq("#switchToCompact").click(function () {
+            ASC.Files.UI.switchFolderView(true);
         });
         jq("#filesMainContent").on("click", ".file-row", ASC.Files.UI.clickRow);
 
@@ -1450,17 +1231,16 @@ window.ASC.Files.UI = (function () {
             }
             ASC.Files.UI.clickRow(event, jq(this));
 
-            jq(this).trigger("blur");
+            jq(this).blur();
             ASC.Files.Common.cancelBubble(event);
         });
 
-        jq(".menu-action-on-top").on("click", function () {
+        jq(".menu-action-on-top").click(function () {
             jq(document).scrollTop(0);
-            document.querySelector('.mainPageContent').scrollTo(0, 0);
             return false;
         });
 
-        jq(document).on("keydown", function (event) {
+        jq(document).keydown(function (event) {
             if (jq(".blockUI:visible").length != 0 ||
                 jq("#fileViewerDialog:visible,#mediaPlayer:visible").length != 0 ||
                 jq(".studio-action-panel:visible").length != 0 ||
@@ -1490,7 +1270,7 @@ window.ASC.Files.UI = (function () {
             if (code == ASC.Files.Common.keyCode.A && e.ctrlKey) {
                 if (jq.browser.opera) {
                     setTimeout(function () {
-                        jq("#filesSelectAllCheck").trigger("focus");
+                        jq("#filesSelectAllCheck").focus();
                     }, 1);
                 }
                 ASC.Files.UI.checkSelectAll(true);
@@ -1500,7 +1280,7 @@ window.ASC.Files.UI = (function () {
             return true;
         });
 
-        jq(document).on("keyup", function (event) {
+        jq(document).keyup(function (event) {
             if (jq(".blockUI:visible").length != 0 ||
                 jq("#fileViewerDialog:visible,#mediaPlayer:visible").length != 0 ||
                 jq("#promptRename").length != 0 ||

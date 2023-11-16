@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 @import "../base.less";
-@import "params.less";
 
 .advanced-selector-select {
     display: inline-block;
@@ -25,10 +24,8 @@
     position: relative;
 
     &.disabled {
-        color: #83888d;
-        cursor:default;
+        color: #666;
     }
-
     &:after {
         border-left: 4px solid transparent;
         border-right: 4px solid transparent;
@@ -51,7 +48,6 @@
     z-index: 1000;
     .boxShadow(4px);
     .borderRadius(4px);
-    .noneSelect();
 
     &.onechosen {
         .advanced-selector-block {
@@ -95,17 +91,17 @@
 
 .advanced-selector-add-text,
 .advanced-selector-add-new-text {
-    border-bottom: 1px dotted @textColor;
+    border-bottom: 1px dotted #333;
 }
 
 .advanced-selector-block {
-    border-bottom: 1px solid @borderColor;
+    border-bottom: 1px solid #d1d1d1;
     position: relative;
 }
 
 .advanced-selector-block-list {
     float: left;
-    margin-top: 35px;
+    margin-top: 31px;
     margin-left: 12px;
     width: 195px;
 
@@ -119,9 +115,9 @@
     margin: 0 0 12px 0;
     position: relative;
 }
-input[type="text"].advanced-selector-search-field,
+input[type="text"].advanced-selector-search-field, 
 input[type="text"].advanced-selector-search-field:focus {
-    border: solid 1px @borderColor2;
+    border: solid 1px #c7c7c7;
     font-size: 12px;
     height: 21px;
     padding: 0 25px 0 5px;
@@ -151,8 +147,7 @@ input[type="text"].advanced-selector-search-field:focus {
 
 .advanced-selector-add-new-link {
     display: inline-block;
-    margin: 6px 0 6px 4px;
-    height: 18px;
+    margin: 0 0 6px 3px;
 }
 
 .advanced-selector-list {
@@ -164,19 +159,16 @@ input[type="text"].advanced-selector-search-field:focus {
     padding: 0;
 
     li {
+        border-top: 1px solid #d1d1d1;
         cursor: default;
-        padding: 0 0 0 8px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        text-align: left;
+        padding: 4px;
 
         &.selected {
-            background-color: @activeTable;
+            background-color: #f2f2f2;
         }
 
         &:hover, &.active {
-            background-color: @hoverTable;
+            background-color: #e5e5e5;
         }
 
         &.disabled {
@@ -189,22 +181,16 @@ input[type="text"].advanced-selector-search-field:focus {
             vertical-align: top;
         }
     }
-
-    img {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        margin: 0 8px 0 0;
-    }
 }
 
 .div-check() {
     div {
         background-color: transparent;
-        background-image: url("images/@{checkboxes-img}");
+        background-image: url("images/checkboxes.png");
         background-position: 0px 0px;
         background-repeat: no-repeat;
-        margin: 0 8px 0 0;
+        float: left;
+        margin: 3px 4px 1px 0;
         height: 14px;
         width: 14px;
         border: 0 none;
@@ -221,7 +207,6 @@ input[type="text"].advanced-selector-search-field:focus {
 
     label {
         display: block;
-        flex: 1;
         .text-overflow();
     }
 }
@@ -240,13 +225,12 @@ input[type="text"].advanced-selector-search-field:focus {
 .advanced-selector-all-select {
     .div-check();
 
-    padding: 0 0 0 8px;
-    height: 30px;
-    display: flex;
-    align-items: center;
+    display: block;
+    width: 100%;
+    padding: 4px;
 
     &:hover {
-        background-color: @hoverTable;
+        background-color: #e5e5e5;
     }
 
     input {
@@ -263,14 +247,14 @@ input[type="text"].advanced-selector-search-field:focus {
 
 /*********Add New Container *********/
 .advanced-selector-add-new-block {
-    border-right: 1px solid @borderColor;
+    border-right: 1px solid #d1d1d1;
     float: left;
     height: 260px;
     padding: 10px 10px 13px 10px;
     width: 195px;
 
     &.right-position {
-        border-left: 1px solid @borderColor;
+        border-left: 1px solid #d1d1d1;
         border-right: none;
     }
 }
@@ -305,7 +289,7 @@ input[type="text"].advanced-selector-search-field:focus {
     top: 0;
 }
 .advanced-selector-field {
-    border: solid 1px @borderColor2;
+    border: solid 1px #c7c7c7;
     font-size: 12px;
     height: 21px;
     margin-bottom: 3px;
@@ -344,6 +328,10 @@ select.advanced-selector-field {
     height: 154px;
     position: relative;
 }
+.advanced-selector-list-groups li label {
+    display: block;
+    .text-overflow();
+}
 
 .advanced-selector-list-groups li.chosen label,
 .advanced-selector-all-select.chosen label {
@@ -351,7 +339,7 @@ select.advanced-selector-field {
 }
 
 .advanced-selector-loader-list {
-    background: url("images/@{loader-gif-32}") no-repeat 0 0 transparent;
+    background: url(./images/loader_32.gif) no-repeat 0 0 transparent;
     height: 32px;
     width: 32px;
     position: absolute;
@@ -372,7 +360,7 @@ select.advanced-selector-field {
 }
 
 .advanced-selector-loader {
-    background: url("images/@{loader-gif-16}") no-repeat scroll 0 0 transparent;
+    background: url("images/loader_16.gif") no-repeat scroll 0 0 transparent;
     color: #999999;    
     font-size:11px;
     line-height: 18px;
@@ -400,7 +388,7 @@ select.advanced-selector-field {
 }
 
 .advanced-selector-field-list {
-    background-color: @body-color;
+    background-color: #fff;
     border: 1px solid #ccc;
     display: none;
     max-height: 70px;
@@ -421,11 +409,11 @@ select.advanced-selector-field {
         .text-overflow();
 
         &.selected {
-            background-color: @activeTable;
+            background-color: #f2f2f2;
         }
 
         &:hover, &.active {
-            background-color: @hoverTable;
+            background-color: #e5e5e5;
         }
     }
 }
@@ -436,7 +424,7 @@ select.advanced-selector-field {
     top:2px;
     left:2px;
     height: 16px;
-    background: url("images/@{loader-gif-16}") no-repeat left center transparent;
+    background: url("images/loader_16.gif") no-repeat left center transparent;
 }
 
 .advanced-selector-list-results {

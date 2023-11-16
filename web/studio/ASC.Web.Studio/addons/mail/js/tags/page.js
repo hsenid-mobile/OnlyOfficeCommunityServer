@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ window.tagsPage = (function($) {
         var $html = $(html);
         $html.actionMenu('tagActionMenu', buttons);
         if (0 <= tag.id) { // mail tag
-            $html.find('.tag').on("click", function() {
+            $html.find('.tag').click(function() {
                 editTag(tag.id);
             });
             // get last mail tag in list

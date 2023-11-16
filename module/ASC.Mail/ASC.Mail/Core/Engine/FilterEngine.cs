@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Mail;
 using System.Reflection;
-
 using ASC.Common.Logging;
 using ASC.Mail.Core.Entities;
 using ASC.Mail.Data.Contracts;
@@ -29,7 +28,6 @@ using ASC.Mail.Enums;
 using ASC.Mail.Enums.Filter;
 using ASC.Mail.Exceptions;
 using ASC.Mail.Utils;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -127,13 +125,13 @@ namespace ASC.Mail.Core.Engine
             if (filterData.Options.ApplyTo.Folders == null || !filterData.Options.ApplyTo.Folders.Any())
                 throw new ArgumentException("No folders in options");
 
-            var aceptedFolders = new[] { (int)FolderType.Inbox, (int)FolderType.Sent, (int)FolderType.Spam };
+            var aceptedFolders = new[] {(int) FolderType.Inbox, (int) FolderType.Sent, (int) FolderType.Spam};
 
             if (filterData.Options.ApplyTo.Folders.Any(f => !aceptedFolders.Contains(f)))
                 throw new ArgumentException("Some folder is not accepted in the options");
 
             if (filterData.Options.ApplyTo.Mailboxes == null)
-                filterData.Options.ApplyTo.Mailboxes = new int[] { };
+                filterData.Options.ApplyTo.Mailboxes = new int[] {};
 
             validFilter.Options = filterData.Options;
 
@@ -309,46 +307,33 @@ namespace ASC.Mail.Core.Engine
                 Func<List<MailAddress>, ConditionOperationType, string, bool> compareToFilter =
                     (addresses, o, v) =>
                     {
-                        return addresses.Any(a => isSucceed(o, a.DisplayName, v)
-                        || isSucceed(o, string.Format("\"{0}\"", a.DisplayName), v)
-                        || isSucceed(o, a.Address, v)
-                        || isSucceed(o, string.Format("<{0}>", a.Address), v));
+                        return addresses.Any(a => isSucceed(o, a.DisplayName, v) || isSucceed(o, a.Address, v));
                     };
 
                 switch (condition.Key)
                 {
                     case ConditionKeyType.From:
                         MailAddress address = null;
+
                         MailUtil.SkipErrors(() =>
                         {
                             var a = Parser.ParseAddress(message.From);
                             address = new MailAddress(a.Email, a.Name);
                         });
 
-                        success = isSucceed(condition.Operation, message.From, condition.Value);
-
-                        if (!success && address != null)
-                            success = compareToFilter(new List<MailAddress> { address }, condition.Operation, condition.Value);
-
+                        success = address == null
+                            ? isSucceed(condition.Operation, message.From, condition.Value)
+                            : compareToFilter(new List<MailAddress> {address}, condition.Operation, condition.Value);
                         break;
                     case ConditionKeyType.ToOrCc:
                         success = compareToFilter(message.ToList, condition.Operation, condition.Value) ||
                                   compareToFilter(message.CcList, condition.Operation, condition.Value);
-
-                        if (!success)
-                            success = isSucceed(condition.Operation, message.To, condition.Value) ||
-                                  isSucceed(condition.Operation, message.Cc, condition.Value);
                         break;
                     case ConditionKeyType.To:
                         success = compareToFilter(message.ToList, condition.Operation, condition.Value);
-
-                        if (!success)
-                            success = isSucceed(condition.Operation, message.To, condition.Value);
                         break;
                     case ConditionKeyType.Cc:
                         success = compareToFilter(message.CcList, condition.Operation, condition.Value);
-                        if (!success)
-                            success = isSucceed(condition.Operation, message.Cc, condition.Value);
                         break;
                     case ConditionKeyType.Subject:
                         success = isSucceed(condition.Operation, message.Subject, condition.Value);
@@ -381,7 +366,7 @@ namespace ASC.Mail.Core.Engine
                     continue;
 
                 if (filter.Options.ApplyTo.Folders.Any() &&
-                    !filter.Options.ApplyTo.Folders.Contains((int)folder.Folder))
+                    !filter.Options.ApplyTo.Folders.Contains((int) folder.Folder))
                 {
                     continue;
                 }
@@ -442,7 +427,7 @@ namespace ASC.Mail.Core.Engine
                                 ? " id=" + action.Data
                                 : "");
 
-                        ApplyAction(new List<int> { message.Id }, action);
+                        ApplyAction(new List<int> {message.Id}, action);
                     }
                     catch (NotFoundFilterDataException ex)
                     {
@@ -466,17 +451,13 @@ namespace ASC.Mail.Core.Engine
 
         public void ApplyAction(List<int> ids, MailSieveFilterActionData action)
         {
-            UserActionEngine userActionEngine = new UserActionEngine(Tenant, User, Factory);
-
             switch (action.Action)
             {
                 case ActionType.DeleteForever:
                     Factory.MessageEngine.SetRemoved(ids);
-                    userActionEngine.SendUserActivity(ids, MailUserAction.SetAsDeleted);
                     break;
                 case ActionType.MarkAsRead:
                     Factory.MessageEngine.SetUnread(ids, false);
-                    userActionEngine.SendUserActivity(ids, MailUserAction.SetAsRead);
                     break;
                 case ActionType.MoveTo:
                     var dataJson = JObject.Parse(action.Data);
@@ -489,15 +470,13 @@ namespace ASC.Mail.Core.Engine
                         throw new ArgumentException("Not valid type value in json data of 'Move to' action");
                     }
 
-                    int folderId;
-
-                    uint? userActivityUserFolderId=null;
+                    uint folderId;
 
                     if (folderType == FolderType.UserFolder)
                     {
-                        var userFolderId = int.Parse(dataJson["userFolderId"].ToString());
+                        var userFolderId = uint.Parse(dataJson["userFolderId"].ToString());
 
-                        var userFolder = Factory.UserFolderEngine.Get((uint)userFolderId);
+                        var userFolder = Factory.UserFolderEngine.Get(userFolderId);
                         if (userFolder == null)
                         {
                             throw new NotFoundFilterDataException(string.Format("User folder with id={0} not found",
@@ -505,18 +484,14 @@ namespace ASC.Mail.Core.Engine
                         }
 
                         folderId = userFolderId;
-                        userActivityUserFolderId = (uint?)userFolderId;
                     }
                     else
                     {
-                        folderId = (int)folderType;
+                        folderId = (uint) folderType;
                     }
 
                     Factory.MessageEngine.SetFolder(ids, folderType,
-                        folderType == FolderType.UserFolder ? (uint)folderId : (uint?)null);
-
-                    userActionEngine.SendUserActivity(ids, MailUserAction.MoveTo, (int)folderType, userActivityUserFolderId);
-
+                        folderType == FolderType.UserFolder ? folderId : (uint?) null);
                     break;
                 case ActionType.MarkTag:
                     var tagId = Convert.ToInt32(action.Data);
@@ -532,7 +507,6 @@ namespace ASC.Mail.Core.Engine
                     break;
                 case ActionType.MarkAsImportant:
                     Factory.MessageEngine.SetImportant(ids, true);
-                    userActionEngine.SendUserActivity(ids, MailUserAction.SetAsImportant);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

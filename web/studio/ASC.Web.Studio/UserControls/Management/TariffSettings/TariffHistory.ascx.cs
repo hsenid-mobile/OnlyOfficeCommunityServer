@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
-
 using ASC.Core.Billing;
-using ASC.Web.Core.Utility;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -36,14 +34,7 @@ namespace ASC.Web.Studio.UserControls.Management
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
-            {
-                Page.RegisterStyle("~/UserControls/Management/TariffSettings/css/dark-tariffhistory.less");
-            }
-            else
-            {
-                Page.RegisterStyle("~/UserControls/Management/TariffSettings/css/tariffhistory.less");
-            }
+            Page.RegisterStyle("~/UserControls/Management/TariffSettings/css/tariffhistory.less");
 
             PaymentsRepeater.DataSource = Payments;
             PaymentsRepeater.DataBind();

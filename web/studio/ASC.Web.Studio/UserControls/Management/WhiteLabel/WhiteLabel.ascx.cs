@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@
 using System;
 using System.Web;
 using System.Web.UI;
-
+using ASC.Core;
+using ASC.Core.Common.Settings;
 using ASC.Web.Core.WhiteLabel;
 using ASC.Web.Studio;
 using ASC.Web.Studio.PublicResources;
@@ -34,7 +35,7 @@ namespace ASC.Web.UserControls.WhiteLabel
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!TenantLogoManager.IsVisibleWhiteLabelSettings)
+            if (CoreContext.Configuration.Standalone || !TenantLogoManager.WhiteLabelEnabled)
             {
                 Response.Redirect(CommonLinkUtility.GetDefault(), true);
                 return;
@@ -60,9 +61,8 @@ namespace ASC.Web.UserControls.WhiteLabel
                 isRetina = value;
             }
         }
-        protected string LogoText
-        {
-            get
+        protected string LogoText {
+        get
             {
                 var whiteLabelSettings = TenantWhiteLabelSettings.Load();
 
@@ -70,7 +70,7 @@ namespace ASC.Web.UserControls.WhiteLabel
             }
         }
 
-        protected bool WhiteLabelEnabledForPaid = TenantLogoManager.WhiteLabelEnabled;
+        protected bool WhiteLabelEnabledForPaid = TenantLogoManager.WhiteLabelPaid;
 
         private void RegisterScript()
         {

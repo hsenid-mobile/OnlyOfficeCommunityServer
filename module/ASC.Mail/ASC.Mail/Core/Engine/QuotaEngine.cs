@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-
 using ASC.Common.Logging;
 using ASC.Data.Storage;
 
@@ -33,12 +32,12 @@ namespace ASC.Mail.Core.Engine
             Log = log ?? LogManager.GetLogger("ASC.Mail.QuotaEngine");
         }
 
-        public void QuotaUsedAdd(long usedQuota, string userGuid)
+        public void QuotaUsedAdd(long usedQuota)
         {
             try
             {
                 var quotaController = new TenantQuotaController(Tenant);
-                quotaController.QuotaUsedAdd(Defines.MODULE_NAME, string.Empty, Defines.MAIL_QUOTA_TAG, usedQuota, Guid.Parse(userGuid), true);
+                quotaController.QuotaUsedAdd(Defines.MODULE_NAME, string.Empty, Defines.MAIL_QUOTA_TAG, usedQuota);
             }
             catch (Exception ex)
             {
@@ -50,14 +49,10 @@ namespace ASC.Mail.Core.Engine
 
         public void QuotaUsedDelete(long usedQuota)
         {
-            QuotaUsedDelete(usedQuota, Guid.Empty);
-        }
-        public void QuotaUsedDelete(long usedQuota, Guid ownerId)
-        {
             try
             {
                 var quotaController = new TenantQuotaController(Tenant);
-                quotaController.QuotaUsedDelete(Defines.MODULE_NAME, string.Empty, Defines.MAIL_QUOTA_TAG, usedQuota, ownerId);
+                quotaController.QuotaUsedDelete(Defines.MODULE_NAME, string.Empty, Defines.MAIL_QUOTA_TAG, usedQuota);
             }
             catch (Exception ex)
             {

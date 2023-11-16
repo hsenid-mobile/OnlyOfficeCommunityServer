@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,6 @@ window.ASC.Controls.LoadPhotoImage = function () {
             updateMainImg(mainImgUrl, false);
         } else {
             changeView(false);
-            StudioBlockUIManager.blockUI(dialog, 450);
         }
     };
 
@@ -98,7 +97,6 @@ window.ASC.Controls.LoadPhotoImage = function () {
 
     var deletePhoto =  function() {
         changeView(false);
-        StudioBlockUIManager.blockUI(dialog, 450);
     };
 
     var savePhoto = function() {
@@ -114,7 +112,7 @@ window.ASC.Controls.LoadPhotoImage = function () {
         var position = jcropElement.tellScaled();
 
         if (!position.w || !position.h) {
-            toastr.warning(ASC.Resources.Master.ResourceJS.EmptySelectedArea);
+            toastr.warning(ASC.Resources.Master.Resource.EmptySelectedArea);
             return;
         }
 
@@ -172,7 +170,7 @@ window.ASC.Controls.LoadPhotoImage = function () {
             img.attr("src", updateUri(data.max));
             mainImgUrl = saveDefault ? null : updateUri(data.original);
             mainThumbnailSettings = tmpThumbnailSettings;
-            toastr.success(ASC.Resources.Master.ResourceJS.ChangesApplied);
+            toastr.success(ASC.Resources.Master.Resource.ChangesApplied);
             closeDialog();
         }
         
@@ -290,8 +288,6 @@ window.ASC.Controls.LoadPhotoImage = function () {
                 var tracker = dialog.find(".jcrop-holder .jcrop-tracker:first");
                 tracker.append(jq("<div class='jcrop-circle'></div>"));
             });
-
-            StudioBlockUIManager.blockUI(dialog, 450);
         };
         
         mainImg.attr({ alt: "", style: "", src: updateUri(src) });

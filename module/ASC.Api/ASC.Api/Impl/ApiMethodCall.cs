@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web.Routing;
-
 using ASC.Api.Attributes;
 using ASC.Api.Interfaces;
 
@@ -101,7 +100,7 @@ namespace ASC.Api.Impl
         public override bool Equals(object obj)
         {
             return !ReferenceEquals(null, obj) &&
-                   (ReferenceEquals(this, obj) || obj.GetType() == typeof(ApiMethodCall) && Equals((ApiMethodCall)obj));
+                   (ReferenceEquals(this, obj) || obj.GetType() == typeof (ApiMethodCall) && Equals((ApiMethodCall)obj));
         }
 
         public bool Equals(ApiMethodCall other)
@@ -115,7 +114,7 @@ namespace ASC.Api.Impl
         {
             unchecked
             {
-                return ((FullPath != null ? FullPath.GetHashCode() : 0) * 397) ^
+                return ((FullPath != null ? FullPath.GetHashCode() : 0)*397) ^
                        (HttpMethod != null ? HttpMethod.GetHashCode() : 0);
             }
         }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,13 @@
 #region Import
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
-
+using System.Text;
 using ASC.Common.Security;
+using ASC.Common.Security.Authorizing;
+using ASC.Core.Users;
 #endregion
 
 namespace ASC.CRM.Core.Entities

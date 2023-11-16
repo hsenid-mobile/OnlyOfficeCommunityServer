@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
@@ -39,7 +38,7 @@ namespace ASC.Mail.Core.Dao
 
         protected string CurrentUserId { get; private set; }
 
-        public UserFolderTreeDao(IDbManager dbManager, int tenant, string user)
+        public UserFolderTreeDao(IDbManager dbManager, int tenant, string user) 
             : base(table, dbManager, tenant)
         {
             CurrentUserId = user;
@@ -115,8 +114,8 @@ namespace ASC.Mail.Core.Dao
             }
 
             var query = new SqlDelete(UserFolderTreeTable.TABLE_NAME)
-                .Where(Exp.In(UserFolderTreeTable.Columns.FolderId, subFolders.Keys.ToList()) &
-                       !Exp.In(UserFolderTreeTable.Columns.ParentId, subFolders.Keys.ToList()));
+                .Where(Exp.In(UserFolderTreeTable.Columns.FolderId, subFolders.Keys) &
+                       !Exp.In(UserFolderTreeTable.Columns.ParentId, subFolders.Keys));
 
             // ReSharper disable once NotAccessedVariable
             var result = Db.ExecuteNonQuery(query);

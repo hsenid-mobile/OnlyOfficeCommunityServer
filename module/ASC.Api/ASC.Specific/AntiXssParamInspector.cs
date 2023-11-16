@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 
 using System.Collections.Generic;
-
 using ASC.Api.Interfaces;
 
 namespace ASC.Specific
 {
-    public class AntiXssParamInspector : IApiParamInspector
+    public class AntiXssParamInspector:IApiParamInspector
     {
         public IEnumerable<object> InspectParams(IEnumerable<object> parameters)
         {
@@ -34,7 +33,7 @@ namespace ASC.Specific
                 }
                 else
                 {
-                    yield return parameter;
+                    yield return parameter;    
                 }
             }
         }

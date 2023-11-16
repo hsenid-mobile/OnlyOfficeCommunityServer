@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,28 +46,10 @@ namespace ASC.ElasticSearch.Config
             get { return Convert.ToInt32(this["period"]); }
         }
 
-        [ConfigurationProperty("maxContentLength", IsRequired = false, DefaultValue = 100 * 1024 * 1024L)]
-        public long MaxContentLength
+        [ConfigurationProperty("memoryLimit", IsRequired = false, DefaultValue = 10 * 1024 * 1024L)]
+        public long MemoryLimit
         {
-            get { return Convert.ToInt64(this["maxContentLength"]); }
-        }
-
-        [ConfigurationProperty("maxFileSize", IsRequired = false, DefaultValue = 10 * 1024 * 1024L)]
-        public long MaxFileSize
-        {
-            get { return Convert.ToInt64(this["maxFileSize"]); }
-        }
-
-        [ConfigurationProperty("threads", IsRequired = false, DefaultValue = 1)]
-        public int Threads
-        {
-            get { return Convert.ToInt32(this["threads"]); }
-        }
-
-        [ConfigurationProperty("compression", IsRequired = false, DefaultValue = true)]
-        public bool HttpCompression
-        {
-            get { return Convert.ToBoolean(this["compression"]); }
+            get { return Convert.ToInt64(this["memoryLimit"]); }
         }
     }
 }

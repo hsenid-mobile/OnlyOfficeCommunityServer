@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,6 @@ window.ASC.Files.TreePrototype = function (rootSelector, rootId) {
                 var hash = ASC.Files.UI.getEntryLink("folder", entryId);
                 jq(this).attr("href", hash);
             });
-            if (treeNode.is(treeNodePrivacy) || treeNodePrivacy.has(treeNode).length) {
-                treeNode.find("li").addClass("access-read");
-            }
         } else {
             treeNode.addClass("jstree-empty");
         }
@@ -79,6 +76,7 @@ window.ASC.Files.TreePrototype = function (rootSelector, rootId) {
         if (!treeNode.length
             || folderId == ASC.Files.Constants.FOLDER_ID_FAVORITES
             || folderId == ASC.Files.Constants.FOLDER_ID_RECENT
+            || folderId == ASC.Files.Constants.FOLDER_ID_PRIVACY && !ASC.Desktop
             || folderId == ASC.Files.Constants.FOLDER_ID_TEMPLATES
             || folderId == ASC.Files.Constants.FOLDER_ID_TRASH) {
             return;
@@ -89,8 +87,6 @@ window.ASC.Files.TreePrototype = function (rootSelector, rootId) {
         } else {
             getTreeSubFolders(folderId, sync);
         }
-
-        changeSelectedNodeWidth(false);
     };
 
     var clickNode = function () {
@@ -102,28 +98,13 @@ window.ASC.Files.TreePrototype = function (rootSelector, rootId) {
         return false;
     };
 
-    var changeSelectedNodeWidth = function (clear) {
-        if (!treeNodeRoot.hasClass("scrolled")) {
-            return;
-        }
-        var wholerow = treeNodeRoot.find(".node-selected > .jstree-wholerow");
-        wholerow.css("width", "");
-        if (!clear) {
-            wholerow.css("width", treeNodeRoot.get(0).scrollWidth + "px");
-        }
-    }
-
     var select = function (treeNode, checkSelected) {
-        changeSelectedNodeWidth(true);
-
         treeNodeRoot.find(".node-selected").removeClass("node-selected");
         treeNodeRoot.find(".parent-selected").removeClass("parent-selected");
 
         treeNode.addClass("node-selected");
         treeNode.parents(".jstree .jstree-closed").addClass("jstree-open").removeClass("jstree-closed");
         treeNode.parents(".jstree .tree-node").addClass("parent-selected");
-
-        changeSelectedNodeWidth(false);
 
         //if (treeNode && treeNode.offset()) {
         //    var nodeY = treeNode.offset().top;
@@ -298,8 +279,6 @@ window.ASC.Files.TreePrototype = function (rootSelector, rootId) {
     var tree = this;
     var treeNodeRoot = jq(rootSelector);
     var treeNodeRootId = rootId;
-
-    var treeNodePrivacy = treeNodeRoot.find("li[data-id=" + ASC.Files.Constants.FOLDER_ID_PRIVACY + "]");
 
     treeNodeRoot.on("click", ".jstree-expander", expand);
     treeNodeRoot.on("dblclick", "a", expand);

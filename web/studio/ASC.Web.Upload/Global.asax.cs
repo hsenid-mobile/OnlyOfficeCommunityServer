@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 
 
 using System;
+using System.Configuration;
 using System.Web;
-
 using ASC.Common.Data;
 using ASC.Common.DependencyInjection;
 using ASC.Data.Storage.S3;
 using ASC.Web.Core;
-
-using log4net.Config;
-
 using TMResourceData;
+using log4net.Config;
 
 namespace ASC.Web.Upload
 {
@@ -37,7 +35,11 @@ namespace ASC.Web.Upload
             DbRegistry.Configure();
             ConfigureServiceLocator();
             (new S3UploadGuard()).DeleteExpiredUploadsAsync(TimeSpan.FromDays(1));
-            DBResourceManager.PatchAssemblies();
+
+            if (ConfigurationManagerExtension.AppSettings["resources.from-db"] == "true")
+            {
+                DBResourceManager.PatchAssemblies();
+            }
         }
 
         private static readonly object locker = new object();
@@ -57,7 +59,7 @@ namespace ASC.Web.Upload
                 }
             }
 
-            var app = (HttpApplication)sender;
+            var app = (HttpApplication) sender;
             if (app.Context.Request.HttpMethod == "OPTIONS")
             {
                 app.Context.Response.StatusCode = 200;

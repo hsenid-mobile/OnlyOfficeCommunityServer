@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,10 @@ using System;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
-
 using ASC.Web.Core.Files;
-using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Controls.Common;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
+using Resources;
 
 namespace ASC.Web.Studio.UserControls.Common.Attachments
 {
@@ -70,15 +68,8 @@ namespace ASC.Web.Studio.UserControls.Common.Attachments
 
         private void InitScripts()
         {
-            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
-            {
-                Page.RegisterStyle("~/UserControls/Common/Attachments/css/dark-attachments.less");
-            }
-            else
-            {
-                Page.RegisterStyle("~/UserControls/Common/Attachments/css/attachments.less");
-            }
-            Page.RegisterBodyScripts("~/UserControls/Common/Attachments/js/attachments.js");
+            Page.RegisterStyle("~/UserControls/Common/Attachments/css/attachments.less")
+                .RegisterBodyScripts("~/UserControls/Common/Attachments/js/attachments.js");
         }
 
         private void CreateEmptyPanel()
@@ -88,10 +79,10 @@ namespace ASC.Web.Studio.UserControls.Common.Attachments
                           "<span class='sort-down-black newDocComb'></span>";
 
             var emptyParticipantScreenControl = new EmptyScreenControl
-            {
-                ImgSrc = VirtualPathUtility.ToAbsolute("~/UserControls/Common/Attachments/images/documents-logo.svg"),
-                Header = UserControlsCommonResource.EmptyListDocumentsHead,
-                Describe = String.Format(FileUtility.ExtsWebEdited.Any() ? UserControlsCommonResource.EmptyListDocumentsDescr.HtmlEncode() : UserControlsCommonResource.EmptyListDocumentsDescrPoor.HtmlEncode(),
+                {
+                    ImgSrc = VirtualPathUtility.ToAbsolute("~/UserControls/Common/Attachments/images/documents-logo.png"),
+                    Header = UserControlsCommonResource.EmptyListDocumentsHead,
+                    Describe = String.Format(FileUtility.ExtsWebEdited.Any() ? UserControlsCommonResource.EmptyListDocumentsDescr.HtmlEncode() : UserControlsCommonResource.EmptyListDocumentsDescrPoor.HtmlEncode(),
                                              //create
                                              "<span class='hintCreate baseLinkAction' >", "</span>",
                                              //upload
@@ -100,8 +91,8 @@ namespace ASC.Web.Studio.UserControls.Common.Attachments
                                              "<span class='hintOpen baseLinkAction' >", "</span>",
                                              //edit
                                              "<span class='hintEdit baseLinkAction' >", "</span>"),
-                ButtonHTML = buttons
-            };
+                    ButtonHTML = buttons
+                };
             _phEmptyDocView.Controls.Add(emptyParticipantScreenControl);
         }
 

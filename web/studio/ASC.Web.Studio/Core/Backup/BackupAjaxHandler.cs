@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-
 using AjaxPro;
-
 using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Common.Configuration;
@@ -30,8 +28,8 @@ using ASC.Core.Users;
 using ASC.MessagingSystem;
 using ASC.Notify.Cron;
 using ASC.Web.Core.Security;
-using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
+using Resources;
 
 namespace ASC.Web.Studio.Core.Backup
 {
@@ -44,6 +42,7 @@ namespace ASC.Web.Studio.Core.Backup
         public BackupProgress StartBackup(BackupStorageType storageType, Dictionary<string, string> storageParams, bool backupMail)
         {
             DemandPermissionsBackup();
+            DemandSize();
 
             var backupRequest = new StartBackupRequest
             {
@@ -124,6 +123,7 @@ namespace ASC.Web.Studio.Core.Backup
         public void CreateSchedule(BackupStorageType storageType, Dictionary<string, string> storageParams, int backupsStored, CronParams cronParams, bool backupMail)
         {
             DemandPermissionsBackup();
+            DemandSize();
 
             if (!SetupInfo.IsVisibleSettings("AutoBackup"))
                 throw new InvalidOperationException(Resource.ErrorNotAllowedOption);
@@ -238,7 +238,7 @@ namespace ASC.Web.Studio.Core.Backup
         {
             SecurityContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
 
-            if (!CoreContext.Configuration.Standalone && !SetupInfo.IsVisibleSettings(ManagementType.Backup.ToString()))
+            if (!SetupInfo.IsVisibleSettings(ManagementType.Backup.ToString()))
                 throw new BillingException(Resource.ErrorNotAllowedOption, "Backup");
         }
 
@@ -267,11 +267,6 @@ namespace ASC.Web.Studio.Core.Backup
             {
                 restoreRequest.StorageType = storageType;
                 restoreRequest.FilePathOrId = storageParams["filePath"];
-
-                if (restoreRequest.StorageType == BackupStorageType.Local && !CoreContext.Configuration.Standalone)
-                {
-                    restoreRequest.FilePathOrId = BackupFileUploadHandler.GetFilePath();
-                }
             }
 
             using (var service = new BackupServiceClient())
@@ -299,12 +294,8 @@ namespace ASC.Web.Studio.Core.Backup
         {
             SecurityContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
 
-            if (!CoreContext.Configuration.Standalone
-                && (!SetupInfo.IsVisibleSettings("Restore")
-                    || !CoreContext.TenantManager.GetTenantQuota(TenantProvider.CurrentTenantID).Restore))
-            {
+            if (!SetupInfo.IsVisibleSettings("Restore"))
                 throw new BillingException(Resource.ErrorNotAllowedOption, "Restore");
-            }
         }
 
         #endregion
@@ -315,6 +306,7 @@ namespace ASC.Web.Studio.Core.Backup
         public BackupProgress StartTransfer(string targetRegion, bool notifyUsers, bool transferMail)
         {
             DemandPermissionsTransfer();
+            DemandSize();
 
             MessageService.Send(HttpContext.Current.Request, MessageAction.StartTransferSetting);
 
@@ -362,6 +354,15 @@ namespace ASC.Web.Studio.Core.Backup
             }
         }
 
+        private static void DemandSize()
+        {
+            if (BackupHelper.ExceedsMaxAvailableSize(TenantProvider.CurrentTenantID))
+                throw new InvalidOperationException(string.Format(UserControlsCommonResource.BackupSpaceExceed,
+                    FileSizeComment.FilesSizeToString(BackupHelper.AvailableZipSize),
+                    "",
+                    ""));
+        }
+
         private static void ValidateCronSettings(CronParams cronParams)
         {
             new CronExpression(cronParams.ToString());
@@ -374,34 +375,18 @@ namespace ASC.Web.Studio.Core.Backup
 
         public class Schedule
         {
-            ///<example type="int">1</example>
             public BackupStorageType StorageType { get; set; }
-
-            ///<example>null</example>
             public Dictionary<string, string> StorageParams { get; set; }
-
-            ///<type>ASC.Web.Studio.Core.Backup.CronParams, ASC.Web.Studio</type>
             public CronParams CronParams { get; set; }
-
-            ///<example>true</example>
             public bool BackupMail { get; set; }
-
-            ///<example type="int">1</example>
             public int BackupsStored { get; set; }
-
-            ///<example>2019-07-26T00:00:00</example>
             public DateTime LastBackupTime { get; set; }
         }
 
         public class CronParams
         {
-            ///<example type="int">0</example>
             public BackupPeriod Period { get; set; }
-
-            ///<example type="Hour">5</example>
             public int Hour { get; set; }
-
-            ///<example type="Day">4</example>
             public int Day { get; set; }
 
             public CronParams()

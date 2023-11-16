@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System.Collections.Generic;
-
 using ASC.Api.Attributes;
 using ASC.Api.Interfaces;
 using ASC.Web.Sample.Classes;
@@ -24,7 +23,7 @@ using ASC.Web.Sample.Classes;
 namespace ASC.Api.Sample
 {
     /// <summary>
-    /// Sample CRUD API.
+    /// Sample CRUD Api
     /// </summary>
     public class SampleApi : IApiEntryPoint
     {
@@ -37,16 +36,10 @@ namespace ASC.Api.Sample
         }
 
         /// <summary>
-        /// Creates a new module for the current portal.
+        /// Create item
         /// </summary>
-        /// <short>
-        /// Create a module
-        /// </short>
-        /// <param type="System.String, System" name="value">Module name</param>
-        /// <returns>Newly created module</returns>
-        /// <path>api/2.0/sample/create</path>
-        /// <httpMethod>POST</httpMethod>
-        /// <requiresAuthorization>false</requiresAuthorization>
+        /// <param name="value">item value</param>
+        /// <returns>SampleClass item</returns>
         [Create("create", false)]
         public SampleClass Create(string value)
         {
@@ -54,16 +47,10 @@ namespace ASC.Api.Sample
         }
 
         /// <summary>
-        /// Returns a module with the ID specified in the request.
+        /// Read item by id
         /// </summary>
-        /// <short>
-        /// Get a module
-        /// </short>
-        /// <param type="System.Int32, System" name="id">Module ID</param>
-        /// <returns>Module</returns>
-        /// <path>api/2.0/sample/read/{id}</path>
-        /// <requiresAuthorization>false</requiresAuthorization>
-        /// <httpMethod>GET</httpMethod>
+        /// <param name="id">item id</param>
+        /// <returns>SampleClass item</returns>
         [Read(@"read/{id:[0-9]+}", false)]
         public SampleClass Read(int id)
         {
@@ -71,17 +58,9 @@ namespace ASC.Api.Sample
         }
 
         /// <summary>
-        /// Returns all the portal modules.
+        /// Read all items
         /// </summary>
-        /// <short>
-        /// Get modules
-        /// </short>
-        /// <returns>List of portal modules</returns>
-        /// <collection>list</collection>
-        /// <path>api/2.0/sample/read</path>
-        /// <httpMethod>GET</httpMethod>
-        /// <requiresAuthorization>false</requiresAuthorization>
-        /// <collection>list</collection>
+        /// <returns>SampleClass items list</returns>
         [Read("read", false)]
         public List<SampleClass> Read()
         {
@@ -89,16 +68,10 @@ namespace ASC.Api.Sample
         }
 
         /// <summary>
-        /// Updates the selected module with a name specified in the request.
+        /// Update item
         /// </summary>
-        /// <short>
-        /// Update a module
-        /// </short>
-        /// <param type="System.Int32, System" name="id">Module ID</param>
-        /// <param type="System.String, System" name="value">New module name</param>
-        /// <path>api/2.0/sample/update</path>
-        /// <requiresAuthorization>false</requiresAuthorization>
-        /// <httpMethod>PUT</httpMethod>
+        /// <param name="id">item id</param>
+        /// <param name="value">new item value</param>
         [Update("update", false)]
         public void Update(int id, string value)
         {
@@ -106,15 +79,9 @@ namespace ASC.Api.Sample
         }
 
         /// <summary>
-        /// Deletes a module with the ID specified in the request.
+        /// Update item by id
         /// </summary>
-        /// <short>
-        /// Delete a module
-        /// </short>
-        /// <param type="System.Int32, System" name="id">Module ID</param>
-        /// <path>api/2.0/sample/delete/{id}</path>
-        /// <requiresAuthorization>false</requiresAuthorization>
-        /// <httpMethod>DELETE</httpMethod>
+        /// <param name="id">item id</param>
         [Delete("delete/{id:[0-9]+}", false)]
         public void Delete(int id)
         {

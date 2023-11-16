@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,8 @@ using System.IO;
 using System.Net.Mime;
 using System.Runtime.Serialization;
 using System.Xml.Linq;
-
 using ASC.Api.Interfaces;
 using ASC.Api.Utils;
-
 using Newtonsoft.Json;
 
 namespace ASC.Api.Impl.Serializers
@@ -34,14 +32,14 @@ namespace ASC.Api.Impl.Serializers
 
         public JsonNetSerializer()
         {
-
+            
         }
 
         #region IApiSerializer Members
 
         public IEnumerable<string> GetSupportedExtensions()
         {
-            return new[] { ".json", ".xml", ".tml" };
+            return new[] {".json", ".xml",".tml"};
         }
 
         public bool CanSerializeType(Type type)
@@ -55,11 +53,11 @@ namespace ASC.Api.Impl.Serializers
             var settings = new JsonSerializerSettings
             {
                 DefaultValueHandling = DefaultValueHandling.Include,
-                ContractResolver = new SerializerContractResolver(responce.Response, responce.ApiContext),
+                ContractResolver = new SerializerContractResolver(responce.Response,responce.ApiContext),
                 Converters = new[] { new JsonStringConverter() }
             };
 
-            string responseJson = JsonConvert.SerializeObject(responce, prettify ? Formatting.Indented : Formatting.None, settings);
+            string responseJson = JsonConvert.SerializeObject(responce, prettify ? Formatting.Indented : Formatting.None,settings);
             if (string.IsNullOrEmpty(responseJson))
                 throw new InvalidOperationException("Failed to serialize object");
 
@@ -85,7 +83,7 @@ namespace ASC.Api.Impl.Serializers
             }
             catch (Exception e)
             {
-                throw new SerializationException("Failed to write:" + responseJson, e);
+                throw new SerializationException("Failed to write:"+responseJson,e);
             }
             return type;
         }
@@ -94,7 +92,7 @@ namespace ASC.Api.Impl.Serializers
         private static bool IsXmlRequest(string request, string contentType)
         {
             var ext = StringUtils.GetExtension(request);
-            return (ext == ".tml" || ext == ".xml") &&
+            return ( ext == ".tml" || ext == ".xml") &&
                 !StringUtils.IsContentType(Constants.JsonContentType, contentType);
         }
 

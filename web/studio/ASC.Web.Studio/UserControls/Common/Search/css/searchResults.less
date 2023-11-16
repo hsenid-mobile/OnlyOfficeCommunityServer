@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  *
 */
 
-
-@import "../../../../skins/default/params.less";
 
 .search-results-block {
     padding: 10px;
@@ -32,7 +30,7 @@
 
     .showAllLink {
         border-bottom: 1px dotted;
-        color: @textColor;
+        color: #333333;
         cursor: pointer;
         text-decoration: none;
     }
@@ -48,7 +46,7 @@
         &:after {
             border-right: 6px solid transparent;
             border-left: 6px solid transparent;
-            border-top: 6px solid @textColorBlackDark;
+            border-top: 6px solid #666666;
             content: " ";
             height: 0;
             left: 0;
@@ -63,7 +61,7 @@
 
             &:after {
                 border-bottom: 6px solid transparent;
-                border-left: 6px solid @textColorBlackDark;
+                border-left: 6px solid #666666;
                 border-top: 6px solid transparent;
                 border-right: 0 none;
                 left: 3px;
@@ -78,7 +76,7 @@
     overflow: hidden;
 
     div.item, div.universalitem {
-        border-top: 1px solid @borderColor;
+        border-top: 1px solid #d1d1d1;
         min-height: 40px;
 
         a {
@@ -147,7 +145,7 @@
 
     div.projItem {
         padding: 5px 10px 5px 10px;
-        border-top: 1px solid @borderColor;
+        border-top: 1px solid #d1d1d1;
         min-height: 40px;
         overflow: hidden;
 

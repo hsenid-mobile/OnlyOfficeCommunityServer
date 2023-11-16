@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2023
+ * (c) Copyright Ascensio System Limited 2010-2020
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,13 +144,13 @@ ASC.CRM.SocialMedia = (function() {
         var windowHeight = _CalculateProfilesWindowHeight();
         jq("#divSMProfilesWindow").css("height", windowHeight);
 
-        jq("#divSMProfilesWindow").off("mouseenter").on("mouseenter", function() {
+        jq("#divSMProfilesWindow").unbind("mouseenter").mouseenter(function() {
             ASC.CRM.SocialMedia.MouseInProfilesWindow = true;
         });
-        jq("#divSMProfilesWindow").off("mouseleave").on("mouseleave", function() {
+        jq("#divSMProfilesWindow").unbind("mouseleave").mouseleave(function() {
             ASC.CRM.SocialMedia.MouseInProfilesWindow = false;
         });
-        jq(document).on("click", _CheckProfilesWindow);
+        jq(document).bind("click", _CheckProfilesWindow);
     };
 
     _ShowWaitProfilesWindow = function(name) {
@@ -170,7 +170,7 @@ ASC.CRM.SocialMedia = (function() {
 
     _HideProfilesWindow = function() {
         jq("#divSMProfilesWindow").hide();
-        jq(document).off("click", _CheckProfilesWindow);
+        jq(document).unbind("click", _CheckProfilesWindow);
     };
 
 
@@ -245,7 +245,7 @@ ASC.CRM.SocialMedia = (function() {
                         var err = errors[0];
                         LoadingBanner.hideLoading();
                         try {
-                            var json = JSON.parse(err);
+                            var json = jq.parseJSON(err);
                             err = json.description;
                         } catch (e) { }
 
@@ -280,7 +280,7 @@ ASC.CRM.SocialMedia = (function() {
             var $link = jq(".linkChangePhoto");
             if (!$link || ($link && !$link.hasClass("disable"))) {
 
-                jq("[name='chbSocialNetwork']").prop("checked", false);
+                jq("[name='chbSocialNetwork']").removeAttr("checked");
 
                 var curAvatarSrc = jq("img.contact_photo").attr("src");
                 if (curAvatarSrc.indexOf(ASC.CRM.SocialMedia.defaultAvatarSrc + '?') == 0) {
@@ -307,7 +307,7 @@ ASC.CRM.SocialMedia = (function() {
             }
             var imageChecked = jq(event.target).is(":checked");
             if (imageChecked == false) { return; }
-            jq("[name='chbSocialNetwork']").not(jq(event.target)).prop("checked", false);
+            jq("[name='chbSocialNetwork']").not(jq(event.target)).removeAttr("checked");
         },
 
         UploadUserAvatar: function (event, socialNetwork, userIdentity) {
@@ -394,7 +394,7 @@ ASC.CRM.SocialMedia = (function() {
 
             //contact type can be "company" or "people"
             if (jq("#baseInfo_Title").length == 1) {
-                searchText = jq("#baseInfo_Title").val().trim();
+                searchText = jq.trim(jq("#baseInfo_Title").val());
             } else {
                 if (contactType == "company") {
                     searchText = jq("[name='baseInfo_companyName']").val();
@@ -404,7 +404,7 @@ ASC.CRM.SocialMedia = (function() {
                 }
             }
 
-            if (searchText === undefined || searchText.trim().length == 0) {
+            if (searchText === undefined || jq.trim(searchText).length == 0) {
                 return;
             }
 
