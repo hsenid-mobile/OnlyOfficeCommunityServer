@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,11 @@
 */
 
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security;
+
 using ASC.Common.Caching;
 using ASC.Common.Security;
 using ASC.Common.Security.Authorizing;
@@ -22,10 +27,7 @@ using ASC.Core;
 using ASC.Core.Users;
 using ASC.Web.Core.Utility.Settings;
 using ASC.Web.Studio.Utility;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security;
+
 using SecurityAction = ASC.Common.Security.Authorizing.Action;
 using SecurityContext = ASC.Core.SecurityContext;
 
@@ -45,12 +47,14 @@ namespace ASC.Web.Core
                 cacheNotify = AscCache.Notify;
                 cacheNotify.Subscribe<WebItemSecurityNotifier>((r, act) =>
                 {
+                    CoreContext.TenantManager.SetCurrentTenant(r.Tenant);
+
                     ClearCache();
                 });
             }
             catch
             {
-                
+
             }
         }
 
@@ -142,9 +146,9 @@ namespace ASC.Web.Core
 
         public static void SetSecurity(string id, bool enabled, params Guid[] subjects)
         {
-            if(TenantAccessSettings.Load().Anyone)
+            if (TenantAccessSettings.Load().Anyone)
                 throw new SecurityException("Security settings are disabled for an open portal");
-            
+
             var securityObj = WebItemSecurityObject.Create(id);
 
             // remove old aces
@@ -168,7 +172,7 @@ namespace ASC.Web.Core
                 CoreContext.AuthorizationManager.AddAce(a);
             }
 
-            cacheNotify.Publish(new WebItemSecurityNotifier(), CacheNotifyAction.Any);
+            cacheNotify.Publish(new WebItemSecurityNotifier() { Tenant = TenantProvider.CurrentTenantID }, CacheNotifyAction.Any);
         }
 
         public static WebItemSecurityInfo GetSecurityInfo(string id)
@@ -176,19 +180,19 @@ namespace ASC.Web.Core
             var info = GetSecurity(id).ToList();
             var module = WebItemManager.Instance.GetParentItemID(new Guid(id)) != Guid.Empty;
             return new WebItemSecurityInfo
-                       {
-                           WebItemId = id,
+            {
+                WebItemId = id,
 
-                           Enabled = !info.Any() || (!module && info.Any(i => i.Item2)) || (module && info.All(i => i.Item2)),
+                Enabled = !info.Any() || (!module && info.Any(i => i.Item2)) || (module && info.All(i => i.Item2)),
 
-                           Users = info
+                Users = info
                                .Select(i => CoreContext.UserManager.GetUsers(i.Item1))
                                .Where(u => u.ID != ASC.Core.Users.Constants.LostUser.ID),
 
-                           Groups = info
+                Groups = info
                                .Select(i => CoreContext.UserManager.GetGroupInfo(i.Item1))
                                .Where(g => g.ID != ASC.Core.Users.Constants.LostGroupInfo.ID && g.CategoryID != ASC.Core.Users.Constants.SysGroupCategoryId)
-                       };
+            };
         }
 
         private static IEnumerable<Tuple<Guid, bool>> GetSecurity(string id)
@@ -253,7 +257,7 @@ namespace ASC.Web.Core
                 CoreContext.UserManager.RemoveUserFromGroup(userid, productid);
             }
 
-            cacheNotify.Publish(new WebItemSecurityNotifier(), CacheNotifyAction.Any);
+            cacheNotify.Publish(new WebItemSecurityNotifier() { Tenant = TenantProvider.CurrentTenantID }, CacheNotifyAction.Any);
         }
 
         public static bool IsProductAdministrator(Guid productid, Guid userid)
@@ -378,6 +382,6 @@ namespace ASC.Web.Core
 
     public class WebItemSecurityNotifier
     {
-        
+        public int Tenant { get; set; }
     }
 }

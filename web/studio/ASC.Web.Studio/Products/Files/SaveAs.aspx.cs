@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,15 @@
 using System;
 using System.Text;
 using System.Web;
+
 using ASC.Web.Core.Client.Bundling;
 using ASC.Web.Core.Files;
+using ASC.Web.Core.Utility;
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Controls;
 using ASC.Web.Files.Resources;
 using ASC.Web.Studio;
+
 using Global = ASC.Web.Files.Classes.Global;
 
 namespace ASC.Web.Files
@@ -40,6 +43,11 @@ namespace ASC.Web.Files
             get { return Location + string.Format("?{0}={{{0}}}&{1}={{{1}}}", FilesLinkUtility.FileTitle, FilesLinkUtility.FileUri); }
         }
 
+        public static string GetUrlToFolder(object folderId)
+        {
+            return string.Format("{0}&{1}={2}", GetUrl, FilesLinkUtility.FolderId, folderId);
+        }
+
         public string RequestFileTitle
         {
             get { return Global.ReplaceInvalidCharsAndTruncate(Request[FilesLinkUtility.FileTitle]); }
@@ -50,12 +58,17 @@ namespace ASC.Web.Files
             get { return Request[FilesLinkUtility.FileUri]; }
         }
 
+        private bool DisplayPrivacy
+        {
+            get { return !string.IsNullOrEmpty(Request["displayPrivacy"]); }
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             Master.Master.DisabledSidePanel = true;
             Master.Master.DisabledTopStudioPanel = true;
             Master.Master
-                  .AddStaticStyles(GetStaticStyleSheet())
+                  .AddStaticStyles(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark ? GetStaticDarkStyleSheet() : GetStaticStyleSheet())
                   .AddStaticBodyScripts(GetStaticJavaScript());
 
             var fileSelector = (FileSelector)LoadControl(FileSelector.Location);
@@ -77,8 +90,10 @@ namespace ASC.Web.Files
             }
 
             var script = new StringBuilder();
-            script.AppendFormat("ASC.Files.FileChoice.init(\"{0}\");",
-                                originForPost);
+            script.AppendFormat("ASC.Files.FileChoice.init(\"{0}\", \"{1}\", ({2} == true));",
+                                originForPost,
+                                (Request[FilesLinkUtility.FolderId] ?? "").Replace("\"", "\\\""),
+                                DisplayPrivacy.ToString().ToLower());
             Page.RegisterInlineScript(script.ToString());
         }
 
@@ -106,13 +121,26 @@ namespace ASC.Web.Files
         {
             return (StyleBundleData)
                    new StyleBundleData("filessaveas", "files")
-                       .AddSource(PathProvider.GetFileStaticRelativePath, "saveas.css")
+                       .AddSource(PathProvider.GetFileStaticRelativePath, "saveas.less")
                        .AddSource(r => FilesLinkUtility.FilesBaseAbsolutePath + r,
-                                  "Controls/FileSelector/fileselector.css",
-                                  "Controls/ThirdParty/thirdparty.css",
-                                  "Controls/ContentList/contentlist.css",
-                                  "Controls/EmptyFolder/emptyfolder.css",
-                                  "Controls/Tree/tree.css"
+                                  "Controls/FileSelector/fileselector.less",
+                                  "Controls/ThirdParty/thirdparty.less",
+                                  "Controls/ContentList/contentlist.less",
+                                  "Controls/EmptyFolder/emptyfolder.less",
+                                  "Controls/Tree/tree.less"
+                       );
+        }
+        public StyleBundleData GetStaticDarkStyleSheet()
+        {
+            return (StyleBundleData)
+                   new StyleBundleData("dark-filessaveas", "files")
+                       .AddSource(PathProvider.GetFileStaticRelativePath, "saveas.less")
+                       .AddSource(r => FilesLinkUtility.FilesBaseAbsolutePath + r,
+                                  "Controls/FileSelector/fileselector.less",
+                                  "Controls/ThirdParty/dark-thirdparty.less",
+                                  "Controls/ContentList/dark-contentlist.less",
+                                  "Controls/EmptyFolder/emptyfolder.less",
+                                  "Controls/Tree/dark-tree.less"
                        );
         }
     }

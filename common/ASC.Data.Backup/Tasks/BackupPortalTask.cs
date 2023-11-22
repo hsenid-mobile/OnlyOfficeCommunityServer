@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.Common;
 using System.IO;
@@ -25,6 +26,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
+using ASC.Common;
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
@@ -35,6 +37,7 @@ using ASC.Data.Backup.Extensions;
 using ASC.Data.Backup.Tasks.Data;
 using ASC.Data.Backup.Tasks.Modules;
 using ASC.Data.Storage;
+using ASC.Data.Storage.ZipOperators;
 
 using Newtonsoft.Json;
 
@@ -62,14 +65,11 @@ namespace ASC.Data.Backup.Tasks
         public override void RunJob()
         {
             Logger.DebugFormat("begin backup {0}", TenantId);
-            CoreContext.TenantManager.SetCurrentTenant(TenantId);
-
-
-            using (var writer = new ZipWriteOperator(BackupFilePath))
+            using (WriteOperator)
             {
                 if (Dump)
                 {
-                    DoDump(writer);
+                    DoDump(WriteOperator);
                 }
                 else
                 {
@@ -82,11 +82,11 @@ namespace ASC.Data.Backup.Tasks
 
                     foreach (var module in modulesToProcess)
                     {
-                        DoBackupModule(writer, dbFactory, module);
+                        DoBackupModule(WriteOperator, dbFactory, module);
                     }
                     if (ProcessStorage)
                     {
-                        DoBackupStorage(writer, fileGroups);
+                        DoBackupStorage(WriteOperator, fileGroups);
                     }
                 }
             }
@@ -95,19 +95,46 @@ namespace ASC.Data.Backup.Tasks
 
         private void DoDump(IDataWriteOperator writer)
         {
-            var tmp = Path.GetTempFileName();
-            File.AppendAllText(tmp, true.ToString());
-            writer.WriteEntry(KeyHelper.GetDumpKey(), tmp);
-
-            List<string> tables;
-            var files = new List<BackupFileInfo>();
+            Dictionary<string, List<string>> databases = new Dictionary<string, List<string>>();
+            using (var dbManager = new DbManager("default", 100000))
+            {
+                dbManager.ExecuteList("select id, connection_string from mail_server_server").ForEach(r =>
+                {
+                    var dbName = GetDbName((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
+                    using (var dbManager1 = new DbManager(dbName, 100000))
+                    {
+                        try
+                        {
+                            var tables = dbManager1.ExecuteList("show tables;").Select(res => Convert.ToString(res[0])).ToList();
+                            databases.Add(dbName, tables);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Error(e);
+                            DbRegistry.UnRegisterDatabase(dbName);
+                        }
+                    }
+                });
+            }
 
             using (var dbManager = new DbManager("default", 100000))
             {
-                tables = dbManager.ExecuteList("show tables;").Select(r => Convert.ToString(r[0])).ToList();
+                var tables = dbManager.ExecuteList("show tables;").Select(res => Convert.ToString(res[0])).ToList();
+                databases.Add("default", tables);
             }
 
-            var stepscount = tables.Count * 4; // (schema + data) * (dump + zip)
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(true.ToString())))
+            {
+                writer.WriteEntry(KeyHelper.GetDumpKey(), stream);
+            }
+
+            var files = new List<BackupFileInfo>();
+
+            var stepscount = 0;
+            foreach (var db in databases)
+            {
+                stepscount += db.Value.Count * 4;// (schema + data) * (dump + zip)
+            }
             if (ProcessStorage)
             {
                 var tenants = CoreContext.TenantManager.GetTenants(false).Select(r => r.TenantId);
@@ -121,14 +148,42 @@ namespace ASC.Data.Backup.Tasks
 
             SetStepsCount(stepscount);
 
+            foreach (var db in databases)
+            {
+                DoDump(writer, db.Key, db.Value);
+            }
+            var dir = Path.GetDirectoryName(BackupFilePath);
+            var subDir = Path.Combine(dir, Path.GetFileNameWithoutExtension(BackupFilePath));
+            Logger.DebugFormat("dir remove start {0}", subDir);
+            Directory.Delete(subDir, true);
+            Logger.DebugFormat("dir remove end {0}", subDir);
+
+            if (ProcessStorage)
+            {
+                DoDumpStorage(writer, files);
+            }
+        }
+
+        private void DoDump(IDataWriteOperator writer, string dbName, List<string> tables)
+        {
             var excluded = ModuleProvider.AllModules.Where(r => IgnoredModules.Contains(r.ModuleName)).SelectMany(r => r.Tables).Select(r => r.Name).ToList();
             excluded.AddRange(IgnoredTables);
             excluded.Add("res_");
 
             var dir = Path.GetDirectoryName(BackupFilePath);
             var subDir = Path.Combine(dir, Path.GetFileNameWithoutExtension(BackupFilePath));
-            var schemeDir = Path.Combine(subDir, KeyHelper.GetDatabaseSchema());
-            var dataDir = Path.Combine(subDir, KeyHelper.GetDatabaseData());
+            var schemeDir = "";
+            var dataDir = "";
+            if (dbName == "default")
+            {
+                schemeDir = Path.Combine(subDir, KeyHelper.GetDatabaseSchema());
+                dataDir = Path.Combine(subDir, KeyHelper.GetDatabaseData());
+            }
+            else
+            {
+                schemeDir = Path.Combine(subDir, dbName, KeyHelper.GetDatabaseSchema());
+                dataDir = Path.Combine(subDir, dbName, KeyHelper.GetDatabaseData());
+            }
 
             if (!Directory.Exists(schemeDir))
             {
@@ -139,7 +194,11 @@ namespace ASC.Data.Backup.Tasks
                 Directory.CreateDirectory(dataDir);
             }
 
-            var dict = tables.ToDictionary(t => t, SelectCount);
+            var dict = new Dictionary<string, int>();
+            foreach (var table in tables)
+            {
+                dict.Add(table, SelectCount(table, dbName));
+            }
             tables.Sort((pair1, pair2) => dict[pair1].CompareTo(dict[pair2]));
 
             for (var i = 0; i < tables.Count; i += TasksLimit)
@@ -148,10 +207,10 @@ namespace ASC.Data.Backup.Tasks
                 for (var j = 0; j < TasksLimit && i + j < tables.Count; j++)
                 {
                     var t = tables[i + j];
-                    tasks.Add(Task.Run(() => DumpTableScheme(t, schemeDir)));
+                    tasks.Add(Task.Run(() => DumpTableScheme(t, schemeDir, dbName)));
                     if (!excluded.Any(t.StartsWith))
                     {
-                        tasks.Add(Task.Run(() => DumpTableData(t, dataDir, dict[t])));
+                        tasks.Add(Task.Run(() => DumpTableData(t, dataDir, dict[t], dbName, writer)));
                     }
                     else
                     {
@@ -162,15 +221,6 @@ namespace ASC.Data.Backup.Tasks
                 Task.WaitAll(tasks.ToArray());
 
                 ArchiveDir(writer, subDir);
-            }
-
-            Logger.DebugFormat("dir remove start {0}", subDir);
-            Directory.Delete(subDir, true);
-            Logger.DebugFormat("dir remove end {0}", subDir);
-
-            if (ProcessStorage)
-            {
-                DoDumpStorage(writer, files);
             }
         }
 
@@ -194,12 +244,12 @@ namespace ASC.Data.Backup.Tasks
             return files;
         }
 
-        private void DumpTableScheme(string t, string dir)
+        private void DumpTableScheme(string t, string dir, string dbName)
         {
             try
             {
                 Logger.DebugFormat("dump table scheme start {0}", t);
-                using (var dbManager = new DbManager("default", 100000))
+                using (var dbManager = new DbManager(dbName, 100000))
                 {
                     var createScheme = dbManager.ExecuteList(string.Format("SHOW CREATE TABLE `{0}`", t));
                     var creates = new StringBuilder();
@@ -222,22 +272,21 @@ namespace ASC.Data.Backup.Tasks
 
                 Logger.DebugFormat("dump table scheme stop {0}", t);
             }
-            catch (Exception e)
+            catch
             {
-                Logger.Error(e);
-                throw;
+
             }
 
         }
 
-        private int SelectCount(string t)
+        private int SelectCount(string t, string dbName)
         {
             try
             {
-                using (var dbManager = new DbManager("default", 100000))
+                using (var dbManager = new DbManager(dbName, 100000))
                 {
                     dbManager.ExecuteNonQuery("analyze table " + t);
-                    return dbManager.ExecuteScalar<int>(new SqlQuery("information_schema.`TABLES`").Select("table_rows").Where("TABLE_NAME", t));
+                    return dbManager.ExecuteScalar<int>(new SqlQuery("information_schema.`TABLES`").Select("table_rows").Where("TABLE_NAME", t).Where("TABLE_SCHEMA", dbManager.Connection.Database));
                 }
             }
             catch (Exception e)
@@ -248,7 +297,7 @@ namespace ASC.Data.Backup.Tasks
 
         }
 
-        private void DumpTableData(string t, string dir, int count)
+        private void DumpTableData(string t, string dir, int count, string dbName, IDataWriteOperator writer)
         {
             try
             {
@@ -266,7 +315,7 @@ namespace ASC.Data.Backup.Tasks
                 int primaryIndexStart = 0;
 
                 List<string> columns;
-                using (var dbManager = new DbManager("default", 100000))
+                using (var dbManager = new DbManager(dbName, 100000))
                 {
                     var columnsData = dbManager.ExecuteList(string.Format("SHOW COLUMNS FROM `{0}`;", t));
                     columns = columnsData
@@ -305,9 +354,7 @@ namespace ASC.Data.Backup.Tasks
                     }
                 }
 
-
                 var path = Path.Combine(dir, t);
-
                 var offset = 0;
 
                 do
@@ -316,12 +363,12 @@ namespace ASC.Data.Backup.Tasks
 
                     if (searchWithPrimary)
                     {
-                        result = GetDataWithPrimary(t, columns, primaryIndex, primaryIndexStart, primaryIndexStep);
+                        result = GetDataWithPrimary(t, columns, primaryIndex, primaryIndexStart, primaryIndexStep, dbName);
                         primaryIndexStart += primaryIndexStep;
                     }
                     else
                     {
-                        result = GetData(t, columns, offset);
+                        result = GetData(t, columns, offset, dbName);
                     }
 
                     offset += Limit;
@@ -332,10 +379,7 @@ namespace ASC.Data.Backup.Tasks
 
                     SaveToFile(path, t, columns, result);
 
-                    if (resultCount < Limit) break;
-
                 } while (true);
-
 
                 SetStepCompleted();
                 Logger.DebugFormat("dump table data stop {0}", t);
@@ -347,9 +391,9 @@ namespace ASC.Data.Backup.Tasks
             }
         }
 
-        private List<object[]> GetData(string t, List<string> columns, int offset)
+        private List<object[]> GetData(string t, List<string> columns, int offset, string dbName)
         {
-            using (var dbManager = new DbManager("default", 100000))
+            using (var dbManager = new DbManager(dbName, 100000))
             {
                 var query = new SqlQuery(t)
                     .Select(columns.ToArray())
@@ -358,9 +402,9 @@ namespace ASC.Data.Backup.Tasks
                 return dbManager.ExecuteList(query);
             }
         }
-        private List<object[]> GetDataWithPrimary(string t, List<string> columns, string primary, int start, int step)
+        private List<object[]> GetDataWithPrimary(string t, List<string> columns, string primary, int start, int step, string dbName)
         {
-            using (var dbManager = new DbManager("default", 100000))
+            using (var dbManager = new DbManager(dbName, 100000))
             {
                 var query = new SqlQuery(t)
                     .Select(columns.ToArray())
@@ -368,6 +412,20 @@ namespace ASC.Data.Backup.Tasks
 
                 return dbManager.ExecuteList(query);
             }
+        }
+
+        private string GetDbName(int id, string connectionString)
+        {
+            connectionString = connectionString + ";convert zero datetime=True";
+            var connectionSettings = new ConnectionStringSettings("mailservice-" + id, connectionString, "MySql.Data.MySqlClient");
+
+            if (DbRegistry.IsDatabaseRegistered(connectionSettings.Name))
+            {
+                DbRegistry.UnRegisterDatabase(connectionSettings.Name);
+            }
+
+            DbRegistry.RegisterDatabase(connectionSettings.Name, connectionSettings);
+            return connectionSettings.Name;
         }
 
         private void SaveToFile(string path, string t, IReadOnlyCollection<string> columns, List<object[]> data)
@@ -392,7 +450,7 @@ namespace ASC.Data.Backup.Tasks
                         for (var i = 0; i < obj.Length; i++)
                         {
                             var byteArray = obj[i] as byte[];
-                            if (byteArray != null)
+                            if (byteArray != null && byteArray.Length != 0)
                             {
                                 sw.Write("0x");
                                 foreach (var b in byteArray)
@@ -400,8 +458,16 @@ namespace ASC.Data.Backup.Tasks
                             }
                             else
                             {
-                                var ser = new JsonSerializer();
-                                ser.Serialize(writer, obj[i]);
+                                var s = obj[i] as string;
+                                if (s != null)
+                                {
+                                    sw.Write("'" + s.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("'", "\\'").Replace("\n", "\\n") + "'");
+                                }
+                                else
+                                {
+                                    var ser = new JsonSerializer();
+                                    ser.Serialize(writer, obj[i]);
+                                }
                             }
                             if (i != obj.Length - 1)
                             {
@@ -460,13 +526,12 @@ namespace ASC.Data.Backup.Tasks
             var tmpPath = Path.Combine(subDir, KeyHelper.GetStorageRestoreInfoZipKey());
             Directory.CreateDirectory(Path.GetDirectoryName(tmpPath));
 
-            using (var tmpFile = File.OpenWrite(tmpPath))
+            using (var tmpFile = new FileStream(tmpPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose))
             {
                 restoreInfoXml.WriteTo(tmpFile);
+                writer.WriteEntry(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile);
             }
 
-            writer.WriteEntry(KeyHelper.GetStorageRestoreInfoZipKey(), tmpPath);
-            File.Delete(tmpPath);
             SetStepCompleted();
 
             Directory.Delete(subDir, true);
@@ -511,8 +576,10 @@ namespace ASC.Data.Backup.Tasks
                 {
                     f = @"\\?\" + f;
                 }
-                writer.WriteEntry(enumerateFile.Substring(subDir.Length), f);
-                File.Delete(f);
+                using (var tmpFile = new FileStream(f, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose))
+                {
+                    writer.WriteEntry(enumerateFile.Substring(subDir.Length), tmpFile);
+                }
                 SetStepCompleted();
             }
             Logger.DebugFormat("archive dir end {0}", subDir);
@@ -524,14 +591,28 @@ namespace ASC.Data.Backup.Tasks
             var exclude = new List<string>();
 
             using (var db = dbFactory.OpenConnection())
-            using (var command = db.CreateCommand())
             {
-                command.CommandText = "select storage_path from backup_backup where tenant_id = " + TenantId + " and storage_type = 0 and storage_path is not null";
-                using (var reader = command.ExecuteReader())
+                using (var command = db.CreateCommand())
                 {
-                    while (reader.Read())
+                    command.CommandText = "select storage_path from backup_backup where tenant_id = " + TenantId + " and storage_type = 0 and storage_path is not null and removed = 0";
+                    using (var reader = command.ExecuteReader())
                     {
-                        exclude.Add(reader.GetString(0));
+                        while (reader.Read())
+                        {
+                            exclude.Add(reader.GetString(0));
+                        }
+                    }
+                }
+
+                using (var command = db.CreateCommand())
+                {
+                    command.CommandText = "select id from files_file where tenant_id = " + TenantId + " and title like '%tar.gz' and content_length > 1073741824";
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            exclude.Add(reader.GetString(0));
+                        }
                     }
                 }
             }
@@ -586,15 +667,13 @@ namespace ASC.Data.Backup.Tasks
 
                         Logger.DebugFormat("begin saving table {0}", table.Name);
 
-                        var tmp = Path.GetTempFileName();
-                        using (var file = File.OpenWrite(tmp))
+                        using (var file = TempStream.Create())
                         {
                             data.WriteXml(file, XmlWriteMode.WriteSchema);
                             data.Clear();
-                        }
 
-                        writer.WriteEntry(KeyHelper.GetTableZipKey(module, data.TableName), tmp);
-                        File.Delete(tmp);
+                            writer.WriteEntry(KeyHelper.GetTableZipKey(module, data.TableName), file);
+                        }
 
                         Logger.DebugFormat("end saving table {0}", table.Name);
                     }
@@ -618,31 +697,17 @@ namespace ASC.Data.Backup.Tasks
                 {
                     var storage = StorageFactory.GetStorage(ConfigPath, TenantId.ToString(), group.Key);
                     var file1 = file;
+                    Stream fileStream = null;
                     ActionInvoker.Try(state =>
                     {
                         var f = (BackupFileInfo)state;
-                        using (var fileStream = storage.GetReadStream(f.Domain, f.Path))
-                        {
-                            var tmp = Path.GetTempFileName();
-                            try
-                            {
-                                using (var tmpFile = File.OpenWrite(tmp))
-                                {
-                                    fileStream.CopyTo(tmpFile);
-                                }
-
-                                writer.WriteEntry(file1.GetZipKey(), tmp);
-                            }
-                            finally
-                            {
-                                if (File.Exists(tmp))
-                                {
-                                    File.Delete(tmp);
-                                }
-                            }
-                        }
+                        fileStream = storage.GetReadStream(f.Domain, f.Path);
                     }, file, 5, error => Logger.WarnFormat("can't backup file ({0}:{1}): {2}", file1.Module, file1.Path, error));
-
+                    if (fileStream != null) 
+                    {
+                        writer.WriteEntry(file1.GetZipKey(), fileStream);
+                        fileStream.Dispose();
+                    }
                     SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)filesCount));
                 }
             }
@@ -653,15 +718,11 @@ namespace ASC.Data.Backup.Tasks
                     .SelectMany(group => group.Select(file => (object)file.ToXElement()))
                     .ToArray());
 
-            var tmpPath = Path.GetTempFileName();
-            using (var tmpFile = File.OpenWrite(tmpPath))
+            using (var tmpFile = TempStream.Create())
             {
                 restoreInfoXml.WriteTo(tmpFile);
+                writer.WriteEntry(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile);
             }
-
-            writer.WriteEntry(KeyHelper.GetStorageRestoreInfoZipKey(), tmpPath);
-            File.Delete(tmpPath);
-
 
             Logger.Debug("end backup storage");
         }

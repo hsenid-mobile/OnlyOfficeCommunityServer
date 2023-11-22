@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+
 using ASC.Api.Attributes;
 using ASC.Mail.Data.Contracts;
 
@@ -25,11 +26,14 @@ namespace ASC.Api.Mail
     public partial class MailApi
     {
         /// <summary>
-        ///    Returns the list of alerts for the authenticated user
+        /// Returns a list of all the alerts for the authenticated user.
         /// </summary>
-        /// <returns>Alerts list</returns>
-        /// <short>Get alerts list</short> 
+        /// <returns type="ASC.Mail.Data.Contracts.MailAlertData, ASC.Mail">List of alerts</returns>
+        /// <short>Get alerts</short> 
         /// <category>Alerts</category>
+        /// <path>api/2.0/mail/alert</path>
+        /// <httpMethod>GET</httpMethod>
+        /// <collection>list</collection>
         [Read(@"alert")]
         public IList<MailAlertData> GetAlerts()
         {
@@ -37,21 +41,23 @@ namespace ASC.Api.Mail
         }
 
         /// <summary>
-        ///    Deletes the alert with the ID specified in the request
+        /// Deletes an alert with the ID specified in the request.
         /// </summary>
-        /// <param name="id">Alert ID</param>
-        /// <returns>Deleted alert id. Same as request parameter.</returns>
-        /// <short>Delete alert by ID</short> 
+        /// <param type="System.Int64, System" method="url" name="id">Alert ID</param>
+        /// <returns>Deleted alert ID. Same as the request parameter</returns>
+        /// <short>Delete an alert</short> 
         /// <category>Alerts</category>
+        /// <path>api/2.0/mail/alert/{id}</path>
+        /// <httpMethod>DELETE</httpMethod>
         [Delete(@"alert/{id}")]
         public long DeleteAlert(long id)
         {
-            if(id < 0)
+            if (id < 0)
                 throw new ArgumentException(@"Invalid alert id. Id must be positive integer.", "id");
 
             var success = MailEngineFactory.AlertEngine.DeleteAlert(id);
 
-            if(!success)
+            if (!success)
                 throw new Exception("Delete failed");
 
             return id;

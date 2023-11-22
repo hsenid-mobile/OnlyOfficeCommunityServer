@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 
 using System;
+
 using ASC.Web.Core.ModuleManagement.Common;
 using ASC.Web.Core.Utility;
 using ASC.Web.Core.Utility.Skins;
@@ -38,7 +39,7 @@ namespace ASC.Web.Sample.Configuration
 
         public override ImageOptions Logo
         {
-            get { return new ImageOptions { ImageFileName = "common_search_icon.png" }; }
+            get { return new ImageOptions { ImageFileName = "common_search_icon.svg" }; }
         }
 
         public override string SearchName

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
+
 using ASC.Api.Exceptions;
 using ASC.Common.Utils;
 using ASC.Core;
@@ -31,18 +32,17 @@ using ASC.Data.Storage;
 using ASC.ElasticSearch;
 using ASC.Notify.Patterns;
 using ASC.Notify.Recipients;
+using ASC.Web.Community.Modules.Wiki.Resources;
+using ASC.Web.Community.Product;
+using ASC.Web.Community.Search;
+using ASC.Web.Community.Wiki.Common;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Utility;
 using ASC.Web.UserControls.Wiki.Data;
 using ASC.Web.UserControls.Wiki.Handlers;
-using ASC.Web.UserControls.Wiki.Resources;
 using ASC.Web.UserControls.Wiki.UC;
+
 using File = ASC.Web.UserControls.Wiki.Data.File;
-using ASC.Web.Community.Product;
-using ASC.Web.Community.Search;
-using ASC.Web.Community.Wiki.Common;
-using ASC.Web.Studio.Core.Notify;
-using ASC.Web.Core.WhiteLabel;
 
 namespace ASC.Web.UserControls.Wiki
 {
@@ -431,18 +431,18 @@ namespace ASC.Web.UserControls.Wiki
                     if (pageName == string.Empty)
                     {
                         page = new Page
-                            {
-                                PageName = string.Empty,
-                                Body = WikiUCResource.MainPage_DefaultBody
-                            };
+                        {
+                            PageName = string.Empty,
+                            Body = WikiUCResource.MainPage_DefaultBody
+                        };
                     }
                     else if (pageName == WikiUCResource.HelpPageCaption)
                     {
                         page = new Page
-                            {
-                                PageName = WikiUCResource.HelpPageCaption,
-                                Body = WikiUCResource.HelpPage_DefaultBody
-                            };
+                        {
+                            PageName = WikiUCResource.HelpPageCaption,
+                            Body = WikiUCResource.HelpPage_DefaultBody
+                        };
                     }
 
                 }
@@ -564,7 +564,6 @@ namespace ASC.Web.UserControls.Wiki
                 SecurityContext.CurrentAccount.ID.ToString(),
                 Constants.NewPage,
                 null,
-                null,
                 GetNotifyTags(page.PageName));
         }
 
@@ -574,7 +573,6 @@ namespace ASC.Web.UserControls.Wiki
                 SecurityContext.CurrentAccount.ID.ToString(),
                 Constants.EditPage,
                 PageNameUtil.ReplaceSpaces(page.PageName),
-                null,
                 GetNotifyTags(page.PageName, "edit wiki page", null));
         }
 
@@ -584,18 +582,32 @@ namespace ASC.Web.UserControls.Wiki
                 SecurityContext.CurrentAccount.ID.ToString(),
                 Constants.AddPageToCat,
                 category,
-                null,
                 GetCategoryNotifyTags(category, page));
         }
 
         private void NotifyCommentCreated(Page page, Comment comment)
         {
-            WikiNotifyClient.SendNoticeAsync(
-                SecurityContext.CurrentAccount.ID.ToString(),
-                Constants.EditPage,
-                PageNameUtil.ReplaceSpaces(page.PageName),
-                null,
-                GetNotifyTags(page.PageName, "new wiki page comment", comment));
+            var mentionedUsers = MentionProvider.GetMentionedUsers(comment.Body);
+            var mentionedUserIds = mentionedUsers.Select(u => u.ID.ToString());
+
+            var provider = WikiNotifySource.Instance.GetSubscriptionProvider();
+
+            var authorID = SecurityContext.CurrentAccount.ID.ToString();
+            var objectID = PageNameUtil.ReplaceSpaces(page.PageName);
+
+            var recipients = provider
+                .GetRecipients(Constants.EditPage, objectID)
+                .Where(r => !mentionedUserIds.Contains(r.ID))
+                .ToArray();
+
+            var tags = GetNotifyTags(page.PageName, "new wiki page comment", comment);
+
+            WikiNotifyClient.SendNoticeToAsync(authorID, Constants.EditPage, objectID, recipients, tags);
+
+            if (mentionedUsers.Length > 0)
+            {
+                WikiNotifyClient.SendNoticeToAsync(authorID, Constants.MentionForWikiComment, objectID, mentionedUsers, tags);
+            }        
         }
 
         private ITagValue[] GetNotifyTags(string pageName)
@@ -620,8 +632,6 @@ namespace ASC.Web.UserControls.Wiki
                     new TagValue(Constants.TagDate, TenantUtil.DateTimeNow()),
                     new TagValue(Constants.TagPostPreview, HtmlUtil.GetText(EditPage.ConvertWikiToHtml(page.PageName, page.Body, defPage, WikiSection.Section.ImageHangler.UrlFormat, CoreContext.TenantManager.GetCurrentTenant().TenantId), 120))
                 };
-            if (comment != null && !string.IsNullOrEmpty(pageName))
-                ReplyToTagProvider.Comment("wiki", pageName, comment.Id.ToString());
 
             if (!string.IsNullOrEmpty(patternType))
             {
@@ -651,8 +661,7 @@ namespace ASC.Web.UserControls.Wiki
                     new TagValue(Constants.TagUserURL, CommonLinkUtility.GetFullAbsolutePath(CommonLinkUtility.GetUserProfile(user.ID))),
                     new TagValue(Constants.TagDate, TenantUtil.DateTimeNow()),
                     new TagValue(Constants.TagPostPreview, HtmlUtil.GetText(EditPage.ConvertWikiToHtml(page.PageName, page.Body, defPageHref, WikiSection.Section.ImageHangler.UrlFormat, CoreContext.TenantManager.GetCurrentTenant().TenantId), 120)),
-                    new TagValue(Constants.TagCatName, objectId),
-                    ReplyToTagProvider.Comment("wiki", pageName)
+                    new TagValue(Constants.TagCatName, objectId)
                 };
 
             return tags.ToArray();

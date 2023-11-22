@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,6 +139,8 @@ window.printPage = (function($) {
             messages[i].printedHtmlBody = getMessageBodyForPrint(messages[i]);
         }
 
+        window.toastr.remove();
+
         $view = $.tmpl(viewTmpl, { messages: messages }, {
             fileSizeToStr: AttachmentManager.GetSizeString,
             cutFileName: AttachmentManager.CutFileName,
@@ -182,7 +184,7 @@ window.printPage = (function($) {
     }
 
     function showErrorMessage() {
-        toastr.error(ASC.Resources.Master.Resource.CommonJSErrorMsg);
+        toastr.error(ASC.Resources.Master.ResourceJS.CommonJSErrorMsg);
     }
 
     return {

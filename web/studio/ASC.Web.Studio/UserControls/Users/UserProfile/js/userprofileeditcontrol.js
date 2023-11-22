@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ window.EditProfileManager = (function () {
         $passDigits,
         $passSpecial,
         $passMinLength,
+        $passLatinLetters,
         $passwordInfo,
         $emailInfo,
         $domainSelector,
@@ -102,6 +103,7 @@ window.EditProfileManager = (function () {
         $passDigits = jq('#passDigits');
         $passSpecial = jq('#passSpecial');
         $passMinLength = jq('#passMinLength');
+        $passLatinLetters = jq('#passLatinLetters');
         $passwordInfo = jq('#passwordInfo');
         $emailInfo = jq(classEmailInfo);
         $domainSelector = jq('#domainSelector');
@@ -139,7 +141,7 @@ window.EditProfileManager = (function () {
 
         edit = jq.getURLParam("action") == "edit";
 
-        teamlab.getPortalPasswordSettings({},
+        teamlab.getPasswordSettings({},
             {
                 success: function (params, data) {
                     passwordSettings = data;
@@ -197,7 +199,7 @@ window.EditProfileManager = (function () {
         jq(".group-field").tlcombobox({ align: 'left' });
         jq(".group-field.external").tlcombobox(false);
 
-        $profileFirstName.focus();
+        $profileFirstName.trigger("focus");
 
         jq(".tabs-content select").each(function () {
             var className = jq(this).find("option:selected").val();
@@ -209,7 +211,7 @@ window.EditProfileManager = (function () {
         var selectedGroups = {};
         var $chooseGroupsSelector = jq("#chooseGroupsSelector");
         $chooseGroupsSelector.groupadvancedSelector({
-            canadd: teamlab.profile.isAdmin
+            canadd: teamlab.profile.isAdmin || ASC.Resources.Master.IsProductAdmin
         });
 
         $chooseGroupsSelector.on("showList", function (event, items) {
@@ -236,7 +238,7 @@ window.EditProfileManager = (function () {
             if (groupList.length) {
                 groupList.prepend("<li class=\"menu-sub-item\" data-id=\"" + item.id
                     + "\"><a class=\"menu-item-label outer-text text-overflow\" title=\""
-                    + Encoder.htmlEncode(item.title) + "\"" + " href=\"Products/People/#group=" + item.id + "\">"
+                    + Encoder.htmlEncode(item.title) + "\"" + " href=\"/Products/People/#group=" + item.id + "\">"
                     + Encoder.htmlEncode(item.title)
                     + "</a></li>");
                 if (groupList.parents("li").hasClass("none-sub-list")) {
@@ -300,6 +302,34 @@ window.EditProfileManager = (function () {
         //////
         InitDatePicker();
 
+        /// Lead
+
+        $leadSelector = jq("#leadSelector");
+        $leadManager = jq("#leadManager");
+        $leadManagerName = $leadManager.find(".result-name");
+
+        $leadSelector.useradvancedSelector({
+            onechosen: true,   // list without checkbox, you can choose only one item
+            showGroups: true,
+            withGuests: false,
+            itemsDisabledIds: edit && window.userId ? [window.userId] : []
+        }).on("showList", function (event, item) {
+            $leadManagerName.attr("data-id", item.id).html(item.title);
+            $leadManager.removeClass("display-none");
+            $leadSelector.hide();
+        });
+
+        $leadManager.find(".reset-icon").on("click", function () {
+            $leadManager.addClass("display-none");
+            $leadManagerName.attr("data-id", "").text("");
+            $leadSelector.show();
+        });
+
+        if ($leadManagerName.attr("data-id") != "") {
+            $leadSelector.hide();
+            $leadManager.removeClass("display-none");
+        }
+
         jq("#profileActionButton").on("click", function () {
 
             HideRequiredError();
@@ -317,7 +347,8 @@ window.EditProfileManager = (function () {
                 sex,
                 departments = [],
                 contacts = [],
-                comment = $profileComment.val();
+                comment = $profileComment.val(),
+                lead = $leadManagerName.attr("data-id");
 
             isError = false;
 
@@ -403,7 +434,7 @@ window.EditProfileManager = (function () {
                 if (type && value) {
                     for (var j = 0, k = contacts.length; j < k; j++) {
                         if (type == contacts[j].Type && value == contacts[j].Value) {
-                            toastr.error(ASC.Resources.Master.Resource.ErrorMessageContactsDuplicated);
+                            toastr.error(ASC.Resources.Master.ResourceJS.ErrorMessageContactsDuplicated);
                             return;
                         }
                     }
@@ -444,6 +475,7 @@ window.EditProfileManager = (function () {
                     departments.push($depSelector.attr("data-id"));
                 }
             }
+
             var profile =
                 {
                     isVisitor: isVisitor,
@@ -457,7 +489,8 @@ window.EditProfileManager = (function () {
                     worksfrom: workFromDate,
                     contacts: contacts,
                     files: "", //pathname,
-                    department: departments
+                    department: departments,
+                    lead: lead
                 };
 
 
@@ -557,18 +590,20 @@ window.EditProfileManager = (function () {
 
             fromDateInp.datepicker({
                 onSelect: function() {
-                    var date = jq(this).blur().datepicker("getDate");
+                    var date = jq(this).trigger("blur").datepicker("getDate");
                     birthDateInp.datepicker("option", "maxDate", date);
                     jQuery.datepicker._hideDatepicker();
-                }
+                },
+                yearRange: '1990:+0'
             }).val(fromDateInp.attr("data-value"));
 
             birthDateInp.datepicker({
                 onSelect: function() {
-                    var date = jq(this).blur().datepicker("getDate");
+                    var date = jq(this).trigger("blur").datepicker("getDate");
                     fromDateInp.datepicker("option", "minDate", date);
                     jQuery.datepicker._hideDatepicker();
-                }
+                },
+                yearRange: '-80:+0'
             }).val(birthDateInp.attr("data-value"));
 
             IsInitDatePicker = true;
@@ -615,7 +650,7 @@ window.EditProfileManager = (function () {
         }
 
         if (fromDate && fromDate > maxDate) {
-            fromDateInp.siblings(requiredErrorText).text(ASC.Resources.Master.Resource.Error);
+            fromDateInp.siblings(requiredErrorText).text(ASC.Resources.Master.ResourceJS.Error);
             showRequiredError(fromDateInp);
             isValid = false;
         }
@@ -627,13 +662,13 @@ window.EditProfileManager = (function () {
         }
 
         if (birthDate && birthDate > maxDate) {
-            birthDateInp.siblings(requiredErrorText).text(ASC.Resources.Master.Resource.Error);
+            birthDateInp.siblings(requiredErrorText).text(ASC.Resources.Master.ResourceJS.Error);
             showRequiredError(birthDateInp);
             isValid = false;
         }
 
         if (birthDate && fromDate && fromDate < birthDate) {
-            fromDateInp.siblings(requiredErrorText).text(ASC.Resources.Master.Resource.ErrorMessage_InvalidDate);
+            fromDateInp.siblings(requiredErrorText).text(ASC.Resources.Master.ResourceJS.ErrorMessage_InvalidDate);
             showRequiredError(fromDateInp);
             isValid = false;
         }
@@ -684,7 +719,7 @@ window.EditProfileManager = (function () {
                         $newEl.find(".group-field").addClass("external");
 
                         var title = jq("#profileFirstName").attr("title");
-                        $newEl.find(".textEdit").addClass("disable").attr("disabled", true).attr("title", title);
+                        $newEl.find(".textEdit").addClass("disable").prop("disabled", true).attr("title", title);
 
                     }
                 }
@@ -726,7 +761,7 @@ window.EditProfileManager = (function () {
     };
 
     function lockProfileActionPageElements() {
-        jq(".profile-action-userdata .userdata-value input, #profileComment, .contacts-group input").attr("disabled", "disabled");
+        jq(".profile-action-userdata .userdata-value input, #profileComment, .contacts-group input").prop("disabled", true);
         jq(".group-field").tlcombobox(false);
         jq(".add-new-field, #loadPhotoImage, #chooseGroupsSelector, #departmentsField .departments-list .reset-icon").addClass("disabled");
 
@@ -734,7 +769,7 @@ window.EditProfileManager = (function () {
     };
 
     function unlockProfileActionPageElements() {
-        jq(".profile-action-userdata .userdata-value input, #profileComment, .contacts-group input").removeAttr("disabled");
+        jq(".profile-action-userdata .userdata-value input, #profileComment, .contacts-group input").prop("disabled", false);
         jq(".group-field").tlcombobox(true);
         jq(".add-new-field, #loadPhotoImage, #chooseGroupsSelector, #departmentsField .departments-list .reset-icon").removeClass("disabled");
 
@@ -824,11 +859,11 @@ window.EditProfileManager = (function () {
     };
 
     function validateFirstName(checkIsEmpty, withouthScroll, withouthFocus) {
-        return validateUserName($profileFirstName, checkIsEmpty, withouthScroll, withouthFocus, ASC.Resources.Master.Resource.ErrorInvalidUserFirstName);
+        return validateUserName($profileFirstName, checkIsEmpty, withouthScroll, withouthFocus, ASC.Resources.Master.ResourceJS.ErrorInvalidUserFirstName);
     }
 
     function validateLastName(checkIsEmpty, withouthScroll, withouthFocus) {
-        return validateUserName($profileSecondName, checkIsEmpty, withouthScroll, withouthFocus, ASC.Resources.Master.Resource.ErrorInvalidUserLastName);
+        return validateUserName($profileSecondName, checkIsEmpty, withouthScroll, withouthFocus, ASC.Resources.Master.ResourceJS.ErrorInvalidUserLastName);
     }
 
     function validateUserName(obj, checkIsEmpty, withouthScroll, withouthFocus, errorMsg) {
@@ -928,7 +963,7 @@ window.EditProfileManager = (function () {
             var infoText = ASC.Resources.Master.EmailAndPasswordIncorrectEmail;
 
             if (param === 'error') {
-                infoText = ASC.Resources.Master.Resource.Error;
+                infoText = ASC.Resources.Master.ResourceJS.Error;
             }
 
             showRequiredError(control, true, true);
@@ -969,7 +1004,7 @@ window.EditProfileManager = (function () {
     function checkFieldLength(field, length, $control, showErrMesage) {
         if (field.length > length) {
             if (showErrMesage) {
-                $control.siblings(requiredErrorText).text(ASC.Resources.Master.Resource.ErrorMessageLongField64);
+                $control.siblings(requiredErrorText).text(ASC.Resources.Master.ResourceJS.ErrorMessageLongField64);
             }
             showRequiredError($control);
             isError = true;
@@ -1043,10 +1078,10 @@ window.EditProfileManager = (function () {
 
     function copyLocalPart() {
         if (isUserEmail) {
-            $profileEmail.val(splitEmail($portalEmail)).focus();
+            $profileEmail.val(splitEmail($portalEmail)).trigger("focus");
             delayedCheck($profileEmail);
         } else {
-            $portalEmail.val(splitEmail($profileEmail)).focus();
+            $portalEmail.val(splitEmail($profileEmail)).trigger("focus");
             delayedCheck($portalEmail);
         }
         clearEmailInfo();
@@ -1096,7 +1131,7 @@ window.EditProfileManager = (function () {
     };
 
     function checkPassword() {
-        var inputValues = $password.val().trim(),
+        var inputValues = $password.val(),
             inputLength = inputValues.length,
             progress = jq('.validationProgress'),
             progressStep = ($password.width() + 41) / passwordSettings.minLength;
@@ -1170,23 +1205,25 @@ window.EditProfileManager = (function () {
             special;
 
         (passwordSettings.upperCase)
-            ? upper = /[A-Z]/.test(inputValues)
+            ? upper = new RegExp(passwordSettings.upperCaseRegexStr).test(inputValues)
             : upper = true;
 
         (passwordSettings.digits)
-            ? digits = /\d/.test(inputValues)
+            ? digits = new RegExp(passwordSettings.digitsRegexStr).test(inputValues)
             : digits = true;
 
         (passwordSettings.specSymbols)
-            ? special = /[!@#$%^&*_\-()=]/.test(inputValues)
+            ? special = new RegExp(passwordSettings.specSymbolsRegexStr).test(inputValues)
             : special = true;
 
-        checkPasswordInfoColor(upper, digits, special, inputValues);
+        var onlyLatinLetters = new RegExp("^" + passwordSettings.allowedCharactersRegexStr + "{1,}$").test(inputValues);
 
-        return digits && upper && special && inputValues.length >= passwordSettings.minLength;
+        checkPasswordInfoColor(inputValues, upper, digits, special, onlyLatinLetters);
+
+        return digits && upper && special && inputValues.length >= passwordSettings.minLength && inputValues.length <= passwordSettings.maxLength && onlyLatinLetters;
     };
 
-    function checkPasswordInfoColor(upper, digits, special, inputValues) {
+    function checkPasswordInfoColor(inputValues, upper, digits, special, onlyLatinLetters) {
         (upper)
             ? greenText($passUpper)
             : redText($passUpper);
@@ -1199,9 +1236,13 @@ window.EditProfileManager = (function () {
             ? greenText($passSpecial)
             : redText($passSpecial);
 
-        (inputValues.length >= passwordSettings.minLength)
+        (inputValues.length >= passwordSettings.minLength && inputValues.length <= passwordSettings.maxLength)
             ? greenText($passMinLength)
             : redText($passMinLength);
+
+        (onlyLatinLetters)
+            ? greenText($passLatinLetters)
+            : redText($passLatinLetters);
     };
 
     function greenText(control) {
@@ -1236,7 +1277,7 @@ window.EditProfileManager = (function () {
             var enabledModuleIndex = enabledModulesId.indexOf(module.id);
             if (enabledModuleIndex >= 0) {
                 moduleInfo.append("<tr>"
-                    + "<td>" + jq.trim(enabledModulesList[enabledModuleIndex].title) + "</td>"
+                    + "<td>" + enabledModulesList[enabledModuleIndex].title.trim() + "</td>"
                     + module.value
                     + "</tr>");
             }

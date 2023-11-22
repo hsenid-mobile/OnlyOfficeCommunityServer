@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 
 CookieSettingsManager = new function () {
     this.Init = function () {
-        jq("#saveCookieSettingsBtn").click(CookieSettingsManager.Save);
+        jq("#saveCookieSettingsBtn").on("click", CookieSettingsManager.Save);
         
-        jq("#lifeTimeTxt").keydown(function (e) {
+        jq("#lifeTimeTxt").on("keydown", function (e) {
             // Allow: backspace, delete, tab, escape, enter and .
             if (jq.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
                 // Allow: Ctrl+A, Command+A

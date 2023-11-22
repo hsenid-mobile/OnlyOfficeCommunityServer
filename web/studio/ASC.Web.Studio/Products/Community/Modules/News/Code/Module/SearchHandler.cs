@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 
 using System;
+
 using ASC.Common.Utils;
+using ASC.Web.Community.Modules.News.Resources;
 using ASC.Web.Community.News.Code.DAO;
-using ASC.Web.Community.News.Resources;
 using ASC.Web.Community.Product;
 using ASC.Web.Core.ModuleManagement.Common;
 using ASC.Web.Core.Utility;
@@ -34,18 +35,18 @@ namespace ASC.Web.Community.News.Code.Module
             return FeedStorageFactory.Create()
                                      .SearchFeeds(text)
                                      .ConvertAll(f => new SearchResultItem
-                                         {
-                                             Name = f.Caption,
-                                             Description = HtmlUtil.GetText(f.Text, 120),
-                                             URL = FeedUrls.GetFeedUrl(f.Id),
-                                             Date = f.Date
-                                         })
+                                     {
+                                         Name = f.Caption,
+                                         Description = HtmlUtil.GetText(f.Text, 120),
+                                         URL = FeedUrls.GetFeedUrl(f.Id),
+                                         Date = f.Date
+                                     })
                                      .ToArray();
         }
 
         public override ImageOptions Logo
         {
-            get { return new ImageOptions { ImageFileName = "newslogo.png", PartID = NewsConst.ModuleId }; }
+            get { return new ImageOptions { ImageFileName = "newslogo.svg", PartID = NewsModule.ModuleId }; }
         }
 
         public override string SearchName
@@ -55,7 +56,7 @@ namespace ASC.Web.Community.News.Code.Module
 
         public override Guid ModuleID
         {
-            get { return NewsConst.ModuleId; }
+            get { return NewsModule.ModuleId; }
         }
 
         public override Guid ProductID

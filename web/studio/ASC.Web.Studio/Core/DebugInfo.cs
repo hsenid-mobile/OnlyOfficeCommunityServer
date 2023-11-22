@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
+
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Web.Core.Files;
@@ -34,6 +35,7 @@ namespace ASC.Web.Studio.Core
         private static readonly string ChangeLogPatternFilePath = string.Concat(HttpContext.Current.Server.MapPath("~/"), "change.log");
         private static readonly string ChangeLogFilePath = string.Concat(HttpContext.Current.Server.MapPath("~/"), "changelog.xml");
         private static readonly string debugString;
+        private static ILog Log = LogManager.GetLogger("ASC");
         public static bool ShowDebugInfo;
 
         static DebugInfo()
@@ -54,7 +56,7 @@ namespace ASC.Web.Studio.Core
             }
             catch (Exception)
             {
-                
+
             }
         }
 
@@ -110,7 +112,7 @@ namespace ASC.Web.Studio.Core
             }
             catch (Exception e)
             {
-                LogManager.GetLogger("ASC").Error("DebugInfo", e);
+                Log.Error("DebugInfo", e);
             }
 
             return "";
@@ -156,7 +158,7 @@ namespace ASC.Web.Studio.Core
                 }
                 catch (Exception e)
                 {
-                    LogManager.GetLogger("ASC").Error("DebugInfo", e);
+                    Log.Error("DebugInfo", e);
                 }
 
                 return "";

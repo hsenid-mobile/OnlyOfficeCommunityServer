@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text.RegularExpressions;
 using System.Threading;
+
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Tenants;
@@ -31,15 +32,17 @@ using ASC.Notify.Engine;
 using ASC.Notify.Messages;
 using ASC.Notify.Patterns;
 using ASC.Web.Core;
-using ASC.Web.Studio.Utility;
-using MimeKit.Utils;
 using ASC.Web.Core.WhiteLabel;
+using ASC.Web.Studio.Utility;
+
+using MimeKit.Utils;
 
 namespace ASC.Web.Studio.Core.Notify
 {
     public static class NotifyConfiguration
     {
         private static bool configured;
+        private static ILog Log = LogManager.GetLogger("ASC");
         private static readonly object locker = new object();
         private static readonly Regex urlReplacer = new Regex(@"(<a [^>]*href=(('(?<url>[^>']*)')|(""(?<url>[^>""]*)""))[^>]*>)|(<img [^>]*src=(('(?<url>(?![data:|cid:])[^>']*)')|(""(?<url>(?![data:|cid:])[^>""]*)""))[^/>]*/?>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex textileLinkReplacer = new Regex(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
@@ -117,53 +120,56 @@ namespace ASC.Web.Studio.Core.Notify
                          // culture
                          var u = Constants.LostUser;
 
-                         if (32 <= r.Recipient.ID.Length)
+                         if (!(CoreContext.Configuration.Personal && r.NotifyAction.ID == Actions.PersonalConfirmation.ID))
                          {
-                             var guid = default(Guid);
-                             try
+                             if (32 <= r.Recipient.ID.Length)
                              {
-                                 guid = new Guid(r.Recipient.ID);
+                                 var guid = default(Guid);
+                                 try
+                                 {
+                                     guid = new Guid(r.Recipient.ID);
+                                 }
+                                 catch (FormatException) { }
+                                 catch (OverflowException) { }
+
+                                 if (guid != default(Guid))
+                                 {
+                                     u = CoreContext.UserManager.GetUsers(guid);
+                                 }
                              }
-                             catch (FormatException) { }
-                             catch (OverflowException) { }
 
-                             if (guid != default(Guid))
+                             if (Constants.LostUser.Equals(u))
                              {
-                                 u = CoreContext.UserManager.GetUsers(guid);
+                                 u = CoreContext.UserManager.GetUserByEmail(r.Recipient.ID);
                              }
-                         }
 
-                         if (Constants.LostUser.Equals(u))
-                         {
-                             u = CoreContext.UserManager.GetUserByEmail(r.Recipient.ID);
-                         }
-
-                         if (Constants.LostUser.Equals(u))
-                         {
-                             u = CoreContext.UserManager.GetUserByUserName(r.Recipient.ID);
-                         }
-
-                         if (!Constants.LostUser.Equals(u))
-                         {
-                             var culture = !string.IsNullOrEmpty(u.CultureName) ? u.GetCulture() : CoreContext.TenantManager.GetCurrentTenant().GetCulture();
-                             Thread.CurrentThread.CurrentCulture = culture;
-                             Thread.CurrentThread.CurrentUICulture = culture;
-
-                             // security
-                             var tag = r.Arguments.Find(a => a.Tag == CommonTags.ModuleID);
-                             var productId = tag != null ? (Guid)tag.Value : Guid.Empty;
-                             if (productId == Guid.Empty)
+                             if (Constants.LostUser.Equals(u))
                              {
-                                 tag = r.Arguments.Find(a => a.Tag == CommonTags.ProductID);
-                                 productId = tag != null ? (Guid)tag.Value : Guid.Empty;
+                                 u = CoreContext.UserManager.GetUserByUserName(r.Recipient.ID);
                              }
-                             if (productId == Guid.Empty)
+
+                             if (!Constants.LostUser.Equals(u))
                              {
-                                 productId = (Guid)(CallContext.GetData("asc.web.product_id") ?? Guid.Empty);
-                             }
-                             if (productId != Guid.Empty && productId != new Guid("f4d98afdd336433287783c6945c81ea0") /* ignore people product */)
-                             {
-                                 return !WebItemSecurity.IsAvailableForUser(productId, u.ID);
+                                 var culture = !string.IsNullOrEmpty(u.CultureName) ? u.GetCulture() : CoreContext.TenantManager.GetCurrentTenant().GetCulture();
+                                 Thread.CurrentThread.CurrentCulture = culture;
+                                 Thread.CurrentThread.CurrentUICulture = culture;
+
+                                 // security
+                                 var tag = r.Arguments.Find(a => a.Tag == CommonTags.ModuleID);
+                                 var productId = tag != null ? (Guid)tag.Value : Guid.Empty;
+                                 if (productId == Guid.Empty)
+                                 {
+                                     tag = r.Arguments.Find(a => a.Tag == CommonTags.ProductID);
+                                     productId = tag != null ? (Guid)tag.Value : Guid.Empty;
+                                 }
+                                 if (productId == Guid.Empty)
+                                 {
+                                     productId = (Guid)(CallContext.GetData("asc.web.product_id") ?? Guid.Empty);
+                                 }
+                                 if (productId != Guid.Empty && productId != new Guid("f4d98afdd336433287783c6945c81ea0") /* ignore people product */)
+                                 {
+                                     return !WebItemSecurity.IsAvailableForUser(productId, u.ID);
+                                 }
                              }
                          }
 
@@ -177,7 +183,7 @@ namespace ASC.Web.Studio.Core.Notify
                      }
                      catch (Exception error)
                      {
-                         LogManager.GetLogger("ASC").Error(error);
+                         Log.Error(error);
                      }
                      return false;
                  });
@@ -208,7 +214,7 @@ namespace ASC.Web.Studio.Core.Notify
                      }
                      catch (Exception error)
                      {
-                         LogManager.GetLogger("ASC").Error(error);
+                         Log.Error(error);
                      }
                      return false;
                  });
@@ -241,12 +247,6 @@ namespace ASC.Web.Studio.Core.Notify
                 product = WebItemManager.Instance[(Guid)CallContext.GetData("asc.web.product_id")] as IProduct;
             }
 
-            var logoText = TenantWhiteLabelSettings.DefaultLogoText;
-            if ((TenantExtra.Enterprise || CoreContext.Configuration.CustomMode) && !MailWhiteLabelSettings.Instance.IsDefault)
-            {
-                logoText = TenantLogoManager.GetLogoText();
-            }
-
             request.Arguments.Add(new TagValue(CommonTags.AuthorID, aid));
             request.Arguments.Add(new TagValue(CommonTags.AuthorName, aname));
             request.Arguments.Add(new TagValue(CommonTags.AuthorUrl, CommonLinkUtility.GetFullAbsolutePath(CommonLinkUtility.GetUserProfile(aid))));
@@ -259,7 +259,7 @@ namespace ASC.Web.Studio.Core.Notify
             request.Arguments.Add(new TagValue(CommonTags.ProfileUrl, CommonLinkUtility.GetFullAbsolutePath(CommonLinkUtility.GetMyStaff())));
             request.Arguments.Add(new TagValue(CommonTags.RecipientSubscriptionConfigURL, CommonLinkUtility.GetMyStaff()));
             request.Arguments.Add(new TagValue(CommonTags.HelpLink, CommonLinkUtility.GetHelpLink(false)));
-            request.Arguments.Add(new TagValue(CommonTags.LetterLogoText, logoText));
+            request.Arguments.Add(new TagValue(CommonTags.LetterLogoText, TenantLogoManager.GetLogoText()));
             request.Arguments.Add(new TagValue(CommonTags.MailWhiteLabelSettings, MailWhiteLabelSettings.Instance));
             request.Arguments.Add(new TagValue(CommonTags.SendFrom, CoreContext.TenantManager.GetCurrentTenant().Name));
             request.Arguments.Add(new TagValue(CommonTags.ImagePath, StudioNotifyHelper.GetNotificationImageUrl("").TrimEnd('/')));
@@ -300,7 +300,7 @@ namespace ASC.Web.Studio.Core.Notify
                 }
                 catch (Exception error)
                 {
-                    LogManager.GetLogger("ASC").Error(error);
+                    Log.Error(error);
                 }
             }
 
@@ -325,7 +325,7 @@ namespace ASC.Web.Studio.Core.Notify
 
         public static byte[] GetDefaultMailLogo()
         {
-            var filePath = Path.Combine(Environment.CurrentDirectory, "skins", "default", "images", "onlyoffice_logo", "dark_general.png");
+            var filePath = Path.Combine(Environment.CurrentDirectory, "skins", "default", "images", "logo", "dark_general.png");
 
             return File.Exists(filePath) ? File.ReadAllBytes(filePath) : null;
         }

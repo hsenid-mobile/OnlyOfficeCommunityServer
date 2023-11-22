@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,18 @@
 
 using System;
 using System.Text;
-using System.Web.UI;
 using System.Web;
+using System.Web.UI;
+
+using AjaxPro;
+
 using ASC.Core;
 using ASC.Core.Tenants;
 using ASC.MessagingSystem;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Core.Notify;
+using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
-using AjaxPro;
-using Resources;
 
 namespace ASC.Web.Studio.UserControls.Management.DnsSettings
 {
@@ -35,34 +37,56 @@ namespace ASC.Web.Studio.UserControls.Management.DnsSettings
     {
         public const string Location = "~/UserControls/Management/DnsSettings/DnsSettings.ascx";
 
-        protected string HelpLink { get; set; }
+        protected string HelpLink { get; private set; }
+
+        protected string SupportLink { get; private set; }
+
+        protected string MappedDomain { get; private set; }
+
+        protected string CurrentDomain { get; private set; }
+
+        protected bool AvailableDnsSettings { get; private set; }
+
+        protected bool HasMappedDomain { get; private set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            AjaxPro.Utility.RegisterTypeForAjax(GetType());
-
-            Page.RegisterBodyScripts("~/UserControls/Management/DnsSettings/dnssettings.js");
-
             HelpLink = CommonLinkUtility.GetHelpLink();
+
+            SupportLink = CommonLinkUtility.GetFeedbackAndSupportLink();
+
+            var tenant = CoreContext.TenantManager.GetCurrentTenant();
+
+            MappedDomain = tenant.MappedDomain;
+
+            HasMappedDomain = !string.IsNullOrEmpty(MappedDomain);
+
+            if (CoreContext.Configuration.Standalone)
+            {
+                AjaxPro.Utility.RegisterTypeForAjax(GetType());
+
+                Page.RegisterBodyScripts("~/UserControls/Management/DnsSettings/dnssettings.js");
+
+                AvailableDnsSettings = true;
+
+                CurrentDomain = CoreContext.Configuration.BaseDomain;
+            }
+            else
+            {
+                AvailableDnsSettings = TenantExtra.GetTenantQuota().HasDomain;
+
+                CurrentDomain = string.Format("{0}{1}", tenant.TenantAlias, GetTenantBaseDomain());
+            }
         }
 
-        protected bool EnableDomain
-        {
-            get { return TenantExtra.GetTenantQuota().HasDomain; }
-        }
-
-        protected static bool EnableDnsChange
-        {
-            get { return !string.IsNullOrEmpty(CoreContext.TenantManager.GetCurrentTenant().MappedDomain); }
-        }
 
         [AjaxMethod(HttpSessionStateRequirement.ReadWrite)]
         public AjaxResponse SaveDnsSettings(string dnsName, bool enableDns)
         {
-            var resp = new AjaxResponse {rs1 = "1"};
+            var resp = new AjaxResponse { rs1 = "1" };
             try
             {
-                if (!EnableDomain || !SetupInfo.IsVisibleSettings<DnsSettings>()) throw new Exception(Resource.ErrorNotAllowedOption);
+                if (!SetupInfo.IsVisibleSettings<DnsSettings>()) throw new Exception(Resource.ErrorNotAllowedOption);
 
                 SecurityContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
 
@@ -81,6 +105,7 @@ namespace ASC.Web.Studio.UserControls.Management.DnsSettings
                         return resp;
                     }
 
+                    //TODO: unreachable code
                     if (tenant.MappedDomain != dnsName)
                     {
                         var portalAddress = string.Format("http://{0}.{1}", tenant.TenantAlias ?? String.Empty, CoreContext.Configuration.BaseDomain);
@@ -112,8 +137,9 @@ namespace ASC.Web.Studio.UserControls.Management.DnsSettings
             {
                 return false;
             }
-            if (!string.IsNullOrEmpty(TenantBaseDomain) &&
-                (domain.EndsWith(TenantBaseDomain, StringComparison.InvariantCultureIgnoreCase) || domain.Equals(TenantBaseDomain.TrimStart('.'), StringComparison.InvariantCultureIgnoreCase)))
+            var tenantBaseDomain = GetTenantBaseDomain();
+            if (!string.IsNullOrEmpty(tenantBaseDomain) &&
+                (domain.EndsWith(tenantBaseDomain, StringComparison.InvariantCultureIgnoreCase) || domain.Equals(tenantBaseDomain.TrimStart('.'), StringComparison.InvariantCultureIgnoreCase)))
             {
                 return false;
             }
@@ -145,7 +171,7 @@ namespace ASC.Web.Studio.UserControls.Management.DnsSettings
 
         private static string GenerateDnsChangeConfirmUrl(string email, string dnsName, string tenantAlias, ConfirmType confirmType)
         {
-            var postfix = string.Join(string.Empty, new[] {dnsName, tenantAlias});
+            var postfix = string.Join(string.Empty, new[] { dnsName, tenantAlias });
 
             var sb = new StringBuilder();
             sb.Append(CommonLinkUtility.GetConfirmationUrl(email, confirmType, postfix));
@@ -160,14 +186,11 @@ namespace ASC.Web.Studio.UserControls.Management.DnsSettings
             return sb.ToString();
         }
 
-        protected static string TenantBaseDomain
+        private static string GetTenantBaseDomain()
         {
-            get
-            {
-                return String.IsNullOrEmpty(CoreContext.Configuration.BaseDomain)
-                           ? String.Empty
-                           : String.Format(".{0}", CoreContext.Configuration.BaseDomain);
-            }
+            return string.IsNullOrEmpty(CoreContext.Configuration.BaseDomain)
+                        ? string.Empty
+                        : string.Format(".{0}", CoreContext.Configuration.BaseDomain);
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,22 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Web;
 using System.Xml;
+
 using ASC.Common.Logging;
 using ASC.CRM.Core.Dao;
 using ASC.CRM.Core.Entities;
+using ASC.Files.Core;
 using ASC.Web.CRM.Core;
 using ASC.Web.CRM.Resources;
 using ASC.Web.Files.Services.DocumentService;
+
 using Autofac;
-using Ionic.Zip;
+
+using ICSharpCode.SharpZipLib.Zip;
+
 using File = ASC.Files.Core.File;
 
 namespace ASC.Web.CRM.Classes
@@ -50,11 +53,11 @@ namespace ASC.Web.CRM.Classes
         private const string DocumentXml = "word/document.xml";
         private const string DocumentLogoImage = "word/media/logo.jpeg";
 
+        private static ILog Log = LogManager.GetLogger("ASC.CRM");
 
         public static void CreateAndSaveFile(int invoiceId)
         {
-            var log = LogManager.GetLogger("ASC.CRM");
-            log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}", invoiceId);
+            Log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}", invoiceId);
             try
             {
                 using (var scope = DIHelper.Resolve())
@@ -64,11 +67,11 @@ namespace ASC.Web.CRM.Classes
                     var invoice = daoFactory.InvoiceDao.GetByID(invoiceId);
                     if (invoice == null)
                     {
-                        log.Warn(CRMErrorsResource.InvoiceNotFound + ". Invoice ID = " + invoiceId);
+                        Log.Warn(CRMErrorsResource.InvoiceNotFound + ". Invoice ID = " + invoiceId);
                         return;
                     }
 
-                    log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}. Convertation", invoiceId);
+                    Log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}. Convertation", invoiceId);
 
                     string urlToFile;
                     using (var docxStream = GetStreamDocx(invoice))
@@ -76,13 +79,14 @@ namespace ASC.Web.CRM.Classes
                         urlToFile = GetUrlToFile(docxStream);
                     }
 
-                    log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}. UrlToFile = {1}", invoiceId,
+                    Log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}. UrlToFile = {1}", invoiceId,
                         urlToFile);
 
                     var file = new File
                     {
                         Title = string.Format("{0}{1}", invoice.Number, FormatPdf),
-                        FolderID = daoFactory.FileDao.GetRoot()
+                        FolderID = daoFactory.FileDao.GetRoot(),
+                        ThumbnailStatus = Thumbnail.NotRequired,
                     };
 
                     var request = WebRequest.Create(urlToFile);
@@ -91,7 +95,7 @@ namespace ASC.Web.CRM.Classes
                     {
                         file.ContentLength = response.ContentLength;
 
-                        log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}. SaveFile", invoiceId);
+                        Log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}. SaveFile", invoiceId);
                         file = daoFactory.FileDao.SaveFile(file, stream);
                     }
 
@@ -102,22 +106,21 @@ namespace ASC.Web.CRM.Classes
 
                     invoice.FileID = Int32.Parse(file.ID.ToString());
 
-                    log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}. UpdateInvoiceFileID. FileID = {1}", invoiceId, file.ID);
+                    Log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}. UpdateInvoiceFileID. FileID = {1}", invoiceId, file.ID);
                     daoFactory.InvoiceDao.UpdateInvoiceFileID(invoice.ID, invoice.FileID);
 
-                    log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}. AttachFiles. FileID = {1}", invoiceId, file.ID);
-                    daoFactory.RelationshipEventDao.AttachFiles(invoice.ContactID, invoice.EntityType, invoice.EntityID, new[] {invoice.FileID});
+                    Log.DebugFormat("PdfCreator. CreateAndSaveFile. Invoice ID = {0}. AttachFiles. FileID = {1}", invoiceId, file.ID);
+                    daoFactory.RelationshipEventDao.AttachFiles(invoice.ContactID, invoice.EntityType, invoice.EntityID, new[] { invoice.FileID });
                 }
             }
             catch (Exception e)
             {
-                log.Error(e);
+                Log.Error(e);
             }
         }
 
         public static File CreateFile(Invoice data, DaoFactory daoFactory)
         {
-            var log = LogManager.GetLogger("ASC.CRM");
             try
             {
                 using (var docxStream = GetStreamDocx(data))
@@ -128,7 +131,7 @@ namespace ASC.Web.CRM.Classes
             }
             catch (Exception e)
             {
-                log.Error(e);
+                Log.Error(e);
                 throw;
             }
         }
@@ -137,13 +140,13 @@ namespace ASC.Web.CRM.Classes
         {
             var externalUri = Files.Classes.PathProvider.GetTempUrl(docxStream, FormatDocx);
             externalUri = DocumentServiceConnector.ReplaceCommunityAdress(externalUri);
-            LogManager.GetLogger("ASC.CRM").DebugFormat("PdfCreator. GetUrlToFile. externalUri = {0}", externalUri);
+            Log.DebugFormat("PdfCreator. GetUrlToFile. externalUri = {0}", externalUri);
 
             var revisionId = DocumentServiceConnector.GenerateRevisionId(Guid.NewGuid().ToString());
             string urlToFile;
-            DocumentServiceConnector.GetConvertedUri(externalUri, FormatDocx, FormatPdf, revisionId, null, false, out urlToFile);
+            DocumentServiceConnector.GetConvertedUri(externalUri, FormatDocx, FormatPdf, revisionId, null, null, null, null, false, out urlToFile);
 
-            LogManager.GetLogger("ASC.CRM").DebugFormat("PdfCreator. GetUrlToFile. urlToFile = {0}", urlToFile);
+            Log.DebugFormat("PdfCreator. GetUrlToFile. urlToFile = {0}", urlToFile);
             return urlToFile;
         }
 
@@ -156,14 +159,14 @@ namespace ASC.Web.CRM.Classes
 
                 var revisionId = DocumentServiceConnector.GenerateRevisionId(Guid.NewGuid().ToString());
                 string urlToFile;
-                DocumentServiceConnector.GetConvertedUri(externalUri, FormatDocx, FormatPdf, revisionId, null, true, out urlToFile);
+                DocumentServiceConnector.GetConvertedUri(externalUri, FormatDocx, FormatPdf, revisionId, null, null, null, null, true, out urlToFile);
 
                 return new ConverterData
-                    {
-                        StorageUrl = externalUri,
-                        RevisionId = revisionId,
-                        InvoiceId = data.ID,
-                    };
+                {
+                    StorageUrl = externalUri,
+                    RevisionId = revisionId,
+                    InvoiceId = data.ID,
+                };
             }
         }
 
@@ -173,9 +176,9 @@ namespace ASC.Web.CRM.Classes
             {
                 return null;
             }
-            
+
             string urlToFile;
-            DocumentServiceConnector.GetConvertedUri(data.StorageUrl, FormatDocx, FormatPdf, data.RevisionId, null, true, out urlToFile);
+            DocumentServiceConnector.GetConvertedUri(data.StorageUrl, FormatDocx, FormatPdf, data.RevisionId, null, null, null, null, true, out urlToFile);
 
             if (string.IsNullOrEmpty(urlToFile))
             {
@@ -203,7 +206,8 @@ namespace ASC.Web.CRM.Classes
                         {
                             Title = string.Format("{0}{1}", data.Number, FormatPdf),
                             FolderID = daoFactory.FileDao.GetRoot(),
-                            ContentLength = response.ContentLength
+                            ContentLength = response.ContentLength,
+                            ThumbnailStatus = Thumbnail.NotRequired,
                         };
 
                         if (data.GetInvoiceFile(daoFactory) != null)
@@ -222,7 +226,7 @@ namespace ASC.Web.CRM.Classes
         private static Stream GetStreamDocx(Invoice data)
         {
             var invoiceData = InvoiceFormattedData.GetData(data, 0, 0);
-            var logo = new byte[] {};
+            var logo = new byte[] { };
 
             if (!string.IsNullOrEmpty(invoiceData.LogoBase64))
             {
@@ -233,32 +237,54 @@ namespace ASC.Web.CRM.Classes
                 logo = Convert.FromBase64String(OrganisationLogoManager.GetOrganisationLogoBase64(invoiceData.LogoBase64Id));
             }
 
-            using (var zip = ZipFile.Read(Template))
+            var result = new MemoryStream();
+
+            using (var zipOutputStream = new ZipOutputStream(result))
+            using (var zipInputStream = new ZipInputStream(Template))
             {
-                var documentXmlStream = new MemoryStream();
-                foreach (var entry in zip.Entries.Where(entry => entry.FileName == DocumentXml))
-                {
-                    entry.Extract(documentXmlStream);
-                }
-                documentXmlStream.Position = 0;
-                zip.RemoveEntry(DocumentXml);
-                var document = new XmlDocument();
-                document.Load(documentXmlStream);
-                var documentStr = GenerateDocumentXml(document, invoiceData, logo);
-                zip.AddEntry(DocumentXml, documentStr, Encoding.UTF8);
+                ZipEntry zipEntry;
+                zipOutputStream.IsStreamOwner = false;
 
-                if (logo.Length > 0)
+                while ((zipEntry = zipInputStream.GetNextEntry()) != null)
                 {
-                    zip.UpdateEntry(DocumentLogoImage, logo);
+                    zipOutputStream.PutNextEntry(new ZipEntry(zipEntry.Name));
+
+                    if (zipEntry.Name == DocumentXml)
+                    {
+                        using (var documentXmlStream = new MemoryStream())
+                        {
+                            zipInputStream.CopyTo(documentXmlStream);
+                            documentXmlStream.Position = 0;
+
+                            var document = new XmlDocument();
+                            document.Load(documentXmlStream);
+                            var documentStr = GenerateDocumentXml(document, invoiceData, logo);
+                            using (var documentStrAsStream = new MemoryStream(Encoding.UTF8.GetBytes(documentStr)))
+                            {
+                                documentStrAsStream.CopyTo(zipOutputStream);
+                            }
+                        }
+                        continue;
+                    }
+
+                    if (zipEntry.Name == DocumentLogoImage && logo.Length > 0)
+                    {
+                        using (var logoAsStream = new MemoryStream(logo))
+                        {
+                            logoAsStream.CopyTo(zipOutputStream);
+                        }
+                        continue;
+                    }
+
+                    zipInputStream.CopyTo(zipOutputStream);
                 }
 
-                var streamZip = new MemoryStream();
-                zip.Save(streamZip);
-                streamZip.Seek(0, SeekOrigin.Begin);
-                streamZip.Flush();
-                return streamZip;
+                zipOutputStream.Finish();
+
+                result.Position = 0;
             }
 
+            return result;
         }
 
         private static string GenerateDocumentXml(XmlDocument xDocument, InvoiceFormattedData data, byte[] logo)
@@ -315,8 +341,8 @@ namespace ASC.Web.CRM.Classes
                     using (var stream = new MemoryStream(logo))
                     using (var img = System.Drawing.Image.FromStream(stream))
                     {
-                        var cx = img.Width*9525; //1px =  9525emu
-                        var cy = img.Height*9525; //1px =  9525emu
+                        var cx = img.Width * 9525; //1px =  9525emu
+                        var cy = img.Height * 9525; //1px =  9525emu
 
                         var newText = parent.CloneNode(true).OuterXml;
                         newText = newText
@@ -702,9 +728,16 @@ namespace ASC.Web.CRM.Classes
 
     public class ConverterData
     {
+        ///<example>Storage Url</example>
         public string StorageUrl { get; set; }
+
+        ///<example>123ws</example>
         public string RevisionId { get; set; }
+
+        ///<example type="int">2</example>
         public int InvoiceId { get; set; }
+
+        ///<example type="int">1</example>
         public int FileId { get; set; }
     }
 }

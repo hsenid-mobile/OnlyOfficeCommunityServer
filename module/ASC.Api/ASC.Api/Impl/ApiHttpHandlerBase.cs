@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,22 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Routing;
+
 using ASC.Api.Enums;
 using ASC.Api.Interfaces;
 using ASC.Api.Utils;
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Web.Core.Client;
+
 using Autofac;
 
 namespace ASC.Api.Impl
 {
-    public abstract class ApiHttpHandlerBase : IApiHttpHandler
+    public abstract class ApiHttpHandlerBase : ApiHttpAsyncHandler
     {
         public ILog Log { get; set; }
 
@@ -45,13 +48,9 @@ namespace ASC.Api.Impl
 
         protected IApiMethodCall Method { get; private set; }
 
-
         public IApiStandartResponce ApiResponce { get; private set; }
 
         public ApiContext ApiContext { get; private set; }
-
-
-
 
         protected ApiHttpHandlerBase(RouteData routeData)
         {
@@ -109,7 +108,7 @@ namespace ASC.Api.Impl
             }
         }
 
-        public void Process(HttpContextBase context)
+        public async Task Process(HttpContextBase context)
         {
             using (Container)
             {
@@ -122,27 +121,27 @@ namespace ASC.Api.Impl
                 //NOTE: Don't register anything it will be resolved when needed
                 //Container.RegisterInstance(ApiContext, new HttpContextLifetimeManager2(context));//Regiter only api context
 
-                Method = ApiManager.GetMethod(((Route) RouteData.Route).Url, context.Request.RequestType); //Set method
+                Method = ApiManager.GetMethod(((Route)RouteData.Route).Url, context.Request.RequestType); //Set method
 
-                DoProcess(context);
+                await DoProcess(context);
             }
         }
 
         protected RequestContext RouteContext { get; private set; }
 
-        protected abstract void DoProcess(HttpContextBase context);
+        protected abstract Task DoProcess(HttpContextBase context);
 
-        public void ProcessRequest(HttpContext context)
+        public override async Task ProcessRequestAsync(HttpContext context)
         {
             var contextWrapper = new HttpContextWrapper(context);
-            ProcessInternal(contextWrapper);
+            await ProcessInternal(contextWrapper);
         }
 
-        private void ProcessInternal(HttpContextWrapper contextWrapper)
+        private async Task ProcessInternal(HttpContextWrapper contextWrapper)
         {
             try
             {
-                Process(contextWrapper);
+                await Process(contextWrapper);
             }
             catch (ThreadAbortException e)
             {
@@ -158,7 +157,7 @@ namespace ASC.Api.Impl
             }
         }
 
-        public bool IsReusable
+        public override bool IsReusable
         {
             get { return false; }
         }
@@ -181,7 +180,7 @@ namespace ASC.Api.Impl
                 var filters = Container.Resolve<IEnumerable<IApiResponceFilter>>();
                 //Do filtering
                 if (filters != null)
-                    responce = filters.Aggregate(responce, (current, apiResponceFilter) => apiResponceFilter.FilterResponce(current,ApiContext));
+                    responce = filters.Aggregate(responce, (current, apiResponceFilter) => apiResponceFilter.FilterResponce(current, ApiContext));
 
                 ApiResponce.Count = Binder.GetCollectionCount(responce);
                 if (ApiResponce.Count == ApiContext.SpecifiedCount && (beforeFilterCount - ApiContext.StartIndex) > ApiContext.SpecifiedCount)
@@ -206,7 +205,7 @@ namespace ASC.Api.Impl
                 if (!string.IsNullOrEmpty(acceptEncoding))
                 {
                     var encodings = acceptEncoding.Split(',');
-                    if(encodings.Contains("gzip") && ClientSettings.GZipEnabled)
+                    if (encodings.Contains("gzip") && ClientSettings.GZipEnabled)
                     {
                         context.Response.Filter = new GZipStream(context.Response.Filter, CompressionMode.Compress);
                         context.Response.AppendHeader("Content-Encoding", "gzip");

@@ -15,6 +15,9 @@
         {{if ($data.isAdmin === true || $data.isMe === true) && (user.status === "waited")}}
         <li><a class="email-activation dropdown-item with-icon email">${ASC.People.Resources.PeopleResource.LblSendActivation}</a></li>
         {{/if}}
+        {{if (user.status !== "blocked") && user.canImpersonateUser}}
+        <li><a class="impersonate-user dropdown-item with-icon impersonate-item">${ASC.Resources.Master.ResourceJS.ImpersonateUser}</a></li>
+        {{/if}}
         {{if ($data.canDel === "true") && ($data.isAdmin === true) && ($data.isMe !== true) && (user.status !== "blocked") && (user.isLDAP === "false")}}
         <li><a class="block-profile dropdown-item with-icon disable-item">${ASC.People.Resources.PeopleResource.DisableUserButton}</a></li>
         {{/if}}
@@ -75,11 +78,11 @@
 
             {{if user.bithdayDaysLeft != null}}
         <div class="birthday">
-        {{if user.bithdayDaysLeft == 0}}${ASC.Resources.Master.TemplateResource.DrnToday}
-        {{else user.bithdayDaysLeft==1}}${ASC.Resources.Master.TemplateResource.DrnTomorrow}
-        {{else user.bithdayDaysLeft==2}}${ASC.Resources.Master.TemplateResource.In} ${ASC.Resources.Master.TemplateResource.Yet2}
-        {{else user.bithdayDaysLeft==3}}${ASC.Resources.Master.TemplateResource.In} ${ASC.Resources.Master.TemplateResource.Yet3}
-        {{/if}}
+            {{if user.bithdayDaysLeft == 0}}${ASC.Resources.Master.TemplateResource.DrnToday}
+            {{else user.bithdayDaysLeft==1}}${ASC.Resources.Master.TemplateResource.DrnTomorrow}
+            {{else user.bithdayDaysLeft==2}}${ASC.Resources.Master.TemplateResource.In} ${ASC.Resources.Master.TemplateResource.Yet2}
+            {{else user.bithdayDaysLeft==3}}${ASC.Resources.Master.TemplateResource.In} ${ASC.Resources.Master.TemplateResource.Yet3}
+            {{/if}}
         </div>
       {{/if}}
         <div class="title">
@@ -128,12 +131,12 @@
         <div id="peopleEmailSwitcher_${id}" class="studio-action-panel">
             <ul class="dropdown-content">
                 <li>
-                    <a class="send-email dropdown-item">${ASC.People.Resources.PeopleResource.LblSendEmail}</a>
+                    <a class="send-email dropdown-item" data-module="mail">${ASC.People.Resources.PeopleResource.LblSendEmail}</a>
                 </li>
-                {{if !user.isMe && !user.isTerminated}}
-         <li>
-             <a class="open-dialog dropdown-item">${ASC.People.Resources.PeopleResource.LblSendMessage}</a>
-         </li>
+                {{if $data.talkModuleEnabled && !user.isMe && !user.isTerminated}}
+                <li>
+                    <a class="open-dialog dropdown-item" data-module="talk">${ASC.People.Resources.PeopleResource.LblSendMessage}</a>
+                </li>
                 {{/if}}
             </ul>
         </div>
@@ -200,7 +203,7 @@
 <script id="groupListTemplate" type="text/x-jquery-tmpl">
     {{each(i, group) groups}}
     <li class="menu-sub-item" data-id="${group.id}">
-        <a class="menu-item-label outer-text text-overflow" title="${group.name}" href="/Products/People/#sortorder=ascending&status=active&group=${group.id}">${group.name}</a>
+        <a class="menu-item-label outer-text text-overflow" title="${group.name}">${group.name}</a>
     </li>
     {{/each}}
 </script>
@@ -223,8 +226,10 @@
         <td class="email">
             <input type="text" class="studioEditableInput email last" value="${Email}" maxlength="64" />
         </td>
-        <td class="remove {{if jq.browser.mobile === true}}mob{{/if}}">
-            <div></div>
+        <td class="status">
+            <span class="link dotline statusValue">
+                
+            </span>
         </td>
     </tr>
 </script>
@@ -269,12 +274,14 @@
     {{/if}}
         <option value="emptyOption">${ASC.People.Resources.PeopleResource.NotImport}</option>
         {{each $item.cols}}
-        {{if $value.Value === $data }}
-        <option value="${$value.Key}" selected>${$value.Value}</option>
-        {{else}}
-        <option value="${$value.Key}">${$value.Value}</option>
+        {{if $value.Key != "status" }}
+            {{if $value.Value === $data }}
+            <option value="${$value.Key}" selected>${$value.Value}</option>
+            {{else}}
+            <option value="${$value.Key}">${$value.Value}</option>
+            {{/if}}
         {{/if}}
-        {{/each}}
+    {{/each}}
     </select>
 </script>
 

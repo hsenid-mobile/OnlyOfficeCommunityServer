@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Community.Blogs.Core.Service {
+namespace ASC.Web.Community.Modules.Blogs.Core.Service {
     using System;
     
     
@@ -61,13 +61,32 @@ namespace ASC.Web.Community.Blogs.Core.Service {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to h1.You were mentioned in comment to Blog Post: &quot;$PostSubject&quot;:&quot;$URL&quot;
+        ///
+        /// $Date &quot;$UserName&quot;:&quot;$UserURL&quot; mentioned you in the comment to the &quot;$PostSubject&quot;:&quot;$URL&quot; blog post:
+        ///
+        ///$CommentBody 
+        ///
+        ///&quot;Read More&quot;:&quot;$CommentURL&quot;
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notifications about new comments added to this blog post, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
+        /// </summary>
+        public static string pattern_mention_for_blog_comment {
+            get {
+                return ResourceManager.GetString("pattern_mention_for_blog_comment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.New Comment to Blog Post: &quot;$PostSubject&quot;:&quot;$URL&quot;
         ///
         /// $Date &quot;$UserName&quot;:&quot;$UserURL&quot; has added a new comment to the &quot;$PostSubject&quot;:&quot;$URL&quot; blog post:
         ///
-        ///$CommentBody
+        ///$CommentBody 
         ///
-        ///&quot;Read More&quot;:&quot;$CommentURL&quot;.
+        ///&quot;Read More&quot;:&quot;$CommentURL&quot;
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notifications about new comments added to this blog post, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
         public static string pattern_new_comment {
             get {
@@ -82,11 +101,31 @@ namespace ASC.Web.Community.Blogs.Core.Service {
         ///
         ///$PostPreview
         ///
-        ///&quot;Read More&quot;:&quot;$URL&quot;.
+        ///&quot;Read More&quot;:&quot;$URL&quot;
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notifications about new posts in blogs, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
         public static string pattern_new_post {
             get {
                 return ResourceManager.GetString("pattern_new_post", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Community.Mention in comment to blog post: $PostSubject.
+        /// </summary>
+        public static string subject_mention_for_blog_comment {
+            get {
+                return ResourceManager.GetString("subject_mention_for_blog_comment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Community. Mention in comment to blog post: [$PostSubject]($CommentURL).
+        /// </summary>
+        public static string subject_mention_for_blog_comment_tg {
+            get {
+                return ResourceManager.GetString("subject_mention_for_blog_comment_tg", resourceCulture);
             }
         }
         

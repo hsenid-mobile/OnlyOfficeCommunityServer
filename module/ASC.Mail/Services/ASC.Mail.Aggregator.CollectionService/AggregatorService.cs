@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.ServiceModel;
 using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
+
 using ASC.Core;
 using ASC.Mail.Aggregator.CollectionService.Queue;
 using ASC.Mail.Aggregator.CollectionService.Queue.Data;
@@ -38,10 +40,13 @@ using ASC.Mail.Data.Contracts;
 using ASC.Mail.Data.Storage;
 using ASC.Mail.Extensions;
 using ASC.Mail.Utils;
-using MailKit.Security;
+
 using MailKit.Net.Imap;
 using MailKit.Net.Pop3;
+using MailKit.Security;
+
 using MimeKit;
+
 using ILog = ASC.Common.Logging.ILog;
 using LogManager = ASC.Common.Logging.LogManager;
 
@@ -71,6 +76,7 @@ namespace ASC.Mail.Aggregator.CollectionService
         private static SignalrWorker _signalrWorker;
         private const int SIGNALR_WAIT_SECONDS = 30;
         private readonly TimeSpan _taskSecondsLifetime;
+        private ServiceHost _healthCheckServiceHost;
 
         public ConcurrentDictionary<string, List<MailSieveFilterData>> Filters { get; set; }
 
@@ -158,10 +164,14 @@ namespace ASC.Mail.Aggregator.CollectionService
 
                 base.OnStart(args);
 
+                _healthCheckServiceHost = new ServiceHost(typeof(HealthCheckService));
+                _healthCheckServiceHost.Open();
+
                 StartTimer(true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _log.Fatal("OnStart", ex);
                 OnStop();
             }
         }
@@ -208,6 +218,13 @@ namespace ASC.Mail.Aggregator.CollectionService
 
                 if (_resetEvent != null)
                     _resetEvent.Set();
+
+                if (_healthCheckServiceHost != null)
+                {
+                    _healthCheckServiceHost.Close();
+                    _healthCheckServiceHost = null;
+                }
+
             }
         }
 
@@ -464,12 +481,21 @@ namespace ASC.Mail.Aggregator.CollectionService
                 var commonCancelToken =
                     CancellationTokenSource.CreateLinkedTokenSource(cancelToken, timeoutCancel.Token).Token;
 
-                var taskLogger = LogManager.GetLogger(string.Format("Mbox_{0}", mailbox.MailBoxId));
+                var taskLogger = LogManager.GetLogger(string.Format("ASC.Mail Mbox_{0}", mailbox.MailBoxId));
+
+                taskLogger.InfoFormat("CreateMailClient(Tenant = {0} MailboxId = {1}, Address = '{2}')",
+                               mailbox.TenantId, mailbox.MailBoxId, mailbox.EMail);
 
                 var client = CreateMailClient(mailbox, taskLogger, commonCancelToken);
 
-                if (client == null)
+                if (client == null || !client.IsConnected || !client.IsAuthenticated)
                 {
+                    if (client != null)
+                        taskLogger.InfoFormat("Client -> Could not connect: {0} | Not authenticated: {1}.",
+                        !client.IsConnected ? "Yes" : "No",
+                        !client.IsAuthenticated ? "Yes" : "No");
+                    else taskLogger.InfoFormat("Client was null");
+
                     taskLogger.InfoFormat("ReleaseMailbox(Tenant = {0} MailboxId = {1}, Address = '{2}')",
                                mailbox.TenantId, mailbox.MailBoxId, mailbox.EMail);
                     ReleaseMailbox(mailbox);
@@ -553,6 +579,14 @@ namespace ASC.Mail.Aggregator.CollectionService
                 log.ErrorFormat(
                     "CreateTasks->client.LoginImapPop(Tenant = {0}, MailboxId = {1}, Address = '{2}')\r\nException: {3}\r\n",
                     mailbox.TenantId, mailbox.MailBoxId, mailbox.EMail, webEx.ToString());
+
+                connectError = true;
+                stopClient = true;
+            }
+            catch (ImapProtocolException protocolEx)
+            {
+                log.ErrorFormat(
+                    $"CreateTasks() -> MailClient.LoginImap(Tenant = {mailbox.TenantId}, MailboxId = {mailbox.MailBoxId}, Address = \"{mailbox.EMail}\")\r\nThe box will be disabled.\r\nImap Protocol Exception: {protocolEx}\r\n");
 
                 connectError = true;
                 stopClient = true;
@@ -644,7 +678,7 @@ namespace ASC.Mail.Aggregator.CollectionService
 
             var failed = false;
 
-            var taskLogger = LogManager.GetLogger(string.Format("ASC.Mail Mbox_{0} Task_{1}", mailbox.MailBoxId, Task.CurrentId));
+            var taskLogger = LogManager.GetLogger(string.Format("ASC.Mail Mbox_{0}", mailbox.MailBoxId));
 
             taskLogger.InfoFormat(
                 "ProcessMailbox(Tenant = {0}, MailboxId = {1} Address = '{2}') Is {3}",
@@ -766,7 +800,7 @@ namespace ASC.Mail.Aggregator.CollectionService
                     uidl, mailbox.MailBoxId, mailbox.EMail);
 
                 CoreContext.TenantManager.SetCurrentTenant(mailbox.TenantId);
-                SecurityContext.AuthenticateMe(new Guid(mailbox.UserId));
+                SecurityContext.CurrentUser = new Guid(mailbox.UserId);
 
                 var message = MessageEngine.Save(mailbox, mimeMessage, uidl, folder, null, unread, log);
 
@@ -775,7 +809,7 @@ namespace ASC.Mail.Aggregator.CollectionService
                     return;
                 }
 
-                log.InfoFormat("Message saved (id: {0}, From: '{1}', Subject: '{2}', Unread: {3})", 
+                log.InfoFormat("Message saved (id: {0}, From: '{1}', Subject: '{2}', Unread: {3})",
                     message.Id, message.From, message.Subject, message.IsNew);
 
                 log.Info("DoOptionalOperations->START");
@@ -971,7 +1005,7 @@ namespace ASC.Mail.Aggregator.CollectionService
                     factory
                         .CalendarEngine
                         .UploadIcsToCalendar(mailbox, message.CalendarId, message.CalendarUid, message.CalendarEventIcs,
-                            message.CalendarEventCharset, message.CalendarEventMimeType, mailbox.EMail.Address,
+                            message.CalendarEventCharset, message.CalendarEventMimeType, message.Attachments, mimeMessage.Attachments, mailbox.EMail.Address,
                             _tasksConfig.DefaultApiSchema);
                 }
 

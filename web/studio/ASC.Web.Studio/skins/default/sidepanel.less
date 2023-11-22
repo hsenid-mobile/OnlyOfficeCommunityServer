@@ -1,6 +1,6 @@
-/*
+﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@
    Common Navigation Side Panel
 *******************************************************************************/
 
-@menu-selected-bg:          #E9E9E9;
-@menu-addblock-color:       #83888D;
+
 .page-menu .studio-action-panel .dropdown-content {
     max-height: 500px;
     .dropdown-item {
@@ -47,6 +46,7 @@
 
         .category-wrapper {
             overflow: hidden;
+            display: flex;
             padding: 5px 0 5px 0;
         }
 
@@ -115,6 +115,7 @@
                 width: 8px;
                 position: relative;
                 margin: 1px 1px 0 7px;
+
                 &:after {
                     .arrow-close(4px, #696969);
                     left: 0;
@@ -134,6 +135,10 @@
                     padding: 4px 0 4px 45px;
 
                     &.display-none {
+                        display: none;
+                    }
+
+                    &.video-guides .new-label-menu {
                         display: none;
                     }
                 }
@@ -158,6 +163,7 @@
 
                     .expander {
                         margin: 0 1px 0 40px;
+
                         &:after {
                             .arrow-close(4px, #696969);
                             left: 0;
@@ -177,7 +183,7 @@
                             white-space: nowrap;
 
                             a {
-                                color: #333333;
+                                color: @textColor;
                                 display: inline-block;
                                 max-width: 185px;
                                 overflow: hidden;
@@ -194,12 +200,12 @@
                     &.open {
                         .expander {
                             margin: 2px 3px 0 38px;
+
                             &:after {
                                 .arrow-down(4px, #696969);
                                 left: 0;
                                 margin-top: -4px;
                             }
-                            
                         }
 
                         .menu-sub-list {
@@ -212,6 +218,7 @@
             &.open {
                 .expander {
                     margin: 3px 3px 0 5px;
+
                     &:after {
                         .arrow-down(4px, #696969);
                         left: 0;
@@ -284,7 +291,7 @@
 .menu-item-svg {
     width: 16px;
     height: 16px;
-    fill: #83888d;
+    fill: @menu-item-svg;
 
     &-green {
         fill: #7ca52f;
@@ -391,7 +398,7 @@
         text-decoration: none;
 
         .menu-item-label.inner-text {
-            border-bottom-color: #333333;
+            border-bottom-color: @textColor;
         }
     }
 }
@@ -468,7 +475,7 @@
             &:after {
                 border-left: 4px solid transparent;
                 border-right: 4px solid transparent;
-                border-top: 4px solid #ffffff;
+                border-top: 4px solid @body-color;
                 content: "";
                 height: 0;
                 margin-top: -1px;
@@ -505,7 +512,7 @@
             font-weight: bold;
             padding: 1px 16px 1px 8px;
             position: relative;
-            text-shadow: 0 1px 0 #fff;
+            text-shadow: 0 1px 0 @body-color;
 
             &.btn_other-actions:after {
                 border-color: @grayButtonTextColor transparent transparent;
@@ -515,14 +522,14 @@
                 height: 0;
                 margin-top: -2px;
                 position: absolute;
-                right: 1px;
+                left: 30px;
                 top: 50%;
                 width: 0;
             }
 
             &.mail {
                 background: url('@{img-change-url}rotate.svg') center 3px no-repeat;
-                background-size:70%;
+                background-size: 70%;
             }
         }
     }
@@ -595,7 +602,7 @@
         &:after {
             border-left: 4px solid transparent;
             border-right: 4px solid transparent;
-            border-top: 4px solid #ffffff;
+            border-top: 4px solid @body-color;
             content: "";
             height: 0;
             margin-top: -1px;
@@ -632,7 +639,7 @@
         &:after {
             border-left: 4px solid transparent;
             border-right: 4px solid transparent;
-            border-top: 4px solid #ffffff;
+            border-top: 4px solid @body-color;
             content: "";
             height: 0;
             margin-top: -1px;
@@ -650,7 +657,7 @@
 *******************************************************************************/
 .banner-link {
     background: no-repeat 0 0 transparent;
-    border: 1px solid #d1d1d1;
+    border: 1px solid @borderColor;
     display: block;
     height: 54px;
     margin: 20px 0 0;
@@ -697,4 +704,43 @@ only screen and (                min-resolution: 2dppx) {
 		//background: url("@{imagesBaseUrl}icons_nav_panel_retina.png") no-repeat 0 0;
 		background-size: 32px 1416px;
     }
+}
+
+/*******************************************************************************
+    Switcher for Support
+*******************************************************************************/
+.switch-btn {
+    display: inline-block;
+    width: 22px;
+    height: 13px;
+    line-height: normal;
+    border-radius: 7px;
+    background: #CCCCCC;
+    z-index: 0;
+    margin: 2px 0 0 12px;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition-duration: 300ms;
+}
+
+.switch-btn::after {
+    content: "";
+    height: 9px;
+    width: 9px;
+    border-radius: 5px;
+    background: @body-color;
+    top: 2px;
+    left: 2px;
+    position: absolute;
+    z-index: 1;
+}
+
+.switch-on {
+    background: #3b72a7;
+}
+
+.switch-on::after {
+    left: 11px;
 }

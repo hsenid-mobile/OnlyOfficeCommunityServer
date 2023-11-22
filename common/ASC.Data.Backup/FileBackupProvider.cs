@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+
 using ASC.Common.Logging;
 using ASC.Data.Storage;
+using ASC.Data.Storage.ZipOperators;
 
 namespace ASC.Data.Backup
 {
@@ -70,14 +72,7 @@ namespace ASC.Data.Backup
                         {
                             using (var stream = storage.GetReadStream(file.Domain, file.Path))
                             {
-                                var tmpPath = Path.GetTempFileName();
-                                using (var tmpFile = File.OpenWrite(tmpPath))
-                                {
-                                    stream.StreamCopyTo(tmpFile);
-                                }
-
-                                writer.WriteEntry(backupPath, tmpPath);
-                                File.Delete(tmpPath);
+                                writer.WriteEntry(backupPath, stream);
                             }
 
                             break;

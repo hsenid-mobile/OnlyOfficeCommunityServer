@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+
 using ASC.Files.Core;
 using ASC.Files.Core.Data;
 using ASC.Files.Core.Security;
@@ -74,7 +75,7 @@ namespace ASC.Files.Thirdparty.ProviderDao
         {
             using (var securityDao = TryGetSecurityDao())
             {
-                securityDao.GetPureShareRecords(entries.ToArray())
+                securityDao.GetPureShareRecords(entries)
                     //.Where(x => x.Owner == SecurityContext.CurrentAccount.ID)
                     .Select(x => x.EntryId).Distinct().ToList()
                     .ForEach(id =>
@@ -166,68 +167,79 @@ namespace ASC.Files.Thirdparty.ProviderDao
             var fromSelector = GetSelector(fromFileId);
             var toSelector = GetSelector(toFolderId);
             //Get File from first dao
-            var fromFileDao = fromSelector.GetFileDao(fromFileId);
-            var toFileDao = toSelector.GetFileDao(toFolderId);
-            var fromFile = fromFileDao.GetFile(fromSelector.ConvertId(fromFileId));
-
-            if (fromFile.ContentLength > SetupInfo.AvailableFileSize)
+            using (var fromFileDao = fromSelector.GetFileDao(fromFileId))
+            using (var toFileDao = toSelector.GetFileDao(toFolderId))
             {
-                throw new Exception(string.Format(deleteSourceFile ? FilesCommonResource.ErrorMassage_FileSizeMove : FilesCommonResource.ErrorMassage_FileSizeCopy,
-                                                  FileSizeComment.FilesSizeToString(SetupInfo.AvailableFileSize)));
-            }
+                var fromFile = fromFileDao.GetFile(fromSelector.ConvertId(fromFileId));
 
-            using (var securityDao = TryGetSecurityDao())
-            using (var tagDao = TryGetTagDao())
-            {
-                var fromFileShareRecords = securityDao.GetPureShareRecords(fromFile).Where(x => x.EntryType == FileEntryType.File);
-                var fromFileNewTags = tagDao.GetNewTags(Guid.Empty, fromFile).ToList();
-                var fromFileLockTag = tagDao.GetTags(fromFile.ID, FileEntryType.File, TagType.Locked).FirstOrDefault();
-                var fromFileFavoriteTag = tagDao.GetTags(fromFile.ID, FileEntryType.File, TagType.Favorite);
-                var fromFileTemplateTag = tagDao.GetTags(fromFile.ID, FileEntryType.File, TagType.Template);
+                if (fromFile.ContentLength > SetupInfo.AvailableFileSize)
+                {
+                    throw new Exception(string.Format(deleteSourceFile ? FilesCommonResource.ErrorMassage_FileSizeMove : FilesCommonResource.ErrorMassage_FileSizeCopy,
+                                                      FileSizeComment.FilesSizeToString(SetupInfo.AvailableFileSize)));
+                }
 
-                var toFile = new File
+                using (var securityDao = TryGetSecurityDao())
+                using (var tagDao = TryGetTagDao())
+                {
+                    var fromFileShareRecords = securityDao.GetPureShareRecords(fromFile).Where(x => x.EntryType == FileEntryType.File);
+                    var fromFileNewTags = tagDao.GetNewTags(Guid.Empty, fromFile).ToList();
+                    var fromFileLockTag = tagDao.GetTags(fromFile.ID, FileEntryType.File, TagType.Locked).FirstOrDefault();
+                    var fromFileFavoriteTag = tagDao.GetTags(fromFile.ID, FileEntryType.File, TagType.Favorite);
+                    var fromFileTemplateTag = tagDao.GetTags(fromFile.ID, FileEntryType.File, TagType.Template);
+
+                    var toFile = new File
                     {
                         Title = fromFile.Title,
                         Encrypted = fromFile.Encrypted,
                         FolderID = toSelector.ConvertId(toFolderId)
                     };
 
-                fromFile.ID = fromSelector.ConvertId(fromFile.ID);
+                    fromFile.ID = fromSelector.ConvertId(fromFile.ID);
 
-                var mustConvert = !string.IsNullOrEmpty(fromFile.ConvertedType);
-                using (var fromFileStream = mustConvert
-                                                ? FileConverter.Exec(fromFile)
-                                                : fromFileDao.GetFileStream(fromFile))
-                {
-                    toFile.ContentLength = fromFileStream.CanSeek ? fromFileStream.Length : fromFile.ContentLength;
-                    toFile = toFileDao.SaveFile(toFile, fromFileStream);
-                }
-
-                if (deleteSourceFile)
-                {
-                    if (fromFileShareRecords.Any())
-                        fromFileShareRecords.ToList().ForEach(x =>
-                            {
-                                x.EntryId = toFile.ID;
-                                securityDao.SetShare(x);
-                            });
-
-                    var fromFileTags = fromFileNewTags;
-                    if (fromFileLockTag != null) fromFileTags.Add(fromFileLockTag);
-                    if (fromFileFavoriteTag != null) fromFileTags.AddRange(fromFileFavoriteTag);
-                    if (fromFileTemplateTag != null) fromFileTags.AddRange(fromFileTemplateTag);
-
-                    if (fromFileTags.Any())
+                    var mustConvert = !string.IsNullOrEmpty(fromFile.ConvertedType);
+                    using (var fromFileStream = mustConvert
+                                                    ? FileConverter.Exec(fromFile)
+                                                    : fromFileDao.GetFileStream(fromFile))
                     {
-                        fromFileTags.ForEach(x => x.EntryId = toFile.ID);
-
-                        tagDao.SaveTags(fromFileTags);
+                        toFile.ContentLength = fromFileStream.CanSeek ? fromFileStream.Length : fromFile.ContentLength;
+                        toFile = toFileDao.SaveFile(toFile, fromFileStream);
                     }
 
-                    //Delete source file if needed
-                    fromFileDao.DeleteFile(fromSelector.ConvertId(fromFileId));
+                    if (fromFile.ThumbnailStatus == Thumbnail.Created)
+                    {
+                        using (var thumbnail = fromFileDao.GetThumbnail(fromFile))
+                        {
+                            toFileDao.SaveThumbnail(toFile, thumbnail);
+                        }
+                        toFile.ThumbnailStatus = Thumbnail.Created;
+                    }
+
+                    if (deleteSourceFile)
+                    {
+                        if (fromFileShareRecords.Any())
+                            fromFileShareRecords.ToList().ForEach(x =>
+                                {
+                                    x.EntryId = toFile.ID;
+                                    securityDao.SetShare(x);
+                                });
+
+                        var fromFileTags = fromFileNewTags;
+                        if (fromFileLockTag != null) fromFileTags.Add(fromFileLockTag);
+                        if (fromFileFavoriteTag != null) fromFileTags.AddRange(fromFileFavoriteTag);
+                        if (fromFileTemplateTag != null) fromFileTags.AddRange(fromFileTemplateTag);
+
+                        if (fromFileTags.Any())
+                        {
+                            fromFileTags.ForEach(x => x.EntryId = toFile.ID);
+
+                            tagDao.SaveTags(fromFileTags);
+                        }
+
+                        //Delete source file if needed
+                        fromFileDao.DeleteFile(fromSelector.ConvertId(fromFileId));
+                    }
+                    return toFile;
                 }
-                return toFile;
             }
         }
 
@@ -237,88 +249,87 @@ namespace ASC.Files.Thirdparty.ProviderDao
             var fromSelector = GetSelector(fromFolderId);
             var toSelector = GetSelector(toRootFolderId);
 
-            var fromFolderDao = fromSelector.GetFolderDao(fromFolderId);
-            var fromFileDao = fromSelector.GetFileDao(fromFolderId);
-            //Create new folder in 'to' folder
-            var toFolderDao = toSelector.GetFolderDao(toRootFolderId);
-            //Ohh
-            var fromFolder = fromFolderDao.GetFolder(fromSelector.ConvertId(fromFolderId));
-
-            var toFolder = toFolderDao.GetFolder(fromFolder.Title, toSelector.ConvertId(toRootFolderId));
-            var toFolderId = toFolder != null
-                                 ? toFolder.ID
-                                 : toFolderDao.SaveFolder(
-                                     new Folder
+            using (var fromFolderDao = fromSelector.GetFolderDao(fromFolderId))
+            using (var fromFileDao = fromSelector.GetFileDao(fromFolderId))
+            using (var toFolderDao = toSelector.GetFolderDao(toRootFolderId))
+            {
+                var fromFolder = fromFolderDao.GetFolder(fromSelector.ConvertId(fromFolderId));
+                var toFolder = toFolderDao.GetFolder(fromFolder.Title, toSelector.ConvertId(toRootFolderId));
+                var toFolderId = toFolder != null
+                                     ? toFolder.ID
+                                     : toFolderDao.SaveFolder(
+                                         new Folder
                                          {
                                              Title = fromFolder.Title,
                                              ParentFolderID = toSelector.ConvertId(toRootFolderId)
                                          });
 
-            var foldersToCopy = fromFolderDao.GetFolders(fromSelector.ConvertId(fromFolderId));
-            var fileIdsToCopy = fromFileDao.GetFiles(fromSelector.ConvertId(fromFolderId));
-            Exception copyException = null;
-            //Copy files first
-            foreach (var fileId in fileIdsToCopy)
-            {
-                if (cancellationToken.HasValue) cancellationToken.Value.ThrowIfCancellationRequested();
-                try
+                var foldersToCopy = fromFolderDao.GetFolders(fromSelector.ConvertId(fromFolderId));
+                var fileIdsToCopy = fromFileDao.GetFiles(fromSelector.ConvertId(fromFolderId));
+                Exception copyException = null;
+                //Copy files first
+                foreach (var fileId in fileIdsToCopy)
                 {
-                    PerformCrossDaoFileCopy(fileId, toFolderId, deleteSourceFolder);
-                }
-                catch (Exception ex)
-                {
-                    copyException = ex;
-                }
-            }
-            foreach (var folder in foldersToCopy)
-            {
-                if (cancellationToken.HasValue) cancellationToken.Value.ThrowIfCancellationRequested();
-                try
-                {
-                    PerformCrossDaoFolderCopy(folder.ID, toFolderId, deleteSourceFolder, cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    copyException = ex;
-                }
-            }
-
-            if (deleteSourceFolder)
-            {
-                using (var securityDao = TryGetSecurityDao())
-                {
-                    var fromFileShareRecords = securityDao.GetPureShareRecords(fromFolder)
-                        .Where(x => x.EntryType == FileEntryType.Folder);
-
-                    if (fromFileShareRecords.Any())
+                    if (cancellationToken.HasValue) cancellationToken.Value.ThrowIfCancellationRequested();
+                    try
                     {
-                        fromFileShareRecords.ToList().ForEach(x =>
+                        PerformCrossDaoFileCopy(fileId, toFolderId, deleteSourceFolder);
+                    }
+                    catch (Exception ex)
+                    {
+                        copyException = ex;
+                    }
+                }
+                foreach (var folder in foldersToCopy)
+                {
+                    if (cancellationToken.HasValue) cancellationToken.Value.ThrowIfCancellationRequested();
+                    try
+                    {
+                        PerformCrossDaoFolderCopy(folder.ID, toFolderId, deleteSourceFolder, cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        copyException = ex;
+                    }
+                }
+
+                if (deleteSourceFolder)
+                {
+                    using (var securityDao = TryGetSecurityDao())
+                    {
+                        var fromFileShareRecords = securityDao.GetPureShareRecords(fromFolder)
+                            .Where(x => x.EntryType == FileEntryType.Folder);
+
+                        if (fromFileShareRecords.Any())
                         {
-                            x.EntryId = toFolderId;
-                            securityDao.SetShare(x);
-                        });
+                            fromFileShareRecords.ToList().ForEach(x =>
+                            {
+                                x.EntryId = toFolderId;
+                                securityDao.SetShare(x);
+                            });
+                        }
                     }
-                }
 
-                using (var tagDao = TryGetTagDao())
-                {
-                    var fromFileNewTags = tagDao.GetNewTags(Guid.Empty, fromFolder).ToList();
-
-                    if (fromFileNewTags.Any())
+                    using (var tagDao = TryGetTagDao())
                     {
-                        fromFileNewTags.ForEach(x => x.EntryId = toFolderId);
+                        var fromFileNewTags = tagDao.GetNewTags(Guid.Empty, fromFolder).ToList();
 
-                        tagDao.SaveTags(fromFileNewTags);
+                        if (fromFileNewTags.Any())
+                        {
+                            fromFileNewTags.ForEach(x => x.EntryId = toFolderId);
+
+                            tagDao.SaveTags(fromFileNewTags);
+                        }
                     }
+
+                    if (copyException == null)
+                        fromFolderDao.DeleteFolder(fromSelector.ConvertId(fromFolderId));
                 }
 
-                if (copyException == null)
-                    fromFolderDao.DeleteFolder(fromSelector.ConvertId(fromFolderId));
+                if (copyException != null) throw copyException;
+
+                return toFolderDao.GetFolder(toSelector.ConvertId(toFolderId));
             }
-
-            if (copyException != null) throw copyException;
-
-            return toFolderDao.GetFolder(toSelector.ConvertId(toFolderId));
         }
     }
 }

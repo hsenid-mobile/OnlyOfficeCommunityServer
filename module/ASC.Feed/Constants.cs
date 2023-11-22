@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,88 +19,45 @@ namespace ASC.Feed
 {
     public class Constants
     {
-        public const string FeedDbId = "core";
-        public const string ProjectsDbId = "projects";
-        public const string FilesDbId = "files";
-        public const string CommunityDbId = "community";
-        public const string CrmDbId = "crm";
+        #region DbId
+
+        public const string DefaultDbId = "default";
+        public const string FeedDbId = DefaultDbId;
+        public const string ProjectsDbId = DefaultDbId;
+        public const string FilesDbId = DefaultDbId;
+        public const string CommunityDbId = DefaultDbId;
+        public const string CrmDbId = DefaultDbId;
+        public const string PeopleDbId = DefaultDbId;
+
+        //public const string FeedDbId = "core";
+        //public const string ProjectsDbId = "projects";
+        //public const string FilesDbId = "files";
+        //public const string CommunityDbId = "community";
+        //public const string CrmDbId = "crm";
+        //public const string PeopleDbId = "people";
+
+        #endregion
+
 
         #region Modules
 
-        public static string BookmarksModule
-        {
-            get { return "bookmarks"; }
-        }
-
-        public static string BlogsModule
-        {
-            get { return "blogs"; }
-        }
-
-        public static string ForumsModule
-        {
-            get { return "forums"; }
-        }
-
-        public static string EventsModule
-        {
-            get { return "events"; }
-        }
-
-        public static string ProjectsModule
-        {
-            get { return "projects"; }
-        }
-
-        public static string MilestonesModule
-        {
-            get { return "milestones"; }
-        }
-
-        public static string DiscussionsModule
-        {
-            get { return "discussions"; }
-        }
-
-        public static string TasksModule
-        {
-            get { return "tasks"; }
-        }
-
-        public static string CommentsModule
-        {
-            get { return "comments"; }
-        }
-
-        public static string CrmTasksModule
-        {
-            get { return "crmTasks"; }
-        }
-
-        public static string ContactsModule
-        {
-            get { return "contacts"; }
-        }
-
-        public static string DealsModule
-        {
-            get { return "deals"; }
-        }
-
-        public static string CasesModule
-        {
-            get { return "cases"; }
-        }
-
-        public static string FilesModule
-        {
-            get { return "files"; }
-        }
-
-        public static string FoldersModule
-        {
-            get { return "folders"; }
-        }
+        public static string BookmarksModule = "bookmarks";
+        public static string BlogsModule = "blogs";
+        public static string ForumsModule = "forums";
+        public static string EventsModule = "events";
+        public static string ProjectsModule = "projects";
+        public static string MilestonesModule = "milestones";
+        public static string DiscussionsModule = "discussions";
+        public static string TasksModule = "tasks";
+        public static string CommentsModule = "comments";
+        public static string CrmTasksModule = "crmTasks";
+        public static string ContactsModule = "contacts";
+        public static string DealsModule = "deals";
+        public static string CasesModule = "cases";
+        public static string FilesModule = "files";
+        public static string FoldersModule = "folders";
+        public static string BirthdaysModule = "birthday";
+        public static string NewEmployeeModule = "newEmployee";
 
         #endregion
     }

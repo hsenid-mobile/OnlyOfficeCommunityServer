@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  *
 */
 
-
-using System.Reflection;
 
 namespace ASC.Forum
 {
@@ -31,9 +29,9 @@ namespace ASC.Forum
     }
 
 
-	public class RankTag : Tag
+    public class RankTag : Tag
     {
-        
+
 
         public virtual int Rank { get; internal set; }
 

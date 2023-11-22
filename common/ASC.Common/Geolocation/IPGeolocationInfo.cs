@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,20 @@
 */
 
 
-using System;
-
 namespace ASC.Geolocation
 {
-    public class  IPGeolocationInfo
+    public class IPGeolocationInfo
     {
         public string Key { get; set; }
 
-        public string City {get; set;}
-        
+        public string City { get; set; }
+
         public double TimezoneOffset { get; set; }
-        
+
         public string TimezoneName { get; set; }
 
         public string IPStart { get; set; }
-        
+
         public string IPEnd { get; set; }
 
 

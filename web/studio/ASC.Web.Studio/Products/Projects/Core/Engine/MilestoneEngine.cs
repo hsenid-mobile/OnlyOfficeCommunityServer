@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using ASC.Core;
 using ASC.Core.Tenants;
 using ASC.ElasticSearch;
 using ASC.Projects.Core.DataInterfaces;
 using ASC.Projects.Core.Domain;
 using ASC.Projects.Core.Services.NotifyService;
+using ASC.Web.Projects.Core.Engine;
 using ASC.Web.Projects.Core.Search;
 
 namespace ASC.Projects.Engine
@@ -70,7 +72,7 @@ namespace ASC.Projects.Engine
 
                 if (filter.Max <= 0 || filter.Max > 150000) break;
 
-                listMilestones = listMilestones.Take((int) filter.Max).ToList();
+                listMilestones = listMilestones.Take((int)filter.Max).ToList();
 
                 if (listMilestones.Count == filter.Max || milestones.Count == 0) break;
 
@@ -115,6 +117,23 @@ namespace ASC.Projects.Engine
                 return y.DeadLine.CompareTo(x.DeadLine);
             });
             return milestones;
+        }
+
+        public List<Milestone> GetRecentMilestones(int max, params int[] projects)
+        {
+            var offset = 0;
+            var milestones = new List<Milestone>();
+            while (true)
+            {
+                var packet = DaoFactory.MilestoneDao.GetRecentMilestones(offset, 2 * max, projects);
+                milestones.AddRange(packet.Where(CanRead));
+                if (max <= milestones.Count || packet.Count() < 2 * max)
+                {
+                    break;
+                }
+                offset += 2 * max;
+            }
+            return milestones.Count <= max ? milestones : milestones.GetRange(0, max);
         }
 
         public List<Milestone> GetUpcomingMilestones(int max, params int[] projects)

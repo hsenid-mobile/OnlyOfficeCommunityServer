@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,12 @@ namespace ASC.Data.Backup.Storage
     {
         void SaveBackupRecord(BackupRecord backupRecord);
         BackupRecord GetBackupRecord(Guid id);
+        BackupRecord GetBackupRecord(string hash, int tenant);
         List<BackupRecord> GetExpiredBackupRecords();
         List<BackupRecord> GetScheduledBackupRecords();
         List<BackupRecord> GetBackupRecordsByTenantId(int tenantId);
         void DeleteBackupRecord(Guid id);
-
+        void MigrationBackupRecords(int tenantId, int newTenantId, string configPath);
         void SaveBackupSchedule(Schedule schedule);
         Schedule GetBackupSchedule(int tenantId);
         List<Schedule> GetBackupSchedules();

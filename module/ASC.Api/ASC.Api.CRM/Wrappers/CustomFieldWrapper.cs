@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,14 @@
 
 using System;
 using System.Runtime.Serialization;
+
 using ASC.CRM.Core;
 using ASC.CRM.Core.Entities;
 using ASC.Specific;
 
 namespace ASC.Api.CRM.Wrappers
 {
+    ///<inherited>ASC.Api.CRM.Wrappers.CustomFieldBaseWrapper, ASC.Api.CRM</inherited>
     [DataContract(Name = "customField", Namespace = "")]
     public class CustomFieldWrapper : CustomFieldBaseWrapper
     {
@@ -36,27 +38,29 @@ namespace ASC.Api.CRM.Wrappers
         {
         }
 
+        ///<example type="int">0</example>
         [DataMember]
         public int RelativeItemsCount { get; set; }
 
         public new static CustomFieldWrapper GetSample()
         {
             return new CustomFieldWrapper(0)
-                {
-                    Position = 10,
-                    EntityId = 14523423,
-                    FieldType = CustomFieldType.Date,
-                    FieldValue = ApiDateTime.GetSample().ToString(),
-                    Label = "Birthdate",
-                    Mask = "",
-                    RelativeItemsCount = 0
-                };
+            {
+                Position = 10,
+                EntityId = 14523423,
+                FieldType = CustomFieldType.Date,
+                FieldValue = ApiDateTime.GetSample().ToString(),
+                Label = "Birthdate",
+                Mask = "",
+                RelativeItemsCount = 0
+            };
         }
     }
 
     /// <summary>
     ///  User custom fields
     /// </summary>
+    /// <inherited>ASC.Api.CRM.Wrappers.ObjectWrapperBase, ASC.Api.CRM</inherited>
     [DataContract(Name = "customField", Namespace = "")]
     public class CustomFieldBaseWrapper : ObjectWrapperBase
     {
@@ -75,35 +79,41 @@ namespace ASC.Api.CRM.Wrappers
             Mask = customField.Mask;
         }
 
+        ///<example type="int">14523423</example>
         [DataMember]
         public int EntityId { get; set; }
 
+        ///<example>Birthdate</example>
         [DataMember]
         public String Label { get; set; }
 
+        ///<example>2020-12-08T17:37:04.5916406Z</example>
         [DataMember]
         public String FieldValue { get; set; }
 
+        ///<example type="int">5</example>
         [DataMember]
         public CustomFieldType FieldType { get; set; }
 
+        ///<example type="int">10</example>
         [DataMember]
         public int Position { get; set; }
 
+        ///<example></example>
         [DataMember]
         public String Mask { get; set; }
 
         public static CustomFieldBaseWrapper GetSample()
         {
             return new CustomFieldBaseWrapper(0)
-                {
-                    Position = 10,
-                    EntityId = 14523423,
-                    FieldType = CustomFieldType.Date,
-                    FieldValue = ApiDateTime.GetSample().ToString(),
-                    Label = "Birthdate",
-                    Mask = ""
-                };
+            {
+                Position = 10,
+                EntityId = 14523423,
+                FieldType = CustomFieldType.Date,
+                FieldValue = ApiDateTime.GetSample().ToString(),
+                Label = "Birthdate",
+                Mask = ""
+            };
         }
     }
 }

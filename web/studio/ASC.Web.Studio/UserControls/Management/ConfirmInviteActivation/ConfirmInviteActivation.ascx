@@ -3,7 +3,7 @@
 <%@ Import Namespace="ASC.Web.Core.Utility" %>
 <%@ Import Namespace="ASC.Web.Studio.Core.Users" %>
 <%@ Import Namespace="ASC.Web.Studio.Utility" %>
-<%@ Import Namespace="Resources" %>
+<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
 
 <asp:PlaceHolder runat="server" ID="_confirmHolder">
     <div class="confirmBlock <%= isPersonal ? "confirm-personal" : "" %>">
@@ -70,14 +70,29 @@
                     </div>
                     <div class="value">
                         <input type="password" id="studio_confirm_pwd" value="" class="textEdit" autocomplete="off"
-                            data-maxlength="<%= PasswordSettings.MaxLength %>"
-                            data-regex="<%: PasswordSettings.GetPasswordRegex(PasswordSettings.Load()) %>"
-                            data-help="<%= ASC.Web.Studio.Core.Users.UserManagerWrapper.GetPasswordHelpMessage() %>" />
+                            data-maxlength="<%= TenantPasswordSettings.MaxLength %>"
+                            data-regex="<%: PasswordSettings.GetPasswordRegex(TenantPasswordSettings) %>"
+                            data-help="<%= UserManagerWrapper.GetPasswordHelpMessage() %>"/>
                         <input type="hidden" id="passwordHash" name="passwordHash" />
+                        <label class="eye-label hide-label" id="passwordShowLabel"></label>
                     </div>
                     <div class="popup_helper" id="InvitePasswordHelp">
                         <%= UserManagerWrapper.GetPasswordHelpMessage() %>
-                        </div>
+                    </div>
+                </div>
+                <%--Pwd Match--%>
+                <div class="property">
+                    <div class="name">
+                        <%= Resource.InviteRepeatPassword %>
+                    </div>
+                    <div class="value">
+                        <input type="password" id="studio_confirm_pwd_match" value="" class="textEdit" autocomplete="off"
+                            data-maxlength="<%= TenantPasswordSettings.MaxLength %>"/>
+                        <label class="eye-label hide-label" id="passwordShowLabelMatch"></label>
+                    </div>
+                </div>
+                <div class="name">
+                    <p id="password-do-not-match-text"><%= Resource.PasswordDoNotMatch %></p>
                 </div>
 
                 <div class="big-button-container">

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 
 using System;
+
 using ASC.Web.Core.Client.Bundling;
 using ASC.Web.Studio.Masters.MasterResources;
 
@@ -46,8 +47,8 @@ namespace ASC.Web.Studio.Masters
                         "~/js/asc/plugins/jquery-groupadvansedselector.js",
                         "~/js/asc/plugins/jquery-contactadvansedselector.js",
                         "~/js/asc/plugins/jquery-emailadvansedselector.js",
-                        "~/js/asc/plugins/jquery.tlblock.js",
                         "~/js/asc/plugins/popupbox.js",
+                        "~/js/asc/plugins/userselector.js",
                         "~/js/asc/core/asc.files.utility.js",
                         "~/js/asc/core/basetemplate.master.init.js",
                         "~/UserControls/Common/HelpCenter/js/help-center.js",
@@ -69,6 +70,10 @@ namespace ASC.Web.Studio.Masters
         }
 
         public StyleBundleData GetStaticStyleSheet()
+        {
+            return null;
+        }
+        public StyleBundleData GetStaticDarkStyleSheet()
         {
             return null;
         }

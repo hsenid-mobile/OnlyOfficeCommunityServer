@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 
 using System;
 using System.Runtime.Serialization;
+
 using ASC.Core;
 using ASC.Core.Common.Settings;
+
 using Newtonsoft.Json;
 
 namespace ASC.Web.Core.WhiteLabel
@@ -43,17 +45,7 @@ namespace ASC.Web.Core.WhiteLabel
         public string Phone { get; set; }
 
         [DataMember(Name = "IsLicensor")]
-        public bool IsLicensorSetting { get; set; }
-
-        public bool IsLicensor
-        {
-            get
-            {
-                return IsLicensorSetting
-                    && (IsDefault || CoreContext.TenantManager.GetTenantQuota(CoreContext.TenantManager.GetCurrentTenant().TenantId).Branding);
-            }
-            set { IsLicensorSetting = value; }
-        }
+        public bool IsLicensor { get; set; }
 
         public bool IsDefault
         {
@@ -68,7 +60,7 @@ namespace ASC.Web.Core.WhiteLabel
                        Email == defaultSettings.Email &&
                        Address == defaultSettings.Address &&
                        Phone == defaultSettings.Phone &&
-                       IsLicensorSetting == defaultSettings.IsLicensorSetting;
+                       IsLicensor == defaultSettings.IsLicensor;
             }
         }
 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +32,16 @@ ASC.Settings.MailService = (function () {
     var host;
 
     var init = function () {
-        jq(".settings-switcher-btn").click(function () {
+        jq(".settings-switcher-btn").on("click", function () {
             jq(".settings-switcher-btn, .settings-switcher-content").toggleClass("display-none");
         });
 
-        jq("#mailServiceConnectBtn").click(function () {
+        jq("#mailServiceConnectBtn").on("click", function () {
             if (jq(this).hasClass("disable")) return;
             connect();
         });
         
-        jq("#mailServiceSaveBtn").click(function () {
+        jq("#mailServiceSaveBtn").on("click", function () {
             if (jq(this).hasClass("disable")) return;
             save();
         });

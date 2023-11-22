@@ -1,6 +1,6 @@
-/*
+﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
+
+using ASC.Common.Caching;
+using ASC.Common.Logging;
+using ASC.Common.Radicale;
+using ASC.Core.Caching;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
-using ASC.Core.Caching;
+using ASC.Security.Cryptography;
 
 namespace ASC.Core
 {
@@ -30,6 +36,7 @@ namespace ASC.Core
 
         private readonly IDictionary<Guid, UserInfo> systemUsers;
 
+        public static readonly ICache Cache = AscCache.Default;
 
         public UserManager(IUserService service)
         {
@@ -97,6 +104,12 @@ namespace ASC.Core
 
         public UserInfo GetUserByUserName(string username)
         {
+            if (CoreContext.Configuration.Personal)
+            {
+                var u = userService.GetUserByUserName(CoreContext.TenantManager.GetCurrentTenant().TenantId, username);
+                return u ?? Constants.LostUser;
+            }
+
             return GetUsersInternal()
                 .FirstOrDefault(u => string.Compare(u.UserName, username, StringComparison.CurrentCultureIgnoreCase) == 0) ?? Constants.LostUser;
         }
@@ -145,8 +158,14 @@ namespace ASC.Core
         {
             if (string.IsNullOrEmpty(email)) return Constants.LostUser;
 
+            if (CoreContext.Configuration.Personal)
+            {
+                var u = userService.GetUser(CoreContext.TenantManager.GetCurrentTenant().TenantId, email);
+                return u != null && !u.Removed ? u : Constants.LostUser;
+            }
+
             return GetUsersInternal()
-                .FirstOrDefault(u => string.Compare(u.Email, email, StringComparison.CurrentCultureIgnoreCase) == 0) ?? Constants.LostUser;
+               .FirstOrDefault(u => string.Compare(u.Email, email, StringComparison.CurrentCultureIgnoreCase) == 0) ?? Constants.LostUser;
         }
 
         public UserInfo[] Search(string text, EmployeeStatus status)
@@ -184,23 +203,38 @@ namespace ASC.Core
             return findUsers.ToArray();
         }
 
-        public UserInfo SaveUserInfo(UserInfo u, bool isVisitor = false)
+        public UserInfo SaveUserInfo(UserInfo u, bool isVisitor = false, bool syncCardDav = false)
         {
             if (IsSystemUser(u.ID)) return systemUsers[u.ID];
             if (u.ID == Guid.Empty) SecurityContext.DemandPermissions(Constants.Action_AddRemoveUser);
             else SecurityContext.DemandPermissions(new UserSecurityProvider(u.ID), Constants.Action_EditUser);
 
-            if (Constants.MaxEveryoneCount <= GetUsersByGroup(Constants.GroupEveryone.ID).Length)
+            if (!CoreContext.Configuration.Personal)
             {
-                throw new TenantQuotaException("Maximum number of users exceeded");
-            }
-
-            if (u.Status == EmployeeStatus.Active)
-            {
-                var q = CoreContext.TenantManager.GetTenantQuota(CoreContext.TenantManager.GetCurrentTenant().TenantId);
-                if (q.ActiveUsers < GetUsersByGroup(Constants.GroupUser.ID).Length)
+                if (Constants.MaxEveryoneCount <= GetUsersByGroup(Constants.GroupEveryone.ID).Length)
                 {
-                    throw new TenantQuotaException(string.Format("Exceeds the maximum active users ({0})", q.ActiveUsers));
+                    throw new TenantQuotaException("Maximum number of users exceeded");
+                }
+
+                if (u.Status == EmployeeStatus.Active)
+                {
+                    if (isVisitor)
+                    {
+                        var maxUsers = CoreContext.TenantManager.GetTenantQuota(CoreContext.TenantManager.GetCurrentTenant().TenantId).ActiveUsers;
+
+                        if (!CoreContext.Configuration.Standalone && CoreContext.UserManager.GetUsersByGroup(Constants.GroupVisitor.ID).Length > Constants.CoefficientOfVisitors * maxUsers)
+                        {
+                            throw new TenantQuotaException("Maximum number of visitors exceeded");
+                        }
+                    }
+                    else
+                    {
+                        var q = CoreContext.TenantManager.GetTenantQuota(CoreContext.TenantManager.GetCurrentTenant().TenantId);
+                        if (q.ActiveUsers < GetUsersByGroup(Constants.GroupUser.ID).Length)
+                        {
+                            throw new TenantQuotaException(string.Format("Exceeds the maximum active users ({0})", q.ActiveUsers));
+                        }
+                    }
                 }
             }
 
@@ -209,10 +243,86 @@ namespace ASC.Core
                 throw new InvalidOperationException("Can not disable tenant owner.");
             }
 
+            var oldUserData = userService.GetUserByUserName(CoreContext.TenantManager.GetCurrentTenant().TenantId, u.UserName);
+
             var newUser = userService.SaveUser(CoreContext.TenantManager.GetCurrentTenant().TenantId, u);
+
+            if (syncCardDav)
+            {
+                var tenant = CoreContext.TenantManager.GetCurrentTenant();
+                var cardDavAB = new CardDavAddressbook();
+                var myUri = (HttpContext.Current != null) ? HttpContext.Current.Request.GetUrlRewriter().ToString() :
+                            (Cache.Get<string>("REWRITE_URL" + tenant.TenantId) != null) ?
+                            new Uri(Cache.Get<string>("REWRITE_URL" + tenant.TenantId)).ToString() : tenant.GetTenantDomain();
+
+                var rootAuthorization = cardDavAB.GetSystemAuthorization();
+                var allUserEmails = CoreContext.UserManager.GetDavUserEmails().ToList();
+                var cardDavAddBook = new CardDavAddressbook();
+
+                if (oldUserData != null && oldUserData.Status != newUser.Status && newUser.Status == EmployeeStatus.Terminated)
+                {
+                    var userAuthorization = oldUserData.Email.ToLower() + ":" + InstanceCrypto.Encrypt(oldUserData.Email);
+                    var requestUrlBook = cardDavAB.GetRadicaleUrl(myUri, newUser.Email.ToLower(), true, true);
+                    var collection = cardDavAB.GetCollection(requestUrlBook, userAuthorization, myUri.ToString()).Result;
+                    if (collection.Completed && collection.StatusCode != 404)
+                    {
+                        cardDavAB.Delete(myUri, newUser.ID, newUser.Email, tenant.TenantId);
+                    }
+                    foreach (string email in allUserEmails)
+                    {
+                        var requestUrlItem = cardDavAddBook.GetRadicaleUrl(myUri.ToString(), email.ToLower(), true, true, itemID: newUser.ID.ToString());
+                        try
+                        {
+                            var davItemRequest = new DavRequest()
+                            {
+                                Url = requestUrlItem,
+                                Authorization = rootAuthorization,
+                                Header = myUri
+                            };
+                            RadicaleClient.RemoveAsync(davItemRequest).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.GetLogger("ASC").Error("ERROR: " + ex.Message);
+                        }
+                    }
+                }
+                else
+                {
+
+                    try
+                    {
+                        var cardDavUser = new CardDavItem(u.ID, u.FirstName, u.LastName, u.UserName, u.BirthDate, u.Sex, u.Title, u.Email, u.Contacts, u.MobilePhone);
+
+                        try
+                        {
+                            cardDavAB.UpdateItemForAllAddBooks(allUserEmails, myUri, cardDavUser, CoreContext.TenantManager.GetCurrentTenant().TenantId, oldUserData != null && oldUserData.Email != newUser.Email ? oldUserData.Email : null);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.GetLogger("ASC").Error("ERROR: " + ex.Message);
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.GetLogger("ASC").Error("ERROR: " + ex.Message);
+                    }
+                }
+
+            }
+
 
             return newUser;
         }
+        #region CardDAV/methods
+
+        public IEnumerable<string> GetDavUserEmails()
+        {
+            return userService.GetDavUserEmails(CoreContext.TenantManager.GetCurrentTenant().TenantId);
+        }
+
+        #endregion
 
         public void DeleteUser(Guid id)
         {
@@ -223,7 +333,61 @@ namespace ASC.Core
                 throw new InvalidOperationException("Can not remove tenant owner.");
             }
 
+            var delUser = CoreContext.UserManager.GetUsers(id);
             userService.RemoveUser(CoreContext.TenantManager.GetCurrentTenant().TenantId, id);
+            var tenant = CoreContext.TenantManager.GetCurrentTenant();
+            try
+            {
+
+                var curreMail = delUser.Email.ToLower();
+                var currentAccountPaswd = InstanceCrypto.Encrypt(curreMail);
+                var userAuthorization = curreMail + ":" + currentAccountPaswd;
+                var cardDavAddBook = new CardDavAddressbook();
+                var rootAuthorization = cardDavAddBook.GetSystemAuthorization();
+                var myUri = (HttpContext.Current != null) ? HttpContext.Current.Request.GetUrlRewriter().ToString() :
+                    (Cache.Get<string>("REWRITE_URL" + tenant.TenantId) != null) ?
+                    new Uri(Cache.Get<string>("REWRITE_URL" + tenant.TenantId)).ToString() : tenant.GetTenantDomain();
+                var davUsersEmails = CoreContext.UserManager.GetDavUserEmails();
+                var requestUrlBook = cardDavAddBook.GetRadicaleUrl(myUri, delUser.Email.ToLower(), true, true);
+                var addBookCollection = cardDavAddBook.GetCollection(requestUrlBook, userAuthorization, myUri.ToString()).Result;
+
+
+                if (addBookCollection.Completed && addBookCollection.StatusCode != 404)
+                {
+                    var davbookRequest = new DavRequest()
+                    {
+                        Url = requestUrlBook,
+                        Authorization = rootAuthorization,
+                        Header = myUri
+                    };
+                    RadicaleClient.RemoveAsync(davbookRequest).ConfigureAwait(false);
+                }
+
+                foreach (string email in davUsersEmails)
+                {
+                    var requestUrlItem = cardDavAddBook.GetRadicaleUrl(myUri.ToString(), email.ToLower(), true, true, itemID: delUser.ID.ToString());
+                    try
+                    {
+                        var davItemRequest = new DavRequest()
+                        {
+                            Url = requestUrlItem,
+                            Authorization = rootAuthorization,
+                            Header = myUri
+                        };
+                        RadicaleClient.RemoveAsync(davItemRequest).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.GetLogger("ASC").Error("ERROR: " + ex.Message);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                LogManager.GetLogger("ASC").Error("ERROR: " + ex.Message);
+            }
+
         }
 
         public void SaveUserPhoto(Guid id, byte[] photo)
@@ -307,8 +471,8 @@ namespace ASC.Core
 
                 if (userRefs != null)
                 {
-                    var toAdd = userRefs.Where(r => !r.Removed && 
-                        r.RefType == UserGroupRefType.Contains && 
+                    var toAdd = userRefs.Where(r => !r.Removed &&
+                        r.RefType == UserGroupRefType.Contains &&
                         !Constants.BuildinGroups.Any(g => g.ID.Equals(r.GroupId)))
                         .Select(r => r.GroupId);
                     result.AddRange(toAdd);
@@ -342,6 +506,16 @@ namespace ASC.Core
                 new UserGroupRef(userId, groupId, UserGroupRefType.Contains));
 
             GetUsers(userId).ResetGroupCache();
+            var user = CoreContext.UserManager.GetUsers(userId);
+            if (groupId == Constants.GroupVisitor.ID)
+            {
+                var tenant = CoreContext.TenantManager.GetCurrentTenant();
+                var myUri = (HttpContext.Current != null) ? HttpContext.Current.Request.GetUrlRewriter().ToString() :
+                           (Cache.Get<string>("REWRITE_URL" + tenant.TenantId) != null) ?
+                           new Uri(Cache.Get<string>("REWRITE_URL" + tenant.TenantId)).ToString() : tenant.GetTenantDomain();
+                var cardDavAB = new CardDavAddressbook();
+                cardDavAB.Delete(myUri, user.ID, user.Email, tenant.TenantId);
+            }
         }
 
         public void RemoveUserFromGroup(Guid userId, Guid groupId)
@@ -353,6 +527,8 @@ namespace ASC.Core
 
             GetUsers(userId).ResetGroupCache();
         }
+
+
 
         #endregion Users
 

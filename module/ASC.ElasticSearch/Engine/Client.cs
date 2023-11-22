@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,14 @@
 
 using System;
 using System.Text;
+
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Tenants;
 using ASC.ElasticSearch.Service;
+
 using Elasticsearch.Net;
+
 using Nest;
 
 namespace ASC.ElasticSearch
@@ -34,7 +37,7 @@ namespace ASC.ElasticSearch
 
         private Client()
         {
-            
+
         }
 
         public static ElasticClient Instance
@@ -55,25 +58,30 @@ namespace ASC.ElasticSearch
                         .RequestTimeout(TimeSpan.FromMinutes(5))
                         .MaximumRetries(10)
                         .ThrowExceptions();
-#if DEBUG
+
+                    if (launchSettings.HttpCompression)
+                    {
+                        settings = settings.EnableHttpCompression();
+                    }
+
                     if (Log.IsTraceEnabled)
                     {
                         settings.DisableDirectStreaming().PrettyJson().EnableDebugMode(r =>
                         {
-                            Log.Trace(r.DebugInformation);
+                            //Log.Trace(r.DebugInformation);
 
-                            if (r.RequestBodyInBytes != null)
-                            {
-                                Log.TraceFormat("Request: {0}", Encoding.UTF8.GetString(r.RequestBodyInBytes));
-                            }
+                            //if (r.RequestBodyInBytes != null)
+                            //{
+                            //    Log.TraceFormat("Request: {0}", Encoding.UTF8.GetString(r.RequestBodyInBytes));
+                            //}
 
-                            if (r.ResponseBodyInBytes != null)
+                            if (r.HttpStatusCode != null && (r.HttpStatusCode == 403 || r.HttpStatusCode == 500) && r.ResponseBodyInBytes != null)
                             {
                                 Log.TraceFormat("Response: {0}", Encoding.UTF8.GetString(r.ResponseBodyInBytes));
                             }
                         });
                     }
-#endif
+
                     return client = new ElasticClient(settings);
                 }
             }

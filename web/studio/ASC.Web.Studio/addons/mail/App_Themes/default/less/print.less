@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,11 @@
 */
 
 
-@import "settings.less";
-
 body {
     height: auto;
 }
 
 #message-print-view {
-    width: 1007px;
     margin: 0 auto;
 
     .head-subject {
@@ -30,6 +27,7 @@ body {
 
         .viewTitle {
             margin-left: 0;
+            height: auto;
         }
     }
 
@@ -49,7 +47,7 @@ body {
                 min-height: 20px;
 
                 label {
-                    color: #333;
+                    color: @text-color;
                     width: auto;
                     font-weight: bold;
                 }
@@ -59,6 +57,7 @@ body {
         .body {
             margin-top: 14px;
             margin-left: 48px;
+            margin-right: 48px;
         }
 
         .attachments {
@@ -68,7 +67,7 @@ body {
         .attachments_list {
             .row:hover {
                 background-color: transparent;
-                
+
                 .file-name {
                     text-decoration: none;
                     cursor: default;

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,15 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
+
+using ASC.Common;
 using ASC.Data.Storage.Configuration;
+
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
+
 using MimeMapping = ASC.Common.Web.MimeMapping;
 
 
@@ -56,6 +61,7 @@ namespace ASC.Data.Storage.GoogleCloud
             _tenant = tenant;
 
             _modulename = string.Empty;
+            _cache = false;
             _dataList = null;
 
             _domainsExpires = new Dictionary<string, TimeSpan> { { string.Empty, TimeSpan.Zero } };
@@ -69,6 +75,7 @@ namespace ASC.Data.Storage.GoogleCloud
             _tenant = tenant;
 
             _modulename = moduleConfig.Name;
+            _cache = moduleConfig.Cache;
             _dataList = new DataList(moduleConfig);
 
             _domainsExpires =
@@ -197,7 +204,7 @@ namespace ASC.Data.Storage.GoogleCloud
             return GetReadStream(domain, path, 0);
         }
 
-        public override System.IO.Stream GetReadStream(string domain, string path, int offset)
+        public override System.IO.Stream GetReadStream(string domain, string path, long offset)
         {
             var tempStream = TempStream.Create();
 
@@ -213,6 +220,26 @@ namespace ASC.Data.Storage.GoogleCloud
             return tempStream;
         }
 
+        public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset)
+        {
+            var tempStream = TempStream.Create();
+
+            var storage = GetStorage();
+
+            await storage.DownloadObjectAsync(_bucket, MakePath(domain, path), tempStream);
+
+            if (offset > 0)
+                tempStream.Seek(offset, SeekOrigin.Begin);
+
+            tempStream.Position = 0;
+
+            return tempStream;
+        }
+
+        public override Uri Save(string domain, string path, System.IO.Stream stream, Guid ownerId)
+        {
+            return Save(domain, path, ownerId, stream, string.Empty, string.Empty);
+        }
         public override Uri Save(string domain, string path, System.IO.Stream stream)
         {
             return Save(domain, path, stream, string.Empty, string.Empty);
@@ -225,27 +252,39 @@ namespace ASC.Data.Storage.GoogleCloud
 
         protected override Uri SaveWithAutoAttachment(string domain, string path, System.IO.Stream stream, string attachmentFileName)
         {
+            return SaveWithAutoAttachment(domain, path, Guid.Empty, stream, attachmentFileName);
+        }
+
+        protected override Uri SaveWithAutoAttachment(string domain, string path, Guid ownerId, System.IO.Stream stream, string attachmentFileName)
+        {
             var contentDisposition = string.Format("attachment; filename={0};",
                                                  HttpUtility.UrlPathEncode(attachmentFileName));
-            if (attachmentFileName.Any(c => (int)c >= 0 && (int)c <= 127))
+            if (attachmentFileName.Any(c => c >= 0 && c <= 127))
             {
                 contentDisposition = string.Format("attachment; filename*=utf-8''{0};",
                                                    HttpUtility.UrlPathEncode(attachmentFileName));
             }
             return Save(domain, path, stream, null, contentDisposition);
         }
-
         public override Uri Save(string domain, string path, System.IO.Stream stream, string contentType, string contentDisposition)
         {
-            return Save(domain, path, stream, contentType, contentDisposition, ACL.Auto);
+            return Save(domain, path, Guid.Empty, stream, contentType, contentDisposition);
+        }
+        public override Uri Save(string domain, string path, Guid ownerId, System.IO.Stream stream, string contentType, string contentDisposition)
+        {
+            return Save(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto);
         }
 
         public override Uri Save(string domain, string path, System.IO.Stream stream, string contentEncoding, int cacheDays)
         {
             return Save(domain, path, stream, string.Empty, string.Empty, ACL.Auto, contentEncoding, cacheDays);
         }
-
         public Uri Save(string domain, string path, Stream stream, string contentType,
+                          string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
+        {
+           return Save(domain, path, Guid.Empty, stream, contentType, contentDisposition, acl, contentEncoding, cacheDays);
+        }
+        public Uri Save(string domain, string path, Guid ownerId, Stream stream, string contentType,
                           string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
         {
 
@@ -253,7 +292,7 @@ namespace ASC.Data.Storage.GoogleCloud
 
             if (QuotaController != null)
             {
-                QuotaController.QuotaUsedCheck(buffered.Length);
+                QuotaController.QuotaUsedCheck(buffered.Length, ownerId);
             }
 
             var mime = string.IsNullOrEmpty(contentType)
@@ -272,7 +311,7 @@ namespace ASC.Data.Storage.GoogleCloud
             var uploaded = storage.UploadObject(_bucket, MakePath(domain, path), mime, buffered, uploadObjectOptions, null);
 
             uploaded.ContentEncoding = contentEncoding;
-            uploaded.CacheControl = String.Format("public, maxage={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds);
+            uploaded.CacheControl = String.Format("public, max-age={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds);
 
             if (uploaded.Metadata == null)
                 uploaded.Metadata = new Dictionary<String, String>();
@@ -292,7 +331,7 @@ namespace ASC.Data.Storage.GoogleCloud
 
             //           InvalidateCloudFront(MakePath(domain, path));
 
-            QuotaUsedAdd(domain, buffered.Length);
+            QuotaUsedAdd(domain, buffered.Length, ownerId);
 
             return GetUri(domain, path);
         }
@@ -342,6 +381,10 @@ namespace ASC.Data.Storage.GoogleCloud
 
         public override void DeleteFiles(string domain, string folderPath, string pattern, bool recursive)
         {
+            DeleteFiles(domain, folderPath, pattern, recursive, Guid.Empty);
+        }
+        public override void DeleteFiles(string domain, string folderPath, string pattern, bool recursive, Guid ownerId)
+        {
             var storage = GetStorage();
 
             IEnumerable<Google.Apis.Storage.v1.Data.Object> objToDel;
@@ -356,7 +399,7 @@ namespace ASC.Data.Storage.GoogleCloud
             foreach (var obj in objToDel)
             {
                 storage.DeleteObject(_bucket, obj.Name);
-                QuotaUsedDelete(domain, Convert.ToInt64(obj.Size));
+                QuotaUsedDelete(domain, Convert.ToInt64(obj.Size), ownerId);
             }
         }
 
@@ -435,7 +478,7 @@ namespace ASC.Data.Storage.GoogleCloud
             }
         }
 
-        public override Uri Move(string srcdomain, string srcpath, string newdomain, string newpath)
+        public override Uri Move(string srcdomain, string srcpath, string newdomain, string newpath, bool quotaCheckFileSize = true)
         {
             var storage = GetStorage();
 
@@ -451,7 +494,7 @@ namespace ASC.Data.Storage.GoogleCloud
             Delete(srcdomain, srcpath);
 
             QuotaUsedDelete(srcdomain, size);
-            QuotaUsedAdd(newdomain, size);
+            QuotaUsedAdd(newdomain, size, quotaCheckFileSize);
 
             return GetUri(newdomain, newpath);
 
@@ -497,12 +540,25 @@ namespace ASC.Data.Storage.GoogleCloud
             return objects.Count() > 0;
         }
 
+        public override async Task<bool> IsFileAsync(string domain, string path)
+        {
+            var storage = GetStorage();
+
+            var objects = await storage.ListObjectsAsync(_bucket, MakePath(domain, path)).ReadPageAsync(1);
+
+            return objects.Count() > 0;
+        }
+
         public override bool IsDirectory(string domain, string path)
         {
             return IsFile(domain, path);
         }
 
         public override void DeleteDirectory(string domain, string path)
+        {
+            DeleteDirectory(domain, path, Guid.Empty);
+        }
+        public override void DeleteDirectory(string domain, string path, Guid ownerId)
         {
             var storage = GetStorage();
 
@@ -512,7 +568,7 @@ namespace ASC.Data.Storage.GoogleCloud
             foreach (var obj in objToDel)
             {
                 storage.DeleteObject(_bucket, obj.Name);
-                QuotaUsedDelete(domain, Convert.ToInt64(obj.Size));
+                QuotaUsedDelete(domain, Convert.ToInt64(obj.Size), ownerId);
             }
         }
 
@@ -521,6 +577,18 @@ namespace ASC.Data.Storage.GoogleCloud
             var storage = GetStorage();
 
             var obj = storage.GetObject(_bucket, MakePath(domain, path));
+
+            if (obj.Size.HasValue)
+                return Convert.ToInt64(obj.Size.Value);
+
+            return 0;
+        }
+
+        public override async Task<long> GetFileSizeAsync(string domain, string path)
+        {
+            var storage = GetStorage();
+
+            var obj = await storage.GetObjectAsync(_bucket, MakePath(domain, path));
 
             if (obj.Size.HasValue)
                 return Convert.ToInt64(obj.Size.Value);
@@ -650,7 +718,7 @@ namespace ASC.Data.Storage.GoogleCloud
 
             var uploaded = storage.UploadObject(_bucket, MakePath(domain, path), "application/octet-stream", buffered, uploadObjectOptions, null);
 
-            uploaded.CacheControl = String.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds);
+            uploaded.CacheControl = String.Format("public, max-age={0}", (int)TimeSpan.FromDays(5).TotalSeconds);
             uploaded.ContentDisposition = "attachment";
 
             if (uploaded.Metadata == null)
@@ -663,8 +731,15 @@ namespace ASC.Data.Storage.GoogleCloud
 
             using (var mStream = new MemoryStream(Encoding.UTF8.GetBytes(_json ?? "")))
             {
+                TimeSpan signDuration;
+
+                if (expires.Date == DateTime.MinValue)
+                    signDuration = expires.TimeOfDay;
+                else
+                    signDuration = expires.Subtract(DateTime.UtcNow);
+
                 var preSignedURL = UrlSigner.FromServiceAccountData(mStream)
-                                .Sign(_bucket, MakePath(domain, path), expires, null);
+                                .Sign(_bucket, MakePath(domain, path), signDuration, null);
 
                 //TODO: CNAME!
                 return preSignedURL;
@@ -777,7 +852,7 @@ namespace ASC.Data.Storage.GoogleCloud
                         continue;
                     }
 
-                    if ((int)status != 308)
+                    if (status != 308)
                         throw (ex);
 
                     break;
@@ -817,11 +892,6 @@ namespace ASC.Data.Storage.GoogleCloud
             throw new NotImplementedException();
         }
 
-        public override string GetUploadedUrl(string domain, string directoryPath)
-        {
-            throw new NotImplementedException();
-        }
-
         public override string GetUploadUrl()
         {
             throw new NotImplementedException();
@@ -830,6 +900,17 @@ namespace ASC.Data.Storage.GoogleCloud
         public override string GetPostParams(string domain, string directoryPath, long maxUploadSize, string contentType, string contentDisposition)
         {
             throw new NotImplementedException();
+        }
+
+        protected override DateTime GetLastModificationDate(string domain, string path)
+        {
+            var storage = GetStorage();
+
+            var obj =  storage.GetObject(_bucket, MakePath(domain, path));
+
+            if (obj == null) throw new FileNotFoundException();
+
+            return obj.Updated ?? obj.TimeCreated ?? DateTime.MinValue;
         }
     }
 }

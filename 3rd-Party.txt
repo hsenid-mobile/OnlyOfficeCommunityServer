@@ -4,13 +4,13 @@ Community Server uses code from the following 3rd party projects:
 nuget packages
 ====================================================================================================
 
-AjaxMin - JavaScript and CSS minification Library for use in .NET applications that want to provide minification or parsing functionality. (http://www.apache.org/licenses/LICENSE-2.0)
-License:        Apache License 2.0
-License File:   AjaxMin.license
-
-AjaxPro.2 - .NET Library that provides AJAX related methods to simplify the communication between server and client. (https://github.com/michaelschwarz/Ajax.NET-Professional/blob/master/LICENS)
+AjaxPro.2 - .NET Library that provides AJAX related methods to simplify the communication between server and client. (https://github.com/michaelschwarz/Ajax.NET-Professional/blob/master/LICENSE)
 License:        MIT License
 License File:   AjaxPro.2.license
+
+Amazon.Extensions.S3.Encryption - The Amazon S3 Encryption Client for .NET simplifies encrypting and decrypting objects to S3 using KMS or custom keys. (https://github.com/aws/amazon-s3-encryption-client-dotnet/blob/main/LICENSE)
+License:        Apache License 2.0
+License File:   Amazon.Extensions.S3.Encryption.license
 
 AntiXSS - AntiXSS is an encoding library which uses a safe list approach to encoding. It provides Html, XML, Url, Form, LDAP, CSS, JScript and VBScript encoding methods to allow you to avoid Cross Site Scripting attacks. This library is part of the Microsoft SDL tools. (http://wpl.codeplex.com/license)
 License:        MS-PL License
@@ -80,7 +80,7 @@ CommandLineParser - The Command Line Parser Library offers to CLR applications a
 License:        MIT License
 License File:   CommandLineParser.license
 
-CsvHelper - A library for reading and writing CSV files. Extremely fast, flexible, and easy to use. Supports reading and writing of custom class objects. (https://licenses.nuget.org/MS-PL, или https://licenses.nuget.org/Apache-2.0)
+CsvHelper - A library for reading and writing CSV files. Extremely fast, flexible, and easy to use. Supports reading and writing of custom class objects. (https://licenses.nuget.org/MS-PL, or https://licenses.nuget.org/Apache-2.0)
 License:        MS-PL or Apache License 2.0
 License File:   CsvHelper.license
 
@@ -108,10 +108,6 @@ DotNetOpenAuth.Ultimate - A single assembly that adds OpenID 1.1/2.0, OAuth 1.0(
 License:        MS-PL
 License File:   DotNetOpenAuth.Ultimate.license
 
-DotNetZip - A fork of the DotNetZip project without signing with a solution that compiles cleanly. This project aims to follow semver to avoid versioning conflicts. DotNetZip is a FAST, FREE class library and toolset for manipulating zip files. Use VB, C# or any .NET language to easily create, extract, or update zip files. (https://raw.githubusercontent.com/haf/DotNetZip.Semverd/master/LICENSE)
-License:        Ms-PL , BSD-style (3 clause), Apache 2 license ???
-License File:   DotNetZip.license
-
 Dropbox.Api - Portable class library for accessing the Dropbox v2 API (https://github.com/dropbox/dropbox-sdk-dotnet/blob/master/LICENSE)
 License:        MIT License 
 License File:   Dropbox.Api.license
@@ -131,6 +127,10 @@ License File:   Flurl.Http.Signed.license
 Flurl.Signed - A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http. (https://raw.githubusercontent.com/tmenier/Flurl/master/LICENSE)
 License:        MIT License
 License File:   Flurl.Signed.license
+
+FolkerKinzel.VCards -.NET library to read, write and convert VCF files that match the vCard standards 2.1, 3.0 and 4.0. (https://github.com/FolkerKinzel/VCards/blob/master/LICENSE)
+License:        MIT License
+License File:   FolkerKinzel.VCards.license
 
 FredCK.FCKeditorV2 - FCKeditor is a text editor to be used inside web pages. In 2009 it was renamed CKEditor. (http://ckeditor.com/what-is-ckeditor) (https://download.cksource.com/FCKeditor/FCKeditor/2.6.3/)
 License:        GPL 2 (or later) or LGPL 2.1 (or later) or MPL 1.1 (or later)
@@ -340,6 +340,10 @@ Microsoft.IdentityModel.Tokens - Includes types that provide support for Securit
 License:        MIT License
 License File:   Microsoft.IdentityModel.Tokens.license
 
+Microsoft.IdentityModel.Tokens.Jwt - Includes types that provide support for creating, serializing and validating JSON Web Tokens. (https://licenses.nuget.org/MIT)
+License:        MIT License
+License File:   Microsoft.IdentityModel.Tokens.Jwt.license
+
 Microsoft.Net.Http - This package includes HttpClient for sending requests over HTTP, as well as HttpRequestMessage and HttpResponseMessage for processing HTTP messages. (https://dotnet.microsoft.com/en/dotnet_library_license.htm)
 License:        MICROSOFT .NET LIBRARY LICENSE
 License File:   Microsoft.Net.Http.license
@@ -424,6 +428,10 @@ Novell.Directory.LDAP - LDAP client library (https://github.com/dsbenghe/Novell.
 License:        MIT License
 License File:   Novell.Directory.LDAP.license
 
+NUglify - NUglify provides minify and compression methods for CSS, JavaScript and HTML files. (https://github.com/trullock/NUglify/blob/master/license.txt)
+License:        BSD-2-Clause License
+License File:   NUglify.license
+
 NUnit - NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. (https://github.com/nunit/nunit/blob/master/LICENSE.txt)
 License:        MIT License
 License File:   NUnit.license
@@ -443,6 +451,10 @@ License File:   Owin.license
 Pipelines.Sockets.Unofficial - Package Description (https://raw.githubusercontent.com/mgravell/Pipelines.Sockets.Unofficial/master/LICENSE)
 License:        MIT License
 License File:   Pipelines.Sockets.Unofficial.license
+
+Polly - Polly is a library that allows developers to express resilience and transient fault handling policies such as Retry, Circuit Breaker, Timeout, Bulkhead Isolation, and Fallback in a fluent and thread-safe manner. (https://github.com/App-vNext/Polly/blob/main/LICENSE.txt)
+License:        BSD-3-Clause "New" License
+License File:   Polly.license
 
 Portable.BouncyCastle - BouncyCastle portable version with support for .NET 4, .NET Standard 2.0 (https://www.bouncycastle.org/csharp/licence.html)
 License:        MIT X11 License 
@@ -772,145 +784,209 @@ License File:   WebSocketSharp.license
 npm packages
 ====================================================================================================
 
-body-parser - Node.js body parsing middleware. (https://github.com/expressjs/body-parser/blob/master/LICENSE)
-License:        MIT
-License File:   body-parser.license
+@authenio/samlify-node-xmllint - Validator module powered by node-xmllint  (https://www.npmjs.com/package/@authenio/samlify-node-xmllint)
+License:        MIT License
+License File:   @authenio-samlify-node-xmllint.license
+
+axios - Promise based HTTP client for the browser and node.js	(https://github.com/axios/axios/blob/master/LICENSE)
+License:        MIT License
+License File:   axios.license
 
 body-parser - Node.js body parsing middleware. (https://github.com/expressjs/body-parser/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   body-parser.license
 
 co - Generator based control flow goodness for nodejs and the browser, using promises, letting you write non-blocking code in a nice-ish way. (https://github.com/tj/co/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   co.license
 
 config - Node-config organizes hierarchical configurations for your app deployments. (https://github.com/lorenwest/node-config/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   config.license
 
 connect-redis - connect-redis is a Redis session store backed by node_redis, and is insanely fast :). Requires redis >= 2.0.0 for the SETEX command. (https://github.com/tj/connect-redis)
-License:        MIT
+License:        MIT License
 License File:   connect-redis.license
 
 cookie-parser - Parse Cookie header and populate req.cookies with an object keyed by the cookie names. Optionally you may enable signed cookie support by passing a secret string, which assigns req.secret so it may be used by other middleware. (https://github.com/expressjs/cookie-parser/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   cookie-parser.license
 
+cors - CORS is a node.js package for providing a Connect/Express middleware that can be used to enable CORS with various options. (https://github.com/expressjs/cors/blob/master/LICENSE)
+License:        MIT License
+License File:   cors.license
+
 cross-spawn - A cross platform solution to node's spawn. (https://github.com/moxystudio/node-cross-spawn/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   cross-spawn.license
 
 debug - A tiny JavaScript debugging utility modelled after Node.js core's debugging technique. Works in Node.js and web browsers. (https://github.com/visionmedia/debug/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   debug.license
 
 express - Fast, unopinionated, minimalist web framework for node. (https://github.com/expressjs/express/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   express.license
 
-express - Fast, unopinionated, minimalist web framework for node. (https://github.com/expressjs/express/blob/master/LICENSE)
-License:        MIT
-License File:   express.license
+express-handlebars - A Handlebars view engine for Express which doesn't suck. (https://github.com/express-handlebars/express-handlebars/blob/master/LICENSE)
+License:        BSD 3-Clause "New" or "Revised" License
+License File:   express-handlebars.license
 
-express - Fast, unopinionated, minimalist web framework for node. (https://github.com/expressjs/express/blob/master/LICENSE)
-License:        MIT
-License File:   express.license
-
-express-session - Node.js session middleware. (https://github.com/expressjs/session/blob/master/LICENSE)
-License:        MIT
+express-session - Create a session middleware with the given options. (https://github.com/expressjs/session/blob/master/LICENSE)
+License:        MIT License
 License File:   express-session.license
 
 express-socket.io-session - Share a cookie-based express-session middleware with socket.io. Works with express > 4.0.0and socket.io > 1.0.0 and won't be backward compatible. (https://github.com/oskosk/express-socket.io-session/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   express-socket.io-session.license
 
 filenamify-url - Convert a URL to a valid filename (https://github.com/sindresorhus/filenamify-url/blob/master/license)
-License:        MIT
+License:        MIT License
 License File:   filenamify-url.license
+
+form-data - A library to create readable "multipart/form-data" streams. Can be used to submit forms and file uploads to other web applications.The API of this library is inspired by the XMLHttpRequest-2 FormData Interface. (https://github.com/form-data/form-data/blob/master/License)
+License:        MIT License
+License File:   form-data.license
+
+formidable - A Node.js module for parsing form data, especially file uploads. (https://github.com/node-formidable/formidable/blob/master/LICENSE)
+License:        MIT License
+License File:   formidable.license
+
+get-byte - A Universal way of getting a Byte at a Given Index from a variety of in-memory data formats, including Uint8Array, Buffer, DataView, and Array Buffer (https://github.com/DanielJDufour/get-byte/blob/main/LICENSE)
+License:        CC0-1.0 License
+License File:   get-byte.license
 
 graceful-fs - graceful-fs functions as a drop-in replacement for the fs module, making various improvements. (https://github.com/isaacs/node-graceful-fs)
 License:        ISC License
 License File:   graceful-fs.license
 
+gulp - The streaming build system (https://github.com/gulpjs/gulp/blob/master/LICENSE)
+License:        MIT License
+License File:   gulp.license
+
+gulp-append-prepend - Simple Gulp plugin. (https://github.com/JamesHemery/gulp-append-prepend/blob/master/LICENCE)
+License:        MIT License
+License File:   gulp-append-prepend.license
+
+gulp-just-replace - The gulp-replace is fine. But it's painful to install it on production server as it takes many seconds to install those useless dependencies for me. (https://github.com/caiguanhao/gulp-just-replace/blob/master/LICENSE)
+License:        MIT License
+License File:   gulp-just-replace.license
+
+help - substack way of --help. v3 of help requires at least Node.js v4. To use help with an older version, please use help@2.x. (https://github.com/evanlucas/help/blob/master/LICENSE)
+License:        MIT License
+License File:   help.license
+
+ipaddr - an IPv6 and IPv4 address manipulation library. (https://github.com/whitequark/ipaddr.js/blob/master/LICENSE)
+License:        MIT License
+License File:   ipaddr.license
+
+lodash - The modern build of lodash exported as Node.js/io.js modules. (https://github.com/lodash/lodash/blob/master/LICENSE)
+License:        MIT License
+License File:   lodash.license
+
 log4js - This is a conversion of the log4js framework to work with node. I've mainly stripped out the browser-specific code and tidied up some of the javascript. (https://github.com/log4js-node/log4js-node/blob/master/LICENSE)
-License:        Apache-2.0
+License:        Apache License 2.0
 License File:   log4js.license
 
 memorystore - A session store implementation for Express using lru-cache. (https://github.com/roccomuso/memorystore/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   memorystore.license
 
-moment - A lightweight JavaScript date library for parsing, validating, manipulating, and formatting dates. (https://github.com/moment/moment/blob/develop/LICENSE)
-License:        MIT
-License File:   moment.license
+minify-xml - lightweight and fast XML minifier for NodeJS with a command line. (https://github.com/kristian/minify-xml/blob/master/LICENSE)
+License:        MIT License OR Apache License 2.0
+License File:   minify-xml.license
 
 moment - A lightweight JavaScript date library for parsing, validating, manipulating, and formatting dates. (https://github.com/moment/moment/blob/develop/LICENSE)
-License:        MIT
-License File:   moment.license
-
-moment - A lightweight JavaScript date library for parsing, validating, manipulating, and formatting dates. (https://github.com/moment/moment/blob/develop/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   moment.license
 
 morgan - HTTP request logger middleware for node.js (https://github.com/expressjs/morgan/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   morgan.license
 
 mysql2 - MySQL client for Node.js with focus on performance. Supports prepared statements, non-utf8 encodings, binary log protocol, compression, ssl much more (https://github.com/sidorares/node-mysql2/blob/master/License)
-License:        MIT
+License:        MIT License
 License File:   mysql2.license
 
 nconf - Hierarchical node.js configuration with files, environment variables, command-line arguments, and atomic object merging. (https://github.com/indexzero/nconf/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   nconf.license
 
 node-cache - A simple caching module that has set, get and delete methods and works a little bit like memcached. Keys can have a timeout (ttl) after which they expire and are deleted from the cache. All keys are stored in a single object so the practical limit is at around 1m keys. (https://github.com/node-cache/node-cache/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   node-cache.license
 
+node-fetch - A light-weight module that brings window.fetch to Node.js (https://github.com/node-fetch/node-fetch/blob/master/LICENSE.md)
+License:        MIT License
+License File:   node-fetch.license
+
+node-forge - A native implementation of TLS (and various other cryptographic tools) in JavaScript. (https://github.com/digitalbazaar/forge/blob/master/LICENSE)
+License:        BSD-3-Clause OR GPL-2.0 License
+License File:   node-forge.license
+
+nodemon - For use during development of a node.js based application. (https://github.com/remy/nodemon/blob/master/LICENSE)
+License:        MIT License
+License File:   nodemon.license
+
 phantomjs-prebuilt - An NPM installer for PhantomJS, headless webkit with JS API. (https://github.com/Medium/phantomjs)
-License:        Apache-2.0
+License:        Apache License 2.0
 License File:   phantomjs-prebuilt.license
 
+plugin-error - Error handling for Vinyl plugins. (https://github.com/gulpjs/plugin-error/blob/master/LICENSE)
+License:        MIT License
+License File:   plugin-error.license
+
 redis - This is a complete and feature rich Redis client for node.js. It supports all Redis commands and focuses on high performance. (https://github.com/NodeRedis/node-redis/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   redis.license
 
-request - Simplified HTTP request client.  (https://github.com/request/request)
-License:        Apache-2.0
+request -  Simplified HTTP request client. (https://github.com/request/request/blob/master/LICENSE)
+License:        Apache License 2.0
 License File:   request.license
 
-request - Simplified HTTP request client.  (https://github.com/request/request)
-License:        Apache-2.0
-License File:   request.license
+samlify - Highly configuarable Node.js SAML 2.0 library for Single Sign On (https://github.com/tngan/samlify/blob/master/LICENSE)
+License:        MIT License
+License File:   samlify.license
+
+serve-favicon - Node.js middleware for serving a favicon. (https://github.com/expressjs/serve-favicon/blob/master/LICENSE)
+License:        MIT License
+License File:   serve-favicon.license
 
 socket.io - Socket.IO enables real-time bidirectional event-based communication.  (https://github.com/socketio/socket.io/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   socket.io.license
 
 tmp - A simple temporary file and directory creator for node.js. (https://github.com/raszi/node-tmp/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   tmp.license
 
+to-byte-array - Convert a string or buffer into a plain array of bytes. (https://github.com/finwo/to-byte-array/blob/master/LICENSE.md)
+License:        MIT License
+License File:   to-byte-array.license
+
 ua-parser-js - A JavaScript-based User-Agent string parser. Can be used either in browser (client-side) or in node.js (server-side) environment. Also available as jQuery/Zepto plugin, Bower/Meteor package, & RequireJS/AMD module.  (https://github.com/faisalman/ua-parser-js/blob/master/license.md)
-License:        MIT
+License:        MIT License
 License File:   ua-parser-js.license
 
-winston - A multi-transport async logging library for node.js. "CHILL WINSTON! ... I put it in the logs." (https://github.com/winstonjs/winston/blob/master/LICENSE)
-License:        MIT
-License File:   winston.license
+url - This module has utilities for URL resolution and parsing meant to have feature parity with node.js core url module. (https://github.com/defunctzombie/node-url/blob/master/LICENSE)
+License:        MIT License
+License File:   url.license
+
+webdav-server - WebDav server. (https://github.com/OpenMarshal/npm-WebDAV-Server/blob/master/LICENSE)
+License:        Unlicense License
+License File:   webdav-server.license
 
 winston - A logger for just about everything. (https://github.com/winstonjs/winston/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   winston.license
 
 winston-daily-rotate-file - A transport for winston which logs to a rotating file. Logs can be rotated based on a date, size limit, and old logs can be removed based on count or elapsed days. (https://github.com/winstonjs/winston-daily-rotate-file/blob/master/LICENSE)
-License:        MIT
+License:        MIT License
 License File:   winston-daily-rotate-file.license
 
-winston-daily-rotate-file - A transport for winston which logs to a rotating file. Logs can be rotated based on a date, size limit, and old logs can be removed based on count or elapsed days. (https://github.com/winstonjs/winston-daily-rotate-file/blob/master/LICENSE)
-License:        MIT
-License File:   winston-daily-rotate-file.license
+yargs - Yargs helps you build interactive command line tools, by parsing arguments and generating an elegant user interface. (https://github.com/yargs/yargs/blob/master/LICENSE)
+License:        MIT License
+License File:   yargs.license
 
 ====================================================================================================
 javascript plugins
@@ -1096,13 +1172,25 @@ jstree.min.js - jsTree is jquery plugin, that provides interactive trees (https:
 License:        MIT License
 License File:   jstree.license
 
-linkify.min.js - Linkify is a zero-dependency JavaScript plugin for finding links in plain-text and converting them to HTML <a> tags (https://github.com/Soapbox/linkifyjs/blob/master/LICENSE)
+linkify.min.js - Linkify is a JavaScript plugin for finding links in plain-text and converting them to HTML <a> tags. (https://github.com/Soapbox/linkifyjs/blob/master/LICENSE)
 License:        MIT License
 License File:   linkify.license
 
-linkify-string.min.js - Linkify is a zero-dependency JavaScript plugin for finding links in plain-text and converting them to HTML <a> tags (https://github.com/Soapbox/linkifyjs/blob/master/LICENSE)
+linkify-html.min.js - Linkify is a JavaScript plugin for finding links in plain-text and converting them to HTML <a> tags. (https://github.com/Soapbox/linkifyjs/blob/master/LICENSE)
+License:        MIT License
+License File:   linkify-html.license
+
+linkify-string.min.js - Linkify is a JavaScript plugin for finding links in plain-text and converting them to HTML <a> tags. (https://github.com/Soapbox/linkifyjs/blob/master/LICENSE)
 License:        MIT License
 License File:   linkify-string.license
+
+lodash.min.js - A modern JavaScript utility library delivering modularity, performance & extras. (https://github.com/lodash/lodash/blob/master/LICENSE)
+License:        MIT License
+License File:   lodash.license
+
+masonry.pkgd.min.js - Cascading grid layout library (https://github.com/desandro/masonry , https://desandro.mit-license.org/)
+License:        MIT License
+License File:   masonry.pkgd.license
 
 md5.js - JavaScript MD5 (http://pajhome.org.uk/site/legal.html#bsdlicense)
 License:        BSD License

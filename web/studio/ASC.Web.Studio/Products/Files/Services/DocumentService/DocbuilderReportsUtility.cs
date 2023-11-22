@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+
 using ASC.Common.Logging;
+using ASC.Common.Threading;
 using ASC.Core;
 using ASC.Web.Files.Classes;
 using ASC.Web.Studio.Utility;
-using ASC.Common.Threading;
 
 namespace ASC.Web.Files.Services.DocumentService
 {
@@ -46,13 +47,25 @@ namespace ASC.Web.Files.Services.DocumentService
 
     public class ReportState
     {
-        public string Id { get; set; } 
-        public string FileName { get; set; } 
+        ///<example>wd2</example>
+        public string Id { get; set; }
+
+        ///<example>FileName</example>
+        public string FileName { get; set; }
+
+        ///<example type="int">1</example>
         public int FileId { get; set; }
+
+        ///<example type="int">1</example>
         public int ReportType { get; set; }
 
+        ///<example>Exception</example>
         public string Exception { get; set; }
+
+        ///<example type="int">1</example>
         public ReportStatus Status { get; set; }
+
+        ///<example type="int">1</example>
         public ReportOrigin Origin { get; set; }
 
         internal string BuilderKey { get; set; }
@@ -64,6 +77,7 @@ namespace ASC.Web.Files.Services.DocumentService
         internal Guid UserId { get; set; }
         internal string ContextUrl { get; set; }
 
+        ///<example>null</example>
         public object Obj { get; set; }
 
         protected DistributedTask TaskInfo { get; private set; }
@@ -95,7 +109,7 @@ namespace ASC.Web.Files.Services.DocumentService
                 null,
                 null)
             {
-                Id =  task.GetProperty<string>("id"),
+                Id = task.GetProperty<string>("id"),
                 FileId = task.GetProperty<int>("fileId"),
                 Status = task.GetProperty<ReportStatus>("status"),
                 Exception = task.GetProperty<string>("exception")
@@ -117,7 +131,7 @@ namespace ASC.Web.Files.Services.DocumentService
                 }
 
                 CoreContext.TenantManager.SetCurrentTenant(TenantId);
-                SecurityContext.AuthenticateMe(UserId);
+                SecurityContext.CurrentUser = UserId;
 
                 Dictionary<string, string> urls;
                 BuilderKey = DocumentServiceConnector.DocbuilderRequest(null, Script, true, out urls);
@@ -168,7 +182,7 @@ namespace ASC.Web.Files.Services.DocumentService
         protected void PublishTaskInfo()
         {
             var tries = 3;
-            while (tries -- > 0)
+            while (tries-- > 0)
             {
                 try
                 {
@@ -243,9 +257,9 @@ namespace ASC.Web.Files.Services.DocumentService
             {
                 var task = tasks.GetTasks().LastOrDefault(Predicate(origin));
                 if (task == null) return null;
-                
+
                 var result = ReportState.FromTask(task);
-                if ((int) result.Status > 1)
+                if ((int)result.Status > 1)
                 {
                     tasks.RemoveTask(task.Id);
                 }

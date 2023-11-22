@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,5 +23,10 @@ namespace ASC.Core.Common.Notify.Push
         public const string PushParentItemTagName = "PushParentItem";
         public const string PushModuleTagName = "PushModule";
         public const string PushActionTagName = "PushAction";
+
+
+        public const string PushDocAppName = "doc";
+        public const string PushProjAppName = "proj";
+
     }
 }

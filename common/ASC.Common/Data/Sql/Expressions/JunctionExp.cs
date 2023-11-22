@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,21 +34,21 @@ namespace ASC.Common.Data.Sql.Expressions
 
         public override string ToString(ISqlDialect dialect)
         {
-            string format = exp1 is JunctionExp && ((JunctionExp) exp1).and != and ? "({0})" : "{0}";
+            string format = exp1 is JunctionExp && ((JunctionExp)exp1).and != and ? "({0})" : "{0}";
             format += " {1} ";
-            format += exp2 is JunctionExp && ((JunctionExp) exp2).and != and ? "({2})" : "{2}";
+            format += exp2 is JunctionExp && ((JunctionExp)exp2).and != and ? "({2})" : "{2}";
             return Not
                        ? string.Format(format, (!exp1).ToString(dialect), and ? "or" : "and",
                                        (!exp2).ToString(dialect))
                        : string.Format(format, exp1.ToString(dialect), and ? "and" : "or", exp2.ToString(dialect));
         }
 
-        public override object[] GetParameters()
+        public override IEnumerable<object> GetParameters()
         {
             var parameters = new List<object>();
             parameters.AddRange(exp1.GetParameters());
             parameters.AddRange(exp2.GetParameters());
-            return parameters.ToArray();
+            return parameters;
         }
     }
 }

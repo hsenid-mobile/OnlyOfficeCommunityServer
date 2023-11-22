@@ -1,0 +1,9 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.ElasticSearch.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.ElasticSearch.xml
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.ElasticSearch.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.ElasticSearch.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.ElasticSearch\obj\Debug\ASC.ElasticSearch.csproj.AssemblyReference.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.ElasticSearch\obj\Debug\ASC.ElasticSearch.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.ElasticSearch\obj\Debug\ASC.ElasticSearch.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.ElasticSearch\obj\Debug\ASC.ElasticSearch.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.ElasticSearch\obj\Debug\ASC.ElasticSearch.pdb

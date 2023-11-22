@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ ASC.Settings.AccessRights = new function() {
         init: function (products) {
             pNameList = products;
 
-            jq("#changeOwnerBtn").click(ASC.Settings.AccessRights.changeOwner);
+            jq("#changeOwnerBtn").on("click", ASC.Settings.AccessRights.changeOwner);
             jq("#adminTable tbody tr").remove();
             jq("#adminTmpl").tmpl(window.adminList, { isRetina: jq.cookies.get("is_retina") }).prependTo("#adminTable tbody");
 
@@ -81,7 +81,7 @@ ASC.Settings.AccessRights = new function() {
                     os.html(item.title).attr("data-id", item.id);
                     jq("#changeOwnerBtn").removeClass("disable");
                 });
-                os.click();
+                os.trigger("click");
             }
 
             function initAdminSelector() {
@@ -103,7 +103,7 @@ ASC.Settings.AccessRights = new function() {
                         ASC.Settings.AccessRights.addAdmin(admin.id);
                     });
                 });
-                as.click();
+                as.trigger("click");
             }
         },
 
@@ -137,6 +137,11 @@ ASC.Settings.AccessRights = new function() {
                 if (res.error != null) {
                     toastr.error(res.error.Message);
                     return;
+                }
+                if (!res.value.enable) {
+
+                    jq("#adminAdvancedSelector").addClass("disabled");
+                    jq("#ErrorNotAllowed").removeClass("display-none");
                 }
                 window.adminList.push(res.value);
                 jq("#adminTmpl").tmpl(res.value, { isRetina: jq.cookies.get("is_retina") }).appendTo("#adminTable tbody");
@@ -191,7 +196,7 @@ ASC.Settings.AccessRights = new function() {
         },
         
         initProduct: function (productItem) {
-            var pItem = jq.parseJSON(jq.base64.decode(productItem)),
+            var pItem = JSON.parse(jq.base64.decode(productItem)),
                 pId = pItem.ID,
                 pName = pItem.ItemName,
                 pIsPuplic = pItem.SelectedUsers.length == 0 && pItem.SelectedGroups.length == 0,
@@ -208,7 +213,7 @@ ASC.Settings.AccessRights = new function() {
                 sg[pItem.SelectedGroups[len].ID] = pItem.SelectedGroups[len].Name;
             }
 
-            jq.tmpl("template-productItem", pItem).appendTo("#studioPageContent .mainPageContent:first");
+            jq.tmpl("template-productItem", pItem).appendTo("#studioPageContent .products-section");
 
             var $container = jq("#accessRightsContainer_" + pName),
                 $allRadio = $container.find("#all_" + pId),
@@ -245,7 +250,7 @@ ASC.Settings.AccessRights = new function() {
                     withGuests: (pName !== "crm" && pName !== "people")
                 }).on("showList", ASC.Settings.AccessRights.pushUserIntoList);
                 us.useradvancedSelector("disable", Object.keys(su));
-                us.click();
+                us.trigger("click");
             }
 
             function initGroupSelector() {
@@ -253,7 +258,7 @@ ASC.Settings.AccessRights = new function() {
                 gs.off("click", initGroupSelector);
                 gs.groupadvancedSelector().on("showList", ASC.Settings.AccessRights.pushGroupIntoList);
                 gs.groupadvancedSelector("disable", Object.keys(sg));
-                gs.click();
+                gs.trigger("click");
             }
         },
 
@@ -472,10 +477,10 @@ ASC.Settings.AccessRights = new function() {
             Teamlab.setProductAdministrator({}, data, {
                 success: function() {
                     if (data.administrator) {
-                        jq("#adminItem_" + data.userid + " input[type=checkbox]").prop("checked", true).attr("disabled", true);
-                        jq(obj).removeAttr("disabled");
+                        jq("#adminItem_" + data.userid + " input[type=checkbox]").prop("checked", true).prop("disabled", true);
+                        jq(obj).prop("disabled", false);
                     } else {
-                        jq("#adminItem_" + data.userid + " input[type=checkbox]").prop("checked", false).attr("disabled", false);
+                        jq("#adminItem_" + data.userid + " input[type=checkbox]").prop("checked", false).prop("disabled", false);
                     }
                     ASC.Settings.AccessRights.hideUserFromAll(data.userid, data.administrator);
                 }

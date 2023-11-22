@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ window.ASC.Files.Anchor = (function () {
     };
 
     var onError = function (errorString) {
-        ASC.Files.UI.displayInfoPanel(decodeURIComponent(errorString || ASC.Files.FilesJSResources.UnknownErrorText).replace(/\+/g, " "), true);
+        ASC.Files.UI.displayInfoPanel(decodeURIComponent(errorString || ASC.Files.FilesJSResource.UnknownErrorText).replace(/\+/g, " "), true);
         if (jq.browser.msie) {
             setTimeout(ASC.Files.Anchor.defaultFolderSet, 3000);
         } else {
@@ -123,7 +123,7 @@ window.ASC.Files.Anchor = (function () {
                     var hash = ASC.Files.MediaPlayer.getPlayHash(fileId);
                     ASC.Files.Anchor.move(hash, true);
                 },
-                downloadAction: ASC.Files.Utility.GetFileDownloadUrl,
+                downloadAction: ASC.Files.Utility.GetFileViewUrl,
                 canDelete: function (fileId) {
                     var entryObj = ASC.Files.UI.getEntryObject("file", fileId);
                     if (entryObj.length <= 0) {
@@ -219,9 +219,14 @@ window.ASC.Files.Anchor = (function () {
 
     var defaultFolderSet = function () {
         if (!ASC.Resources.Master.IsAuthenticated) {
-            location.reload(true);
+            if (!ASC.Files.Tree.externalFolderIdCurrentRoot) {
+                location.reload(true);
+                return
+            }
+            ASC.Files.Anchor.navigationSet(ASC.Files.Tree.externalFolderIdCurrentRoot);
             return;
-        }
+        } 
+
         if (ASC.Files.Tree) {
             ASC.Files.Filter.clearFilter(true);
             if (!ASC.Files.Tree.folderIdCurrentRoot) {

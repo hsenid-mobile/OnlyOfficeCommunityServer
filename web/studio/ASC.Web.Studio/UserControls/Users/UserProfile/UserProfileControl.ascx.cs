@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -27,14 +26,14 @@ using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.Web.Core;
 using ASC.Web.Core.Users;
+using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Core.TFA;
 using ASC.Web.Studio.Core.Users;
+using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Management;
 using ASC.Web.Studio.UserControls.Users.UserProfile;
 using ASC.Web.Studio.Utility;
-
-using Resources;
 
 using LdapMapping = ASC.ActiveDirectory.Base.Settings.LdapSettings.MappingFields;
 
@@ -52,7 +51,13 @@ namespace ASC.Web.Studio.UserControls.Users
 
         protected UserInfo UserInfo { get; set; }
 
+        protected UserInfo Lead { get; set; }
+
         protected bool ShowSocialLogins { get; set; }
+
+        protected bool EnableOauth { get; set; }
+
+        protected string TariffPageLink { get; set; }
 
         protected bool ShowPrimaryMobile;
 
@@ -67,6 +72,11 @@ namespace ASC.Web.Studio.UserControls.Users
         protected bool IsAdmin { get; set; }
 
         protected bool IsVisitor { get; set; }
+        protected bool EnableUserQuota { get; set; }
+        
+        protected string QuotaLimit { get; set; }
+        protected string UsedSpace { get; set; }
+
 
         protected int HappyBirthday { get; set; }
 
@@ -82,11 +92,6 @@ namespace ASC.Web.Studio.UserControls.Users
             get { return UserInfo != null && !string.IsNullOrEmpty(UserInfo.Location) && !string.IsNullOrEmpty(UserInfo.Location.Trim()) && !"null".Equals(UserInfo.Location.Trim(), StringComparison.InvariantCultureIgnoreCase); }
         }
 
-        protected string JoinAffilliateLink
-        {
-            get { return ConfigurationManagerExtension.AppSettings["web.affiliates.link"]; }
-        }
-
         protected bool IsPersonal
         {
             get { return CoreContext.Configuration.Personal; }
@@ -98,16 +103,40 @@ namespace ASC.Web.Studio.UserControls.Users
         {
             get { return "~/UserControls/Users/UserProfile/UserProfileControl.ascx"; }
         }
-
+        protected ModeThemeSettings ChosenMode { get; set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            ChosenMode = ModeThemeSettings.GetModeThemesSettings();
             if (UserProfileHelper == null)
             {
                 UserProfileHelper = new ProfileHelper(SecurityContext.CurrentAccount.ID.ToString());
             }
+
             UserInfo = UserProfileHelper.UserInfo;
+
+            if (!IsPersonal && UserInfo.Lead.HasValue)
+            {
+                Lead = CoreContext.UserManager.GetUsers(UserInfo.Lead.Value);
+            }
+
+            var quotaSettings = TenantUserQuotaSettings.Load();
+            var userQuotaSettings = UserQuotaSettings.LoadForUser(UserInfo.ID);
+
+            EnableUserQuota = quotaSettings.EnableUserQuota;
+
+            
+            var quotaLimit = userQuotaSettings != null ? userQuotaSettings.UserQuota : quotaSettings.DefaultUserQuota;
+            QuotaLimit = FileSizeComment.FilesSizeToString(quotaLimit);
+            UsedSpace = FileSizeComment.FilesSizeToString(UserInfo.UsedSpace);
+            
+
             ShowSocialLogins = UserInfo.IsMe();
+
+            EnableOauth = CoreContext.Configuration.Standalone ||
+                 CoreContext.TenantManager.GetTenantQuota(TenantProvider.CurrentTenantID).Oauth;
+
+            TariffPageLink = TenantExtra.GetTariffPageLink();
 
             IsAdmin = CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID).IsAdmin() ||
                       WebItemSecurity.IsProductAdministrator(WebItemManager.PeopleProductID, SecurityContext.CurrentAccount.ID);
@@ -141,8 +170,15 @@ namespace ASC.Web.Studio.UserControls.Users
 
             _deleteProfileContainer.Options.IsPopup = true;
 
-            Page.RegisterStyle("~/UserControls/Users/UserProfile/css/userprofilecontrol_style.less")
-                .RegisterBodyScripts(VirtualPathUtility.ToAbsolute("~/UserControls/Users/UserProfile/js/userprofilecontrol.js"));
+            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
+            {
+                Page.RegisterStyle("~/UserControls/Users/UserProfile/css/dark-userprofilecontrol_style.less");
+            }
+            else
+            {
+                Page.RegisterStyle("~/UserControls/Users/UserProfile/css/userprofilecontrol_style.less");
+            }
+            Page.RegisterBodyScripts(VirtualPathUtility.ToAbsolute("~/UserControls/Users/UserProfile/js/userprofilecontrol.js"));
 
             if (Actions.AllowEdit)
             {
@@ -191,7 +227,7 @@ namespace ASC.Web.Studio.UserControls.Users
                 }
             }
 
-            if (TfaAppAuthSettings.IsVisibleSettings && TfaAppAuthSettings.Enable && TfaAppUserSettings.EnableForUser(UserInfo.ID) && (UserInfo.IsMe() || IsAdmin))
+            if (TfaAppAuthSettings.IsVisibleSettings && TfaAppAuthSettings.TfaEnabledForUser(UserInfo.ID) && TfaAppUserSettings.EnableForUser(UserInfo.ID) && (UserInfo.IsMe() || IsAdmin))
             {
                 ShowTfaAppSettings = true;
 

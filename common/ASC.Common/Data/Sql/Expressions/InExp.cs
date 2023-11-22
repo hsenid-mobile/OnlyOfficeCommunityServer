@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,19 @@
 */
 
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace ASC.Common.Data.Sql.Expressions
 {
-    public class InExp : Exp
+    public class InExp<T> : Exp
     {
         private readonly string column;
         private readonly SqlQuery subQuery;
-        private readonly object[] values;
+        private readonly IEnumerable<T> values;
 
-        public InExp(string column, object[] values)
+        public InExp(string column, IEnumerable<T> values)
         {
             this.column = column;
             this.values = values;
@@ -40,7 +41,7 @@ namespace ASC.Common.Data.Sql.Expressions
 
         public override string ToString(ISqlDialect dialect)
         {
-            if (values != null && values.Count() < 2) 
+            if (values != null && values.Count() < 2)
             {
                 var exp = values.Count() == 0 ? Exp.False : Exp.Eq(column, values.ElementAt(0));
                 return (Not ? !exp : exp).ToString(dialect);
@@ -61,9 +62,9 @@ namespace ASC.Common.Data.Sql.Expressions
             return sql.Append(")").ToString();
         }
 
-        public override object[] GetParameters()
+        public override IEnumerable<object> GetParameters()
         {
-            if (values != null) return values;
+            if (values != null) return values.Cast<object>().ToList();
             if (subQuery != null) return subQuery.GetParameters();
             return new object[0];
         }

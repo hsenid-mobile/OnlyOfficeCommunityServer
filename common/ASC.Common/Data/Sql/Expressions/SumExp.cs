@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 */
 
 
+using System.Collections.Generic;
+
 namespace ASC.Common.Data.Sql.Expressions
 {
     public class SumExp : Exp
@@ -23,7 +25,7 @@ namespace ASC.Common.Data.Sql.Expressions
 
         public SumExp(string column)
         {
-            _exp = (SqlIdentifier) column;
+            _exp = (SqlIdentifier)column;
         }
 
         public SumExp(Exp exp)
@@ -36,7 +38,7 @@ namespace ASC.Common.Data.Sql.Expressions
             return string.Format("sum({0})", _exp.ToString(dialect));
         }
 
-        public override object[] GetParameters()
+        public override IEnumerable<object> GetParameters()
         {
             return _exp.GetParameters();
         }

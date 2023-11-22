@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,6 +150,8 @@ namespace ASC.Common.Web
             AddMimeMapping(".docm", "application/vnd.ms-word.document.macroEnabled.12");
             AddMimeMapping(".doct", "application/doct");
             AddMimeMapping(".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            AddMimeMapping(".docxf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            AddMimeMapping(".docxf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.docxf");
             AddMimeMapping(".dot", "application/msword");
             AddMimeMapping(".dotm", "application/vnd.ms-word.template.macroEnabled.12");
             AddMimeMapping(".dotx", "application/vnd.openxmlformats-officedocument.wordprocessingml.template");
@@ -421,6 +423,8 @@ namespace ASC.Common.Web
             AddMimeMapping(".odp", "application/vnd.oasis.opendocument.presentation");
             AddMimeMapping(".ods", "application/vnd.oasis.opendocument.spreadsheet");
             AddMimeMapping(".odt", "application/vnd.oasis.opendocument.text");
+            AddMimeMapping(".oform", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            AddMimeMapping(".oform", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.oform");
             AddMimeMapping(".oga", "audio/ogg");
             AddMimeMapping(".ogg", "video/ogg");
             AddMimeMapping(".ogg", "audio/ogg");
@@ -431,6 +435,7 @@ namespace ASC.Common.Web
             AddMimeMapping(".otp", "application/vnd.oasis.opendocument.presentation-template");
             AddMimeMapping(".ots", "application/vnd.oasis.opendocument.spreadsheet-template");
             AddMimeMapping(".ott", "application/vnd.oasis.opendocument.text-template");
+            AddMimeMapping(".oxps", "application/oxps");
             AddMimeMapping(".p", "text/x-pascal");
             AddMimeMapping(".p10", "application/pkcs10");
             AddMimeMapping(".p10", "application/x-pkcs10");
@@ -702,6 +707,7 @@ namespace ASC.Common.Web
             AddMimeMapping(".wmlc", "application/vnd.wap.wmlc");
             AddMimeMapping(".wmls", "text/vnd.wap.wmlscript");
             AddMimeMapping(".wmlsc", "application/vnd.wap.wmlscriptc");
+            AddMimeMapping(".woff2", "application/font-woff2");
             AddMimeMapping(".word", "application/msword");
             AddMimeMapping(".wp", "application/wordperfect");
             AddMimeMapping(".wp5", "application/wordperfect");

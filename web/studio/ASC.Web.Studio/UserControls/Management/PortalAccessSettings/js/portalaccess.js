@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 
 jq(function () {
-    jq("input[name='PortalAccess']").click(PortalAccess.SwitchAccessType);
+    jq("input[name='PortalAccess']").on("click", PortalAccess.SwitchAccessType);
     jq("input[type=radio][name=PortalAccess][checked=checked]").prop("checked", true);
     jq("#cbxRegisterUsers[checked=checked]").prop("checked", true);
     PortalAccess.SwitchAccessType();

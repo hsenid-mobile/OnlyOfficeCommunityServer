@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,37 @@
 
 
 using System.Runtime.Serialization;
+
 using ASC.Api.Employee;
 using ASC.Projects.Core.Domain;
-using ASC.Projects.Engine;
 using ASC.Specific;
 
 namespace ASC.Api.Projects.Wrappers
 {
+    ///<inherited>ASC.Api.Projects.Wrappers.ObjectWrapperFullBase, ASC.Api.Projects</inherited>
     [DataContract(Name = "message", Namespace = "")]
     public class MessageWrapper : ObjectWrapperFullBase
     {
+        ///<type>ASC.Api.Projects.Wrappers.SimpleProjectWrapper, ASC.Api.Projects</type>
+        ///<order>14</order>
         [DataMember(Order = 14)]
         public SimpleProjectWrapper ProjectOwner { get; set; }
 
+        ///<example>Hello, this is sample message</example>
+        ///<order>20</order>
         [DataMember(Order = 20)]
         public string Text { get; set; }
 
+        ///<example>false</example>
         [DataMember]
         public bool CanCreateComment { get; set; }
 
+        ///<example>true</example>
         [DataMember]
         public bool CanEdit { get; set; }
 
+        ///<example type="int">5</example>
+        ///<ordeR>15</ordeR>
         [DataMember(Order = 15)]
         public int CommentsCount { get; set; }
 
@@ -82,18 +91,18 @@ namespace ASC.Api.Projects.Wrappers
         public static MessageWrapper GetSample()
         {
             return new MessageWrapper
-                {
-                    Id = 10,
-                    ProjectOwner = SimpleProjectWrapper.GetSample(),
-                    Title = "Sample Title",
-                    Text = "Hello, this is sample message",
-                    Created = ApiDateTime.GetSample(),
-                    CreatedBy = EmployeeWraper.GetSample(),
-                    Updated = ApiDateTime.GetSample(),
-                    UpdatedBy = EmployeeWraper.GetSample(),
-                    CanEdit = true,
-                    CommentsCount = 5
-                };
+            {
+                Id = 10,
+                ProjectOwner = SimpleProjectWrapper.GetSample(),
+                Title = "Sample Title",
+                Text = "Hello, this is sample message",
+                Created = ApiDateTime.GetSample(),
+                CreatedBy = EmployeeWraper.GetSample(),
+                Updated = ApiDateTime.GetSample(),
+                UpdatedBy = EmployeeWraper.GetSample(),
+                CanEdit = true,
+                CommentsCount = 5
+            };
         }
     }
 }

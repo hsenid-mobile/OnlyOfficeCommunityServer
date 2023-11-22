@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 */
 
 
-using ASC.Data.Backup.Tasks.Data;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -24,7 +23,9 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+
 using ASC.Common.Logging;
+using ASC.Data.Backup.Tasks.Data;
 
 namespace ASC.Data.Backup.Tasks.Modules
 {
@@ -35,6 +36,7 @@ namespace ASC.Data.Backup.Tasks.Modules
         private const string BunchRightNodeStartCrmOpportunity = "crm/opportunity/";
         private const string BunchRightNodeStartMy = "files/my/";
         private const string BunchRightNodeStartTrash = "files/trash/";
+        private ILog Log = LogManager.GetLogger("ASC");
 
         private readonly TableInfo[] _tables = new[]
             {
@@ -149,7 +151,7 @@ namespace ASC.Data.Backup.Tasks.Modules
             if (table.Name == "files_file")
             {
                 // do not backup previus backup files
-                return "where not exists(select 1 from backup_backup b where b.tenant_id = t.tenant_id and b.storage_path = t.id) and t.tenant_id = " + tenantId;
+                return "where not exists(select 1 from backup_backup b where b.tenant_id = t.tenant_id and b.storage_path = t.id and b.removed = 0) and not (t.title LIKE '%tar.gz' and t.content_length > 1073741824) and t.tenant_id = " + tenantId;
             }
             return base.GetSelectCommandConditionText(tenantId, table);
         }
@@ -243,12 +245,12 @@ namespace ASC.Data.Backup.Tasks.Modules
                 }
                 catch (Exception err)
                 {
-                    LogManager.GetLogger("ASC").ErrorFormat("Can not prepare value {0}: {1}", value, err);
+                    Log.ErrorFormat("Can not prepare value {0}: {1}", value, err);
                     value = null;
                 }
                 return true;
             }
-            if(table.Name == "files_folder" && (columnName == "create_by" || columnName == "modified_by"))
+            if (table.Name == "files_folder" && (columnName == "create_by" || columnName == "modified_by"))
             {
                 base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
                 return true;
@@ -274,7 +276,7 @@ namespace ASC.Data.Backup.Tasks.Modules
                     }
                     catch (Exception ex)
                     {
-                        LogManager.GetLogger("ASC").ErrorFormat("Can not prepare data {0}: {1}", row[providerColumn] as string, ex);
+                        Log.ErrorFormat("Can not prepare data {0}: {1}", row[providerColumn] as string, ex);
                         data.Rows.Remove(row);
                         i--;
                     }

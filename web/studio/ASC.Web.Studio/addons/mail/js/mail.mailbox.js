@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ window.mailBox = (function($) {
         minWidthOfSwitching = 1024,
         maxDisplayedTagsCount = 3,
         actionButtons = [],
-        softRefrash = false;
+        softRefrash = false,
+        totalMsgInFolder = 0;
 
     var selection = new TMContainers.IdMap();
     var currentSelection = new TMContainers.IdMap();
@@ -102,14 +103,11 @@ window.mailBox = (function($) {
         window.Teamlab.bind(window.Teamlab.events.getNextMailMessageId, onGetNextPrevMessageId);
         window.Teamlab.bind(window.Teamlab.events.getPrevMailMessageId, onGetNextPrevMessageId);
 
-        $('#createNewMailBtn').trackEvent(ga_Categories.leftPanel, ga_Actions.buttonClick, "create-new-Email");
-        $('#check_email_btn').trackEvent(ga_Categories.leftPanel, ga_Actions.buttonClick, "check_email");
-
         $(document).on("click", '.menu-list a.menu-item-label', messagePage.onLeaveMessage);
-        $('#createNewMailBtn').click(messagePage.onLeaveMessage);
-        $('#check_email_btn').click(messagePage.onLeaveMessage);
+        $('#createNewMailBtn').on("click", messagePage.onLeaveMessage);
+        $('#check_email_btn').on("click", messagePage.onLeaveMessage);
 
-        $(window).scroll(stickActionMenuToTheTop);
+        $(window).on("scroll", stickActionMenuToTheTop);
         $(window).on('resize', function () { setTimeout(groupGroupButtons, 200); });
 
         actionButtons = [
@@ -130,13 +128,24 @@ window.mailBox = (function($) {
     function getScrolledGroupOptions() {
         var options = undefined;
         if (TMMail.pageIs('sysfolders')) {
-            options = {
-                menuSelector: "#MessagesListGroupButtons",
-                menuAnchorSelector: "#SelectAllMessagesCB",
-                menuSpacerSelector: "#actionContainer .contentMenuWrapper.messagesList .header-menu-spacer",
-                userFuncInTop: function () { $("#MessagesListGroupButtons .menu-action-on-top").hide(); },
-                userFuncNotInTop: function () { $("#MessagesListGroupButtons .menu-action-on-top").show(); }
-            };
+            if ($("#MessagesListGroupButtons").parent().first().css("display") == "block") {
+                options = {
+                    menuSelector: "#MessagesListGroupButtons",
+                    menuAnchorSelector: "#SelectAllMessagesCB",
+                    menuSpacerSelector: "#actionContainer .contentMenuWrapper.messagesList .header-menu-spacer",
+                    userFuncInTop: function () { $("#MessagesListGroupButtons .menu-action-on-top").hide(); },
+                    userFuncNotInTop: function () { $("#MessagesListGroupButtons .menu-action-on-top").show(); }
+                };
+            }
+            else {
+                options = {
+                    menuSelector: "#blankPage",
+                    menuAnchorSelector: "#folderEmptyScreen",
+                    menuSpacerSelector: ".mainContainerClass .header-menu-spacer",
+                    userFuncInTop: function () { $(".mainContainerClass .menu-action-on-top").hide(); },
+                    userFuncNotInTop: function () { $(".mainContainerClass .menu-action-on-top").show(); }
+                };
+            }
         } else if (TMMail.pageIs('tlContact') || TMMail.pageIs('crmContact') || TMMail.pageIs('personalContact')) {
             options = {
                 menuSelector: "#ContactsListGroupButtons",
@@ -460,10 +469,13 @@ window.mailBox = (function($) {
     function hideContentDivs(skipFolderFilter) {
         var itemContainer = $('#itemContainer');
         var actionContainer = $('#actionContainer');
+        var mainContainerClass = $('.mainContainerClass');
 
         itemContainer.find('.messages').remove();
 
         actionContainer.find('.contentMenuWrapper').hide();
+        mainContainerClass.find('.header-menu-spacer').hide();
+        mainContainerClass.find('.menu-action-on-top').hide();
         itemContainer.find('.itemWrapper').remove();
         itemContainer.find('.mailContentWrapper').remove();
         itemContainer.find('.simpleWrapper').remove();
@@ -508,13 +520,7 @@ window.mailBox = (function($) {
                 setCurrentMessageTag(tagId);
             }
 
-            // Google Analytics
-            window.ASC.Mail.ga_track(
-                TMMail.pageIs('message') ? ga_Categories.message : ga_Categories.createMail, ga_Actions.buttonClick, "set_tag");
         } else {
-            // Google Analytics
-            window.ASC.Mail.ga_track(ga_Categories.folder, ga_Actions.buttonClick, "set_tag");
-
             setMessagesTag(tagId, messageIds);
         }
 
@@ -831,7 +837,7 @@ window.mailBox = (function($) {
         if (needSkip)
             serviceManager.getMailFolders();
         else
-            serviceManager.updateFolders({}, {}, ASC.Resources.Master.Resource.LoadingProcessing);
+            serviceManager.updateFolders({}, {}, ASC.Resources.Master.ResourceJS.LoadingProcessing);
     }
 
     // Removes messages from the specified folder to trash. And removes them completely if we delete them from trash.
@@ -1187,6 +1193,18 @@ window.mailBox = (function($) {
         return html;
     }
 
+    function resetConversationsUrl() {
+        var newUrl = window.location.href
+            .replace(/from_message=(\d+)\//, "")
+            .replace(/prev=true\//, "")
+            .replace(/from_date=([\w\d%:+(,)]+)\//g, "")
+            .replace(/page_size=25\//, "");
+
+        //console.log(`orig-url=${window.location.href}, new-url=${newUrl}`);
+
+        history.pushState({}, null, newUrl);
+    }
+
     function onGetMailConversations(params, messages) {
         var filter = MailFilter.toData();
         var prevFlag = filter.hasOwnProperty("prev_flag") && filter.prev_flag;
@@ -1196,7 +1214,7 @@ window.mailBox = (function($) {
 
         if (!messages) {
             return;
-        }
+        }       
 
         hideLoadingMask();
 
@@ -1208,20 +1226,21 @@ window.mailBox = (function($) {
 
             if (prevFlag && !hasPrev) {
                 softRefrash = true;
-                var newUrl = window.location.href
-                    .replace(/from_message=(\d+)\//, "")
-                    .replace(/prev=true\//, "")
-                    .replace(/from_date=([\w\d%:+(,)]+)\//g, "")
-                    .replace(/page_size=25\//, "");
+                resetConversationsUrl();
+            }
 
-                //console.log(`orig-url=${window.location.href}, new-url=${newUrl}`);
-
-                history.pushState({}, null, newUrl);
+            if (!hasNext && params.__total == undefined) {
+                MailFilter.setFromDate(undefined);
+                MailFilter.setFromMessage(undefined);
+                MailFilter.setPrevFlag(false);
+                resetConversationsUrl();
             }
         } else {
-            hasNext = messages.length >= MailFilter.getPageSize();
-            hasPrev = MailFilter.getPage() > 1;
+            totalMsgInFolder = params.__total;
 
+            hasNext = MailFilter.getPage() < Math.ceil(params.__total / MailFilter.getPageSize());
+            hasPrev = MailFilter.getPage() > 1;
+            
             var hasPage = window.location.href.indexOf(/page=1/) > -1;
 
             if (hasPage) {
@@ -1234,7 +1253,13 @@ window.mailBox = (function($) {
 
                 history.pushState({}, null, newUrl);
             }
-        }
+
+            anchor = ASC.Controls.AnchorController.getAnchor().includes("forward") || ASC.Controls.AnchorController.getAnchor().includes("reply");
+            if (!anchor && !hasNext && Math.ceil(totalMsgInFolder / MailFilter.getPageSize()) < MailFilter.getPage()) {
+                MailFilter.setPage(Math.floor(totalMsgInFolder / MailFilter.getPageSize()));
+                onChangePageSize(MailFilter.getPageSize());
+            }
+        }        
 
         var folderId = MailFilter.getFolder();
 
@@ -1426,9 +1451,9 @@ window.mailBox = (function($) {
     }
 
     function processTagsMore($html) {
-        $html.find('.more-tags').unbind('.processTagsMore').bind('click.processTagsMore', function(event) {
+        $html.find('.more-tags').off('.processTagsMore').on('click.processTagsMore', function(event) {
             var $this = $(this);
-            $this.unbind('.processTagsMore');
+            $this.off('.processTagsMore');
             var tagsIds = $this.parent().attr('_tags').split(',');
             var buttons = [];
             for (var i = maxDisplayedTagsCount; i < tagsIds.length; i++) {
@@ -1455,6 +1480,14 @@ window.mailBox = (function($) {
         if (isNaN(pageSize) || pageSize < 1) {
             return;
         }
+        if (!commonSettingsPage.isConversationsEnabled()) {
+            var availablePage = Math.ceil(totalMsgInFolder / pageSize);
+
+            if (availablePage <= MailFilter.getPage()) {
+                MailFilter.setPage(availablePage)
+            }
+        }
+
         TMMail.option('MessagesPageSize', pageSize);
         MailFilter.setPageSize(pageSize);
 
@@ -1478,9 +1511,6 @@ window.mailBox = (function($) {
     }
 
     function actionPanelSelectAll() {
-        // google analytics track
-        window.ASC.Mail.ga_track(ga_Categories.folder, ga_Actions.actionClick, 'all_select');
-
         $('.messages:visible .row').each(function() {
             selection.AddId($(this).attr('data_id'));
         });
@@ -1492,8 +1522,6 @@ window.mailBox = (function($) {
     }
 
     function actionPanelSelectNone() {
-        // google analytics track
-        window.ASC.Mail.ga_track(ga_Categories.folder, ga_Actions.actionClick, 'none_select');
         unselectAll();
     }
 
@@ -1509,36 +1537,24 @@ window.mailBox = (function($) {
     }
 
     function actionPanelSelectUnread() {
-        // google analytics track
-        window.ASC.Mail.ga_track(ga_Categories.folder, ga_Actions.actionClick, 'unread_select');
-
         unselectAll();
         lastSelectedConcept = selectionConcept.unread;
         actionPanelSelect('.new');
     }
 
     function actionPanelSelectRead() {
-        // google analytics track
-        window.ASC.Mail.ga_track(ga_Categories.folder, ga_Actions.actionClick, 'read_select');
-
         unselectAll();
         lastSelectedConcept = selectionConcept.read;
         actionPanelSelect(':not(.new)');
     }
 
     function actionPanelSelectImportant() {
-        // google analytics track
-        window.ASC.Mail.ga_track(ga_Categories.folder, ga_Actions.actionClick, 'important_select');
-
         unselectAll();
         lastSelectedConcept = selectionConcept.important;
         actionPanelSelect(':has(.icon-important)');
     }
 
     function actionPanelSelectWithAttachments() {
-        // google analytics track
-        window.ASC.Mail.ga_track(ga_Categories.folder, ga_Actions.actionClick, 'whith_atachments_select');
-
         unselectAll();
         lastSelectedConcept = selectionConcept.with_attachments;
         actionPanelSelect(':has(.icon-attachment)');
@@ -1558,7 +1574,7 @@ window.mailBox = (function($) {
         var $messages = $('.messages:visible .row');
 
         // set message importance flag click handler
-        $messages.find('.importance').unbind('click').bind('click', function() {
+        $messages.find('.importance').off('click').on('click', function() {
             var $this = $(this),
                 icon = $this.find('.icon-important, .icon-unimportant'),
                 newimportance = icon.is('.icon-unimportant'),
@@ -1577,7 +1593,7 @@ window.mailBox = (function($) {
         });
 
         // _Selection checkbox clicked
-        $messages.find('.checkbox').unbind('click').bind('click', function() {
+        $messages.find('.checkbox').off('click').on('click', function() {
             selectRow($(this).parent());
         });
     }
@@ -1605,49 +1621,49 @@ window.mailBox = (function($) {
 
     function groupButtonsMenuHandlers() {
         // Delete (group button)
-        $('#MessagesListGroupButtons .menuActionDelete').click(function() {
+        $('#MessagesListGroupButtons .menuActionDelete').on("click", function() {
             if ($(this).hasClass('unlockAction')) {
                 deleteGroupOperation();
             }
         });
 
         // Spam (group button)
-        $('#MessagesListGroupButtons .menuActionSpam').click(function() {
+        $('#MessagesListGroupButtons .menuActionSpam').on("click", function() {
             if ($(this).hasClass('unlockAction')) {
                 spamGroupOperation();
             }
         });
 
         // NotSpam (group button)
-        $('#MessagesListGroupButtons .menuActionNotSpam').click(function() {
+        $('#MessagesListGroupButtons .menuActionNotSpam').on("click", function() {
             if ($(this).hasClass('unlockAction')) {
                 restoreGroupOperation();
             }
         });
 
         // Read/Unread (group button)
-        $('#MessagesListGroupButtons .menuActionRead').click(function() {
+        $('#MessagesListGroupButtons .menuActionRead').on("click", function() {
             if ($(this).hasClass('unlockAction')) {
                 readUnreadGroupOperation();
             }
         });
 
         // Important/NotImportant (group button)
-        $('#MessagesListGroupButtons .menuActionImportant').click(function () {
+        $('#MessagesListGroupButtons .menuActionImportant').on("click", function () {
             if ($(this).hasClass('unlockAction')) {
                 impotantGroupOperation();
             }
         });
 
         // Restore (group button)
-        $('#MessagesListGroupButtons .menuActionRestore').click(function() {
+        $('#MessagesListGroupButtons .menuActionRestore').on("click", function() {
             if ($(this).hasClass('unlockAction')) {
                 restoreGroupOperation();
             }
         });
 
         // Add tag (group button)
-        $('#MessagesListGroupButtons .menuActionAddTag').click(function() {
+        $('#MessagesListGroupButtons .menuActionAddTag').on("click", function() {
             if (!$(this).hasClass('unlockAction')) return;
 
             var options = {
@@ -1667,7 +1683,7 @@ window.mailBox = (function($) {
         });
 
         // Move to (group button)
-        $('#MessagesListGroupButtons .menuActionMoveTo').click(function () {
+        $('#MessagesListGroupButtons .menuActionMoveTo').on("click", function () {
             if ($(this).hasClass('unlockAction')) {
                 var options = {
                     btnCaption: window.MailResource.MoveHere,
@@ -1698,8 +1714,8 @@ window.mailBox = (function($) {
         });
 
         // Select all
-        $('#SelectAllMessagesCB').unbind('click');
-        $('#SelectAllMessagesCB').bind('click', function(e) {
+        $('#SelectAllMessagesCB').off('click');
+        $('#SelectAllMessagesCB').on('click', function(e) {
             if (e.target.checked) {
                 actionPanelSelectAll();
             } else {
@@ -1722,7 +1738,7 @@ window.mailBox = (function($) {
             css: 'stick-over'
         });
 
-        $('#OverallDeselectAll').click(function() {
+        $('#OverallDeselectAll').on("click", function() {
             overallDeselectAll();
         });
     }
@@ -1806,6 +1822,7 @@ window.mailBox = (function($) {
             else
                 setMessagesReadUnread(messageIds, read, isFiltered);
         }
+        if (!isFiltered)
         overallDeselectAll();
     }
 
@@ -1838,11 +1855,11 @@ window.mailBox = (function($) {
         var $comboCheckbox = $('#SelectAllMessagesCB');
 
         if ($('.messages:visible .row').length == 0) {
-            $comboCheckbox.attr('disabled', 'true');
-            $('#SelectAllMessagesDropdown').attr('disabled', 'true');
+            $comboCheckbox.prop("disabled", true);
+            $('#SelectAllMessagesDropdown').prop("disabled", true);
         } else {
-            $comboCheckbox.removeAttr('disabled');
-            $('#SelectAllMessagesDropdown').removeAttr('disabled');
+            $comboCheckbox.prop("disabled", false);
+            $('#SelectAllMessagesDropdown').prop("disabled", false);
         }
         // Spam / Not spam
         groupButtons.find('.menuActionNotSpam').toggle(folderId == TMMail.sysfolders.spam.id);
@@ -2054,7 +2071,7 @@ window.mailBox = (function($) {
                 restoreFolderId = parseInt($('#itemContainer .message-wrap[message_id="' + ids[0] + '"]').attr('restore_folder_id'));
             }
 
-            if ($.isNumeric(restoreFolderId)) {
+            if ($.isNumber(restoreFolderId)) {
                 TMMail.showCompleteActionHint(TMMail.action_types.restore, window.commonSettingsPage.isConversationsEnabled(), ids.length, restoreFolderId);
             }
         } else {
@@ -2073,7 +2090,7 @@ window.mailBox = (function($) {
             updateAnchor(true);
         }
         else {
-            serviceManager.updateFolders({}, {}, ASC.Resources.Master.Resource.LoadingProcessing);
+            serviceManager.updateFolders({}, {}, ASC.Resources.Master.ResourceJS.LoadingProcessing);
         }
         // Clear checkboxes
         selection.RemoveIds(ids);
@@ -2092,7 +2109,7 @@ window.mailBox = (function($) {
                 updateAnchor(true);
             }
             else {
-                serviceManager.updateFolders({}, {}, ASC.Resources.Master.Resource.LoadingProcessing);
+                serviceManager.updateFolders({}, {}, ASC.Resources.Master.ResourceJS.LoadingProcessing);
             }
 
             selection.RemoveIds(ids); // Clear checkboxes
@@ -2189,7 +2206,7 @@ window.mailBox = (function($) {
             updateAnchor(true);
         }
         else {
-            serviceManager.updateFolders({}, {}, ASC.Resources.Master.Resource.LoadingProcessing);
+            serviceManager.updateFolders({}, {}, ASC.Resources.Master.ResourceJS.LoadingProcessing);
         }
     }
 
@@ -2264,7 +2281,7 @@ window.mailBox = (function($) {
 
         MailFilter.fromAnchor(folderName, params);
 
-        serviceManager.updateFolders({}, {}, ASC.Resources.Master.Resource.LoadingProcessing);
+        serviceManager.updateFolders({}, {}, ASC.Resources.Master.ResourceJS.LoadingProcessing);
     }
 
     function updateView() {
@@ -2310,7 +2327,7 @@ window.mailBox = (function($) {
                 var ids = TMMail.getParamsValue(params, /crm=([^\/]+)/);
                 if (ids) {
                     serviceManager.getCrmContactsById({}, { contactids: ids.split(',') }, { success: onGetCrmContacts },
-                        ASC.Resources.Master.Resource.LoadingProcessing);
+                        ASC.Resources.Master.ResourceJS.LoadingProcessing);
                 } else {
                     messagePage.onComposeTo();
                 }

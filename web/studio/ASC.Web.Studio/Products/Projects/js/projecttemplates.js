@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ ASC.Projects.ListProjectsTemplates = (function () {
     };
 
     function showEntityMenu(selectedActionCombobox) {
-        var resources = ASC.Projects.Resources.ProjectTemplatesResource;
+        var ProjectTemplatesResource = ASC.Projects.Resources.ProjectTemplatesResource;
         var id = parseInt(selectedActionCombobox.attr("id"));
         var template = templates.find(function (item) { return item.id === id });
 
@@ -59,15 +59,15 @@ ASC.Projects.ListProjectsTemplates = (function () {
         var menuItems = [];
 
         if (template.canEdit) {
-            menuItems.push(new ActionMenuItem("editTmpl", resources.Edit, taEdit.bind(null, id), "edit"));
+            menuItems.push(new ActionMenuItem("editTmpl", ProjectTemplatesResource.Edit, taEdit.bind(null, id), "edit"));
         }
 
         if (ASC.Projects.Master.CanCreateProject) {
-            menuItems.push(new ActionMenuItem("createProj", resources.CreateProject, taCreate.bind(null, id), "project"));
+            menuItems.push(new ActionMenuItem("createProj", ProjectTemplatesResource.CreateProject, taCreate.bind(null, id), "project"));
         }
 
         if (template.canEdit) {
-            menuItems.push(new ActionMenuItem("deleteTmpl", resources.Delete, taDelete.bind(null, id), "delete"));
+            menuItems.push(new ActionMenuItem("deleteTmpl", ProjectTemplatesResource.Delete, taDelete.bind(null, id), "delete"));
         }
         return { menuItems: menuItems };
     }
@@ -130,7 +130,7 @@ ASC.Projects.ListProjectsTemplates = (function () {
 
         var description = { tasks: [], milestones: [] };
         try {
-            description = jQuery.parseJSON(template.description) || {tasks:[], milestones:[] };
+            description = JSON.parse(template.description) || {tasks:[], milestones:[] };
         } catch (e) {
 
         }
@@ -230,7 +230,7 @@ ASC.Projects.EditProjectTemplates = (function() {
             teamlab.getPrjTemplate({}, tmplId, { success: onGetTemplate, before: loadingBanner.displayLoading, after: loadingBanner.hideLoading });
         }
 
-        $templateTitle.focus();
+        $templateTitle.trigger("focus");
 
         jq("#saveTemplate").on(clickEventName, function () {
             generateAndSaveTemplate.call(this, 'save');
@@ -266,10 +266,10 @@ ASC.Projects.EditProjectTemplates = (function() {
         if (jq(this).hasClass("disable")) return;
         jq("." + requiredFieldErrorClass).removeClass(requiredFieldErrorClass);
 
-        if (jq.trim($templateTitle.val()) == "") {
+        if ($templateTitle.val().trim() == "") {
             $templateTitleContainer.addClass(requiredFieldErrorClass);
             jq.scrollTo($templateTitleContainer);
-            $templateTitle.focus();
+            $templateTitle.trigger("focus");
             return;
         }
         jq(this).addClass("disable");
@@ -303,7 +303,7 @@ ASC.Projects.EditProjectTemplates = (function() {
             description.milestones.push(milestone);
         }
         var data = {
-            title: jq.trim($templateTitle.val()),
+            title: $templateTitle.val().trim(),
             description: JSON.stringify(description)
         };
 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,17 @@ window.ASC.Files.CreateMenu = (function () {
                 ASC.Files.Folders.getTemplateList();
             },
         });
+
+        jq("body").append(jq("#createMasterFormPanel"));
+
+        jq.dropdownToggle({
+            addLeft: 4,
+            addTop: -4,
+            dropdownID: "createMasterFormPanel",
+            sideToggle: true,
+            switcherSelector: "#createMasterFormPointer",
+            toggleOnOver: true,
+        });
     };
 
     var updateCreateDocList = function () {
@@ -70,19 +81,32 @@ window.ASC.Files.CreateMenu = (function () {
             jq("#emptyContainer .empty-folder-create-presentation").remove();
         }
 
+        if (!ASC.Files.Utility.CanWebEdit(ASC.Files.Utility.Resource.MasterFormExtension)) {
+            jq("#createMasterFormPointer, #createMasterFormPanel").remove();
+            jq("#emptyContainer .empty-folder-create-masterform").remove();
+        }
+
         if (!jq(".empty-folder-create-editor a").length) {
             jq(".empty-folder-create-editor").remove();
         }
     };
 
     var disableMenu = function (enable) {
-        var listButtons = jq("#menuUploadActionsButton, #buttonUpload, #buttonFolderUpload, #createDocument, #createSpreadsheet, #createPresentation, #createNewFolder" +
+        var listButtons = jq("#menuUploadActionsButton, #buttonUpload, #buttonFolderUpload, #createDocument, #createSpreadsheet, #createPresentation, #createMasterFormPointer, #createMasterForm, #createMasterFormFromFile, #createNewFolder" +
             (!ASC.Files.Tree.folderIdCurrentRoot
                 ? ", .page-menu .menu-actions .menu-main-button"
                 : ""));
 
         listButtons.toggleClass("disable", !enable);
         ASC.Files.ChunkUploads.disableBrowseButton(!enable);
+
+        if (enable) {
+            jq("#createMasterFormFromFile").toggleClass("disable", ASC.Files.Folders.folderContainer == "privacy");
+        }
+
+        if (!ASC.Resources.Master.IsAuthenticated) {
+            jq("#createMasterFormFromFile").hide();
+        }
     };
 
     var toggleCreateByTemplate = function (enable) {
@@ -104,13 +128,23 @@ window.ASC.Files.CreateMenu = (function () {
     $(function () {
         ASC.Files.CreateMenu.updateCreateDocList();
 
-        jq(document).on("click", "#createDocument:not(.disable), #createSpreadsheet:not(.disable), #createPresentation:not(.disable)", function () {
+        function createFile() {
             ASC.Files.Actions.hideAllActionPanels();
             ASC.Files.Folders.typeNewDoc = this.id.replace("create", "").toLowerCase();
             ASC.Files.Folders.createNewDoc();
+        }
+
+        jq(document).on("click", "#createDocument:not(.disable), #createSpreadsheet:not(.disable), #createPresentation:not(.disable)", createFile);
+
+        jq("#createMasterForm").on("click", function (e) {
+            if (this.classList.contains("disable")) {
+                e.stopPropagation();
+                return;
+            }
+            createFile.call(this);
         });
 
-        jq("#emptyContainer .empty-folder-create a").click(function () {
+        jq("#emptyContainer .empty-folder-create a").on("click", function () {
             ASC.Files.Actions.hideAllActionPanels();
             ASC.Files.Folders.typeNewDoc = (
                 jq(this).hasClass("empty-folder-create-document")
@@ -119,8 +153,10 @@ window.ASC.Files.CreateMenu = (function () {
                         ? "spreadsheet"
                         : (jq(this).hasClass("empty-folder-create-presentation")
                             ? "presentation"
-                            : ""
-                        )));
+                            : (jq(this).hasClass("empty-folder-create-masterform")
+                                ? "masterform"
+                                : ""
+                            ))));
             ASC.Files.Folders.createNewDoc();
         });
 

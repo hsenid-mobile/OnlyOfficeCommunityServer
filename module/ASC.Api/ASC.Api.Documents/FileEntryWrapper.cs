@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 */
 
 
-using System;
 using System.Runtime.Serialization;
+
 using ASC.Api.Employee;
 using ASC.Files.Core;
 using ASC.Files.Core.Security;
@@ -31,31 +31,39 @@ namespace ASC.Api.Documents
     {
         /// <summary>
         /// </summary>
+        /// <example type="int">857864274</example>
         [DataMember]
         public object Id { get; set; }
 
         /// <summary>
         /// </summary>
+        /// <example>Some titile.txt</example>
         [DataMember(IsRequired = true)]
         public string Title { get; set; }
 
         /// <summary>
         /// </summary>
+        /// <example type="int">1</example>
         [DataMember]
         public FileShare Access { get; set; }
 
         /// <summary>
         /// </summary>
+        /// <example>false</example>
         [DataMember]
         public bool Shared { get; set; }
 
         /// <summary>
         /// </summary>
+        /// <example>2020-12-13T17:13:31.5902727Z</example>
+        /// <order>50</order>
         [DataMember(Order = 50)]
         public ApiDateTime Created { get; set; }
 
         /// <summary>
         /// </summary>
+        /// <type>ASC.Api.Employee.EmployeeWraper, ASC.Api.Employee</type>
+        /// <order>51</order>
         [DataMember(Order = 51, EmitDefaultValue = false)]
         public EmployeeWraper CreatedBy { get; set; }
 
@@ -63,6 +71,8 @@ namespace ASC.Api.Documents
 
         /// <summary>
         /// </summary>
+        /// <example>2020-12-13T17:13:31.5902727Z</example>
+        /// <order>52</order>
         [DataMember(Order = 52, EmitDefaultValue = false)]
         public ApiDateTime Updated
         {
@@ -75,28 +85,48 @@ namespace ASC.Api.Documents
 
         /// <summary>
         /// </summary>
+        /// <example type="int">2</example>
+        /// <order>41</order>
         [DataMember(Order = 41, EmitDefaultValue = false)]
         public FolderType RootFolderType { get; set; }
 
         /// <summary>
         /// </summary>
+        /// <type>ASC.Api.Employee.EmployeeWraper, ASC.Api.Employee</type>
+        /// <order>41</order>
         [DataMember(Order = 41, EmitDefaultValue = false)]
         public EmployeeWraper UpdatedBy { get; set; }
 
         /// <summary>
         /// </summary>
+        /// <example>true</example>
+        /// <order>55</order>
         [DataMember(Order = 55, EmitDefaultValue = false)]
         public bool ProviderItem { get; set; }
 
         /// <summary>
         /// </summary>
+        ///  <example>1234d</example>
+        /// <order>56</order>
         [DataMember(Order = 56, EmitDefaultValue = false)]
         public string ProviderKey { get; set; }
 
         /// <summary>
         /// </summary>
+        ///  <example type="int">1234</example>
+        /// <order>57</order>
         [DataMember(Order = 57, EmitDefaultValue = false)]
         public int ProviderId { get; set; }
+
+        /// <summary>
+        /// </summary>
+        [DataMember(EmitDefaultValue = false, IsRequired = false)]
+        public bool DenyDownload { get; set; }
+
+        /// <summary>
+        /// </summary>
+        [DataMember(EmitDefaultValue = false, IsRequired = false)]
+        public bool DenySharing { get; set; }
 
 
         /// <summary>
@@ -117,6 +147,8 @@ namespace ASC.Api.Documents
             ProviderItem = entry.ProviderEntry;
             ProviderKey = entry.ProviderKey;
             ProviderId = entry.ProviderId;
+            DenyDownload = entry.DenyDownload;
+            DenySharing = entry.DenySharing;
         }
 
         /// <summary>

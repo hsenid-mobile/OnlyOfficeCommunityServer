@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 
 @import "base.less";
-
+@import "params.less";
 /*******************************************************************************
 DealListView
 *******************************************************************************/
@@ -59,11 +59,11 @@ DealListView
     display: none;
     margin-bottom: 15px;
 }
-#dealList .showTotalAmount{
+#showTotalAmount{
     display: none;
 }
-#dealList .showTotalAmount, #dealList .showTotalAmount:hover, #dealList .showTotalAmount:active{
-    color: @textColorBlackDark;
+#showTotalAmount, #showTotalAmount:hover, #showTotalAmount:active {
+    color: @grey-text;
 }
 #showMoreDealsButtons{
     display:inline-block;

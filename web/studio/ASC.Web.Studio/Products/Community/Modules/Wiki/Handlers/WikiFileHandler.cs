@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
 */
 
 
+using System.Net;
 using System.Text.RegularExpressions;
+using System.Web;
+
 using ASC.Core;
 using ASC.Data.Storage;
 using ASC.Web.Core;
-using System.Net;
-using System.Web;
 
 namespace ASC.Web.UserControls.Wiki.Handlers
 {
@@ -68,8 +69,25 @@ namespace ASC.Web.UserControls.Wiki.Handlers
                 return;
             }
 
+            var inline = context.Request["inline"] ?? string.Empty;
+
             var storage = StorageFactory.GetStorage(CoreContext.TenantManager.GetCurrentTenant().TenantId.ToString(), WikiSection.Section.DataStorage.ModuleName);
-            context.Response.Redirect(storage.GetUri(WikiSection.Section.DataStorage.DefaultDomain, file.FileLocation).ToString());
+
+            if (inline.ToLowerInvariant() == "true")
+            {
+                context.Response.Redirect(storage.GetUri(WikiSection.Section.DataStorage.DefaultDomain, file.FileLocation).ToString());
+            }
+            else
+            {
+                context.Response.ContentType = MimeMapping.GetMimeMapping(file.FileName);
+                context.Response.AddHeader("Content-Disposition", string.Format("attachment; filename=\"{0}\"", file.FileName));
+
+                using (var stream = storage.GetReadStream(WikiSection.Section.DataStorage.DefaultDomain, file.FileLocation))
+                {
+                    context.Response.AddHeader("Content-Length", stream.Length.ToString());
+                    stream.CopyTo(context.Response.OutputStream);
+                }
+            }
         }
 
         private Data.File GetFile(string fileName)

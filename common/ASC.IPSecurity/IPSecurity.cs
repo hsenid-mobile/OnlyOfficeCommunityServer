@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,18 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Web;
+
 using ASC.Common.Logging;
+using ASC.Common.Utils;
 using ASC.Core;
 using ASC.Core.Tenants;
+using ASC.Core.Users;
 
 namespace ASC.IPSecurity
 {
@@ -44,7 +49,9 @@ namespace ASC.IPSecurity
 
         private static readonly string CurrentIpForTest = ConfigurationManagerExtension.AppSettings["ipsecurity.test"];
 
-        public static bool Verify(Tenant tenant)
+        private static readonly string MyNetworks = ConfigurationManagerExtension.AppSettings["ipsecurity.mynetworks"];
+
+        public static bool Verify(Tenant tenant, string login = null)
         {
             if (!IpSecurityEnabled) return true;
 
@@ -53,39 +60,55 @@ namespace ASC.IPSecurity
 
             if (tenant == null || SecurityContext.CurrentAccount.ID == tenant.OwnerId) return true;
 
-            string requestIps = null;
+            string address = null;
             try
             {
                 var restrictions = IPRestrictionsService.Get(tenant.TenantId).ToList();
 
                 if (!restrictions.Any()) return true;
 
-                if (string.IsNullOrWhiteSpace(requestIps = CurrentIpForTest))
+                if (string.IsNullOrWhiteSpace(address = CurrentIpForTest))
                 {
                     var request = httpContext.Request;
-                    requestIps = request.Headers["X-Forwarded-For"] ?? request.UserHostAddress;
+                    address = request.Headers["X-Forwarded-For"] ?? request.UserHostAddress;
                 }
 
-                var ips = string.IsNullOrWhiteSpace(requestIps)
-                              ? new string[] { }
-                              : requestIps.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
+                var ips = IpAddressParser.ParseAddress(address).Select(IpAddressParser.GetIpWithoutPort);
 
-                if (ips.Any(requestIp => restrictions.Any(restriction => MatchIPs(GetIpWithoutPort(requestIp), restriction.Ip))))
+                var currentUserId = SecurityContext.CurrentAccount.ID;
+                bool isAdmin;
+
+                if (!string.IsNullOrEmpty(login) && currentUserId == ASC.Core.Configuration.Constants.Guest.ID)
+                {
+                    var currentUser = CoreContext.UserManager.GetUserByEmail(login);
+                    isAdmin = currentUser.IsAdmin();
+                }
+                else
+                {
+                    isAdmin = CoreContext.UserManager.IsUserInGroup(currentUserId, Constants.GroupAdmin.ID);
+                }
+
+                if (ips.Any(requestIp => restrictions.Any(restriction => (restriction.ForAdmin ? isAdmin : true) && MatchIPs(requestIp, restriction.Ip))))
+                {
+                    return true;
+                }
+
+                if (IsMyNetwork(ips))
                 {
                     return true;
                 }
             }
             catch (Exception ex)
             {
-                Log.ErrorFormat("Can't verify request with IP-address: {0}. Tenant: {1}. Error: {2} ", requestIps ?? "", tenant, ex);
+                Log.ErrorFormat("Can't verify request with IP-address: {0}. Tenant: {1}. Error: {2} ", address ?? "", tenant, ex);
                 return false;
             }
 
-            Log.InfoFormat("Restricted from IP-address: {0}. Tenant: {1}. Request to: {2}", requestIps ?? "", tenant, httpContext.Request.Url);
+            Log.InfoFormat("Restricted from IP-address: {0}. Tenant: {1}. Request to: {2}", address ?? "", tenant, httpContext.Request.Url);
             return false;
         }
 
-        private static bool MatchIPs(string requestIp, string restrictionIp)
+        public static bool MatchIPs(string requestIp, string restrictionIp)
         {
             var dividerIdx = restrictionIp.IndexOf('-');
             if (restrictionIp.IndexOf('-') > 0)
@@ -97,13 +120,49 @@ namespace ASC.IPSecurity
                 return range.IsInRange(IPAddress.Parse(requestIp));
             }
 
+            if (restrictionIp.IndexOf('/') > 0)
+            {
+                return IPAddressRange.IsInRange(requestIp, restrictionIp);
+            }
+
             return requestIp == restrictionIp;
         }
 
-        private static string GetIpWithoutPort(string ip)
+        private static bool IsMyNetwork(IEnumerable<string> ips)
         {
-            var portIdx = ip.IndexOf(':');
-            return portIdx > 0 ? ip.Substring(0, portIdx) : ip;
+            try
+            {
+                if (!string.IsNullOrEmpty(MyNetworks))
+                {
+                    var myNetworkIps = MyNetworks.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
+
+                    if (ips.Any(requestIp => myNetworkIps.Any(ipAddress => MatchIPs(requestIp, ipAddress))))
+                    {
+                        return true;
+                    }
+                }
+
+                var hostName = Dns.GetHostName();
+                var hostAddresses = Dns.GetHostAddresses(Dns.GetHostName());
+
+                var localIPs = new List<IPAddress> { IPAddress.IPv6Loopback, IPAddress.Loopback };
+
+                localIPs.AddRange(hostAddresses.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6));
+
+                foreach (var ipAddress in localIPs)
+                {
+                    if (ips.Contains(ipAddress.ToString()))
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.ErrorFormat("Can't verify local network from request with IP-address: {0}", string.Join(",", ips), ex);
+            }
+
+            return false;
         }
     }
 }

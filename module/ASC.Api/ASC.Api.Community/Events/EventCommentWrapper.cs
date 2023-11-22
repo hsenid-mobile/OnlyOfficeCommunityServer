@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
+
 using ASC.Api.Employee;
 using ASC.Specific;
 using ASC.Web.Community.News.Code;
@@ -31,7 +31,7 @@ namespace ASC.Api.Events
         {
             CreatedBy = EmployeeWraper.Get(Core.CoreContext.UserManager.GetUsers(new Guid(comment.Creator)));
             Updated = Created = (ApiDateTime)comment.Date;
-           
+
             Id = comment.Id;
             Text = comment.Comment;
             ParentId = comment.ParentId;
@@ -41,12 +41,18 @@ namespace ASC.Api.Events
         {
         }
 
+        ///<example>comment text</example>
+        ///<order>10</order>
         [DataMember(Order = 10)]
         public string Text { get; set; }
 
+        ///<example>2020-12-07T13:56:02.2899133Z</example>
+        ///<order>6</order>
         [DataMember(Order = 6)]
         public ApiDateTime Created { get; set; }
 
+        ///<example>2020-12-07T13:56:02.2899133Z</example>
+        ///<order>6</order>
         [DataMember(Order = 6)]
         public ApiDateTime Updated
         {
@@ -54,12 +60,18 @@ namespace ASC.Api.Events
             set;
         }
 
+        ///<example type="int">10</example>
+        ///<order>1</order>
         [DataMember(Order = 1)]
         public long Id { get; set; }
 
+        ///<example type="int">123</example>
+        ///<order>2</order>
         [DataMember(Order = 2)]
         public long ParentId { get; set; }
 
+        ///<type>ASC.Api.Employee.EmployeeWraper, ASC.Api.Employee</type>
+        ///<order>9</order>
         [DataMember(Order = 9)]
         public EmployeeWraper CreatedBy { get; set; }
 

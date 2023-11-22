@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,17 @@ ASC.People.PeopleController = (function() {
     var _selectedType = 1;
     var _selectedStatus = 1;
     var _tenantQuota = {};
+    var _mailModuleEnabled = false;
+    var _talkModuleEnabled = false;
 
     var pageNavigator;
     var isRetina;
+
+    var enableImpersonateType = {
+        disableForAdmins: 0,
+        enableForAll: 1,
+        enableWithLimits: 2
+    }
 
     function showLoader() {
         LoadingBanner.displayLoading();
@@ -79,24 +87,6 @@ ASC.People.PeopleController = (function() {
 
     function getBithdayDaysLeft(birthdayApiString) {
 
-        function stringToDate(dateString) {
-            var offset = 0;
-
-            if (dateString.indexOf('Z') === -1) {
-                offset = dateString.substring(dateString.length - 5).split(':');
-                offset = (+offset[0] * 60 + +offset[1]) * (dateString.charAt(dateString.length - 6, 1) === '+' ? 1 : -1);
-            }
-
-            var parts = dateString.split('.')[0].split('T');
-            parts[0] = parts[0].split('-');
-            parts[1] = parts[1].split(':');
-
-            var date = new Date(parts[0][0], parts[0][1] - 1, parts[0][2], parts[1][0], parts[1][1], parts[1][2], 0);
-            date = new Date(date.getTime() - (offset * 60 * 1000));
-
-            return date;
-        }
-
         function isLeapYear(year) {
             if (year < 1 || year > 9999) {
                 throw new Error("ArgumentOutOfRange_Year");
@@ -134,7 +124,7 @@ ASC.People.PeopleController = (function() {
 
         if (!birthdayApiString) return -1;
 
-        var birthdayDate = stringToDate(birthdayApiString);
+        var birthdayDate = window.ServiceFactory.serializeUtcDate(birthdayApiString);
 
         return getDaysLeft(birthdayDate);
     };
@@ -236,7 +226,7 @@ ASC.People.PeopleController = (function() {
             var $this = jq(this),
                 id = jq(this).attr("data-id"),
                 $buttons = $this.find("td.info:first [id^='peopleEmailSwitcher'] .dropdown-item");
-            $buttons.bind("click", onButtonClick);
+            $buttons.on("click", onButtonClick);
 
             var emailToggleMenu = $this.find(".btn.email:first");
             if (emailToggleMenu.length == 1) {
@@ -312,7 +302,8 @@ ASC.People.PeopleController = (function() {
         {
             users: data,
             isAdmin: Teamlab.profile.isAdmin || window.ASC.Resources.Master.IsProductAdmin,
-            isRetina: isRetina
+            isRetina: isRetina,
+            talkModuleEnabled: _talkModuleEnabled
         });
         jq("#peopleData tbody").empty().append($o);
         bindEvents(jq($o));
@@ -324,8 +315,19 @@ ASC.People.PeopleController = (function() {
 
     var onButtonClick = function(evt) {
         var $this = jq(this);
+        var module = $this.attr('data-module');
+        var moduleEnabled;
 
-        peopleActions.callMethodByClassname($this.attr('class'), this, [evt, $this]);
+        switch (module) {
+            case "mail":
+                moduleEnabled = _mailModuleEnabled;
+                break;
+            case "talk":
+                moduleEnabled = _talkModuleEnabled;
+                break;
+        }
+
+        peopleActions.callMethodByClassname($this.attr('class'), this, [evt, $this, moduleEnabled]);
         jq(document.body).trigger('click');
     };
 
@@ -342,7 +344,7 @@ ASC.People.PeopleController = (function() {
             jq("#emptyContentForPeopleFilter").removeClass("display-none");
         }
         //scroll on top
-        jq("#peopleHeaderMenu .on-top-link").click();
+        jq("#peopleHeaderMenu .on-top-link").trigger("click");
     };
 
     function onDeleteGroup(params, data) {
@@ -393,7 +395,7 @@ ASC.People.PeopleController = (function() {
                         var needActiveFilterAsDefault = false;
                         var users = window.UserManager.getAllUsers(true);
                         for (var userId in users) {
-                            if (!users.hasOwnProperty(users)) continue;
+                            if (!users.hasOwnProperty(userId)) continue;
                             var user = users[userId];
                             if (user.isActivated === true && user.isOwner === false) {
                                 needActiveFilterAsDefault = true;
@@ -446,6 +448,8 @@ ASC.People.PeopleController = (function() {
         if (status == 1 && _tenantQuota.availableUsersCount == 0 && isVisitor == "false") {
             if (jq("#tariffLimitExceedUsersPanel").length) {
                 TariffLimitExceed.showLimitExceedUsers();
+            } else {
+                toastr.error(ASC.Resources.Master.ResourceJS.UserSelectorErrorLimitUsers);
             }
             return;
         }
@@ -478,7 +482,7 @@ ASC.People.PeopleController = (function() {
         });
     }
 
-    function showUserActionMenu(personId) {
+    function showUserActionMenu(personId, canImpersonate) {
         var $person = jq("#user_" + personId),
             email = $person.attr("data-email"),
             username = $person.attr("data-username"),
@@ -499,8 +503,10 @@ ASC.People.PeopleController = (function() {
             status: status,
             isOwner: isOwner,
             isLDAP: isLDAP,
-            isSSO: isSSO
+            isSSO: isSSO,
+            canImpersonateUser: canImpersonate
         };
+
         var $menu = jq.tmpl("userActionMenuTemplate",
             { user: profile, isAdmin: Teamlab.profile.isAdmin || window.ASC.Resources.Master.IsProductAdmin, isMe: (profile.id === Teamlab.profile.id), canEdit: canEdit, canDel: canDel });
         $actionMenu.html($menu);
@@ -529,6 +535,9 @@ ASC.People.PeopleController = (function() {
             else if (jq(this).hasClass("block-profile")) {
                 changeUserStatusAction(personId, 2, isVisitor);
             }
+            else if (jq(this).hasClass("impersonate-user")) {
+                ImpersonateManager.LoginAsUser(personId, displayname);
+            }
             else if (jq(this).hasClass("enable-profile")) {
                 changeUserStatusAction(personId, 1, isVisitor);
             }
@@ -553,6 +562,13 @@ ASC.People.PeopleController = (function() {
         var $dropdownItem = jq("#peopleActionMenu");
         if ($dropdownItem.length == 1) {
             var leftForFix = -200;
+
+            var updateUserActionMenu = function (dropdownItem, personId, canImpersonate) {
+                showUserActionMenu(personId, canImpersonate);
+                var left = parseInt(dropdownItem.css("left")) - dropdownItem.innerWidth() + 29 - leftForFix;
+                dropdownItem.css("left", left);
+            }
+
             jq.dropdownToggle({
                 dropdownID: "peopleActionMenu",
                 switcherSelector: "#peopleData .entity-menu",
@@ -564,15 +580,34 @@ ASC.People.PeopleController = (function() {
                     if (!personId) {
                         return;
                     }
-                    showUserActionMenu(personId);
                     switcherObj.addClass("active");
-                    var left = parseInt(dropdownItem.css("left")) - dropdownItem.innerWidth() + 29 - leftForFix;
-                    dropdownItem.css("left", left);
                     if (jq("#peopleData .entity-menu.active").length > 1) {
                         jq("#peopleData .entity-menu.active").not(switcherObj).removeClass("active");
                         dropdownItem.hide();
                     } else if (!dropdownItem.is(":hidden")) {
                         switcherObj.removeClass("active");
+                    }
+
+                    if (window.canImpersonate) {
+                        Teamlab.canImpersonateUser(personId, {
+                            success: function (_, canImpersonate) {
+                                updateUserActionMenu(dropdownItem, personId, canImpersonate);
+                                dropdownItem.show();
+                            },
+                            before: function () {
+                                showLoader();
+                                dropdownItem.addClass("visibility-hidden");
+                            },
+                            after: function() {
+                                hideLoader();
+                                dropdownItem.removeClass("visibility-hidden");
+                            },
+                            error: function (_, errors) {
+                                toastr.error(errors[0]);
+                            }
+                        })
+                    } else {
+                        updateUserActionMenu(dropdownItem, personId, false);
                     }
                 },
                 hideFunction: function() {
@@ -711,8 +746,9 @@ ASC.People.PeopleController = (function() {
         showFirstLoader();
         renderEmptyScreen();
         initAdvansedFilter();
-        renderPopups();  
+        renderPopups();
         initTenantQuota();
+        initModules();
         initScrolledGroupMenu();
         initButtonsEvents();
         initPeopleActionMenu();
@@ -926,11 +962,11 @@ ASC.People.PeopleController = (function() {
     var showGroupActionMenu = function() {
         jq("#peopleHeaderMenu").show();
         //call ScrolledGroupMenu.stickMenuToTheTop
-        jq(window).scroll();
+        jq(window).trigger("scroll");
     };
 
     var lockMainActions = function() {
-        jq("#peopleHeaderMenu").find(".menuChangeType, .menuChangeStatus, .menuSendInvite, .menuRemoveUsers, .menuWriteLetter").removeClass("unlockAction").unbind("click");
+        jq("#peopleHeaderMenu").find(".menuChangeType, .menuChangeStatus, .menuSendInvite, .menuRemoveUsers, .menuWriteLetter").removeClass("unlockAction").off("click");
         jq("#changeTypePanel, #changeStatusPanel").hide();
     };
 
@@ -1177,7 +1213,7 @@ ASC.People.PeopleController = (function() {
         initChangeTypeDialog(type);
         StudioBlockUIManager.blockUI("#changeTypeDialog", 500);
         PopupKeyUpActionProvider.ClearActions();
-        PopupKeyUpActionProvider.EnterAction = "jq(\"#changeTypeDialogOk\").click();";
+        PopupKeyUpActionProvider.EnterAction = "jq(\".changeTypeDialogOk\").trigger('click');";
     };
 
     var initChangeTypeDialog = function(type) {
@@ -1189,20 +1225,19 @@ ASC.People.PeopleController = (function() {
         unlockDialog(dialog);
         hideError(dialog);
         renderSelectedUserList(users, container);
-
-        jq("#changeTypeDialogTariff").hide();
-        jq("#changeTypeDialogOk").removeClass("gray").addClass("blue");
+       
+        jq(".changeTypeDialogTariff").hide();
         jq("#userTypeInfo .action-info").removeClass("display-none");
         jq("#changeTypeDialog .selected-users-info").removeClass("display-none");
-
         if (_selectedType == 1) {
+            jq(".visitorContainer").addClass("display-none");
+            jq(".userContainer").removeClass("display-none");
             jq("#userTypeInfo").removeClass("display-none");
             jq("#visitorTypeInfo").addClass("display-none");
 
-            if (jq("#changeTypeDialogTariff").length) {
-                jq("#changeTypeDialogTariff").show();
-                if (jq("#changeTypeDialogTariff~#changeTypeDialogOk").length) {
-                    jq("#changeTypeDialogOk").removeClass("blue").addClass("gray");
+            if (jq(".changeTypeDialogTariff").length) {
+                jq(".changeTypeDialogTariff").show();
+                if (jq(".changeTypeDialogTariff~.changeTypeDialogOk").length) {
                 }
             }
 
@@ -1210,20 +1245,36 @@ ASC.People.PeopleController = (function() {
             var quota = _tenantQuota.availableUsersCount;
             jq("#userTypeInfo .tariff-limit").html(jq.format(PeopleManager.UserLimit, "<b>", quota, "</b>"));
             updateUserListToChangeTypeByQuota(container, quota);
-
             if (quota == 0) {
                 jq("#userTypeInfo .action-info").addClass("display-none");
                 jq("#changeTypeDialog .selected-users-info").addClass("display-none");
             }
         } else if (_selectedType == 2) {
-            jq("#userTypeInfo").addClass("display-none");
+            jq(".userContainer").addClass("display-none");
+            jq(".visitorContainer").removeClass("display-none");
             jq("#visitorTypeInfo").removeClass("display-none");
-        }
+            jq("#userTypeInfo").addClass("display-none");
+            if (jq(".changeTypeDialogTariff").length) {
+                jq(".changeTypeDialogTariff").show();
+                if (jq(".changeTypeDialogTariff~.changeTypeDialogOk").length) {
+                }
+            }
 
+            //GET QUOTA & SET TO INTERFACE
+            var quota = _tenantQuota.maxVisitors - _tenantQuota.visitorsCount;
+            jq("#visitorTypeInfo .tariff-limit").html(jq.format(PeopleManager.GuestLimit, "<b>", quota, "</b>"));
+            if (_tenantQuota.maxVisitors != -1) {
+                updateUserListToChangeTypeByQuota(container, quota);
+            }
+            if (quota == 0) {
+                jq("#userTypeInfo .action-info").addClass("display-none");
+                jq("#changeTypeDialog .selected-users-info").addClass("display-none");
+            }
+        }
         if (dialog.find("input[disabled]").length == dialog.find("input").length) {
-            jq("#changeTypeDialogOk").addClass("disable");
+            jq(".changeTypeDialogOk").addClass("disable");
         } else {
-            jq("#changeTypeDialogOk").removeClass("disable");
+            jq(".changeTypeDialogOk").removeClass("disable");
         }
     };
 
@@ -1260,13 +1311,13 @@ ASC.People.PeopleController = (function() {
         $containerBox.find("input[type=checkbox]").each(function (i, item) {
             var $checkbox = jq(item);
             if ($checkbox.attr("locked")) {
-                $checkbox.prop("checked", false).attr("disabled", true);
+                $checkbox.prop("checked", false).prop("disabled", true);
             } else {
                 if (quota > 0 && count < quota) {
-                    $checkbox.prop("checked", true).attr("disabled", false);
+                    $checkbox.prop("checked", true).prop("disabled", false);
                     count++;
                 } else {
-                    $checkbox.prop("checked", false).attr("disabled", true);
+                    $checkbox.prop("checked", false).prop("disabled", true);
                 }
             }
         });
@@ -1293,16 +1344,16 @@ ASC.People.PeopleController = (function() {
                 $inputs.each(function (i, item) {
                     var $item = jq(item);
                     if (!$item.is(":checked"))
-                        $item.attr("disabled", true);
+                        $item.prop("disabled", true);
                 });
             }
         } else {
             $inputs.each(function (i, item) {
                 var $item = jq(item);
                 if ($item.attr("locked")) {
-                    $item.prop("checked", false).attr("disabled", true);
+                    $item.prop("checked", false).prop("disabled", true);
                 } else {
-                    $item.attr("disabled", false);
+                    $item.prop("disabled", false);
                 }
             });
         }
@@ -1353,7 +1404,7 @@ ASC.People.PeopleController = (function() {
         initChangeStatusDialog(status);
         StudioBlockUIManager.blockUI("#changeStatusDialog", 650);
         PopupKeyUpActionProvider.ClearActions();
-        PopupKeyUpActionProvider.EnterAction = "jq(\"#changeStatusOkBtn\").click();";
+        PopupKeyUpActionProvider.EnterAction = "jq(\"#changeStatusOkBtn\").trigger('click');";
     };
 
     var initChangeStatusDialog = function(status) {
@@ -1426,15 +1477,15 @@ ASC.People.PeopleController = (function() {
         $containerBox.find("input[type=checkbox]").each(function (i, item) {
             var $checkbox = jq(item);
             if ($checkbox.attr("locked")) {
-                $checkbox.prop("checked", false).attr("disabled", true);
+                $checkbox.prop("checked", false).prop("disabled", true);
             } else {
                 if ($checkbox.attr("user-isvisitor") == "true") {
-                    $checkbox.prop("checked", true).attr("disabled", false);
+                    $checkbox.prop("checked", true).prop("disabled", false);
                 } else if (quota > 0 && count < quota) {
-                    $checkbox.prop("checked", true).attr("disabled", false);
+                    $checkbox.prop("checked", true).prop("disabled", false);
                     count++;
                 } else {
-                    $checkbox.prop("checked", false).attr("disabled", true);
+                    $checkbox.prop("checked", false).prop("disabled", true);
                 }
             }
         });
@@ -1469,16 +1520,16 @@ ASC.People.PeopleController = (function() {
                 $inputs.each(function (i, item) {
                     var $item = jq(item);
                     if (!$item.is(":checked") && $item.attr("user-isvisitor") != "true")
-                        $item.attr("disabled", true);
+                        $item.prop("disabled", true);
                 });
             }
         } else {
             $inputs.each(function (i, item) {
                 var $item = jq(item);
                 if ($item.attr("locked")) {
-                    $item.prop("checked", false).attr("disabled", true);
+                    $item.prop("checked", false).prop("disabled", true);
                 } else {
-                    $item.attr("disabled", false);
+                    $item.prop("disabled", false);
                 }
             });
         }
@@ -1527,7 +1578,7 @@ ASC.People.PeopleController = (function() {
         initResendInviteDialog();
         StudioBlockUIManager.blockUI("#resendInviteDialog", 500);
         PopupKeyUpActionProvider.ClearActions();
-        PopupKeyUpActionProvider.EnterAction = "jq(\"#resendInviteDialog .button.blue\").click();";
+        PopupKeyUpActionProvider.EnterAction = "jq(\"#resendInviteDialog .button.blue\").trigger('click');";
     };
 
     var initResendInviteDialog = function() {
@@ -1588,7 +1639,7 @@ ASC.People.PeopleController = (function() {
         initRemoveUsersDialog();
         StudioBlockUIManager.blockUI("#deleteUsersDialog", 500);
         PopupKeyUpActionProvider.ClearActions();
-        PopupKeyUpActionProvider.EnterAction = "jq(\"#deleteUsersDialog .button.blue\").click();";
+        PopupKeyUpActionProvider.EnterAction = "jq(\"#deleteUsersDialog .button.blue\").trigger('click');";
     };
 
     var initRemoveUsersDialog = function () {
@@ -1665,7 +1716,8 @@ ASC.People.PeopleController = (function() {
             {
                 users: [profile],
                 isAdmin: Teamlab.profile.isAdmin || window.ASC.Resources.Master.IsProductAdmin,
-                isRetina: isRetina
+                isRetina: isRetina,
+                talkModuleEnabled: _talkModuleEnabled
             });
             jq("#user_" + profile.id).replaceWith($row);
 
@@ -1698,10 +1750,10 @@ ASC.People.PeopleController = (function() {
             $checkbox.attr("user-id", item.id);
             $checkbox.attr("user-isVisitor", item.isVisitor);
             if (item.locked) {
-                $checkbox.attr("locked", item.id).prop("checked", false).attr("disabled", true);
+                $checkbox.attr("locked", item.id).prop("checked", false).prop("disabled", true);
                 $label.addClass("gray-text");
             } else {
-                $checkbox.prop("checked", true).attr("disabled", false);
+                $checkbox.prop("checked", true).prop("disabled", false);
             }
             $label.html(item.displayName);
             $checkbox.prependTo($label);
@@ -1738,14 +1790,14 @@ ASC.People.PeopleController = (function() {
 
     var lockDialog = function(obj) {
         LoadingBanner.showLoaderBtn(obj);
-        jq(obj).find("input[type=checkbox]").attr("disabled", true);
+        jq(obj).find("input[type=checkbox]").prop("disabled", true);
     };
 
     var unlockDialog = function(obj) {
         LoadingBanner.hideLoaderBtn(obj);
         jq(obj).find("input[type=checkbox]").each(function() {
             if (!jq(this).attr("locked")) {
-                jq(this).attr("disabled", false);
+                jq(this).prop("disabled", false);
             }
         });
     };
@@ -1878,34 +1930,19 @@ ASC.People.PeopleController = (function() {
             hintDefaultDisable: true,
             sorters:
             [
-                { id: "firstname", title: ASC.Resources.Master.Resource.FirstName, dsc: false, def: ASC.People.Data.userDisplayFormat == 1 },
-                { id: "lastname", title: ASC.Resources.Master.Resource.LastName, dsc: false, def: ASC.People.Data.userDisplayFormat == 2 }
+                { id: "firstname", title: ASC.Resources.Master.ResourceJS.FirstName, dsc: false, def: ASC.People.Data.userDisplayFormat == 1 },
+                { id: "lastname", title: ASC.Resources.Master.ResourceJS.LastName, dsc: false, def: ASC.People.Data.userDisplayFormat == 2 }
             ],
             filters: filters
         })
-            .bind("setfilter", ASC.People.PeopleController.setFilter)
-            .bind("resetfilter", ASC.People.PeopleController.resetFilter)
-            .bind("resetallfilters", ASC.People.PeopleController.resetAllFilters);
+            .on("setfilter", ASC.People.PeopleController.setFilter)
+            .on("resetfilter", ASC.People.PeopleController.resetFilter)
+            .on("resetallfilters", ASC.People.PeopleController.resetAllFilters);
 
         PeopleManager.SelectedCount = ASC.People.Resources.PeopleJSResource.SelectedCount;
         PeopleManager.UserLimit = ASC.People.Resources.PeopleJSResource.TariffActiveUserLimit;
+        PeopleManager.GuestLimit = ASC.People.Resources.PeopleJSResource.TariffGuestLimit;
         PeopleManager.UserLimitExcludingGuests = ASC.People.Resources.PeopleJSResource.TariffActiveUserLimitExcludingGuests;
-
-        ASC.People.PeopleController.advansedFilter.one("adv-ready", function() {
-            var peopleAdvansedFilterContainer = jq("#peopleFilter .advansed-filter-list");
-            peopleAdvansedFilterContainer.find("li[data-id='selected-status-active'] .inner-text").trackEvent(ga_Categories.people, ga_Actions.filterClick, 'status_active');
-            peopleAdvansedFilterContainer.find("li[data-id='selected-status-disabled'] .inner-text").trackEvent(ga_Categories.people, ga_Actions.filterClick, 'status_disabled');
-            peopleAdvansedFilterContainer.find("li[data-id='selected-status-pending'] .inner-text").trackEvent(ga_Categories.people, ga_Actions.filterClick, 'status_pending');
-            peopleAdvansedFilterContainer.find("li[data-id='selected-type-admin'] .inner-text").trackEvent(ga_Categories.people, ga_Actions.filterClick, 'type_admin');
-            peopleAdvansedFilterContainer.find("li[data-id='selected-type-user'] .inner-text").trackEvent(ga_Categories.people, ga_Actions.filterClick, 'type_user');
-            peopleAdvansedFilterContainer.find("li[data-id='selected-type-visitor'] .inner-text").trackEvent(ga_Categories.people, ga_Actions.filterClick, 'type_visitor');
-            peopleAdvansedFilterContainer.find("li[data-id='selected-group'] .inner-text").trackEvent(ga_Categories.people, ga_Actions.filterClick, 'group');
-        });
-
-        jq(".people-import-banner_img").trackEvent(ga_Categories.people, ga_Actions.bannerClick, "import-people");
-        jq("#peopleFilter .btn-toggle-sorter").trackEvent(ga_Categories.people, ga_Actions.filterClick, "sort");
-        jq("#peopleFilter .advansed-filter-input").trackEvent(ga_Categories.people, ga_Actions.filterClick, "search_text", "enter");
-
     };
 
     var initTenantQuota = function() {
@@ -1915,6 +1952,22 @@ ASC.People.PeopleController = (function() {
             },
             error: function(params, errors) { }
         });
+    };
+
+    var initModules = function () {
+        Teamlab.getEnabledModules({},
+            {
+                success: function (params, modules) {
+                    modules.forEach(function (module) {
+                        if (module.id == "mail") {
+                            _mailModuleEnabled = true;
+                        }
+                        if (module.id == "talk") {
+                            _talkModuleEnabled = true;
+                        }
+                    });
+                }
+            });
     };
 
     var initScrolledGroupMenu = function() {
@@ -1964,6 +2017,7 @@ ASC.People.PeopleController = (function() {
 
         jq("#peopleHeaderMenu").on("click", ".on-top-link", function() {
             window.scrollTo(0, 0);
+            document.querySelector('.mainPageContent').scrollTo(0, 0);
             return false;
         });
 
@@ -1984,12 +2038,12 @@ ASC.People.PeopleController = (function() {
             return false;
         });
 
-        jq("#changeTypeDialog").on("click", "#changeTypeDialogOk:not(.disable)", function () {
+        jq("#changeTypeDialog").on("click", ".changeTypeDialogOk:not(.disable)", function () {
             changeUserType();
             return false;
         });
 
-        jq("#changeTypeDialog").on("click", "#changeTypeDialogCancel:not(.disable)", function () {
+        jq("#changeTypeDialog").on("click", ".changeTypeDialogCancel:not(.disable)", function () {
             jq.unblockUI();
             return false;
         });
@@ -2049,7 +2103,7 @@ ASC.People.PeopleController = (function() {
         });        
 
         // right mouse button click
-        jq("body").unbind("contextmenu").bind("contextmenu", function (event) {
+        jq("body").off("contextmenu").on("contextmenu", function (event) {
             var e = jq.fixEvent(event);
 
             if (typeof e == "undefined" || !e) {
@@ -2065,19 +2119,39 @@ ASC.People.PeopleController = (function() {
             }
 
             var userField = target.closest("tr.with-entity-menu");
-            if (userField.length) {
-                var userId = userField.attr("id").split('_')[1];
-                showUserActionMenu(userId);
+
+            if (!userField.length) {
+                return true;
+            }
+
+            var userId = userField.attr("id").split('_')[1];
+
+            var updateUserActionMenu = function (canImpersonate) {
+                showUserActionMenu(userId, canImpersonate);
                 jq("#peopleData .entity-menu.active").removeClass("active");
 
                 $dropdownItem.show();
                 $dropdownItem.hide();
 
                 jq.showDropDownByContext(e, target, $dropdownItem);
-
-                return false;
             }
-            return true;
+
+            if (window.canImpersonate) {
+                Teamlab.canImpersonateUser(userId, {
+                    success: function (_, canImpersonate) {
+                        updateUserActionMenu(canImpersonate);
+                    },
+                    before: showLoader,
+                    after: hideLoader,
+                    error: function (_, errors) {
+                        toastr.error(errors[0]);
+                    }
+                })
+            } else {
+                updateUserActionMenu(false);
+            }
+
+            return false;
         });
 
          jq.dropdownToggle({

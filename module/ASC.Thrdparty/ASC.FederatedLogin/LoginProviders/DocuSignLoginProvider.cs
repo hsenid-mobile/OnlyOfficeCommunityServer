@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 using ASC.Core.Common.Configuration;
 using ASC.FederatedLogin.Helpers;
 
@@ -50,7 +51,7 @@ namespace ASC.FederatedLogin.LoginProviders
 
         public DocuSignLoginProvider() { }
 
-        public DocuSignLoginProvider(string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        public DocuSignLoginProvider(string name, int order, Dictionary<string, Prop> props, Dictionary<string, Prop> additional = null)
             : base(name, order, props, additional)
         {
         }
@@ -74,7 +75,7 @@ namespace ASC.FederatedLogin.LoginProviders
             if (string.IsNullOrEmpty(ClientSecret)) throw new ArgumentException("clientSecret");
 
             var data = string.Format("grant_type=authorization_code&code={0}", authCode);
-            var headers = new Dictionary<string, string> {{"Authorization", AuthHeader}};
+            var headers = new Dictionary<string, string> { { "Authorization", AuthHeader } };
 
             var json = RequestHelper.PerformRequest(AccessTokenUrl, "application/x-www-form-urlencoded", "POST", data, headers);
             if (json == null) throw new Exception("Can not get token");
@@ -99,7 +100,7 @@ namespace ASC.FederatedLogin.LoginProviders
                 throw new ArgumentException("Can not refresh given token");
 
             var data = string.Format("grant_type=refresh_token&refresh_token={0}", refreshToken);
-            var headers = new Dictionary<string, string> {{"Authorization", AuthHeader}};
+            var headers = new Dictionary<string, string> { { "Authorization", AuthHeader } };
 
             var json = RequestHelper.PerformRequest(AccessTokenUrl, "application/x-www-form-urlencoded", "POST", data, headers);
             if (json == null) throw new Exception("Can not get token");

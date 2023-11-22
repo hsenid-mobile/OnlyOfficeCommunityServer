@@ -8,12 +8,11 @@
 <%@ Import Namespace="ASC.Web.Files.Classes" %>
 <%@ Import Namespace="ASC.Web.Files.Resources" %>
 <%@ Import Namespace="ASC.Web.Files.Services.WCFService.FileOperations" %>
-<%@ Import Namespace="ASC.Web.Studio.Utility" %>
-<%@ Import Namespace="Resources" %>
+<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
 <%@ Register TagPrefix="sc" Namespace="ASC.Web.Studio.Controls.Common" Assembly="ASC.Web.Studio" %>
 
 
-<div class="files-content-panel" data-title="<%= TitlePage %>" data-rootid="<%= FolderIDCurrentRoot %>" data-deleteConfirm="<%= FilesSettings.ConfirmDelete ? "true" : null %>">
+<div class="files-content-panel" data-title="<%= TitlePage %>" data-rootid="<%= FolderIDCurrentRoot %>" data-externalrootid="<%= ExternalFolderIDCurrentRoot %>" data-deleteConfirm="<%= FilesSettings.ConfirmDelete ? "true" : null %>">
     <asp:PlaceHolder runat="server" ID="ListHolder"></asp:PlaceHolder>
 </div>
 
@@ -82,7 +81,10 @@
         <li id="buttonRestore"><a class="dropdown-item with-icon restore second-section">
             <%= FilesUCResource.ButtonRestore %>
             (<span></span>)</a></li>
-        <li class="dropdown-item-seporator second-section"></li>
+            <% if (SecurityContext.IsAuthenticated)
+               {  %>
+                    <li class="dropdown-item-seporator second-section"></li>
+            <% } %>
         <li id="buttonRemoveFavorite"><a class="dropdown-item with-icon favorites third-section">
             <%= FilesUCResource.ButtonRemoveFavorite %>
             (<span></span>)</a></li>
@@ -108,22 +110,39 @@
             <%= FilesUCResource.ButtonCreateByTemplate %></a></li>
         <li id="filesEdit"><a class="dropdown-item with-icon edit first-section">
             <%= FilesUCResource.ButtonEdit %></a></li>
+        <li id="filesFillForm"><a class="dropdown-item with-icon fill-form first-section">
+            <%= FilesUCResource.ButtonFillForm %></a></li>
         <% } %>
         <li id="filesOpen"><a class="dropdown-item with-icon preview first-section">
             <%= FilesUCResource.OpenFile %></a></li>
+        <% if (!Global.IsOutsider && !CoreContext.Configuration.CustomMode)
+           { %>
+        <li id="filesCreateForm"><a class="dropdown-item with-icon create-form first-section">
+            <%= FilesUCResource.ButtonMakeForm %></a></li>
+        <% } %>
         <li class="dropdown-item-seporator first-section"></li>
         <% if (!Global.IsOutsider)
            { %>
         <li id="filesShareAccess"><a class="dropdown-item with-icon access second-section">
             <%= FilesUCResource.ButtonShareAccess %></a></li>
-        <li id="filesGetExternalLink" data-trial="<%= !CoreContext.Configuration.Standalone && TenantExtra.GetTenantQuota().Trial ? "true" : "" %>">
+        <li id="filesFormFillingSettings"><a class="dropdown-item with-icon form-filling second-section">
+            <%= FilesUCResource.FormFillingSettings %></a></li>
+        <li id="filesGetExternalLink" data-trial="<%= Trial.ToString().ToLowerInvariant() %>">
             <a class="dropdown-item with-icon with-toggle extrn-link-v2 second-section">
-                <%= FilesUCResource.ButtonCopyExternalLink %>
+                <%= FilesUCResource.ButtonCopyQuickExternalLink %>
                 <span class="toggle off">
                     <span class="switcher"></span>
                 </span>
             </a>
         </li>
+        <% if (!SecurityContext.IsAuthenticated)
+           { %>
+            <li id="filesGetExternalInheritedLink" data-trial="<%= Trial.ToString().ToLowerInvariant() %>">
+                <a class="dropdown-item with-icon link second-section">
+                    <%= FilesUCResource.ButtonCopyExternalLink %>
+                </a>
+            </li>
+        <% } %>
         <% if (!CoreContext.Configuration.Personal)
            { %>
         <li id="filesChangeOwner"><a class="dropdown-item with-icon user second-section">
@@ -223,6 +242,8 @@
         <li class="dropdown-item-seporator second-section"></li>
         <li id="foldersGotoParent"><a class="dropdown-item with-icon open-location third-section">
             <%= FilesUCResource.OpenParent %></a></li>
+        <li id="foldersAddFavorite"><a class="dropdown-item with-icon favorites third-section">
+            <%= FilesUCResource.ButtonAddFavorite %></a></li>
         <li id="foldersDownload"><a class="dropdown-item with-icon download third-section">
             <%= FilesUCResource.DownloadFolder %></a></li>
         <li id="foldersMove"><a class="dropdown-item dropdown-with-item with-icon move-or-copy third-section">
@@ -242,6 +263,8 @@
             <%= FilesUCResource.ButtonDeleteThirdParty %></a></li>
         <li id="foldersUnsubscribe"><a class="dropdown-item with-icon unlink fourth-section">
             <%= FilesUCResource.Unsubscribe %></a></li>
+        <li id="foldersRemoveFavorite"><a class="dropdown-item with-icon favorites fourth-section">
+            <%= FilesUCResource.ButtonRemoveFavorite %></a></li>
         <li id="foldersRemove"><a class="dropdown-item with-icon delete fourth-section">
             <%= FilesUCResource.ButtonDelete %></a></li>
         <% } %>
@@ -299,6 +322,9 @@
         <Body>
             <div id="confirmRemoveText">
             </div>
+            <div id="confirmRemoveTextToContinue">
+                <%= FilesUCResource.ConfirmRemoveToContinue %>
+            </div>
             <div id="confirmRemoveList" class="files-remove-list webkit-scrollbar">
                 <dl>
                     <dt class="confirm-remove-folders">
@@ -338,16 +364,19 @@
 
             <div class="overwrite-capt"><%= FilesUCResource.SelectOverwrite %></div>
 
+            <% if (!IsVisitor)
+                { %>
             <label class="overwrite-resolve selected">
-                <input type="radio" name="resolveType" value="<%= (int) FileConflictResolveType.Overwrite %>" checked="checked" />
+                <input type="radio" name="resolveType" value="<%= (int)FileConflictResolveType.Overwrite %>" checked="checked" />
                 <span class="overwrite-resolve-descr">
                     <span class="overwrite-resolve-head"><%= FilesUCResource.ButtonOverwrite %></span>
                     <br />
                     <%= FilesUCResource.ConfirmOverwriteDescr %>
                 </span>
             </label>
-            <label class="overwrite-resolve">
-                <input type="radio" name="resolveType" value="<%= (int) FileConflictResolveType.Duplicate %>" />
+            <% } %>
+            <label class="overwrite-resolve <%= IsVisitor ? "selected" : "" %>">
+                <input type="radio" name="resolveType" value="<%= (int)FileConflictResolveType.Duplicate %>" <%= IsVisitor ? "checked=\"checked\"" : "" %>/>
                 <span class="overwrite-resolve-descr">
                     <span class="overwrite-resolve-head"><%= FilesUCResource.ButtonDuplicate %></span>
                     <br />

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,16 @@
 */
 
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security;
+using System.Threading;
+using System.Web;
+
 using ASC.Core;
+using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.Files.Core;
 using ASC.MessagingSystem;
@@ -24,13 +33,7 @@ using ASC.Web.Files.Classes;
 using ASC.Web.Files.Helpers;
 using ASC.Web.Files.Resources;
 using ASC.Web.Studio.Core;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security;
-using System.Threading;
-using System.Web;
+
 using File = ASC.Files.Core.File;
 using SecurityContext = ASC.Core.SecurityContext;
 
@@ -53,6 +56,11 @@ namespace ASC.Web.Files.Utils
             using (var dao = Global.DaoFactory.GetFileDao())
             {
                 file = dao.SaveFile(file, data);
+            }
+
+            using (var linkDao = Global.GetLinkDao())
+            {
+                linkDao.DeleteAllLink(file.ID);
             }
 
             FileMarker.MarkAsNew(file);
@@ -84,12 +92,13 @@ namespace ASC.Web.Files.Utils
                     file.Version++;
                     file.VersionGroup++;
                     file.Encrypted = false;
+                    file.ThumbnailStatus = Thumbnail.Waiting;
 
                     return file;
                 }
             }
 
-            return new File {FolderID = folderId, Title = fileName};
+            return new File { FolderID = folderId, Title = fileName };
         }
 
         public static File VerifyFileUpload(string folderId, string fileName, long fileSize, bool updateIfExists)
@@ -118,7 +127,7 @@ namespace ASC.Web.Files.Utils
                    && !file.Encrypted;
         }
 
-        private static string GetFolderId(object folderId, IList<string> relativePath)
+        public static string GetFolderId(object folderId, IList<string> relativePath)
         {
             using (var folderDao = Global.DaoFactory.GetFolderDao())
             {
@@ -140,7 +149,7 @@ namespace ASC.Web.Files.Utils
 
                         if (folder == null)
                         {
-                            folderId = folderDao.SaveFolder(new Folder {Title = subFolderTitle, ParentFolderID = folderId});
+                            folderId = folderDao.SaveFolder(new Folder { Title = subFolderTitle, ParentFolderID = folderId });
 
                             folder = folderDao.GetFolder(folderId);
                             FilesMessageService.Send(folder, HttpContext.Current.Request, MessageAction.FolderCreated, folder.Title);
@@ -163,6 +172,9 @@ namespace ASC.Web.Files.Utils
         {
             var maxUploadSize = GetMaxFileSize(folderId, true);
 
+
+            CheckFolderOwnerQuota(folderId, fileSize);
+
             if (fileSize > maxUploadSize)
                 throw FileSizeComment.GetFileSizeException(maxUploadSize);
 
@@ -172,7 +184,41 @@ namespace ASC.Web.Files.Utils
             return file;
         }
 
-        public static ChunkedUploadSession InitiateUpload(string folderId, string fileId, string fileName, long contentLength, bool encrypted)
+        public static File VerifyChunkedUploadForEditing(object fileId, long fileSize)
+        {
+            using (var fileDao = Global.DaoFactory.GetFileDao())
+            {
+                var file = fileDao.GetFile(fileId);
+
+                if (file == null)
+                {
+                    throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
+                }
+
+                var maxUploadSize = GetMaxFileSize(file.FolderID, true);
+
+                if (fileSize > maxUploadSize)
+                {
+                    throw FileSizeComment.GetFileSizeException(maxUploadSize);
+                }
+
+                if (!CanEdit(file))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
+                }
+
+                file.ConvertedType = null;
+                file.Comment = FilesCommonResource.CommentUpload;
+                file.Encrypted = false;
+                file.ThumbnailStatus = Thumbnail.Waiting;
+
+                file.ContentLength = fileSize;
+
+                return file;
+            }
+        }
+
+        public static ChunkedUploadSession InitiateUpload(string folderId, string fileId, string fileName, long contentLength, bool encrypted, string linkId, bool keepVersion = false)
         {
             if (string.IsNullOrEmpty(folderId))
                 folderId = null;
@@ -181,12 +227,12 @@ namespace ASC.Web.Files.Utils
                 fileId = null;
 
             var file = new File
-                {
-                    ID = fileId,
-                    FolderID = folderId,
-                    Title = fileName,
-                    ContentLength = contentLength
-                };
+            {
+                ID = fileId,
+                FolderID = folderId,
+                Title = fileName,
+                ContentLength = contentLength
+            };
 
             using (var dao = Global.DaoFactory.GetFileDao())
             {
@@ -199,6 +245,8 @@ namespace ASC.Web.Files.Utils
                 uploadSession.FolderId = folderId;
                 uploadSession.CultureName = Thread.CurrentThread.CurrentUICulture.Name;
                 uploadSession.Encrypted = encrypted;
+                uploadSession.KeepVersion = keepVersion;
+                uploadSession.LinkId = linkId;
 
                 ChunkedUploadSessionHolder.StoreSession(uploadSession);
 
@@ -236,6 +284,11 @@ namespace ASC.Web.Files.Utils
 
             if (uploadSession.BytesUploaded == uploadSession.BytesTotal)
             {
+                using (var linkDao = Global.GetLinkDao())
+                {
+                    linkDao.DeleteAllLink(uploadSession.File.ID);
+                }
+
                 FileMarker.MarkAsNew(uploadSession.File);
                 ChunkedUploadSessionHolder.RemoveSession(uploadSession);
             }
@@ -268,6 +321,32 @@ namespace ASC.Web.Files.Utils
             {
                 return folderDao.GetMaxUploadSize(folderId, chunkedUpload);
             }
+        }
+
+        private static void CheckFolderOwnerQuota(object folderId, long fileSize)
+        {
+            var quotaSettings = TenantUserQuotaSettings.Load();
+
+            if (quotaSettings.EnableUserQuota)
+            {
+                using (var folderDao = Global.DaoFactory.GetFolderDao())
+                {
+                    var ownerId = folderDao.GetRootFolder(folderId).CreateBy;
+
+                    var userQuotaSettings = UserQuotaSettings.LoadForUser(ownerId);
+                    var quotaLimit = userQuotaSettings.UserQuota;
+
+                    if (quotaLimit > 0)
+                    {
+                        var userQuotaRows = CoreContext.TenantManager.FindUserQuotaRows(CoreContext.TenantManager.GetCurrentTenant().TenantId, ownerId).Where(r => !string.IsNullOrEmpty(r.Tag)).Where(r => r.Tag != Guid.Empty.ToString());
+                        var folderOwnerFreeSpace = quotaLimit - Math.Max(0, userQuotaRows.Sum(r => r.Counter));
+
+                        if (folderOwnerFreeSpace < 0 || fileSize > folderOwnerFreeSpace)
+                            throw FileSizeComment.GetPersonalFreeSpaceException(quotaLimit);
+                    }
+                }
+            }
+
         }
 
         #endregion

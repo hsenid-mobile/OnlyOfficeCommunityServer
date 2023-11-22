@@ -1,6 +1,6 @@
-/*
+﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,8 @@
 */
 
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using ASC.Common.Logging;
 
 namespace ASC.MessagingSystem
 {
@@ -28,32 +26,33 @@ namespace ASC.MessagingSystem
 
         public static MessageTarget Create<T>(T value)
         {
-            try
+            var res = new List<string>(1);
+            if (value != null)
             {
-                var res = new List<string>();
-                var ids = value as System.Collections.IEnumerable;
-
-                if (ids != null)
-                {
-                    res.AddRange(from object id in ids select id.ToString());
-                }
-                else
-                {
-                    res.Add(value.ToString());
-                }
-
-                return new MessageTarget
-                    {
-                        _items = res.Distinct()
-                    };
-            }
-            catch (Exception e)
-            {
-                LogManager.GetLogger("ASC.Messaging").Error("EventMessageTarget exception", e);
-                return null;
+                res.Add(value.ToString());
             }
 
+            return new MessageTarget
+            {
+                _items = res
+            };
         }
+
+        public static MessageTarget Create<T>(IEnumerable<T> value)
+        {
+            var res = new MessageTarget
+            {
+                _items = new List<string>()
+            };
+
+            if (value != null)
+            {
+                res._items = value.Select(r => r.ToString()).ToList();
+            }
+
+            return res;
+        }
+
 
         public static MessageTarget Parse(string value)
         {
@@ -68,6 +67,8 @@ namespace ASC.MessagingSystem
                 _items = items
             };
         }
+
+        public IEnumerable<string> GetItems() { return _items.ToList(); }
 
         public override string ToString()
         {

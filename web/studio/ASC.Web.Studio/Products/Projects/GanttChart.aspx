@@ -58,13 +58,13 @@
                 <input id="openTaskOnly" type="checkbox" name="openTaskOnly"/>
                 <label for="openTaskOnly"><%=ProjectResource.GanttOpenTaskOnly %></label>
             </div>
-            <div class="task-filter-container" style="display:none;"> <!-- скрыла пока не определиться в каком формате будет этот фильтр -->
+            <div class="task-filter-container" style="display:none;"> <!-- hid until you decide in what format this filter will be -->
                 <select id="teamMemberFilter">
                     <option value="-1"><%=ProjectResource.GanttAllTeamMembers %></option>
                 </select>
             </div>
             <%--<div class="task-filter-container">
-                <a class="link underline" href="Tasks.aspx?prjID=<%=Project.ID%>" target="_blank"><%=ProjectsJSResource.ToTaskList %></a>        если список будет формироваться из разных проектов, то эта ссылка не нужна
+                <a class="link underline" href="Tasks.aspx?prjID=<%=Project.ID%>" target="_blank"><%=ProjectsJSResource.ToTaskList %></a>        if the list will be formed from different projects, then this link is not needed
             </div>--%>
         </div>
         <div class="mode-button-container">
@@ -296,7 +296,7 @@
     <div id="statusListTaskContainer" class="studio-action-panel gantt-context-menu">
         <ul id="statusListTask" class="dropdown-content">
             <% foreach(var s in Statuses) {  %>
-            <li data-id="<%= s.Id %>" class="<%= s.Id %> dropdown-item" style="background: url('data:<%= s.ImageType %>;base64,<%= s.Image %>') no-repeat 2px 4px"><%= s.Title %></li>
+            <li data-id="<%= s.Id %>" class="<%= s.Id %> dropdown-item" style="background: url('data:<%= s.ImageType %>;base64,<%= s.Image %>') no-repeat 2px 4px"><%: s.Title %></li>
             <%} %>
         </ul>
     </div>

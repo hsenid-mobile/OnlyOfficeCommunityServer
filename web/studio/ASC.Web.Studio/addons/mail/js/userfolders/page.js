@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -300,6 +300,8 @@ window.userFoldersPage = (function($) {
             refresh();
         } else {
             ref.open_node(parentId);
+            ref.deselect_all();
+            ref.select_node(res);
         }
 
         show();
@@ -343,9 +345,17 @@ window.userFoldersPage = (function($) {
 
         var id = idPrefix + folder.id;
 
+        if (!id)
+            return;
+
         var node = ref.get_node(id);
 
-        var children = ref.get_node(node.parent).children;
+        var parent = ref.get_node(node.parent);
+
+        var children = parent.children;
+
+        if (!children)
+            return;
 
         var index = children.indexOf(id);
         var nextItem = -1;

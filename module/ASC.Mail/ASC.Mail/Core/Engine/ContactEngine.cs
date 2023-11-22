@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Mail.Core.Dao.Expressions.Contact;
@@ -129,7 +130,7 @@ namespace ASC.Mail.Core.Engine
         {
             var contactId = newContactCard.ContactInfo.Id;
 
-            if(contactId < 0)
+            if (contactId < 0)
                 throw new ArgumentException("Invalid contact id");
 
             var contactCard = GetContactCard(contactId);
@@ -193,7 +194,7 @@ namespace ASC.Mail.Core.Engine
 
             Log.Debug("IndexEngine->UpdateContactCard()");
 
-            factory.IndexEngine.Update(new List<MailContactWrapper> {contactCard.ToMailContactWrapper()});
+            factory.IndexEngine.Update(new List<MailContactWrapper> { contactCard.ToMailContactWrapper() });
 
             return contactCard;
         }
@@ -253,7 +254,7 @@ namespace ASC.Mail.Core.Engine
                 Task.Run(() =>
                 {
                     CoreContext.TenantManager.SetCurrentTenant(tenant);
-                    SecurityContext.AuthenticateMe(userGuid);
+                    SecurityContext.CurrentUser = userGuid;
 
                     var engine = new EngineFactory(tenant, userName);
 
@@ -273,7 +274,7 @@ namespace ASC.Mail.Core.Engine
                 Task.Run(() =>
                 {
                     CoreContext.TenantManager.SetCurrentTenant(tenant);
-                    SecurityContext.AuthenticateMe(userGuid);
+                    SecurityContext.CurrentUser = userGuid;
 
                     var engine = new EngineFactory(tenant, userGuid.ToString());
                     return engine.AccountEngine.SearchAccountEmails(term);
@@ -282,7 +283,7 @@ namespace ASC.Mail.Core.Engine
                 Task.Run(() =>
                 {
                     CoreContext.TenantManager.SetCurrentTenant(tenant);
-                    SecurityContext.AuthenticateMe(userGuid);
+                    SecurityContext.CurrentUser = userGuid;
 
                     return WebItemSecurity.IsAvailableForMe(WebItemManager.CRMProductID)
                         ? apiHelper.SearchCrmEmails(term, maxCountPerSystem)
@@ -292,7 +293,7 @@ namespace ASC.Mail.Core.Engine
                 Task.Run(() =>
                 {
                     CoreContext.TenantManager.SetCurrentTenant(tenant);
-                    SecurityContext.AuthenticateMe(userGuid);
+                    SecurityContext.CurrentUser = userGuid;
 
                     return WebItemSecurity.IsAvailableForMe(WebItemManager.PeopleProductID)
                         ? apiHelper.SearchPeopleEmails(term, 0, maxCountPerSystem)

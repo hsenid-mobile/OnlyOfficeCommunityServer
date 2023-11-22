@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,22 @@
 
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Net;
 using System.Linq;
+using System.Net;
+
 using ASC.Common.Caching;
 using ASC.Common.Logging;
 using ASC.Common.Threading.Workers;
 using ASC.Data.Storage;
+using ASC.Web.Core;
+using ASC.Web.Core.Utility.Skins;
 using ASC.Web.CRM.Configuration;
 using ASC.Web.CRM.Resources;
-using ASC.Web.Core.Utility.Skins;
-using ASC.Web.Core;
 
 namespace ASC.Web.CRM.Classes
 {
@@ -69,17 +71,16 @@ namespace ASC.Web.CRM.Classes
         private const string PhotosBaseDirName = "photos";
         private const string PhotosDefaultTmpDirName = "temp";
 
-        private static readonly Dictionary<int, IDictionary<Size, string>> _photoCache = new Dictionary<int, IDictionary<Size, string>>();
+        private static readonly ConcurrentDictionary<int, ConcurrentDictionary<Size, string>> _photoCache = new ConcurrentDictionary<int, ConcurrentDictionary<Size, string>>();
 
         private static readonly WorkerQueue<ResizeWorkerItem> ResizeQueue = new WorkerQueue<ResizeWorkerItem>(2, TimeSpan.FromSeconds(30), 1, true);
-        private static readonly ICacheNotify cachyNotify; 
+        private static readonly ICacheNotify cachyNotify;
 
         private static readonly Size _oldBigSize = new Size(145, 145);
 
         private static readonly Size _bigSize = new Size(200, 200);
         private static readonly Size _mediumSize = new Size(82, 82);
         private static readonly Size _smallSize = new Size(40, 40);
-
         private static readonly object locker = new object();
 
         #endregion
@@ -109,20 +110,18 @@ namespace ASC.Web.CRM.Classes
 
         private static String FromCache(int contactID, Size photoSize)
         {
-            lock (locker)
+            if (_photoCache.ContainsKey(contactID))
             {
-                if (_photoCache.ContainsKey(contactID))
+                if (_photoCache[contactID].ContainsKey(photoSize))
                 {
-                    if (_photoCache[contactID].ContainsKey(photoSize))
-                    {
-                        return _photoCache[contactID][photoSize];
-                    }
-                    if (photoSize == _bigSize && _photoCache[contactID].ContainsKey(_oldBigSize))
-                    {
-                        return _photoCache[contactID][_oldBigSize];
-                    }
+                    return _photoCache[contactID][photoSize];
+                }
+                if (photoSize == _bigSize && _photoCache[contactID].ContainsKey(_oldBigSize))
+                {
+                    return _photoCache[contactID][_oldBigSize];
                 }
             }
+
             return String.Empty;
         }
 
@@ -133,10 +132,9 @@ namespace ASC.Web.CRM.Classes
 
         private static void RemoveFromPrivateCache(int contactID)
         {
-            lock (locker)
-            {
-                _photoCache.Remove(contactID);
-            }
+            ConcurrentDictionary<Size, string> removedValue;
+
+            _photoCache.TryRemove(contactID, out removedValue);
         }
 
         private static void ToCache(int contactID, String photoUri, Size photoSize)
@@ -144,18 +142,10 @@ namespace ASC.Web.CRM.Classes
             cachyNotify.Publish(CreateCacheItem(contactID, photoUri, photoSize), CacheNotifyAction.InsertOrUpdate);
         }
 
-        private static void ToPrivateCache(int contactID, String photoUri, Size photoSize)
-        {
-            lock (locker)
-            {
-                if (_photoCache.ContainsKey(contactID))
-                    if (_photoCache[contactID].ContainsKey(photoSize))
-                        _photoCache[contactID][photoSize] = photoUri;
-                    else
-                        _photoCache[contactID].Add(photoSize, photoUri);
-                else
-                    _photoCache.Add(contactID, new Dictionary<Size, string> {{photoSize, photoUri}});
-            }
+        private static void ToPrivateCache(int contactID, string photoUri, Size photoSize)
+        {            
+            _photoCache.GetOrAdd(contactID, new ConcurrentDictionary<Size, string>())
+                       .AddOrUpdate(photoSize, photoUri, (key, oldValue) => photoUri);
         }
 
         private static KeyValuePair<int, KeyValuePair<Size, string>> CreateCacheItem(int contactID, String photoUri, Size photoSize)
@@ -399,12 +389,11 @@ namespace ASC.Web.CRM.Classes
 
         public static void DeletePhoto(string tmpDirName)
         {
+            var photoDirectory = BuildFileTmpDirectory(tmpDirName);
+            var store = Global.GetStore();
+
             lock (locker)
             {
-
-                var photoDirectory = BuildFileTmpDirectory(tmpDirName);
-                var store = Global.GetStore();
-
                 if (store.IsDirectory(photoDirectory))
                 {
                     store.DeleteFiles(photoDirectory, "*", false);
@@ -425,7 +414,7 @@ namespace ASC.Web.CRM.Classes
                 {
                     DeletePhoto(contactID, false, null, false);
                 }
-                foreach (var photoSize in new[] {_bigSize, _mediumSize, _smallSize})
+                foreach (var photoSize in new[] { _bigSize, _mediumSize, _smallSize })
                 {
                     var photoTmpPath = FromDataStoreRelative(isNewContact ? 0 : contactID, photoSize, true, tmpDirName);
                     if (string.IsNullOrEmpty(photoTmpPath)) throw new Exception("Temp phono not found");
@@ -448,7 +437,7 @@ namespace ASC.Web.CRM.Classes
                 }
                 DeletePhoto(contactID, true, tmpDirName, true);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogManager.GetLogger("ASC.CRM").ErrorFormat("TryUploadPhotoFromTmp for contactID={0} failed witth error: {1}", contactID, ex);
                 return;
@@ -491,14 +480,14 @@ namespace ASC.Web.CRM.Classes
         private static PhotoData ResizeToBigSize(byte[] imageData, int contactID, bool uploadOnly, string tmpDirName)
         {
             var resizeWorkerItem = new ResizeWorkerItem
-                {
-                    ContactID = contactID,
-                    UploadOnly = uploadOnly,
-                    RequireFotoSize = new[] {_bigSize},
-                    ImageData = imageData,
-                    DataStore = Global.GetStore(),
-                    TmpDirName = tmpDirName
-                };
+            {
+                ContactID = contactID,
+                UploadOnly = uploadOnly,
+                RequireFotoSize = new[] { _bigSize },
+                ImageData = imageData,
+                DataStore = Global.GetStore(),
+                TmpDirName = tmpDirName
+            };
 
             ExecResizeImage(resizeWorkerItem);
 
@@ -530,14 +519,14 @@ namespace ASC.Web.CRM.Classes
         private static void ExecGenerateThumbnail(byte[] imageData, int contactID, bool uploadOnly, string tmpDirName)
         {
             var resizeWorkerItem = new ResizeWorkerItem
-                {
-                    ContactID = contactID,
-                    UploadOnly = uploadOnly,
-                    RequireFotoSize = new[] {_mediumSize, _smallSize},
-                    ImageData = imageData,
-                    DataStore = Global.GetStore(),
-                    TmpDirName = tmpDirName
-                };
+            {
+                ContactID = contactID,
+                UploadOnly = uploadOnly,
+                RequireFotoSize = new[] { _mediumSize, _smallSize },
+                ImageData = imageData,
+                DataStore = Global.GetStore(),
+                TmpDirName = tmpDirName
+            };
 
             if (!ResizeQueue.GetItems().Contains(resizeWorkerItem))
                 ResizeQueue.Add(resizeWorkerItem);
@@ -641,7 +630,10 @@ namespace ASC.Web.CRM.Classes
 
         public class PhotoData
         {
+            ///<example>url</example>
             public string Url;
+
+            ///<example>path</example>
             public string Path;
         }
 

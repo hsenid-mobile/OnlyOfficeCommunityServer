@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
 */
 
 
-using ASC.Core.Billing;
-using ASC.Core.Tenants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +22,9 @@ using System.Net;
 using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Web;
+
+using ASC.Core.Billing;
+using ASC.Core.Tenants;
 
 
 namespace ASC.Core
@@ -60,6 +61,11 @@ namespace ASC.Core
         public List<Tenant> GetTenants(bool active = true)
         {
             return tenantService.GetTenants(default(DateTime), active).ToList();
+        }
+
+        public List<Tenant> GetTenants(List<int> ids)
+        {
+            return tenantService.GetTenants(ids).ToList();
         }
 
         public Tenant GetTenant(int tenantId)
@@ -200,22 +206,31 @@ namespace ASC.Core
             return quotaService.GetTenantQuotas().Where(q => q.Id < 0 && (all || q.Visible)).OrderByDescending(q => q.Id).ToList();
         }
 
-        public TenantQuota GetTenantQuota(int tenant)
+        public TenantQuota GetTenantQuota(int tenant, bool useCache = true)
         {
-            // если в tenants_quota есть строка, с данным идентификатором портала, то в качестве квоты берется именно она
-            var q = quotaService.GetTenantQuota(tenant) ?? quotaService.GetTenantQuota(Tenant.DEFAULT_TENANT) ?? TenantQuota.Default;
-            if (q.Id != tenant && tariffService != null)
+            var defaultQuota = quotaService.GetTenantQuota(tenant, useCache) ?? quotaService.GetTenantQuota(Tenant.DEFAULT_TENANT, useCache) ?? TenantQuota.Default;
+            if (defaultQuota.Id != tenant && tariffService != null)
             {
-                var tariffQuota = quotaService.GetTenantQuota(tariffService.GetTariff(tenant).QuotaId);
-                if (tariffQuota != null)
+                var tariff = tariffService.GetTariff(tenant);
+                var currentQuota = quotaService.GetTenantQuota(tariff.QuotaId);
+                if (currentQuota != null)
                 {
-                    return tariffQuota;
+                    currentQuota = (TenantQuota)currentQuota.Clone();
+
+                    if (currentQuota.ActiveUsers == -1)
+                    {
+                        currentQuota.ActiveUsers = tariff.Quantity;
+                        currentQuota.MaxTotalSize *= currentQuota.ActiveUsers;
+                        currentQuota.Price *= currentQuota.ActiveUsers;
+                    }
+
+                    return currentQuota;
                 }
             }
-            return q;
+            return defaultQuota;
         }
 
-        public IDictionary<string, IEnumerable<Tuple<string, decimal>>> GetProductPriceInfo(bool all = true)
+        public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(bool all = true)
         {
             var productIds = GetTenantQuotas(all)
                 .Select(p => p.AvangateId)
@@ -236,9 +251,18 @@ namespace ASC.Core
             quotaService.SetTenantQuotaRow(row, exchange);
         }
 
-        public List<TenantQuotaRow> FindTenantQuotaRows(TenantQuotaRowQuery query)
+        public List<TenantQuotaRow> FindTenantQuotaRows(int tenantId)
         {
-            return quotaService.FindTenantQuotaRows(query).ToList();
+            return quotaService.FindTenantQuotaRows(tenantId).ToList();
+        }
+
+        public List<TenantQuotaRow> FindUserQuotaRows(int tenantId, Guid userId, bool useCache = true)
+        {
+            return quotaService.FindUserQuotaRows(tenantId, userId, useCache).ToList();
+        }
+        public TenantQuotaRow FindUserQuotaRow(int tenantId, Guid userId, Guid tag)
+        {
+            return quotaService.FindUserQuotaRow(tenantId, userId, tag);
         }
     }
 }

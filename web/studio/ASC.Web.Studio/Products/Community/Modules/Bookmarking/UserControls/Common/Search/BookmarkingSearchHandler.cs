@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 
 using System;
+
+using ASC.Web.Community.Modules.Bookmarking.UserControls.Resources;
 using ASC.Web.Community.Product;
 using ASC.Web.Core.ModuleManagement.Common;
 using ASC.Web.Core.Utility;
 using ASC.Web.Core.Utility.Skins;
 using ASC.Web.Studio.Controls.Common;
 using ASC.Web.UserControls.Bookmarking.Common.Presentation;
-using ASC.Web.UserControls.Bookmarking.Resources;
 
 namespace ASC.Web.UserControls.Bookmarking.Common.Search
 {
@@ -30,7 +31,7 @@ namespace ASC.Web.UserControls.Bookmarking.Common.Search
     {
         public override ImageOptions Logo
         {
-            get { return new ImageOptions { ImageFileName = "bookmarking_mini_icon.png", PartID = ModuleID }; }
+            get { return new ImageOptions { ImageFileName = "bookmarking_mini_icon.svg", PartID = ModuleID }; }
         }
 
         public override string SearchName

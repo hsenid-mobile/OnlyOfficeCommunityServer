@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,15 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Web;
+
 using AjaxPro;
+
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.Web.Core;
 using ASC.Web.Core.Jabber;
+using ASC.Web.Core.Utility;
 using ASC.Web.Studio;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Utility;
@@ -39,6 +42,8 @@ namespace ASC.Web.Talk
     [AjaxNamespace("JabberClient")]
     public partial class JabberClient : MainPage
     {
+        private new ILog Log = LogManager.GetLogger("ASC.Talk");
+
         private static string JabberResource
         {
             get { return "TMTalk"; }
@@ -94,8 +99,16 @@ namespace ASC.Web.Talk
                     "~/addons/talk/js/talk.messagesmanager.js",
                     "~/addons/talk/js/talk.connectiomanager.js",
                     "~/addons/talk/js/talk.default.js",
-                    "~/addons/talk/js/talk.init.js")
-                .RegisterStyle("~/addons/talk/css/default/talk.style.css");
+                    "~/addons/talk/js/talk.init.js");
+            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
+            {
+                Page.RegisterStyle("~/addons/talk/css/dark/dark-talk.style.less");
+            }
+            else
+            {
+                Page.RegisterStyle("~/addons/talk/css/default/talk.style.less");
+            }
+
             if (Request.Browser != null && Request.Browser.Browser != "IE" && Request.Browser.Browser != "InternetExplorer")
             {
                 Page
@@ -106,12 +119,12 @@ namespace ASC.Web.Talk
                         "~/js/third-party/firebase-messaging.js");
             }
 
-            var virtPath = "~/addons/talk/css/default/talk.style." + CultureInfo.CurrentCulture.Name.ToLower() + ".css";
+            var virtPath = "~/addons/talk/css/default/talk.style." + CultureInfo.CurrentCulture.Name.ToLower() + ".less";
             if (File.Exists(Server.MapPath(virtPath)))
             {
                 Page.RegisterStyle(virtPath);
             }
-            Page.RegisterStyle("~/addons/talk/css/default/talk.text-overflow.css");
+            Page.RegisterStyle("~/addons/talk/css/default/talk.text-overflow.less");
 
 
             switch (_cfg.RequestTransportType.ToLower())
@@ -155,8 +168,8 @@ namespace ASC.Web.Talk
             {
                 Page.RegisterInlineScript("ASC.TMTalk.notifications && ASC.TMTalk.notifications.initialiseFirebase(" + GetFirebaseConfig() + ");");
             }
-            catch (Exception){}
-            
+            catch (Exception) { }
+
         }
 
         [AjaxMethod(HttpSessionStateRequirement.ReadWrite), Core.Security.SecurityPassthrough]
@@ -168,7 +181,7 @@ namespace ASC.Web.Talk
             }
             catch (Exception ex)
             {
-                LogManager.GetLogger("ASC.Talk").Error(ex);
+                Log.Error(ex);
                 return String.Empty;
             }
         }
@@ -183,7 +196,7 @@ namespace ASC.Web.Talk
             }
             catch (Exception ex)
             {
-                LogManager.GetLogger("ASC.Talk").Error(ex);
+                Log.Error(ex);
                 return String.Empty;
             }
         }
@@ -198,7 +211,7 @@ namespace ASC.Web.Talk
             }
             catch (Exception ex)
             {
-                LogManager.GetLogger("ASC.Talk").Error(ex);
+                Log.Error(ex);
                 return String.Empty;
             }
         }

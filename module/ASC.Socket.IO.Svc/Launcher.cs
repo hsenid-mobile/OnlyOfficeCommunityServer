@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ using ASC.Core.Notify.Signalr;
 
 using WebSocketSharp;
 
+using LogManager = ASC.Common.Logging.BaseLogManager;
+
 namespace ASC.Socket.IO.Svc
 {
     public class Launcher : IServiceController
@@ -38,7 +40,7 @@ namespace ASC.Socket.IO.Svc
         private static ProcessStartInfo startInfo;
         private static WebSocket webSocket;
         private static CancellationTokenSource cancellationTokenSource;
-        private const int PingInterval = 10000;
+        private static int PingInterval = int.Parse(ConfigurationManagerExtension.AppSettings["ping.interval"]);
         private static readonly ILog Logger = LogManager.GetLogger("ASC");
         private static string LogDir;
 
@@ -127,6 +129,8 @@ namespace ASC.Socket.IO.Svc
         {
             Thread.Sleep(PingInterval);
 
+            var pingCancellationTokenSource = new CancellationTokenSource();
+
             var error = false;
             webSocket = new WebSocket(string.Format("ws://127.0.0.1:{0}/socket.io/?EIO=3&transport=websocket", startInfo.EnvironmentVariables["port"]));
             webSocket.SetCookie(new WebSocketSharp.Net.Cookie("authorization", SignalrServiceClient.CreateAuthToken()));
@@ -146,12 +150,13 @@ namespace ASC.Socket.IO.Svc
 
             webSocket.OnOpen += (sender, e) =>
             {
+                pingCancellationTokenSource = new CancellationTokenSource();
                 Logger.Info("Open");
                 error = false;
 
                 Thread.Sleep(PingInterval);
 
-                Task.Run(() =>
+                var task = new Task(() =>
                 {
                     while (webSocket.Ping())
                     {
@@ -160,13 +165,16 @@ namespace ASC.Socket.IO.Svc
                     }
 
                     Logger.Debug("Reconnect" + webSocket.ReadyState);
-
-                }, cancellationTokenSource.Token);
+                }, pingCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
+                task.Start(TaskScheduler.Default);
             };
 
             webSocket.OnClose += (sender, e) =>
             {
                 Logger.Info("Close");
+
+                pingCancellationTokenSource.Cancel();
+                pingCancellationTokenSource.Dispose();
 
                 if (cancellationTokenSource.IsCancellationRequested) return;
 
@@ -176,10 +184,11 @@ namespace ASC.Socket.IO.Svc
                 }
                 else
                 {
-                    webSocket.Connect();
+                    StartPing();
                 }
 
             };
+
 
             webSocket.OnMessage += (sender, e) =>
             {

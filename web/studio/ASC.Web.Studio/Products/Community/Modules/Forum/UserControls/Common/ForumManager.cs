@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@
 using System;
 using System.Collections;
 using System.Web;
+
+using ASC.Common.Caching;
+using ASC.Core;
 using ASC.Data.Storage;
 using ASC.Forum;
 using ASC.Web.Core.Users;
@@ -48,15 +51,17 @@ namespace ASC.Web.UserControls.Forum.Common
         internal static string ForumScriptKey { get { return "__forum_core_script"; } }
         internal static string SearchHelperScriptKey { get { return "__searchhelper_core_script"; } }
 
-        private static object _syncObj = new object();
+        private static readonly object _syncObj = new object();
 
-        private static Hashtable _settingsCollection;
+        private static readonly Hashtable _settingsCollection;
 
-        private SecurityActionValidator _securityValidator;
+        private readonly SecurityActionValidator _securityValidator;
 
         public IPresenterFactory PresenterFactory { get; private set; }
 
         public Settings Settings { get; private set; }
+
+        private static readonly ICache CacheAsc = AscCache.Memory;
 
         internal ForumManager(Settings settings)
         {
@@ -229,47 +234,24 @@ namespace ASC.Web.UserControls.Forum.Common
             return "<img alt=\"\" class='userPhoto' src=\"" + UserPhotoManager.GetBigPhotoURL(userID) + "\"/>";
         }
 
-
-
-        public PageLocation CurrentPage
-        {
-            get
-            {
-                if (HttpContext.Current != null && HttpContext.Current.Session[this.SessionKeys.CurrentPageLocation] != null)
-                    return (PageLocation)HttpContext.Current.Session[this.SessionKeys.CurrentPageLocation];
-
-                return new PageLocation(ForumPage.Default, Settings.StartPageAbsolutePath);
-
-            }
-        }
-        public PageLocation PreviousPage
-        {
-            get
-            {
-                if (HttpContext.Current != null && HttpContext.Current.Session[this.SessionKeys.CurrentPageLocation] != null)
-                    return (PageLocation)HttpContext.Current.Session[this.SessionKeys.PreviousPageLocation];
-
-                return new PageLocation(ForumPage.Default, Settings.StartPageAbsolutePath);
-
-            }
-        }
+        public string PreviousPage =>
+            CacheAsc.Get<PageLocation>(this.SessionKeys.PreviousPageLocation) != null
+                ? CacheAsc.Get<PageLocation>(this.SessionKeys.PreviousPageLocation).Url
+                : Settings.StartPageAbsolutePath;
 
         public void SetCurrentPage(ForumPage page)
         {
-            if (HttpContext.Current != null)
-            {
-                PageLocation current = new PageLocation(ForumPage.Default, Settings.StartPageAbsolutePath);
-                if (HttpContext.Current.Session[this.SessionKeys.CurrentPageLocation] != null)
-                    current = (PageLocation)HttpContext.Current.Session[this.SessionKeys.CurrentPageLocation];
+            var current = new PageLocation(ForumPage.Default, Settings.StartPageAbsolutePath);
+            if (CacheAsc.Get<PageLocation>(this.SessionKeys.CurrentPageLocation) != null)
+                current = CacheAsc.Get<PageLocation>(this.SessionKeys.CurrentPageLocation);
 
-                PageLocation previous = (PageLocation)current.Clone();
+            var previous = (PageLocation)current.Clone();
 
-                if (previous.Page != page)
-                    HttpContext.Current.Session[this.SessionKeys.PreviousPageLocation] = previous;
+            if (previous.Page != page)
+                CacheAsc.Insert(this.SessionKeys.PreviousPageLocation, previous, TimeSpan.FromMinutes(15));
 
-                current = new PageLocation(page, HttpContext.Current.Request.GetUrlRewriter().AbsoluteUri);
-                HttpContext.Current.Session[this.SessionKeys.CurrentPageLocation] = current;
-            }
+            current = new PageLocation(page, HttpContext.Current.Request.GetUrlRewriter().AbsoluteUri);
+            CacheAsc.Insert(this.SessionKeys.CurrentPageLocation, current, TimeSpan.FromMinutes(15));
         }
 
         public ForumSessionKeys SessionKeys { get; private set; }
@@ -282,17 +264,8 @@ namespace ASC.Web.UserControls.Forum.Common
             {
                 _settingsID = settingsID;
             }
-
-            public string CurrentPageLocation
-            {
-                get { return "forum_current_page_location" + _settingsID.ToString(); }
-            }
-
-            public string PreviousPageLocation
-            {
-                get { return "forum_previous_page_location" + _settingsID.ToString(); }
-            }
-
+            public string CurrentPageLocation => "forum_current_page_location" + _settingsID.ToString() + SecurityContext.CurrentAccount.ID.ToString();
+            public string PreviousPageLocation => "forum_previous_page_location" + _settingsID.ToString() + SecurityContext.CurrentAccount.ID.ToString();
         }
 
     }

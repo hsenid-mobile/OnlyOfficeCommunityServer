@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ namespace ASC.TelegramService.Core
             return parsedParams.ToArray();
         }
 
-        public async Task HandleCommand(Message msg, TelegramBotClient client, int tenantId)
+        public async Task HandleCommand(Message msg, ITelegramBotClient client, int tenantId)
         {
             try
             {

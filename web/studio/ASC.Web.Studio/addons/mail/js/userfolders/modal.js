@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ window.userFoldersModal = (function($) {
         window.StudioBlockUIManager.blockUI(message, width, { bindEvents: false });
 
         $('#manageWindow .cancelButton').css('cursor', 'pointer');
-        $('.containerBodyBlock .buttons .cancel').unbind('click').bind('click', function () {
+        $('.containerBodyBlock .buttons .cancel').off('click').on('click', function () {
             $.unblockUI();
             return false;
         });
@@ -72,7 +72,10 @@ window.userFoldersModal = (function($) {
     function save() {
         if (!wnd) return;
 
-        jq('#userFolderWnd .containerBodyBlock .buttons .button.blue:visible').click();
+        var button = wnd.find('.containerBodyBlock .buttons .button.blue:visible');
+
+        if (button && button.length === 1)
+            button[0].click();
     }
 
     function showCreate(folder, parentFolder, options) {
@@ -91,8 +94,8 @@ window.userFoldersModal = (function($) {
         bindCancel();
 
         wnd.find('.buttons .save')
-            .unbind('click')
-            .bind('click',
+            .off('click')
+            .on('click',
                 function() {
                     var newFolder = {
                         name: (folderNameInput.val() || "").trim(),
@@ -106,8 +109,8 @@ window.userFoldersModal = (function($) {
             selector.toggleClass("disable", false);
 
             selector
-                .unbind('click')
-                .bind('click',
+                .off('click')
+                .on('click',
                     function() {
                         var options = {
                             btnCaption: window.MailResource.Select,
@@ -154,8 +157,8 @@ window.userFoldersModal = (function($) {
         bindCancel();
 
         wnd.find('.buttons .save')
-            .unbind('click')
-            .bind('click',
+            .off('click')
+            .on('click',
                 function() {
                     var newFolder = {
                         id: folder.id,
@@ -169,8 +172,8 @@ window.userFoldersModal = (function($) {
         if (!options.disableSelector) {
             selector.toggleClass("disable", false);
             selector
-                .unbind('click')
-                .bind('click',
+                .off('click')
+                .on('click',
                     function() {
                         var options = {
                             btnCaption: window.MailResource.Select,
@@ -214,8 +217,8 @@ window.userFoldersModal = (function($) {
         bindCancel();
 
         wnd.find('.buttons .del')
-            .unbind('click')
-            .bind('click',
+            .off('click')
+            .on('click',
                 function() {
                     options.onSave(folder);
                 });
@@ -223,8 +226,8 @@ window.userFoldersModal = (function($) {
 
     function bindCancel() {
         wnd.find('.buttons .cancel')
-            .unbind('click')
-            .bind('click',
+            .off('click')
+            .on('click',
                 function () {
                     hide();
                     userFoldersDropdown.hide();

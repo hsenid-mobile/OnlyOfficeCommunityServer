@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,16 @@ using System;
 using System.Text;
 using System.Web;
 using System.Web.UI;
+
+using AjaxPro;
+
 using ASC.Core;
 using ASC.Data.Storage;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Utility;
-using AjaxPro;
+
 using Newtonsoft.Json;
+
 using SmtpSettingsConfig = ASC.Core.Configuration.SmtpSettings;
 
 namespace ASC.Web.Studio.UserControls.Management
@@ -70,7 +74,7 @@ namespace ASC.Web.Studio.UserControls.Management
             Page.ClientScript.RegisterClientScriptBlock(GetType(),
                 "smtpsettings_style",
                 string.Format("<link rel=\"stylesheet\" type=\"text/css\" href=\"{0}\">",
-                    WebPath.GetPath("UserControls/Management/SmtpSettings/css/smtpsettings.css")), false);
+                    WebPath.GetPath("UserControls/Management/SmtpSettings/css/smtpsettings.less")), false);
             Page.RegisterInlineScript(GetSmtpSettingsInitInlineScript(), true, false);
         }
 

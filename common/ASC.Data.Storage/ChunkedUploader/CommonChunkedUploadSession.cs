@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+
+using Newtonsoft.Json;
 
 namespace ASC.Core.ChunkedUploader
 {
@@ -36,10 +37,13 @@ namespace ASC.Core.ChunkedUploader
         public long BytesUploaded { get; set; }
 
         public long BytesTotal { get; set; }
+        public bool LastChunk { get; set; }
 
         public int TenantId { get; set; }
 
         public Guid UserId { get; set; }
+
+        public string LinkId { get; set; }
 
         public bool UseChunks { get; set; }
 
@@ -75,28 +79,50 @@ namespace ASC.Core.ChunkedUploader
             BytesUploaded = 0;
             BytesTotal = bytesTotal;
             UseChunks = true;
+            LastChunk = false;
         }
+
 
         public T GetItemOrDefault<T>(string key)
         {
-            return Items.ContainsKey(key) && Items[key] is T ? (T)Items[key] : default(T);
+            if (Items.ContainsKey(key) && Items[key] != null)
+            {
+                if (Items[key] is T)
+                {
+                    return (T)Items[key];
+                }
+
+                var jToken = Items[key] as Newtonsoft.Json.Linq.JToken;
+                if (jToken != null)
+                {
+                    var item = jToken.ToObject<T>();
+                    Items[key] = item;
+                    return item;
+                }
+            }
+            return default(T);
         }
 
         public Stream Serialize()
         {
-            var stream = new MemoryStream();
-            new BinaryFormatter().Serialize(stream, this);
-            return stream;
+            var str = JsonConvert.SerializeObject(this);
+            var res = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(str));
+            return res;
         }
 
-        public static CommonChunkedUploadSession Deserialize(Stream stream)
+        public static T Deserialize<T>(Stream stream)
         {
-            return (CommonChunkedUploadSession)new BinaryFormatter().Deserialize(stream);
+            using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8))
+            {
+                var str = reader.ReadToEnd();
+                var res = JsonConvert.DeserializeObject<T>(str);
+                return res;
+            }
         }
 
         public virtual object Clone()
         {
-            return (CommonChunkedUploadSession) MemberwiseClone();
+            return (CommonChunkedUploadSession)MemberwiseClone();
         }
     }
 }

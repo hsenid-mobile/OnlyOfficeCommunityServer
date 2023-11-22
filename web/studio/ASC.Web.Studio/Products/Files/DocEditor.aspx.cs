@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ using System.Web;
 
 using ASC.Core;
 using ASC.Files.Core;
+using ASC.MessagingSystem;
+using ASC.Security.Cryptography;
+using ASC.Web.Core;
 using ASC.Web.Core.Client;
 using ASC.Web.Core.Files;
 using ASC.Web.Core.Mobile;
@@ -35,15 +38,18 @@ using ASC.Web.Core.Utility.Skins;
 using ASC.Web.Core.WhiteLabel;
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Core.Entries;
+using ASC.Web.Files.Helpers;
 using ASC.Web.Files.Resources;
 using ASC.Web.Files.Services.DocumentService;
 using ASC.Web.Files.ThirdPartyApp;
 using ASC.Web.Files.Utils;
 using ASC.Web.Studio;
 using ASC.Web.Studio.Core;
+using ASC.Web.Studio.PublicResources;
+using ASC.Web.Studio.UserControls.DeepLink;
 using ASC.Web.Studio.Utility;
 
-using Resources;
+using Newtonsoft.Json;
 
 using File = ASC.Files.Core.File;
 using FileShare = ASC.Files.Core.Security.FileShare;
@@ -58,7 +64,7 @@ namespace ASC.Web.Files
 
         protected override bool MayNotAuth
         {
-            get { return !string.IsNullOrEmpty(Request[FilesLinkUtility.DocShareKey]); }
+            get { return !string.IsNullOrEmpty(Request[FilesLinkUtility.DocShareKey]) || !string.IsNullOrEmpty(Request[FilesLinkUtility.FolderShareKey]); }
             set { }
         }
 
@@ -93,8 +99,11 @@ namespace ASC.Web.Files
 
         private string RequestShareLinkKey
         {
-            get { return Request[FilesLinkUtility.DocShareKey] ?? string.Empty; }
+            get;
+            set;
         }
+        
+        private string RequestFolderShareLinkKey { get; set; }
 
         private bool _valideShareLink;
 
@@ -138,20 +147,51 @@ namespace ASC.Web.Files
         {
             base.OnPreInit(e);
 
-            _valideShareLink = !string.IsNullOrEmpty(FileShareLink.Parse(RequestShareLinkKey));
             CheckAuth();
         }
 
         private void CheckAuth()
         {
-            if (SecurityContext.IsAuthenticated)
-                return;
-            if (_valideShareLink)
-                return;
+            RequestShareLinkKey = Request[FilesLinkUtility.DocShareKey] ?? string.Empty;
 
-            var refererURL = Request.GetUrlRewriter().AbsoluteUri;
-            Session["refererURL"] = refererURL;
-            Response.Redirect("~/Auth.aspx");
+            var fileId = FileShareLink.Parse(RequestShareLinkKey, out Guid linkId, out string _);
+
+            _valideShareLink = !string.IsNullOrEmpty(fileId);
+
+            if (_valideShareLink)
+            {
+                if (FileShareLink.CheckCookieKey(linkId, out string cookieValue))
+                {
+                    if (!string.IsNullOrEmpty(cookieValue))
+                    {
+                        RequestShareLinkKey = FileShareLink.CreateKey(fileId, linkId, cookieValue);
+                    }
+                    return;
+                }
+                else
+                {
+                    Response.Redirect(FileShareLink.GetPasswordProtectedFileLink(RequestShareLinkKey));
+                }
+            }
+
+            if (FileShareLink.TryGetCurrentLinkId(out var folderLinkId))
+            {
+                RequestShareLinkKey = FileShareLink.CreateKey(RequestFileId, folderLinkId);
+                
+                if (FileShareLink.CheckCookieKey(folderLinkId, out var cookieKey))
+                {
+                    RequestFolderShareLinkKey = Request[FilesLinkUtility.FolderShareKey];
+                    RequestShareLinkKey = FileShareLink.CreateKey(RequestFileId, folderLinkId, cookieKey);
+                    _valideShareLink = true;
+                    return;
+                }
+
+                Response.Redirect(FileShareLink.GetPasswordProtectedFileLink(RequestShareLinkKey));
+            }
+
+            if (SecurityContext.IsAuthenticated) return;
+
+            Response.Redirect(Request.AppendRefererURL("~/Auth.aspx"));
         }
 
         protected override void OnLoad(EventArgs e)
@@ -160,12 +200,15 @@ namespace ASC.Web.Files
             PageLoad();
             InitScript();
 
-            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.AppendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            Response.AppendHeader("Pragma", "no-cache");
+            Response.AppendHeader("Expires", "0");
+
             DocServiceApiUrl += (DocServiceApiUrl.Contains("?") ? "&" : "?") + "ver=" + HttpUtility.UrlEncode(ClientSettings.ResetCacheKey + ResetCacheKey);
 
             if (_configuration != null && !string.IsNullOrEmpty(_configuration.DocumentType))
             {
-                Favicon = WebImageSupplier.GetAbsoluteWebPath("onlyoffice_logo/" + _configuration.DocumentType + ".ico");
+                Favicon = WebImageSupplier.GetAbsoluteWebPath("logo/" + _configuration.DocumentType + ".ico");
             }
         }
 
@@ -188,6 +231,7 @@ namespace ASC.Web.Files
                         if (_valideShareLink)
                         {
                             _configuration.Document.SharedLinkKey += RequestShareLinkKey;
+                            _configuration.Document.Info.Favorite = null;
 
                             if (CoreContext.Configuration.Personal && !SecurityContext.IsAuthenticated)
                             {
@@ -209,6 +253,7 @@ namespace ASC.Web.Files
 
                         _configuration.Document.Url = app.GetFileStreamUrl(file);
                         _configuration.EditorConfig.Customization.GobackUrl = string.Empty;
+                        _configuration.Document.Info.Favorite = null;
                     }
                 }
                 else
@@ -236,6 +281,7 @@ namespace ASC.Web.Files
                     _editByUrl = true;
 
                     _configuration.Document.Url = fileUri;
+                    _configuration.Document.Info.Favorite = null;
                 }
                 ErrorMessage = _configuration.ErrorMessage;
             }
@@ -243,8 +289,11 @@ namespace ASC.Web.Files
             {
                 Global.Logger.Warn("DocEditor", ex);
                 ErrorMessage = ex.Message;
+                CheckDeepLinkRedirect(null);
                 return;
             }
+
+            CheckDeepLinkRedirect(file);
 
             if (_configuration.EditorConfig.ModeWrite && FileConverter.MustConvert(file))
             {
@@ -262,8 +311,54 @@ namespace ASC.Web.Files
 
                 var comment = "#message/" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.ConvertForEdit, file.Title));
 
-                Response.Redirect(FilesLinkUtility.GetFileWebEditorUrl(file.ID) + comment);
+                var url = FilesLinkUtility.GetFileWebEditorUrl(file.ID);
+
+                if (!string.IsNullOrEmpty(RequestFolderShareLinkKey))
+                {
+                    url += "&" + FilesLinkUtility.FolderShareKey + "=" + RequestFolderShareLinkKey;
+                }
+                
+                Response.Redirect(url + comment);
                 return;
+            }
+
+            var fileSecurity = Global.GetFilesSecurity();
+            if (_configuration.EditorConfig.ModeWrite
+                && FileUtility.CanWebRestrictedEditing(file.Title)
+                && fileSecurity.CanFillForms(file)
+                && !fileSecurity.CanEdit(file))
+            {
+                if (!file.IsFillFormDraft)
+                {
+                    FileMarker.RemoveMarkAsNew(file);
+
+                    Folder folderIfNew;
+                    try
+                    {
+                        file = EntryManager.GetFillFormDraft(file, out folderIfNew);
+                    }
+                    catch (Exception ex)
+                    {
+                        _configuration = null;
+                        Global.Logger.Error("DocEditor", ex);
+                        ErrorMessage = ex.Message;
+                        return;
+                    }
+
+                    var comment = folderIfNew == null
+                        ? string.Empty
+                        : "#message/" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.MessageFillFormDraftCreated, folderIfNew.Title));
+
+                    Response.Redirect(FilesLinkUtility.GetFileWebEditorUrl(file.ID) + comment);
+                    return;
+                }
+                else if (!EntryManager.CheckFillFormDraft(file))
+                {
+                    var comment = "#message/" + HttpUtility.UrlEncode(FilesCommonResource.MessageFillFormDraftDiscard);
+
+                    Response.Redirect(FilesLinkUtility.GetFileWebEditorUrl(file.ID) + comment);
+                    return;
+                }
             }
 
             Title = file.Title + GetPageTitlePostfix();
@@ -293,7 +388,8 @@ namespace ASC.Web.Files
                     _configuration.EditorConfig.SharingSettingsUrl = CommonLinkUtility.GetFullAbsolutePath(
                         Share.Location
                         + "?" + FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(file.ID.ToString())
-                        + (Request.DesktopApp() ? "&desktop=true" : string.Empty));
+                        + (Request.DesktopApp() ? "&desktop=true" : string.Empty)
+                        + (!string.IsNullOrEmpty(RequestFolderShareLinkKey) ? "&" + FilesLinkUtility.FolderShareKey + "=" + RequestFolderShareLinkKey : string.Empty));
                 }
 
                 if (file.RootFolderType == FolderType.Privacy)
@@ -328,11 +424,30 @@ namespace ASC.Web.Files
 
                 FileMarker.RemoveMarkAsNew(file);
                 if (!file.Encrypted && !file.ProviderEntry) EntryManager.MarkAsRecent(file);
+
+                if (RequestView)
+                {
+                    FilesMessageService.Send(file, MessageInitiator.DocsService, MessageAction.FileReaded, file.Title);
+                }
+                else
+                {
+                    FilesMessageService.Send(file, MessageInitiator.DocsService, MessageAction.FileOpenedForChange, file.Title);
+                }
             }
 
             if (SecurityContext.IsAuthenticated)
             {
-                _configuration.EditorConfig.SaveAsUrl = CommonLinkUtility.GetFullAbsolutePath(SaveAs.GetUrl);
+                var saveAsUrl = SaveAs.GetUrl;
+                using (var folderDao = Global.DaoFactory.GetFolderDao())
+                {
+                    var folder = folderDao.GetFolder(file.FolderID);
+                    if (folder != null && Global.GetFilesSecurity().CanCreate(folder))
+                    {
+                        saveAsUrl = SaveAs.GetUrlToFolder(file.FolderID);
+                    }
+                }
+
+                _configuration.EditorConfig.SaveAsUrl = CommonLinkUtility.GetFullAbsolutePath(saveAsUrl);
             }
 
             if (_configuration.EditorConfig.ModeWrite)
@@ -368,9 +483,11 @@ namespace ASC.Web.Files
             var inlineScript = new StringBuilder();
 
             inlineScript.AppendFormat("\nASC.Files.Constants.URL_WCFSERVICE = \"{0}\";" +
-                                      "ASC.Files.Constants.DocsAPIundefined = \"{1}\";",
+                                      "ASC.Files.Constants.DocsAPIundefined = \"{1}\";" +
+                                      "ASC.Files.Constants.FolderShareKey = \"{2}\"",
                                       PathProvider.GetFileServicePath,
-                                      FilesCommonResource.DocsAPIundefined);
+                                      FilesCommonResource.DocsAPIundefined,
+                                      FilesLinkUtility.FolderShareKey);
 
             if (!CoreContext.Configuration.Personal)
             {
@@ -385,13 +502,23 @@ namespace ASC.Web.Files
                 LinkToEdit = _linkToEdit,
                 OpenHistory = RequestVersion != -1 && RequestView && !RequestHistoryClose && _configuration.Document.Info.File.Forcesave == ForcesaveType.None && !_configuration.Document.Info.File.Encrypted,
                 OpeninigDate = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture),
-                ShareLinkParam = string.IsNullOrEmpty(RequestShareLinkKey) ? string.Empty : "&" + FilesLinkUtility.DocShareKey + "=" + RequestShareLinkKey,
                 ServerErrorMessage = ErrorMessage,
+                ShareLinkParam = string.Empty,
+                DefaultType = (IsMobile ? Services.DocumentService.Configuration.EditorType.Mobile : Services.DocumentService.Configuration.EditorType.Desktop).ToString().ToLower(),
                 TabId = _tabId.ToString(),
                 ThirdPartyApp = _thirdPartyApp,
-                CanGetUsers = SecurityContext.IsAuthenticated && !CoreContext.Configuration.Personal,
+                CanGetUsers = SecurityContext.IsAuthenticated && !CoreContext.Configuration.Personal && WebItemSecurity.IsAvailableForMe(WebItemManager.PeopleProductID),
                 PageTitlePostfix = GetPageTitlePostfix()
             };
+
+            if (!string.IsNullOrEmpty(RequestFolderShareLinkKey))
+            {
+                docServiceParams.ShareLinkParam = "&" + FilesLinkUtility.FolderShareKey + "=" + RequestFolderShareLinkKey;
+            }
+            else if (!string.IsNullOrEmpty(RequestShareLinkKey))
+            {
+                docServiceParams.ShareLinkParam = "&" + FilesLinkUtility.DocShareKey + "=" + RequestShareLinkKey;
+            }
 
             if (_configuration != null)
             {
@@ -400,11 +527,6 @@ namespace ASC.Web.Files
                 docServiceParams.FileVersion = _configuration.Document.Info.File.Version;
 
                 _configuration.Token = DocumentServiceHelper.GetSignature(_configuration);
-
-                if (!string.IsNullOrEmpty(_configuration.Token))
-                {
-                    _configuration.EditorConfig.CallbackUrl = DocumentServiceTracker.GetCallbackUrl(_configuration.Document.Info.File.ID.ToString());
-                }
             }
 
             if (Request.DesktopApp() && SecurityContext.IsAuthenticated)
@@ -424,21 +546,55 @@ namespace ASC.Web.Files
             InlineScripts.Scripts.Add(new Tuple<string, bool>(inlineScript.ToString(), false));
         }
 
-        protected string RenderCustomScript()
-        {
-            var sb = new StringBuilder();
-            //custom scripts
-            foreach (var script in SetupInfo.CustomScripts.Where(script => !String.IsNullOrEmpty(script)))
-            {
-                sb.AppendFormat("<script language=\"javascript\" src=\"{0}\" type=\"text/javascript\"></script>", script);
-            }
-
-            return sb.ToString();
-        }
-
         private string GetPageTitlePostfix()
         {
             return Request.DesktopApp() ? string.Empty : string.Format(" - {0}", Resource.WebStudioName);
+        }
+
+        private void CheckDeepLinkRedirect(File file)
+        {
+            if (_valideShareLink || !DeepLink.MustRedirect(Request))
+            {
+                return;
+            }
+
+            DeepLinkData deepLinkData;
+
+            if (string.IsNullOrEmpty(ErrorMessage))
+            {
+                var currentUser = CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID);
+                deepLinkData = new DeepLinkData
+                {
+                    Email = currentUser.Email,
+                    Portal = CoreContext.TenantManager.GetCurrentTenant().TenantDomain,
+                    File = new DeepLinkDataFile
+                    {
+                        Id = file.ID.ToString(),
+                        Title = file.Title,
+                        Extension = file.ConvertedExtension
+                    },
+                    Folder = new DeepLinkDataFolder
+                    {
+                        Id = file.FolderID.ToString(),
+                        ParentId = file.RootFolderId.ToString(),
+                        RootFolderType = (int)file.RootFolderType
+                    },
+                    OriginalUrl = Request.GetUrlRewriter().ToString()
+                };
+            }
+            else
+            {
+                deepLinkData = new DeepLinkData
+                { 
+                    ErrorMsg = ErrorMessage
+                };
+            }
+
+            var jsonDeeplinkData = JsonConvert.SerializeObject(deepLinkData);
+            var encryptedData = InstanceCrypto.Encrypt(jsonDeeplinkData);
+            var base64DeeplinkData = Convert.ToBase64String(Encoding.UTF8.GetBytes(encryptedData));
+
+            Response.Redirect("~/DeepLink.aspx?data=" + HttpUtility.UrlEncode(base64DeeplinkData));
         }
 
         #endregion

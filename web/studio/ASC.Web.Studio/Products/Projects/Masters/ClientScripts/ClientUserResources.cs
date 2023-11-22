@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web;
+
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.Projects.Core.Domain;
@@ -29,6 +30,7 @@ using ASC.Web.Core.Client.HttpHandlers;
 using ASC.Web.Core.Users;
 using ASC.Web.Projects.Classes;
 using ASC.Web.Projects.Core;
+
 using Autofac;
 
 namespace ASC.Web.Projects.Masters.ClientScripts
@@ -191,7 +193,7 @@ namespace ASC.Web.Projects.Masters.ClientScripts
                     {
                         id = r.UserInfo.ID,
                         displayName = DisplayUserSettings.GetFullUserName(r.UserInfo.ID),
-                        email = r.UserInfo.Email,
+                        email = r.UserInfo.CanViewPrivateData() ? r.UserInfo.Email : string.Empty,
                         userName = r.UserInfo.UserName,
                         avatarSmall = UserPhotoManager.GetSmallPhotoURL(r.UserInfo.ID),
                         avatar = UserPhotoManager.GetBigPhotoURL(r.UserInfo.ID),

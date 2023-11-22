@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,14 @@ using System.Reflection;
 using System.Web;
 using System.Web.Routing;
 using System.Xml.Linq;
+
 using ASC.Api.Collections;
 using ASC.Api.Exceptions;
 using ASC.Api.Interfaces;
 using ASC.Api.Utils;
+
 using Newtonsoft.Json;
+
 using Binder = ASC.Api.Utils.Binder;
 
 namespace ASC.Api.Impl
@@ -157,52 +160,52 @@ namespace ASC.Api.Impl
             switch (contentType.MediaType)
             {
                 case Constants.XmlContentType:
+                {
+                    using (var stream = request.InputStream)
                     {
-                        using (var stream = request.InputStream)
+                        if (stream != null)
                         {
-                            if (stream != null)
+                            using (var reader = new StreamReader(stream))
                             {
-                                using (var reader = new StreamReader(stream))
+                                var root = XDocument.Load(reader).Root;
+                                if (root != null)
                                 {
-                                    var root = XDocument.Load(reader).Root;
-                                    if (root != null)
-                                    {
-                                        FillCollectionFromXElement(root.Elements(), string.Empty, collection);
-                                    }
+                                    FillCollectionFromXElement(root.Elements(), string.Empty, collection);
                                 }
                             }
                         }
                     }
-                    break;
+                }
+                break;
                 case Constants.JsonContentType:
+                {
+                    using (var stream = request.InputStream)
                     {
-                        using (var stream = request.InputStream)
+                        if (stream != null)
                         {
-                            if (stream != null)
+                            using (var reader = new StreamReader(request.InputStream))
                             {
-                                using (var reader = new StreamReader(request.InputStream))
+                                var value = reader.ReadToEnd();
+                                XDocument xdoc;
+                                try
                                 {
-                                    var value = reader.ReadToEnd();
-                                    XDocument xdoc;
-                                    try
-                                    {
-                                        xdoc = JsonConvert.DeserializeXNode(value, "request", false);
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        throw new TargetInvocationException(new ArgumentException("Unable to deserialize json", e));
-                                    }
+                                    xdoc = JsonConvert.DeserializeXNode(value, "request", false);
+                                }
+                                catch (Exception e)
+                                {
+                                    throw new TargetInvocationException(new ArgumentException("Unable to deserialize json", e));
+                                }
 
-                                    XElement root;
-                                    if (xdoc != null && (root = xdoc.Root) != null)
-                                    {
-                                        FillCollectionFromXElement(root.Elements(), string.Empty, collection);
-                                    }
+                                XElement root;
+                                if (xdoc != null && (root = xdoc.Root) != null)
+                                {
+                                    FillCollectionFromXElement(root.Elements(), string.Empty, collection);
                                 }
                             }
                         }
                     }
-                    break;
+                }
+                break;
                 default:
                     if (!"GET".Equals(request.HttpMethod, StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -237,7 +240,6 @@ namespace ASC.Api.Impl
                             FillCollectionFromXElement(element.Elements(), prefix + "." + element.Name.LocalName, collection);
                         }
                     }
-
                 }
                 else
                 {
@@ -272,7 +274,17 @@ namespace ASC.Api.Impl
                 var additional = string.Empty;
                 if (prefixes.Length > 1)
                 {
-                    additional = string.Join("", prefix.Skip(1).Select(x => "[" + x + "]").ToArray());
+                    additional = string.Join("", prefixes.Skip(1)
+                        .Select(subprefix =>
+                        {
+                            var indexPos = subprefix.IndexOf('[');
+                            if (indexPos < 0)
+                                return "[" + subprefix + "]";
+
+                            //"param[0]" => "[param][0]"
+                            return "[" + subprefix.Substring(0, indexPos) + "]" + subprefix.Substring(indexPos);
+                        })
+                        .ToArray());
                 }
                 collection.Add(prefixes[0] + additional + "[" + element.Name.LocalName + "]", element.Value);
             }

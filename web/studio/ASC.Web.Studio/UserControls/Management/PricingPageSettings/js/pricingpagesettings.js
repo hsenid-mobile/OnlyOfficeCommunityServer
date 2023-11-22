@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 PricingPageSettingsManager = new function () {
     this.Init = function () {
-        jq("#pricingPageSettingsBtn").click(PricingPageSettingsManager.Save);
+        jq("#pricingPageSettingsBtn").on("click", PricingPageSettingsManager.Save);
     };
 
     this.Save = function () {

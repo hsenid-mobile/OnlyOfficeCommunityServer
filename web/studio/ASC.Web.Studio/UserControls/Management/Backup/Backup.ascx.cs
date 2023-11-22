@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ using System.Web;
 using System.Web.UI;
 
 using ASC.Core;
+using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Core.Backup;
 using ASC.Web.Studio.UserControls.Common.ChooseTimePeriod;
@@ -42,12 +43,22 @@ namespace ASC.Web.Studio.UserControls.Management
             get { return SetupInfo.IsVisibleSettings("AutoBackup"); }
         }
 
+        protected bool AutoBackup
+        {
+            get
+            {
+                return CoreContext.Configuration.Standalone || TenantExtra.GetTenantQuota().AutoBackup;
+            }
+        }
+
         protected string HelpLink { get; set; }
         protected int TenantId { get; set; }
+        public string TariffPageLink { get; set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (CoreContext.Configuration.Standalone || !SetupInfo.IsVisibleSettings(ManagementType.Backup.ToString()))
+            TariffPageLink = TenantExtra.GetTariffPageLink();
+            if (!SetupInfo.IsVisibleSettings(ManagementType.Backup.ToString()))
             {
                 Response.Redirect(CommonLinkUtility.GetDefault(), true);
                 return;
@@ -56,14 +67,28 @@ namespace ASC.Web.Studio.UserControls.Management
             TenantId = TenantProvider.CurrentTenantID;
             AjaxPro.Utility.RegisterTypeForAjax(typeof(BackupAjaxHandler), Page);
 
-            Page.RegisterStyle("~/UserControls/Management/Backup/css/backup.less",
-                               "~/Products/Files/Controls/FileSelector/fileselector.css",
-                               "~/Products/Files/Controls/ThirdParty/thirdparty.css",
-                               "~/Products/Files/Controls/ContentList/contentlist.css",
-                               "~/Products/Files/Controls/EmptyFolder/emptyfolder.css",
-                               "~/Products/Files/Controls/Tree/tree.css"
-                )
-                .RegisterBodyScripts("~/UserControls/Management/Backup/js/backup.js",
+            if (ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
+            {
+                Page.RegisterStyle("~/UserControls/Management/Backup/css/backup.less",
+                               "~/Products/Files/Controls/FileSelector/fileselector.less",
+                               "~/Products/Files/Controls/ThirdParty/dark-thirdparty.less",
+                               "~/Products/Files/Controls/ContentList/dark-contentlist.less",
+                               "~/Products/Files/Controls/EmptyFolder/emptyfolder.less",
+                               "~/Products/Files/Controls/Tree/dark-tree.less"
+                );
+            }
+            else
+            {
+                Page.RegisterStyle("~/UserControls/Management/Backup/css/backup.less",
+                               "~/Products/Files/Controls/FileSelector/fileselector.less",
+                               "~/Products/Files/Controls/ThirdParty/thirdparty.less",
+                               "~/Products/Files/Controls/ContentList/contentlist.less",
+                               "~/Products/Files/Controls/EmptyFolder/emptyfolder.less",
+                               "~/Products/Files/Controls/Tree/tree.less"
+                );
+            }
+            Page.RegisterBodyScripts("~/UserControls/Management/Backup/js/backup.js",
+                                     "~/UserControls/Management/Backup/js/consumersettings.js",
                                      "~/Products/Files/Controls/Tree/tree.js",
                                      "~/Products/Files/Controls/EmptyFolder/emptyfolder.js",
                                      "~/Products/Files/Controls/FileSelector/fileselector.js",
@@ -78,7 +103,7 @@ namespace ASC.Web.Studio.UserControls.Management
 
             BackupTimePeriod.Controls.Add(LoadControl(ChooseTimePeriod.Location));
 
-            if (!CoreContext.Configuration.Standalone && SetupInfo.IsVisibleSettings("Restore"))
+            if (SetupInfo.IsVisibleSettings("Restore"))
             {
                 RestoreHolder.Controls.Add(LoadControl(Restore.Location));
             }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ window.AttachmentManager = (function($) {
         attachedFiles = [],
         copiedFiles = [],
         failedUploadedFiles = [],
+        unattachedFilesInTrialVersion = [],
 
         nextId = 0,
         nextOrderNumber = 0,
@@ -77,32 +78,32 @@ window.AttachmentManager = (function($) {
         });
 
         uploader
-            .bind('fileuploadadd', onUploadAdd)
-            .bind('fileuploadsubmit', onUploadSubmit)
-            .bind('fileuploadsend', onUploadSend)
-            .bind('fileuploadprogress', onUploadProgress)
-            .bind('fileuploaddone', onUploadDone)
-            .bind('fileuploadfail', onUploadFail)
-            .bind('fileuploadalways', onUploadAlways)
-            .bind('fileuploadstart', onUploadStart)
-            .bind('fileuploadstop', onUploadStop);
+            .on('fileuploadadd', onUploadAdd)
+            .on('fileuploadsubmit', onUploadSubmit)
+            .on('fileuploadsend', onUploadSend)
+            .on('fileuploadprogress', onUploadProgress)
+            .on('fileuploaddone', onUploadDone)
+            .on('fileuploadfail', onUploadFail)
+            .on('fileuploadalways', onUploadAlways)
+            .on('fileuploadstart', onUploadStart)
+            .on('fileuploadstop', onUploadStop);
 
         if (dragDropEnabled) {
             $('#' + uploadContainerId)
-                .bind('dragenter', function () {
+                .on('dragenter', function () {
                     return false;
                 })
-                .bind('dragleave', function () {
+                .on('dragleave', function () {
                     return hideDragHighlight();
                 })
-                .bind('dragover', function () {
+                .on('dragover', function () {
                     showDragHighlight();
                     if ($.browser.safari) {
                         return true;
                     }
                     return false;
                 })
-                .bind('drop', function () {
+                .on('drop', function () {
                     hideDragHighlight();
                     return false;
                 });
@@ -119,7 +120,7 @@ window.AttachmentManager = (function($) {
 
         window.messagePage.initImageZoom();
 
-        $(window).resize(function() {
+        $(window).on("resize", function() {
             if (window.TMMail.pageIs('writemessage')) {
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(function() {
@@ -184,7 +185,7 @@ window.AttachmentManager = (function($) {
 
         displayAttachmentProgress(file.orderNumber, false);
 
-        var response = jq.parseJSON(data.result);
+        var response = JSON.parse(data.result);
 
         if (response) {
             if (!response.Success) {
@@ -249,7 +250,7 @@ window.AttachmentManager = (function($) {
 
         var errorMsg = msg || data.errorThrown || data.textStatus;
         if (data.jqXHR && data.jqXHR.responseText) {
-            errorMsg = jq.parseJSON(data.jqXHR.responseText).Message;
+            errorMsg = JSON.parse(data.jqXHR.responseText).Message;
         }
 
         if (file.orderNumber == undefined || file.orderNumber < 0) {
@@ -318,7 +319,7 @@ window.AttachmentManager = (function($) {
 
         buttonObj.on('click', function (e) {
             e.preventDefault();
-            jq('#fileupload').click();
+            jq('#fileupload').trigger("click");
         });
 
         return inputObj;
@@ -496,7 +497,7 @@ window.AttachmentManager = (function($) {
         var maxTableWidth = Math.max.apply(null, fileinfoList.map(function() {
             return $(this).find('.file-name').outerWidth(true) + $(this).find('.fullSizeLabel').outerWidth(true);
         }).get());
-        return $.isNumeric(maxTableWidth) ? maxTableWidth + filenameColumnPaddingConst : maxTableWidth;
+        return $.isNumber(maxTableWidth) ? maxTableWidth + filenameColumnPaddingConst : maxTableWidth;
     }
 
     function correctFileNameWidth() {
@@ -506,7 +507,7 @@ window.AttachmentManager = (function($) {
         }
 
         var maxTableWidth = getFileNameMaxWidth();
-        if ($.isNumeric(maxTableWidth)) {
+        if ($.isNumber(maxTableWidth)) {
             fileinfoList.animate({ 'width': maxTableWidth }, 'normal');
         }
     }
@@ -536,7 +537,7 @@ window.AttachmentManager = (function($) {
 
             var html = prepareFileRow(attachment);
             var maxTableWidth = getFileNameMaxWidth();
-            if ($.isNumeric(maxTableWidth)) {
+            if ($.isNumber(maxTableWidth)) {
                 $(html).find('.file_info').width(maxTableWidth);
             }
 
@@ -1079,21 +1080,34 @@ window.AttachmentManager = (function($) {
         for (var i = 0; i < files.length; i++) {
             var file = files[i];
 
-            if (file.shareable) {
+
+            if (ASC.Resources.Master.TenantIsPremium == 'No' && !ASC.Resources.Master.Standalone && !ASC.Files.Utility.CanWebView(file.title)) {
+                unattachedFilesInTrialVersion.push(file);
+                continue;
+            }
+
+            if (file.shareable && !file.denySharing) {
                 attachedFiles.push(file);
             } else {
                 copiedFiles.push(file);
             }
         }
 
+        window.popup.hide();
+
+        if (unattachedFilesInTrialVersion.length) {
+            setTimeout(function () {
+                window.popup.addBig(MailScriptResource.Warning, $.tmpl('multimediafilesCannotBeAttachedTmpl'));
+            }, 0);
+        }
+
         if (copiedFiles.length) {
-            window.popup.hide();
             setTimeout(function() {
                 window.popup.addBig(MailScriptResource.Warning, $.tmpl('filesCannotBeAttachedAsLinksTmpl'));
             }, 0);
         } else {
-            completeCopiedFileLinkAttachmentsProgressStatus(files);
-            insertFileLinksToMessage(files);
+            completeCopiedFileLinkAttachmentsProgressStatus(attachedFiles);
+            insertFileLinksToMessage(attachedFiles);
             clearAttachedFiles();
         }
     }
@@ -1111,6 +1125,14 @@ window.AttachmentManager = (function($) {
         window.messagePage.setDirtyMessage();
         addCopiedFileLinkAttachments(cFiles);
         window.popup.hide();
+
+        cFiles = cFiles.filter(function (item) {
+            if (item.denyDownload) {
+                showFileLinkAttachmentErrorStatus(item.orderNumber, MailScriptResource.AttachmentsDocumentAccessDeniedError);
+                return false;
+            }
+            return true;
+        });
 
         copyFilesToMyDocuments(cFiles, function (err, files) {
             if (err) {
@@ -1284,16 +1306,17 @@ window.AttachmentManager = (function($) {
     function clearAttachedFiles() {
         attachedFiles = [];
         copiedFiles = [];
+        unattachedFilesInTrialVersion = [];
     }
 
     //#endregion
 
     function bind(eventName, fn) {
-        eventsHandler.bind(eventName, fn);
+        eventsHandler.on(eventName, fn);
     }
 
     function unbind(eventName) {
-        eventsHandler.unbind(eventName);
+        eventsHandler.off(eventName);
     }
 
     return {

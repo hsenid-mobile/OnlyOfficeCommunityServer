@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
-using ASC.Security.Cryptography;
 
 namespace ASC.Core.Data
 {
@@ -46,6 +46,15 @@ namespace ASC.Core.Data
             return ExecList(q).ConvertAll(ToUser).SingleOrDefault();
         }
 
+
+        public UserInfo GetUser(int tenant, string email)
+        {
+            var q = GetUserQuery(tenant, default(DateTime))
+                .Where("email", email)
+                .Where("removed", false);
+            return ExecList(q).ConvertAll(ToUser).SingleOrDefault();
+        }
+
         public UserInfo GetUserByPasswordHash(int tenant, string login, string passwordHash)
         {
             if (string.IsNullOrEmpty(login)) throw new ArgumentNullException("login");
@@ -53,15 +62,10 @@ namespace ASC.Core.Data
             Guid userId;
             if (Guid.TryParse(login, out userId))
             {
-                RegeneratePassword(tenant, userId);
-
                 var q = GetUserQuery()
                     .InnerJoin("core_usersecurity s", Exp.EqColumns("u.id", "s.userid"))
                     .Where("u.id", userId)
-                    .Where(Exp.Or(
-                        Exp.Eq("s.pwdhash", GetPasswordHash(userId, passwordHash)),
-                        Exp.Eq("s.pwdhash", Hasher.Base64Hash(passwordHash, HashAlg.SHA256)) //todo: remove old scheme
-                               ))
+                    .Where(Exp.Eq("s.pwdhash", GetPasswordHash(userId, passwordHash)))
                     .Where("u.removed", false);
                 if (tenant != Tenant.DEFAULT_TENANT)
                 {
@@ -80,17 +84,13 @@ namespace ASC.Core.Data
                 }
 
                 var users = ExecList(q).ConvertAll(ToUser);
-                foreach(var user in users)
+                foreach (var user in users)
                 {
-                    RegeneratePassword(tenant, user.ID);
-
                     q = new SqlQuery("core_usersecurity s")
                         .SelectCount()
+                        .Where("s.tenant", user.Tenant)
                         .Where("s.userid", user.ID)
-                        .Where(Exp.Or(
-                            Exp.Eq("s.pwdhash", GetPasswordHash(user.ID, passwordHash)),
-                            Exp.Eq("s.pwdhash", Hasher.Base64Hash(passwordHash, HashAlg.SHA256)) //todo: remove old scheme
-                                   ));
+                        .Where(Exp.Eq("s.pwdhash", GetPasswordHash(user.ID, passwordHash)));
                     var count = ExecScalar<int>(q);
                     if (count > 0) return user;
                 }
@@ -99,16 +99,12 @@ namespace ASC.Core.Data
             }
         }
 
-        //todo: remove
-        private void RegeneratePassword(int tenant, Guid userId)
+        public IEnumerable<UserInfo> GetUsersAllTenants(IEnumerable<string> userIds)
         {
-            var q = Query("core_usersecurity", tenant).Select("pwdhashsha512").Where("userid", userId.ToString());
-            var h2 = ExecScalar<string>(q);
-            if (string.IsNullOrEmpty(h2)) return;
-
-            var password = Crypto.GetV(h2, 1, false);
-            var passwordHash = PasswordHasher.GetClientPassword(password);
-            SetUserPasswordHash(tenant, userId, passwordHash);
+            var q = GetUserQuery()
+                .Where(Exp.In("id", userIds.ToArray()))
+                .Where("removed", false);
+            return ExecList(q).ConvertAll(ToUser);
         }
 
         public UserInfo SaveUser(int tenant, UserInfo user)
@@ -172,7 +168,8 @@ namespace ASC.Core.Data
                     .InColumnValue("sid", user.Sid)
                     .InColumnValue("sso_name_id", user.SsoNameId)
                     .InColumnValue("sso_session_id", user.SsoSessionId)
-                    .InColumnValue("create_on", user.CreateDate);
+                    .InColumnValue("create_on", user.CreateDate)
+                    .InColumnValue("user_lead", user.Lead);
 
                 db.ExecuteNonQuery(i);
 
@@ -245,8 +242,8 @@ namespace ASC.Core.Data
             var i = Insert("core_usersecurity", tenant)
                 .InColumnValue("userid", id.ToString())
                 .InColumnValue("pwdhash", h1)
-                .InColumnValue("pwdhashsha512", null) //todo: remove
-                ;
+                .InColumnValue("LastModified", DateTime.UtcNow);
+
             ExecNonQuery(i);
         }
 
@@ -358,7 +355,7 @@ namespace ASC.Core.Data
             return new SqlQuery("core_user u")
                 .Select("u.id", "u.username", "u.firstname", "u.lastname", "u.sex", "u.bithdate", "u.status", "u.title")
                 .Select("u.workfromdate", "u.terminateddate", "u.contacts", "u.email", "u.location", "u.notes", "u.removed")
-                .Select("u.last_modified", "u.tenant", "u.activation_status", "u.culture", "u.phone", "u.phone_activation", "u.sid", "u.sso_name_id", "u.sso_session_id", "u.create_on");
+                .Select("u.last_modified", "u.tenant", "u.activation_status", "u.culture", "u.phone", "u.phone_activation", "u.sid", "u.sso_name_id", "u.sso_session_id", "u.create_on", "u.user_lead");
         }
 
         private static SqlQuery GetUserQuery(int tenant, DateTime from)
@@ -387,32 +384,33 @@ namespace ASC.Core.Data
         private static UserInfo ToUser(object[] r)
         {
             var u = new UserInfo
-                {
-                    ID = new Guid((string)r[0]),
-                    UserName = (string)r[1],
-                    FirstName = (string)r[2],
-                    LastName = (string)r[3],
-                    Sex = r[4] != null ? Convert.ToBoolean(r[4]) : (bool?)null,
-                    BirthDate = (DateTime?)r[5],
-                    Status = (EmployeeStatus)Convert.ToInt32(r[6]),
-                    Title = (string)r[7],
-                    WorkFromDate = (DateTime?)r[8],
-                    TerminatedDate = (DateTime?)r[9],
-                    Email = (string)r[11],
-                    Location = (string)r[12],
-                    Notes = (string)r[13],
-                    Removed = Convert.ToBoolean(r[14]),
-                    LastModified = Convert.ToDateTime(r[15]),
-                    Tenant = Convert.ToInt32(r[16]),
-                    ActivationStatus = (EmployeeActivationStatus)Convert.ToInt32(r[17]),
-                    CultureName = (string)r[18],
-                    MobilePhone = (string)r[19],
-                    MobilePhoneActivationStatus = (MobilePhoneActivationStatus)Convert.ToInt32(r[20]),
-                    Sid = (string)r[21],
-                    SsoNameId = (string)r[22],
-                    SsoSessionId = (string)r[23],
-                    CreateDate = Convert.ToDateTime(r[24])
-                };
+            {
+                ID = new Guid((string)r[0]),
+                UserName = (string)r[1],
+                FirstName = (string)r[2],
+                LastName = (string)r[3],
+                Sex = r[4] != null ? Convert.ToBoolean(r[4]) : (bool?)null,
+                BirthDate = (DateTime?)r[5],
+                Status = (EmployeeStatus)Convert.ToInt32(r[6]),
+                Title = (string)r[7],
+                WorkFromDate = (DateTime?)r[8],
+                TerminatedDate = (DateTime?)r[9],
+                Email = (string)r[11],
+                Location = (string)r[12],
+                Notes = (string)r[13],
+                Removed = Convert.ToBoolean(r[14]),
+                LastModified = Convert.ToDateTime(r[15]),
+                Tenant = Convert.ToInt32(r[16]),
+                ActivationStatus = (EmployeeActivationStatus)Convert.ToInt32(r[17]),
+                CultureName = (string)r[18],
+                MobilePhone = (string)r[19],
+                MobilePhoneActivationStatus = (MobilePhoneActivationStatus)Convert.ToInt32(r[20]),
+                Sid = (string)r[21],
+                SsoNameId = (string)r[22],
+                SsoSessionId = (string)r[23],
+                CreateDate = Convert.ToDateTime(r[24]),
+                Lead = r[25] != null ? new Guid((string)r[25]) : (Guid?)null
+            };
             u.ContactsFromString((string)r[10]);
             return u;
         }
@@ -443,16 +441,16 @@ namespace ASC.Core.Data
         private Group ToGroup(object[] r)
         {
             return new Group
-                {
-                    Id = new Guid((string)r[0]),
-                    Name = (string)r[1],
-                    ParentId = r[2] != null ? new Guid((string)r[2]) : Guid.Empty,
-                    CategoryId = r[3] != null ? new Guid((string)r[3]) : Guid.Empty,
-                    Removed = Convert.ToBoolean(r[4]),
-                    LastModified = Convert.ToDateTime(r[5]),
-                    Tenant = Convert.ToInt32(r[6]),
-                    Sid = (string)r[7]
-                };
+            {
+                Id = new Guid((string)r[0]),
+                Name = (string)r[1],
+                ParentId = r[2] != null ? new Guid((string)r[2]) : Guid.Empty,
+                CategoryId = r[3] != null ? new Guid((string)r[3]) : Guid.Empty,
+                Removed = Convert.ToBoolean(r[4]),
+                LastModified = Convert.ToDateTime(r[5]),
+                Tenant = Convert.ToInt32(r[6]),
+                Sid = (string)r[7]
+            };
         }
 
         private List<string> CollectGroupChilds(int tenant, string id)
@@ -494,11 +492,34 @@ namespace ASC.Core.Data
         private static UserGroupRef ToUserGroupRef(object[] r)
         {
             return new UserGroupRef(new Guid((string)r[0]), new Guid((string)r[1]), (UserGroupRefType)Convert.ToInt32(r[2]))
-                {
-                    Removed = Convert.ToBoolean(r[3]),
-                    LastModified = Convert.ToDateTime(r[4]),
-                    Tenant = Convert.ToInt32(r[5])
-                };
+            {
+                Removed = Convert.ToBoolean(r[3]),
+                LastModified = Convert.ToDateTime(r[4]),
+                Tenant = Convert.ToInt32(r[5])
+            };
         }
+
+        public UserInfo GetUserByUserName(int tenant, string userName)
+        {
+            var q = GetUserQuery(tenant, default(DateTime))
+                .Where("userName", userName)
+                .Where("removed", false);
+            return ExecList(q).ConvertAll(ToUser).SingleOrDefault();
+        }
+
+        #region Dav/methods
+
+        public IEnumerable<string> GetDavUserEmails(int tenant)
+        {
+            var query = new SqlQuery("core_userdav dav")
+                .Select("u.email")
+                .InnerJoin("core_user u", Exp.EqColumns("u.tenant", "dav.tenant_id") & Exp.EqColumns("u.id", "dav.user_id"))
+                .Where("dav.tenant_id", tenant)
+                .Distinct();
+
+            return ExecList(query).ConvertAll(r => (string)r[0]);
+        }
+
+        #endregion
     }
 }

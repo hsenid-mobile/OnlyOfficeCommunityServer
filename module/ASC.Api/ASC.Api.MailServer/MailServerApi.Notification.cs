@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,12 @@
 */
 
 
+using System;
+
 using ASC.Api.Attributes;
 using ASC.Mail.Data.Contracts;
+
+using ASC.Web.Studio.PublicResources;
 
 // ReSharper disable InconsistentNaming
 
@@ -25,29 +29,37 @@ namespace ASC.Api.MailServer
     public partial class MailServerApi
     {
         /// <summary>
-        ///    Create address for tenant notifications
+        /// Creates an address for the tenant notifications with the parameters specified in the request.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="password"></param>
-        /// <param name="domain_id"></param>
-        /// <returns>NotificationAddressData associated with tenant</returns>
-        /// <short>Create notification address</short> 
+        /// <param type="System.String, System" name="name">Address name</param>
+        /// <param type="System.String, System" name="password">Address password</param>
+        /// <param type="System.Int32, System" name="domain_id">Domain ID</param>
+        /// <returns type="ASC.Mail.Data.Contracts.ServerNotificationAddressData, ASC.Mail">Notification address data associated with the tenant</returns>
+        /// <short>Create a notification address</short> 
         /// <category>Notifications</category>
+        /// <path>api/2.0/mailserver/notification/address/add</path>
+        /// <httpMethod>POST</httpMethod>
         [Create(@"notification/address/add")]
         public ServerNotificationAddressData CreateNotificationAddress(string name, string password, int domain_id)
         {
+            if (!IsEnableMailServer) throw new Exception(Resource.ErrorNotAllowedOption);
             var notifyAddress = MailEngineFactory.ServerEngine.CreateNotificationAddress(name, password, domain_id);
             return notifyAddress;
         }
 
         /// <summary>
-        ///    Deletes address for notification 
+        /// Deletes an address for the tenant notifications specified in the request. 
         /// </summary>
-        /// <short>Remove mailbox from mail server</short> 
+        /// <param type="System.String, System" name="address">Address name</param>
+        /// <short>Remove a notification address</short> 
         /// <category>Notifications</category>
+        /// <path>api/2.0/mailserver/notification/address/remove</path>
+        /// <httpMethod>DELETE</httpMethod>
+        /// <returns></returns>
         [Delete(@"notification/address/remove")]
         public void RemoveNotificationAddress(string address)
         {
+            if (!IsEnableMailServer) throw new Exception(Resource.ErrorNotAllowedOption);
             MailEngineFactory.ServerEngine.RemoveNotificationAddress(address);
         }
     }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ ASC.Settings.FullTextSearch = (function () {
     };
 
     var blockFields = function () {
-        inputs.forEach(function(item) { item.attr("disabled", true); });
+        inputs.forEach(function(item) { item.prop("disabled", true); });
         LoadingBanner.showLoaderBtn("#settingsContainer");
     };
     
@@ -69,7 +69,7 @@ ASC.Settings.FullTextSearch = (function () {
     };
     
     var unblockFields = function () {
-        inputs.forEach(function (item) { item.attr("disabled", false); });
+        inputs.forEach(function (item) { item.prop("disabled", false); });
         LoadingBanner.hideLoaderBtn("#settingsContainer");
     };
     

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,15 +47,7 @@ window.mailCalendar = (function ($) {
             }
         };
 
-        var newDescription = window.linkifyStr(text, options).trim();
-
-        newDescription = newDescription
-            .replace(/\\r\\n/g, "<br>")
-            .replace(/\r\n/g, "<br>")
-            .replace(/\\n/g, "<br>")
-            .replace(/\n/g, "<br>")
-            .replace(/\\r/g, "<br>")
-            .replace(/\r/g, "<br>");
+        var newDescription = window.linkifyHtml(text, options).trim();
 
         return newDescription;
     }
@@ -100,6 +92,16 @@ window.mailCalendar = (function ($) {
         if (srcEmail)
             srcAccount = accountsManager.getAccountByAddress(srcEmail);
 
+        var attachments = [];
+        var eventAttachments = vevent.getAllProperties("attach");
+
+        jq.each(eventAttachments, function (index, attachment) {
+            var attach = {};
+            attach.title = attachment.jCal[1].filename;
+            attach.fileUrl = attachment.jCal[3];
+            attachments.push(attach);
+        });
+
         var icalInfo = {
             method: comp.getFirstPropertyValue("method"),
             summary: event.summary,
@@ -119,6 +121,7 @@ window.mailCalendar = (function ($) {
                 };
             }),
             ics: data,
+            attachments: attachments,
             eventSequence: event.sequence,
             eventSummaryChanged: false,
             eventDateEventChanged: false,
@@ -201,7 +204,7 @@ window.mailCalendar = (function ($) {
 
         if (icalInfo.method === "REQUEST") {
             icalInfo.action = !icalInfo.alienEvent && !icalInfo.fromOrganizer && icalInfo.fromAttendee
-                    ? ASC.Resources.Master.Resource.MailIcsRequestDescription.format(icalInfo.orgName || icalInfo.orgEmail)
+                    ? ASC.Resources.Master.ResourceJS.MailIcsRequestDescription.format(icalInfo.orgName || icalInfo.orgEmail)
                     : undefined;
 
         } else if (icalInfo.method === "REPLY") {
@@ -210,18 +213,18 @@ window.mailCalendar = (function ($) {
                 switch (icalInfo.curAttendee.getParameter("partstat")) {
                 case "ACCEPTED":
                     action = icalInfo.fromAttendee
-                        ? ASC.Resources.Master.Resource.MailIcsYouReplyYesDescription
-                        : ASC.Resources.Master.Resource.MailIcsReplyYesDescription;
+                        ? ASC.Resources.Master.ResourceJS.MailIcsYouReplyYesDescription
+                        : ASC.Resources.Master.ResourceJS.MailIcsReplyYesDescription;
                     break;
                 case "TENTATIVE":
                     action = icalInfo.fromAttendee
-                        ? ASC.Resources.Master.Resource.MailIcsYouReplyMaybeDescription
-                        : ASC.Resources.Master.Resource.MailIcsReplyMaybeDescription;
+                        ? ASC.Resources.Master.ResourceJS.MailIcsYouReplyMaybeDescription
+                        : ASC.Resources.Master.ResourceJS.MailIcsReplyMaybeDescription;
                     break;
                 case "DECLINED":
                     action = icalInfo.fromAttendee
-                        ? ASC.Resources.Master.Resource.MailIcsYouReplyNoDescription
-                        : ASC.Resources.Master.Resource.MailIcsReplyNoDescription;
+                        ? ASC.Resources.Master.ResourceJS.MailIcsYouReplyNoDescription
+                        : ASC.Resources.Master.ResourceJS.MailIcsReplyNoDescription;
                     break;
                 default:
                     throw "Unsupported attendee partstart";
@@ -232,7 +235,7 @@ window.mailCalendar = (function ($) {
             icalInfo.attendees = [];
 
         } else if (icalInfo.method === "CANCEL") {
-            icalInfo.action = !icalInfo.alienEvent ? ASC.Resources.Master.Resource.MailIcsCancelDescription : undefined;
+            icalInfo.action = !icalInfo.alienEvent ? ASC.Resources.Master.ResourceJS.MailIcsCancelDescription : undefined;
         }
 
         return icalInfo;
@@ -436,7 +439,7 @@ window.mailCalendar = (function ($) {
 
                     var calendarView = $messageBody.find(".calendarView");
 
-                    calendarView.find('.goToWriter').off("click").click(function () {
+                    calendarView.find('.goToWriter').off("click").on("click", function () {
                         var $this = $(this);
                         return mailCalendar.composeFromCalendar($this.attr("title"), $this.attr("name"));
                     });
@@ -551,17 +554,17 @@ window.mailCalendar = (function ($) {
                                     });
                             }
 
-                            buttons.find("#request-accept").change(function () {
+                            buttons.find("#request-accept").on("change", function () {
                                 if ($(this).is(':checked')) {
                                     doReply("ACCEPTED");
                                 }
                             });
-                            buttons.find("#request-maybe").change(function () {
+                            buttons.find("#request-maybe").on("change", function () {
                                 if ($(this).is(':checked')) {
                                     doReply("TENTATIVE");
                                 }
                             });
-                            buttons.find("#request-decline").change(function () {
+                            buttons.find("#request-decline").on("change", function () {
                                 if ($(this).is(':checked')) {
                                     doReply("DECLINED");
                                 }
@@ -620,7 +623,7 @@ window.mailCalendar = (function ($) {
                                                 hasChanges = eventSummaryChanged || eventDateEventChanged || eventLocationChanged || eventOrganizerChanged || eventRRuleEventChanged;
 
                                             if (calEventInfo.eventSequence !== mailEventInfo.eventSequence || hasChanges) {
-                                                iCal.eventDisplayInfo = ASC.Resources.Master.Resource.MailIcsUpdateDescription;
+                                                iCal.eventDisplayInfo = ASC.Resources.Master.ResourceJS.MailIcsUpdateDescription;
                                                 iCal.eventDisplayInfoClass = "info-region";
                                                 iCal.eventSummaryChanged = eventSummaryChanged;
                                                 iCal.eventDateEventChanged = eventDateEventChanged;
@@ -633,7 +636,7 @@ window.mailCalendar = (function ($) {
                                             else if (!iCal.recurrence &&
                                                 (iCal.dtEndAllDay && iCal.dtEnd.isBefore(now, 'day')) ||
                                                 (!iCal.dtEndAllDay && iCal.dtEnd.isBefore(now))) {
-                                                iCal.eventDisplayInfo = ASC.Resources.Master.Resource.MailIcsFinishDescription;
+                                                iCal.eventDisplayInfo = ASC.Resources.Master.ResourceJS.MailIcsFinishDescription;
                                                 iCal.eventDisplayInfoClass = "success-region";
                                                 iCal.showButtons = false;
                                                 iCal.needAgenda = false;
@@ -642,8 +645,8 @@ window.mailCalendar = (function ($) {
                                                     ? calEventInfo
                                                     : mailEventInfo;
                                                 iCal.eventDisplayInfo = iCal.fromOrganizer
-                                                        ? ASC.Resources.Master.Resource.MailIcsYouSentRequestDescription
-                                                        : ASC.Resources.Master.Resource.MailIcsRequestDescription.format(
+                                                        ? ASC.Resources.Master.ResourceJS.MailIcsYouSentRequestDescription
+                                                        : ASC.Resources.Master.ResourceJS.MailIcsRequestDescription.format(
                                                             iCal.orgName || iCal.orgEmail);
                                                 iCal.eventDisplayInfoClass = "info-region";
 
@@ -660,7 +663,7 @@ window.mailCalendar = (function ($) {
                                             }
                                             break;
                                         case "CANCEL":
-                                            iCal.eventDisplayInfo = ASC.Resources.Master.Resource.MailIcsCancelDescription;
+                                            iCal.eventDisplayInfo = ASC.Resources.Master.ResourceJS.MailIcsCancelDescription;
                                             iCal.eventDisplayInfoClass = "error-region";
                                             iCal.showButtons = false;
                                             iCal.needAgenda = false;
@@ -694,11 +697,13 @@ window.mailCalendar = (function ($) {
                                     break;
                                 case "CANCEL":
                                     iCal = calEventInfo;
-                                    iCal.eventDisplayInfo = ASC.Resources.Master.Resource.MailIcsCancelDescription;
+                                    iCal.eventDisplayInfo = ASC.Resources.Master.ResourceJS.MailIcsCancelDescription;
                                     iCal.eventDisplayInfoClass = "error-region";
                                     break;
                             }
-                            
+
+                            iCal.attachments = calEventInfo.attachments || [];
+
                         } else {
                             switch (iCal.method) {
                                 case "REQUEST":
@@ -706,12 +711,12 @@ window.mailCalendar = (function ($) {
                                     if (!iCal.recurrence &&
                                         (iCal.dtEndAllDay && iCal.dtEnd.isBefore(now, 'day')) ||
                                         (!iCal.dtEndAllDay && iCal.dtEnd.isBefore(now))) {
-                                        iCal.eventDisplayInfo = ASC.Resources.Master.Resource.MailIcsFinishDescription;
+                                        iCal.eventDisplayInfo = ASC.Resources.Master.ResourceJS.MailIcsFinishDescription;
                                         iCal.eventDisplayInfoClass = "success-region";
                                     } else {
                                         iCal.eventDisplayInfo = iCal.fromOrganizer
-                                                        ? ASC.Resources.Master.Resource.MailIcsYouSentRequestDescription
-                                                        : ASC.Resources.Master.Resource.MailIcsRequestDescription.format(
+                                                        ? ASC.Resources.Master.ResourceJS.MailIcsYouSentRequestDescription
+                                                        : ASC.Resources.Master.ResourceJS.MailIcsRequestDescription.format(
                                                             iCal.orgName || iCal.orgEmail);
                                         iCal.eventDisplayInfoClass = "info-region";
 
@@ -794,7 +799,7 @@ window.mailCalendar = (function ($) {
                     var mapEl = $.tmpl("mapLinkTmpl", icalInfo);
                     popup.find('.card_location .card_value').dotdotdot({ wrap: 'word', height: 18, fallbackToLetter: true, after: mapEl });
 
-                    popup.find('.goToWriter').off("click").click(function() {
+                    popup.find('.goToWriter').off("click").on("click", function() {
                         var $this = $(this);
                         return mailCalendar.composeFromCalendar($this.attr("title"), $this.attr("name"));
                     });

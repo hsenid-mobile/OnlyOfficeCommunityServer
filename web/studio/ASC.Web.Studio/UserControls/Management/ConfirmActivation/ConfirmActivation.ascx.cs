@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,17 @@ using System;
 using System.Threading;
 using System.Web;
 using System.Web.UI;
+
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.MessagingSystem;
 using ASC.Web.Core;
+using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Core.SMS;
 using ASC.Web.Studio.Core.TFA;
+using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
-using Resources;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.UserControls.Management
@@ -41,6 +44,8 @@ namespace ASC.Web.Studio.UserControls.Management
         private UserInfo User { get; set; }
         protected ConfirmType Type { get; set; }
 
+        protected Web.Core.Utility.PasswordSettings TenantPasswordSettings;
+
         protected bool isPersonal
         {
             get { return CoreContext.Configuration.Personal; }
@@ -48,10 +53,16 @@ namespace ASC.Web.Studio.UserControls.Management
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            Page.RegisterBodyScripts(
-                    "~/js/third-party/xregexp.js",
-                    "~/UserControls/Management/ConfirmActivation/js/confirmactivation.js")
-                .RegisterStyle("~/UserControls/Management/ConfirmActivation/css/confirmactivation.less");
+            Page.RegisterBodyScripts("~/UserControls/Management/ConfirmActivation/js/confirmactivation.js");
+
+            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
+            {
+                Page.RegisterStyle("~/UserControls/Management/ConfirmActivation/css/dark-confirmactivation.less");
+            }
+            else
+            {
+                Page.RegisterStyle("~/UserControls/Management/ConfirmActivation/css/confirmactivation.less");
+            }
             Page.Title = HeaderStringHelper.GetPageTitle(Resource.Authorization);
 
             var email = (Request["email"] ?? "").Trim();
@@ -63,17 +74,20 @@ namespace ASC.Web.Studio.UserControls.Management
 
             Type = typeof(ConfirmType).TryParseEnum(Request["type"] ?? "", ConfirmType.EmpInvite);
 
+            TenantPasswordSettings = Web.Core.Utility.PasswordSettings.Load();
+
             try
             {
                 if (Type == ConfirmType.EmailChange)
                 {
                     User = CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID);
                     User.Email = email;
-                    CoreContext.UserManager.SaveUserInfo(User);
+                    CoreContext.UserManager.SaveUserInfo(User, syncCardDav: true);
                     MessageService.Send(Request, MessageAction.UserUpdatedEmail);
 
                     ActivateMail(User);
                     const string successParam = "email_change=success";
+                    CookiesManager.ResetUserCookie();
                     if (User.IsVisitor())
                     {
                         Response.Redirect(CommonLinkUtility.ToAbsolute("~/My.aspx?" + successParam), true);
@@ -118,22 +132,24 @@ namespace ASC.Web.Studio.UserControls.Management
         {
             if (SecurityContext.IsAuthenticated) return;
 
-            if (StudioSmsNotificationSettings.IsVisibleSettings && StudioSmsNotificationSettings.Enable)
+            if (StudioSmsNotificationSettings.IsVisibleAndAvailableSettings && StudioSmsNotificationSettings.TfaEnabledForUser(user.ID))
             {
-                Session["refererURL"] = Request.GetUrlRewriter().AbsoluteUri;
-                Response.Redirect(Confirm.SmsConfirmUrl(user), true);
+                Response.Redirect(Request.AppendRefererURL(Confirm.SmsConfirmUrl(user)), true);
                 return;
             }
-            if (TfaAppAuthSettings.IsVisibleSettings && TfaAppAuthSettings.Enable)
+            if (TfaAppAuthSettings.IsVisibleSettings && TfaAppAuthSettings.TfaEnabledForUser(user.ID))
             {
-                Session["refererURL"] = Request.GetUrlRewriter().AbsoluteUri;
-                Response.Redirect(Confirm.TfaConfirmUrl(user), true);
+                Response.Redirect(Request.AppendRefererURL(Confirm.TfaConfirmUrl(user)), true);
                 return;
             }
-
-            var cookiesKey = SecurityContext.AuthenticateMe(user.ID);
-            CookiesManager.SetCookies(CookiesType.AuthKey, cookiesKey);
-            MessageService.Send(Request, MessageAction.LoginSuccess);
+            try
+            {
+                CookiesManager.AuthenticateMeAndSetCookies(user.Tenant, user.ID, MessageAction.LoginSuccess);
+            }
+            catch (Exception ex)
+            {
+                ShowError(ex.Message);
+            }
         }
 
         private void ActivateMail(UserInfo user)

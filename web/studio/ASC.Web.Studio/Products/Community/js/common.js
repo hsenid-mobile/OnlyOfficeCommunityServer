@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ return {
         			jq("#studio_sidePanel #otherActions .dropdown-content").append(container);
         			if (linkData[i].onclick) {
         				var func = linkData[i].onclick;
-        				link.bind("click", func);
+        				link.on("click", func);
         			}
         		}
         	}
@@ -56,7 +56,7 @@ return {
 
 jq(function() {
     calculateWidthTitleBlock();
-    jq(window).resize(function() {
+    jq(window).on("resize", function() {
         calculateWidthTitleBlock();
     });
 });

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,6 @@ window.ASC.Files.TemplateManager = (function () {
             }
             var xmlDocument;
             var xsltProcessor;
-            var xmlSerializer;
             try {
                 xsltProcessor = new XSLTProcessor();
                 xsltProcessor.importStylesheet(xsl);
@@ -146,8 +145,7 @@ window.ASC.Files.TemplateManager = (function () {
                 throw 'Can\'t translate xml : ' + err;
             }
             try {
-                xmlSerializer = new XMLSerializer();
-                xmlstr = xmlSerializer.serializeToString(xmlDocument);
+                xmlstr = jq('<div>').append(xmlDocument).html();
             } catch (err) {
                 throw 'Can\'t serialized xml : ' + err;
             }

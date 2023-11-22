@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 
 using System;
+
 using ASC.Notify.Model;
 using ASC.Notify.Patterns;
+using ASC.Web.Projects.Core.Model.Resources;
+
 using NotifySourceBase = ASC.Core.Notify.NotifySource;
 
 namespace ASC.Projects.Core.Services.NotifyService
@@ -78,6 +81,7 @@ namespace ASC.Projects.Core.Services.NotifyService
                 NotifyConstants.Event_SubTaskDeleted,
                 NotifyConstants.Event_SubTaskCreated,
                 NotifyConstants.Event_SubTaskEdited,
+                NotifyConstants.Event_SubTaskMoved,
                 NotifyConstants.Event_SubTaskClosed,
                 NotifyConstants.Event_SubTaskResumed,
                 NotifyConstants.Event_ProjectDeleted,
@@ -87,7 +91,7 @@ namespace ASC.Projects.Core.Services.NotifyService
 
         protected override IPatternProvider CreatePatternsProvider()
         {
-            return new XmlPatternProvider2(Resources.ProjectsPatternResource.patterns) { GetPatternMethod = ChoosePattern };
+            return new XmlPatternProvider2(ProjectsPatternResource.patterns) { GetPatternMethod = ChoosePattern };
         }
 
         private IPattern ChoosePattern(INotifyAction action, string senderName, Notify.Engine.NotifyRequest request)

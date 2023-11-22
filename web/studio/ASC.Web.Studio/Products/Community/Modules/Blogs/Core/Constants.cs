@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
 */
 
 
-using ASC.Notify.Model;
 using System;
 using System.Web;
+
+using ASC.Notify.Model;
+
 using Action = ASC.Common.Security.Authorizing.Action;
 
 namespace ASC.Blogs.Core
@@ -34,6 +36,7 @@ namespace ASC.Blogs.Core
         public static INotifyAction NewPost = new NotifyAction("new post");
         public static INotifyAction NewPostByAuthor = new NotifyAction("new personal post");
         public static INotifyAction NewComment = new NotifyAction("new comment");
+        public static INotifyAction MentionForPostComment = new NotifyAction("mention for post comment");
 
         public const string _NewBlogSubscribeCategory = "{9C8ED95F-07D2-42d0-B241-C0A51F7D26D5}";
 

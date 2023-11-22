@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using ASC.Api.Attributes;
 using ASC.Api.Exceptions;
 using ASC.Api.Projects.Wrappers;
@@ -38,16 +39,18 @@ namespace ASC.Api.Projects
     {
         #region comments
 
-        ///<summary>
-        ///Returns the information about the comment with the ID specified in the request
-        ///</summary>
-        ///<short>
-        ///Get comment
-        ///</short>
-        ///<category>Comments</category>
-        ///<param name="commentid">Comment ID</param>
-        ///<returns>Comment</returns>        
-        ///<exception cref="ItemNotFoundException"></exception>
+        /// <summary>
+        /// Returns the information about a comment with the ID specified in the request.
+        /// </summary>
+        /// <short>
+        /// Get a comment
+        /// </short>
+        /// <category>Comments</category>
+        /// <param type="System.Guid, System" method="url" name="commentid">Comment ID</param>
+        /// <returns type="ASC.Api.Projects.Wrappers.CommentWrapper, ASC.Api.Projects">Comment</returns>
+        /// <exception cref="ItemNotFoundException"></exception>
+        /// <path>api/2.0/project/comment/{commentid}</path>
+        /// <httpMethod>GET</httpMethod>
         [Read(@"comment/{commentid}")]
         public CommentWrapper GetComment(Guid commentid)
         {
@@ -58,15 +61,15 @@ namespace ASC.Api.Projects
         }
 
         /////<summary>
-        /////Updates the seleted comment using the comment text specified in the request
+        /////Updates the seleted comment using the comment text specified in the request.
         /////</summary>
         /////<short>
-        /////Update comment
+        /////Update a comment
         /////</short>
         /////<category>Comments</category>
-        /////<param name="commentid">comment ID</param>
-        /////<param name="content">comment text</param>
-        /////<returns>Comment</returns>
+        /////<param type="System.Guid, System" name="commentid">Comment ID</param>
+        /////<param type="System.String, System" name="content">Comment text</param>
+        /////<returns>Updated comment</returns>
         /////<exception cref="ItemNotFoundException"></exception>
         /////<example>
         /////<![CDATA[
@@ -93,15 +96,18 @@ namespace ASC.Api.Projects
         //    return new CommentWrapper(comment);
         //}
 
-        ///<summary>
-        ///Get preview
-        ///</summary>
-        ///<short>
-        ///Get preview
-        ///</short>
-        ///<category>Comments</category>
-        ///<param name="htmltext">html to create preview</param>
-        ///<param name="commentid">guid of editing comment or empty string if comment is new</param>
+        /// <summary>
+        /// Returns a preview of a project comment with the ID specified in the request.
+        /// </summary>
+        /// <short>
+        /// Get a comment preview
+        /// </short>
+        /// <category>Comments</category>
+        /// <param type="System.String, System" name="htmltext">Comment text in the HTML format</param>
+        /// <param type="System.String, System" name="commentid">Comment ID, or empty string if a comment is new</param>
+        /// <returns type="ASC.Web.Studio.UserControls.Common.Comments.CommentInfo, ASC.Web.Studio">Comment information</returns>
+        /// <path>api/2.0/project/comment/preview</path>
+        /// <httpMethod>POST</httpMethod>
         [Create(@"comment/preview")]
         public CommentInfo GetProjectCommentPreview(string htmltext, string commentid)
         {
@@ -143,14 +149,15 @@ namespace ASC.Api.Projects
             return info;
         }
 
-        ///<summary>
-        ///Remove comment with the id specified in the request
-        ///</summary>
-        ///<short>Remove comment</short>
-        ///<section>Comments</section>
-        ///<param name="commentid">Comment ID</param>
-        ///<returns>Comment id</returns>
-        ///<category>Comments</category>
+        /// <summary>
+        /// Removes a comment with the ID specified in the request.
+        /// </summary>
+        /// <short>Remove a comment</short>
+        /// <param type="System.String, System" method="url" name="commentid">Comment ID</param>
+        /// <returns>Comment ID</returns>
+        /// <category>Comments</category>
+        /// <path>api/2.0/project/comment/{commentid}</path>
+        /// <httpMethod>DELETE</httpMethod>
         [Delete("comment/{commentid}")]
         public string RemoveProjectComment(string commentid)
         {
@@ -171,14 +178,17 @@ namespace ASC.Api.Projects
         }
 
         /// <summary>
-        /// 
+        /// Adds a project comment with the parameters specified in the request. The parent comment ID can also be selected.
         /// </summary>
-        /// <param name="parentcommentid"></param>
-        /// <param name="entityid"></param>
-        /// <param name="content"></param>
-        /// <param name="type"></param>
-        /// <category>Comments</category>
-        /// <returns></returns>
+        /// <short>Add a project comment</short>
+        /// <param type="System.String, System" name="parentcommentid">Parent comment ID</param>
+        /// <param type="System.Int32, System" name="entityid">Entity ID</param>
+        /// <param type="System.String, System" name="content">Comment text</param>
+        /// <param type="System.String, System" name="type">Comment type (message or task)</param>
+        /// <category>Projects</category>
+        /// <returns type="ASC.Web.Studio.UserControls.Common.Comments.CommentInfo, ASC.Web.Studio">Comment information</returns>
+        /// <path>api/2.0/project/comment</path>
+        /// <httpMethod>POST</httpMethod>
         [Create("comment")]
         public CommentInfo AddProjectComment(string parentcommentid, int entityid, string content, string type)
         {
@@ -187,9 +197,9 @@ namespace ASC.Api.Projects
 
             var isMessageComment = type.ToLower().Equals("message");
             var comment = isMessageComment
-                ? new Comment {Content = content, TargetUniqID = ProjectEntity.BuildUniqId<Message>(entityid)}
-                : new Comment {Content = content, TargetUniqID = ProjectEntity.BuildUniqId<Task>(entityid)};
-            
+                ? new Comment { Content = content, TargetUniqID = ProjectEntity.BuildUniqId<Message>(entityid) }
+                : new Comment { Content = content, TargetUniqID = ProjectEntity.BuildUniqId<Task>(entityid) };
+
 
             if (!string.IsNullOrEmpty(parentcommentid))
                 comment.Parent = new Guid(parentcommentid);
@@ -205,12 +215,15 @@ namespace ASC.Api.Projects
         }
 
         /// <summary>
-        /// 
+        /// Updates the seleted comment using the comment text specified in the request.
         /// </summary>
-        /// <param name="commentid"></param>
-        /// <param name="content"></param>
-        ///<category>Comments</category>
-        /// <returns></returns>
+        /// <short>Update a comment</short>
+        /// <param type="System.String, System" method="url" name="commentid">Comment ID</param>
+        /// <param type="System.String, System" name="content">New comment text</param>
+        /// <category>Comments</category>
+        /// <returns>Updated comment</returns>
+        /// <path>api/2.0/project/comment/{commentid}</path>
+        /// <httpMethod>PUT</httpMethod>
         [Update("comment/{commentid}")]
         public string UpdateComment(string commentid, string content)
         {

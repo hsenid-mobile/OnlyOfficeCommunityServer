@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
 */
 
 
-@border-color: #D1D1D1;
-@active-color: #999999;
+@import "../../../../skins/default/params.less";
+@border-color: @borderColor;
+@active-color: @textColorBlackLight;
 @default-color: #EBEBEB;
 
 .profile-photo-block {
-    border: 1px solid #BFBFBF;
+    border: 1px solid @addition-info;
     border-radius: 3px;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
@@ -56,7 +57,7 @@
         }
 
         .action-block {
-            border-top: 1px solid #BFBFBF;
+            border-top: 1px solid @addition-info;
             cursor: pointer;
             padding: 8px 0;
             text-align: center;
@@ -64,7 +65,7 @@
             width: 200px;
 
             div {
-                color: #000;
+                color: @bg-a-activate;
                 display: inline-block;
                 font-weight: bold;
                 margin-top: 6px;
@@ -99,8 +100,11 @@
         .userdata-value {
             padding-left: 20px;
             padding-bottom: 10px;
-            width: 275px;
-            
+
+            &.user-type {
+                max-width: 275px;
+            }
+
             .nochange {
                 cursor: default;
                 border-color: transparent;
@@ -220,6 +224,9 @@ body.media-width-0-1200 {
             &.yahoo{
                 background-position: 0 -282px;
             }
+            &.telegram{
+                background-position: 0 -302px;
+            }
         }
          
         input {
@@ -243,7 +250,7 @@ body.media-width-0-1200 {
     }
 
     .field-with-actions .combobox-container .combobox-options {
-        max-height: 220px;
+        max-height: 240px;
     }
 
 /*--------Icons for list of contacts----------*/
@@ -294,6 +301,9 @@ body.media-width-0-1200 {
         }
         &.yahoo{
             background-position: 0 -278px;
+        }
+        &.telegram{
+            background-position: 0 -298px;
         }
     }
 }
@@ -424,17 +434,16 @@ body.media-width-0-1200 {
         top: -4px;
 
         #passwordInfo {
-            width: 180px;
             padding: 8px 12px 10px;
             box-shadow: 0 1px 5px rgba(0,0,0,0.5);
             position: relative;
-            background: white;
+            background: @bodyColor2;
 
             :before,
             :after {
                 content: '';
                 position: absolute;
-                background: white;
+                background: @bodyColor2;
                 left: -5px;
                 top: 12px;
                 width: 10px;
@@ -453,6 +462,7 @@ body.media-width-0-1200 {
             .infoItem {
                 color: #A9ADB0;
                 padding-left: 6px;
+                white-space: nowrap;
 
                 &.red {
                     color: #B40404;
@@ -475,7 +485,7 @@ body.media-width-0-1200 {
 
     .infoPanel {
         display: none;
-        background: white;
+        background: @bodyColor2;
         width: 178px;
         box-shadow: 0 1px 5px rgba(0,0,0,0.5);
     }
@@ -514,7 +524,12 @@ body.media-width-0-1200 {
         }
     }
 
-        #passwordShowLabel::before {
-            content: "\00a0";
-        }
+    #passwordShowLabel::before {
+        content: "\00a0";
+    }
+}
+
+.settings-help-block {
+    margin-bottom: 0px;
+    margin-left:20px
 }

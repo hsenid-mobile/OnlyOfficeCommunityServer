@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,32 @@
 */
 
 
-using ASC.Common.Security.Authentication;
-using ASC.Files.Core;
-using ASC.Web.Files.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+
+using ASC.Common.Security.Authentication;
+using ASC.Files.Core;
+using ASC.MessagingSystem;
+using ASC.Web.Files.Helpers;
+using ASC.Web.Files.Utils;
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations
 {
     class FileMarkAsReadOperation : FileOperation
     {
+        private readonly Dictionary<string, string> headers;
+
         public override FileOperationType OperationType
         {
             get { return FileOperationType.MarkAsRead; }
         }
 
 
-        public FileMarkAsReadOperation(List<object> folders, List<object> files)
+        public FileMarkAsReadOperation(List<object> folders, List<object> files, Dictionary<string, string> headers)
             : base(folders, files)
         {
+            this.headers = headers;
         }
 
 
@@ -48,25 +54,27 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations
             var entries = new List<FileEntry>();
             if (Folders.Any())
             {
-                entries.AddRange(FolderDao.GetFolders(Folders.ToArray()));
+                entries.AddRange(FolderDao.GetFolders(Folders));
             }
             if (Files.Any())
             {
-                entries.AddRange(FileDao.GetFiles(Files.ToArray()));
+                entries.AddRange(FileDao.GetFiles(Files));
             }
-            entries.ForEach(x =>
+            entries.ForEach(entry =>
             {
                 CancellationToken.ThrowIfCancellationRequested();
 
-                FileMarker.RemoveMarkAsNew(x, ((IAccount)Thread.CurrentPrincipal.Identity).ID);
+                FileMarker.RemoveMarkAsNew(entry, ((IAccount)Thread.CurrentPrincipal.Identity).ID);
 
-                if (x.FileEntryType == FileEntryType.File)
+                if (entry.FileEntryType == FileEntryType.File)
                 {
-                    ProcessedFile(x.ID.ToString());
+                    ProcessedFile(entry.ID.ToString());
+                    FilesMessageService.Send(entry, headers, MessageAction.FileMarkedAsRead, entry.Title);
                 }
                 else
                 {
-                    ProcessedFolder(x.ID.ToString());
+                    ProcessedFolder(entry.ID.ToString());
+                    FilesMessageService.Send(entry, headers, MessageAction.FolderMarkedAsRead, entry.Title);
                 }
                 ProgressStep();
             });

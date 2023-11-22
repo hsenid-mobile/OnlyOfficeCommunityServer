@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,31 +18,42 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Web;
+
+using ASC.ActiveDirectory.Base;
 using ASC.ActiveDirectory.Base.Data;
 using ASC.ActiveDirectory.Base.Settings;
 using ASC.ActiveDirectory.ComplexOperations;
 using ASC.Api.Attributes;
+using ASC.Common.Caching;
 using ASC.Common.Threading;
 using ASC.Core;
 using ASC.Core.Billing;
-using ASC.Web.Studio.Core;
-using ASC.Web.Studio.Utility;
-using Newtonsoft.Json;
-using Resources;
 using ASC.Notify.Cron;
-using ASC.ActiveDirectory.Base;
+using ASC.Web.Studio.Core;
+using ASC.Web.Studio.PublicResources;
+using ASC.Web.Studio.Utility;
+
+using Newtonsoft.Json;
 
 namespace ASC.Api.Settings
 {
     public partial class SettingsApi
     {
+
+        public static readonly ICache Cache = AscCache.Default;
+
+
         /// <summary>
-        /// Returns current portal LDAP settings
+        /// Returns the current portal LDAP settings.
         /// </summary>
         /// <short>
-        /// Get LDAP settings
+        /// Get the LDAP settings
         /// </short>
-        /// <returns>LDAPSupportSettings object</returns>
+        /// <category>LDAP</category>
+        /// <returns type="ASC.ActiveDirectory.Base.Settings.LdapSettings, ASC.ActiveDirectory">LDAP settings</returns>
+        /// <path>api/2.0/settings/ldap</path>
+        /// <httpMethod>GET</httpMethod>
         [Read("ldap")]
         public LdapSettings GetLdapSettings()
         {
@@ -70,12 +81,15 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Returns current portal LDAP AutoSync cron expression if any
+        /// Returns the LDAP autosynchronous cron expression for the current portal if it exists.
         /// </summary>
         /// <short>
-        /// Get LDAP AutoSync Cron expression
+        /// Get the LDAP cron expression
         /// </short>
-        /// <returns>string or null</returns>
+        /// <category>LDAP</category>
+        /// <returns>Cron expression or null</returns>
+        /// <path>api/2.0/settings/ldap/cron</path>
+        /// <httpMethod>GET</httpMethod>
         [Read("ldap/cron")]
         public string GetLdapCronSettings()
         {
@@ -93,11 +107,16 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Sets current portal LDAP AutoSync cron expression
+        /// Sets the LDAP autosynchronous cron expression to the current portal.
         /// </summary>
         /// <short>
-        /// Sets LDAP AutoSync Cron expression
+        /// Set the LDAP cron expression
         /// </short>
+        /// <category>LDAP</category>
+        /// <path>api/2.0/settings/ldap/cron</path>
+        /// <param type="System.String, System" name="cron">Cron expression</param>
+        /// <httpMethod>POST</httpMethod>
+        /// <returns></returns>
         [Create("ldap/cron")]
         public void SetLdapCronSettings(string cron)
         {
@@ -134,11 +153,15 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Start sync users and groups process by LDAP
+        /// Synchronizes the portal data with the new information from the LDAP server.
         /// </summary>
         /// <short>
-        /// Sync LDAP
+        /// Synchronize with LDAP server
         /// </short>
+        /// <category>LDAP</category>
+        /// <path>api/2.0/settings/ldap/sync</path>
+        /// <httpMethod>GET</httpMethod>
+        /// <returns type="ASC.ActiveDirectory.ComplexOperations.LdapOperationStatus, ASC.ActiveDirectory">Operation status</returns>
         [Read("ldap/sync")]
         public LdapOperationStatus SyncLdap()
         {
@@ -172,17 +195,23 @@ namespace ASC.Api.Settings
 
             var tenant = CoreContext.TenantManager.GetCurrentTenant();
 
+            Cache.Insert("REWRITE_URL" + tenant.TenantId, HttpContext.Current.Request.GetUrlRewriter().ToString(), TimeSpan.FromMinutes(5));
+
             var op = new LdapSaveSyncOperation(ldapSettings, tenant, LdapOperationType.Sync, ldapLocalization, CurrentUser.ToString());
 
             return QueueTask(op);
         }
 
         /// <summary>
-        /// Starts the process of collecting preliminary changes on the portal according to the selected LDAP settings
+        /// Starts the process of collecting preliminary changes on the portal during the synchronization process according to the selected LDAP settings.
         /// </summary>
         /// <short>
-        /// Sync LDAP
+        /// Test the LDAP synchronization
         /// </short>
+        /// <category>LDAP</category>
+        /// <path>api/2.0/settings/ldap/sync/test</path>
+        /// <httpMethod>GET</httpMethod>
+        /// <returns type="ASC.ActiveDirectory.ComplexOperations.LdapOperationStatus, ASC.ActiveDirectory">Operation status</returns>
         [Read("ldap/sync/test")]
         public LdapOperationStatus TestLdapSync()
         {
@@ -216,19 +245,25 @@ namespace ASC.Api.Settings
 
             var tenant = CoreContext.TenantManager.GetCurrentTenant();
 
+            Cache.Insert("REWRITE_URL" + tenant.TenantId, HttpContext.Current.Request.GetUrlRewriter().ToString(), TimeSpan.FromMinutes(5));
+
             var op = new LdapSaveSyncOperation(ldapSettings, tenant, LdapOperationType.SyncTest, ldapLocalization);
 
             return QueueTask(op);
         }
 
         /// <summary>
-        /// Save LDAP settings and start import/sync users and groups process by LDAP
+        /// Saves the LDAP settings specified in the request and starts importing/synchronizing users and groups by LDAP.
         /// </summary>
         /// <short>
-        /// Save LDAP settings
+        /// Save the LDAP settings
         /// </short>
-        /// <param name="settings">LDAPSupportSettings serialized string</param>
-        /// <param name="acceptCertificate">Flag permits errors of checking certificates</param>
+        /// <category>LDAP</category>
+        /// <param type="System.String, System" name="settings">LDAP settings in the serialized string format</param>
+        /// <param type="System.Boolean, System" name="acceptCertificate">Specifies if a certificate will be accepted (true) or not (false)</param>
+        /// <returns type="ASC.ActiveDirectory.ComplexOperations.LdapOperationStatus, ASC.ActiveDirectory">Operation status</returns>
+        /// <path>api/2.0/settings/ldap</path>
+        /// <httpMethod>POST</httpMethod>
         [Create("ldap")]
         public LdapOperationStatus SaveLdapSettings(string settings, bool acceptCertificate)
         {
@@ -263,17 +298,25 @@ namespace ASC.Api.Settings
 
             var tenant = CoreContext.TenantManager.GetCurrentTenant();
 
+            Cache.Insert("REWRITE_URL" + tenant.TenantId, HttpContext.Current.Request.GetUrlRewriter().ToString(), TimeSpan.FromMinutes(5));
+
             var op = new LdapSaveSyncOperation(ldapSettings, tenant, LdapOperationType.Save, ldapLocalization, CurrentUser.ToString());
 
             return QueueTask(op);
         }
 
         /// <summary>
-        /// Starts the process of collecting preliminary changes on the portal according to the LDAP settings
+        /// Starts the process of saving LDAP settings and collecting preliminary changes on the portal according to them.
         /// </summary>
         /// <short>
-        /// Save LDAP settings
+        /// Test the LDAP saving process
         /// </short>
+        /// <category>LDAP</category>
+        /// <param type="System.String, System" name="settings">LDAP settings in the serialized string format</param>
+        /// <param type="System.Boolean, System" name="acceptCertificate">Specifies if a certificate will be accepted (true) or not (false)</param>
+        /// <path>api/2.0/settings/ldap/save/test</path>
+        /// <httpMethod>POST</httpMethod>
+        /// <returns type="ASC.ActiveDirectory.ComplexOperations.LdapOperationStatus, ASC.ActiveDirectory">Operation status</returns>
         [Create("ldap/save/test")]
         public LdapOperationStatus TestLdapSave(string settings, bool acceptCertificate)
         {
@@ -309,18 +352,23 @@ namespace ASC.Api.Settings
 
             var tenant = CoreContext.TenantManager.GetCurrentTenant();
 
+            Cache.Insert("REWRITE_URL" + tenant.TenantId, HttpContext.Current.Request.GetUrlRewriter().ToString(), TimeSpan.FromMinutes(5));
+
             var op = new LdapSaveSyncOperation(ldapSettings, tenant, LdapOperationType.SaveTest, ldapLocalization, CurrentUser.ToString());
 
             return QueueTask(op);
         }
 
         /// <summary>
-        /// Returns LDAP sync process status
+        /// Returns the LDAP synchronization process status.
         /// </summary>
         /// <short>
-        /// Get LDAP sync process status
+        /// Get the LDAP synchronization process status
         /// </short>
-        /// <returns>LDAPSupportSettingsResult object</returns>
+        /// <category>LDAP</category>
+        /// <returns type="ASC.ActiveDirectory.ComplexOperations.LdapOperationStatus, ASC.ActiveDirectory">Operation status</returns>
+        /// <path>api/2.0/settings/ldap/status</path>
+        /// <httpMethod>GET</httpMethod>
         [Read("ldap/status")]
         public LdapOperationStatus GetLdapOperationStatus()
         {
@@ -330,12 +378,15 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Returns LDAP default settings
+        /// Returns the LDAP default settings.
         /// </summary>
         /// <short>
-        /// Get LDAP default settings
+        /// Get the LDAP default settings
         /// </short>
-        /// <returns>LDAPSupportSettings object</returns>
+        /// <category>LDAP</category>
+        /// <returns type="ASC.ActiveDirectory.Base.Settings.LdapSettings, ASC.ActiveDirectory">LDAP default settings</returns>
+        /// <path>api/2.0/settings/ldap/default</path>
+        /// <httpMethod>GET</httpMethod>
         [Read("ldap/default")]
         public LdapSettings GetDefaultLdapSettings()
         {
@@ -389,7 +440,8 @@ namespace ASC.Api.Settings
                 Warning = operation.GetProperty<string>(LdapOperation.WARNING)
             };
 
-            if (!(string.IsNullOrEmpty(result.Warning))) {
+            if (!(string.IsNullOrEmpty(result.Warning)))
+            {
                 operation.SetProperty(LdapOperation.WARNING, ""); // "mark" as read
             }
 
@@ -400,9 +452,9 @@ namespace ASC.Api.Settings
         {
             SecurityContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
 
-            if (!SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString()) ||
-                (CoreContext.Configuration.Standalone &&
-                 !CoreContext.TenantManager.GetTenantQuota(TenantProvider.CurrentTenantID).Ldap))
+            if (!CoreContext.Configuration.Standalone
+                && (!SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString())
+                    || !CoreContext.TenantManager.GetTenantQuota(TenantProvider.CurrentTenantID).Ldap))
             {
                 throw new BillingException(Resource.ErrorNotAllowedOption, "Ldap");
             }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 
 using System;
+using System.Web;
+
+using ASC.Web.Core.Utility;
 using ASC.Web.UserControls.Wiki.Data;
 using ASC.Web.UserControls.Wiki.Handlers;
-using ASC.Web.Core.Utility.Skins;
-using ASC.Web.Studio.Utility;
-using System.Web;
 
 namespace ASC.Web.UserControls.Wiki
 {
@@ -50,16 +50,16 @@ namespace ASC.Web.UserControls.Wiki
         {
             get { return new WikiEngine(); }
         }
-        
+
 
         public void RiseWikiPageLoaded(IWikiObjectOwner owner)
         {
             RiseWikiPageLoaded(false, owner);
         }
-        
+
         public void RiseWikiPageLoaded(bool isNew, IWikiObjectOwner owner)
         {
-            if(WikiPageLoaded != null)
+            if (WikiPageLoaded != null)
             {
                 WikiPageLoaded(isNew, owner);
             }
@@ -68,10 +68,10 @@ namespace ASC.Web.UserControls.Wiki
         public string MainWikiClassName
         {
             get { return _mainWikiClassName; }
-            set{ _mainWikiClassName = value; }
+            set { _mainWikiClassName = value; }
         }
 
-        
+
         protected void RisePageEmptyEvent()
         {
             if (PageEmpty != null)
@@ -132,8 +132,16 @@ namespace ASC.Web.UserControls.Wiki
         {
             base.OnInit(e);
 
-            Page.RegisterBodyScripts("~/Products/Community/Modules/Wiki/scripts/editpage.js")
-                .RegisterStyle("~/Products/Community/Modules/Wiki/content/main.css");
+            Page.RegisterBodyScripts("~/Products/Community/Modules/Wiki/scripts/editpage.js");
+
+            if (ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
+            {
+                Page.RegisterStyle("~/Products/Community/App_Themes/dark/dark-main.less");
+            }
+            else
+            {
+                Page.RegisterStyle("~/Products/Community/Modules/Wiki/content/main.less");
+            }
         }
 
         protected override void OnLoad(EventArgs e)

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,49 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
+
+using ASC.Api.Employee;
 using ASC.Specific;
 using ASC.Web.UserControls.Wiki.Data;
-using ASC.Api.Employee;
 
 namespace ASC.Api.Wiki.Wrappers
 {
     [DataContract(Name = "comment", Namespace = "")]
     public class CommentWrapper
     {
+        ///<example>00000000-0000-0000-0000-000000000000</example>
+        ///<order>0</order>
         [DataMember(Order = 0)]
         public Guid Id { get; set; }
 
+        ///<example>00000000-0000-0000-0000-000000000000</example>
+        ///<order>1</order>
         [DataMember(Order = 1)]
         public Guid ParentId { get; set; }
 
+        ///<example>Some page</example>
+        ///<order>2</order>
         [DataMember(Order = 2)]
         public string Page { get; set; }
 
+        ///<example>Comment content</example>
+        ///<order>3</order>
         [DataMember(Order = 3)]
         public string Content { get; set; }
 
+        ///<type>ASC.Api.Employee.EmployeeWraper, ASC.Api.Employee</type>
+        ///<order>4</order>
         [DataMember(Order = 4)]
         public EmployeeWraper Author { get; set; }
 
+        ///<example>2020-12-08T17:37:03.3304954Z</example>
+        ///<order>4</order>
         [DataMember(Order = 4)]
         public ApiDateTime LastModified { get; set; }
 
+        ///<example>false</example>
+        ///<order>5</order>
         [DataMember(Order = 5)]
         public bool Inactive { get; set; }
 
@@ -63,21 +75,21 @@ namespace ASC.Api.Wiki.Wrappers
 
         public CommentWrapper()
         {
-            
+
         }
 
         public static CommentWrapper GetSample()
         {
             return new CommentWrapper
-                       {
-                           Author = EmployeeWraper.GetSample(),
-                           Content = "Comment content",
-                           Id = Guid.Empty,
-                           Page = "Some page",
-                           Inactive = false,
-                           LastModified = ApiDateTime.GetSample(),
-                           ParentId = Guid.Empty
-                       };
+            {
+                Author = EmployeeWraper.GetSample(),
+                Content = "Comment content",
+                Id = Guid.Empty,
+                Page = "Some page",
+                Inactive = false,
+                LastModified = ApiDateTime.GetSample(),
+                ParentId = Guid.Empty
+            };
         }
     }
 }

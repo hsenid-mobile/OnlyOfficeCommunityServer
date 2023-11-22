@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
+using ASC.Common.Utils;
 using ASC.Mail.Core.Dao.Expressions.Message;
 using ASC.Mail.Core.Dao.Interfaces;
 using ASC.Mail.Core.DbSchema;
 using ASC.Mail.Core.DbSchema.Interfaces;
 using ASC.Mail.Core.DbSchema.Tables;
 using ASC.Mail.Enums;
-using ASC.Mail.Utils;
 
 namespace ASC.Mail.Core.Dao
 {
@@ -37,7 +38,7 @@ namespace ASC.Mail.Core.Dao
 
         protected string CurrentUserId { get; private set; }
 
-        public MailDao(IDbManager dbManager, int tenant, string user) 
+        public MailDao(IDbManager dbManager, int tenant, string user)
             : base(table, dbManager, tenant)
         {
             CurrentUserId = user;
@@ -53,12 +54,12 @@ namespace ASC.Mail.Core.Dao
                 .InColumnValue(MailTable.Columns.Address, mail.Address)
                 .InColumnValue(MailTable.Columns.Uidl, mail.Uidl)
                 .InColumnValue(MailTable.Columns.Md5, mail.Md5)
-                .InColumnValue(MailTable.Columns.From, MailUtil.NormalizeStringForMySql(mail.From))
-                .InColumnValue(MailTable.Columns.To, MailUtil.NormalizeStringForMySql(mail.To))
+                .InColumnValue(MailTable.Columns.From, StringUtils.NormalizeStringForMySql(mail.From))
+                .InColumnValue(MailTable.Columns.To, StringUtils.NormalizeStringForMySql(mail.To))
                 .InColumnValue(MailTable.Columns.Reply, mail.Reply)
-                .InColumnValue(MailTable.Columns.Subject, MailUtil.NormalizeStringForMySql(mail.Subject))
-                .InColumnValue(MailTable.Columns.Cc, MailUtil.NormalizeStringForMySql(mail.Cc))
-                .InColumnValue(MailTable.Columns.Bcc, MailUtil.NormalizeStringForMySql(mail.Bcc))
+                .InColumnValue(MailTable.Columns.Subject, StringUtils.NormalizeStringForMySql(mail.Subject))
+                .InColumnValue(MailTable.Columns.Cc, StringUtils.NormalizeStringForMySql(mail.Cc))
+                .InColumnValue(MailTable.Columns.Bcc, StringUtils.NormalizeStringForMySql(mail.Bcc))
                 .InColumnValue(MailTable.Columns.Importance, mail.Importance)
                 .InColumnValue(MailTable.Columns.DateReceived, mail.DateReceived)
                 .InColumnValue(MailTable.Columns.DateSent, mail.DateSent)
@@ -68,13 +69,13 @@ namespace ASC.Mail.Core.Dao
                 .InColumnValue(MailTable.Columns.IsAnswered, mail.IsAnswered)
                 .InColumnValue(MailTable.Columns.IsForwarded, mail.IsForwarded)
                 .InColumnValue(MailTable.Columns.Stream, mail.Stream)
-                .InColumnValue(MailTable.Columns.Folder, (int) mail.Folder)
-                .InColumnValue(MailTable.Columns.FolderRestore, (int) mail.FolderRestore)
+                .InColumnValue(MailTable.Columns.Folder, (int)mail.Folder)
+                .InColumnValue(MailTable.Columns.FolderRestore, (int)mail.FolderRestore)
                 .InColumnValue(MailTable.Columns.Spam, mail.Spam)
                 .InColumnValue(MailTable.Columns.MimeMessageId, mail.MimeMessageId)
                 .InColumnValue(MailTable.Columns.MimeInReplyTo, mail.MimeInReplyTo)
                 .InColumnValue(MailTable.Columns.ChainId, mail.ChainId)
-                .InColumnValue(MailTable.Columns.Introduction, MailUtil.NormalizeStringForMySql(mail.Introduction))
+                .InColumnValue(MailTable.Columns.Introduction, StringUtils.NormalizeStringForMySql(mail.Introduction))
                 .InColumnValue(MailTable.Columns.ChainDate, mail.DateSent)
                 .InColumnValue(MailTable.Columns.IsTextBodyOnly, mail.IsTextBodyOnly)
                 .Identity(0, 0, true);
@@ -166,8 +167,8 @@ namespace ASC.Mail.Core.Dao
                 IsAnswered = Convert.ToBoolean(r[20]),
                 IsForwarded = Convert.ToBoolean(r[21]),
                 Stream = Convert.ToString(r[22]),
-                Folder = (FolderType) Convert.ToInt32(r[23]),
-                FolderRestore = (FolderType) Convert.ToInt32(r[24]),
+                Folder = (FolderType)Convert.ToInt32(r[23]),
+                FolderRestore = (FolderType)Convert.ToInt32(r[24]),
                 Spam = Convert.ToBoolean(r[25]),
                 IsRemoved = Convert.ToBoolean(r[26]),
                 TimeModified = Convert.ToDateTime(r[27]),
@@ -177,7 +178,8 @@ namespace ASC.Mail.Core.Dao
                 ChainDate = Convert.ToDateTime(r[31]),
                 IsTextBodyOnly = Convert.ToBoolean(r[32]),
                 HasParseError = Convert.ToBoolean(r[33]),
-                CalendarUid = Convert.ToString(r[34])
+                CalendarUid = Convert.ToString(r[34]),
+                ReadRequestStatus = Convert.ToBoolean(r[35])
             };
 
             return mail;

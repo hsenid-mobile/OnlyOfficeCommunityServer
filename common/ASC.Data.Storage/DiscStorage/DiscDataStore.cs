@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+
+using ASC.Common;
 using ASC.Common.Logging;
 using ASC.Core;
+using ASC.Core.ChunkedUploader;
+using ASC.Core.Encryption;
 using ASC.Data.Storage.Configuration;
 using ASC.Data.Storage.Encryption;
+using ASC.Data.Storage.ZipOperators;
 
 namespace ASC.Data.Storage.DiscStorage
 {
@@ -38,6 +44,7 @@ namespace ASC.Data.Storage.DiscStorage
             _tenant = tenant;
             //Fill map path
             _modulename = moduleConfig.Name;
+            _cache = moduleConfig.Cache;
             _dataList = new DataList(moduleConfig);
             foreach (DomainConfigurationElement domain in moduleConfig.Domains)
             {
@@ -93,7 +100,7 @@ namespace ASC.Data.Storage.DiscStorage
         }
 
 
-        public override Stream GetReadStream(string domain, string path, int offset)
+        public override Stream GetReadStream(string domain, string path, long offset)
         {
             if (path == null) throw new ArgumentNullException("path");
             var target = GetTarget(domain, path);
@@ -107,11 +114,23 @@ namespace ASC.Data.Storage.DiscStorage
             throw new FileNotFoundException("File not found", Path.GetFullPath(target));
         }
 
+        public override Task<Stream> GetReadStreamAsync(string domain, string path, long offset)
+        {
+            return Task.FromResult(GetReadStream(domain, path, offset));
+        }
+
+        protected override Uri SaveWithAutoAttachment(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+        {
+            return Save(domain, path, stream, ownerId);
+        }
         protected override Uri SaveWithAutoAttachment(string domain, string path, Stream stream, string attachmentFileName)
         {
             return Save(domain, path, stream);
         }
-
+        public override Uri Save(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
+        {
+            return Save(domain, path, stream, ownerId);
+        }
         public override Uri Save(string domain, string path, Stream stream, string contentType, string contentDisposition)
         {
             return Save(domain, path, stream);
@@ -121,14 +140,17 @@ namespace ASC.Data.Storage.DiscStorage
         {
             return Save(domain, path, stream);
         }
-
         public override Uri Save(string domain, string path, Stream stream)
+        {
+            return Save(domain, path, stream, Guid.Empty);
+        }
+        public override Uri Save(string domain, string path, Stream stream, Guid ownerId)
         {
             LogManager.GetLogger("ASC").Debug("Save " + path);
             var buffered = stream.GetBuffered();
             if (QuotaController != null)
             {
-                QuotaController.QuotaUsedCheck(buffered.Length);
+                QuotaController.QuotaUsedCheck(buffered.Length, ownerId);
             }
 
             if (path == null) throw new ArgumentNullException("path");
@@ -168,7 +190,7 @@ namespace ASC.Data.Storage.DiscStorage
                 }
             }
 
-            QuotaUsedAdd(domain, fslen);
+            QuotaUsedAdd(domain, fslen, ownerId);
 
             crypt.EncryptFile(target);
 
@@ -189,6 +211,13 @@ namespace ASC.Data.Storage.DiscStorage
         }
 
         #region chunking
+
+        public override IDataWriteOperator CreateDataWriteOperator(
+            CommonChunkedUploadSession chunkedUploadSession,
+            CommonChunkedUploadSessionHolder sessionHolder)
+        {
+            return new ChunkZipWriteOperator(chunkedUploadSession, sessionHolder);
+        }
 
         public override string InitiateChunkedUpload(string domain, string path)
         {
@@ -287,6 +316,10 @@ namespace ASC.Data.Storage.DiscStorage
 
         public override void DeleteFiles(string domain, string folderPath, string pattern, bool recursive)
         {
+            DeleteFiles(domain, folderPath, pattern, recursive, Guid.Empty);
+        }
+        public override void DeleteFiles(string domain, string folderPath, string pattern, bool recursive, Guid ownerId)
+        {
             if (folderPath == null) throw new ArgumentNullException("folderPath");
 
             //Return dirs
@@ -298,7 +331,7 @@ namespace ASC.Data.Storage.DiscStorage
                 {
                     var size = crypt.GetFileSize(entry);
                     File.Delete(entry);
-                    QuotaUsedDelete(domain, size);
+                    QuotaUsedDelete(domain, size, ownerId);
                 }
             }
             else
@@ -346,7 +379,7 @@ namespace ASC.Data.Storage.DiscStorage
             Directory.Move(target, newtarget);
         }
 
-        public override Uri Move(string srcdomain, string srcpath, string newdomain, string newpath)
+        public override Uri Move(string srcdomain, string srcpath, string newdomain, string newpath, bool quotaCheckFileSize = true)
         {
             if (srcpath == null) throw new ArgumentNullException("srcpath");
             if (newpath == null) throw new ArgumentNullException("srcpath");
@@ -368,9 +401,9 @@ namespace ASC.Data.Storage.DiscStorage
                     File.Delete(newtarget);
                 }
                 File.Move(target, newtarget);
-               
+
                 QuotaUsedDelete(srcdomain, flength);
-                QuotaUsedAdd(newdomain, flength);
+                QuotaUsedAdd(newdomain, flength, quotaCheckFileSize);
             }
             else
             {
@@ -391,8 +424,11 @@ namespace ASC.Data.Storage.DiscStorage
             }
             return !string.IsNullOrEmpty(targetDir) && Directory.Exists(targetDir);
         }
-
         public override void DeleteDirectory(string domain, string path)
+        {
+            DeleteDirectory(domain, path, Guid.Empty);
+        }
+        public override void DeleteDirectory(string domain, string path, Guid ownerId)
         {
             if (path == null) throw new ArgumentNullException("path");
 
@@ -417,7 +453,7 @@ namespace ASC.Data.Storage.DiscStorage
 
             Directory.Delete(targetDir, true);
 
-            QuotaUsedDelete(domain, size);
+            QuotaUsedDelete(domain, size, ownerId);
         }
 
         public override long GetFileSize(string domain, string path)
@@ -429,6 +465,11 @@ namespace ASC.Data.Storage.DiscStorage
                 return crypt.GetFileSize(target);
             }
             throw new FileNotFoundException("file not found " + target);
+        }
+
+        public override Task<long> GetFileSizeAsync(string domain, string path)
+        {
+            return Task.FromResult(GetFileSize(domain, path));
         }
 
         public override long GetDirectorySize(string domain, string path)
@@ -487,11 +528,6 @@ namespace ASC.Data.Storage.DiscStorage
             throw new NotSupportedException("This operation supported only on s3 storage");
         }
 
-        public override string GetUploadedUrl(string domain, string directoryPath)
-        {
-            throw new NotSupportedException("This operation supported only on s3 storage");
-        }
-
         public override string GetUploadUrl()
         {
             throw new NotSupportedException("This operation supported only on s3 storage");
@@ -545,6 +581,11 @@ namespace ASC.Data.Storage.DiscStorage
             var target = GetTarget(domain, path);
             var result = File.Exists(target);
             return result;
+        }
+
+        public override Task<bool> IsFileAsync(string domain, string path)
+        {
+            return Task.FromResult(IsFile(domain, path));
         }
 
         public override long ResetQuota(string domain)
@@ -714,6 +755,20 @@ namespace ASC.Data.Storage.DiscStorage
             {
                 throw new FileNotFoundException("file not found", target);
             }
+        }
+
+        protected override DateTime GetLastModificationDate(string domain, string path)
+        {
+            if (path == null) throw new ArgumentNullException("path");
+
+            var target = GetTarget(domain, path);
+
+            if (File.Exists(target))
+            {
+                return File.GetLastWriteTimeUtc(target);
+            }
+
+            throw new FileNotFoundException("File not found", Path.GetFullPath(target));
         }
     }
 }

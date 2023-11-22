@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 
 jq(function() {
-    jq('#resendBtn').click(function() {
+    jq('#resendBtn').on("click", function() {
         InvitesResender.Resend();
     });
  
-    jq('#resendCancelBtn, #resendInvitesCloseBtn').click(function() {
+    jq('#resendCancelBtn, #resendInvitesCloseBtn').on("click", function() {
         InvitesResender.Hide();
     });
 });
@@ -50,9 +50,9 @@ var InvitesResender = new function() {
         jq('#resendInvitesResult').addClass("display-none");
         jq('#resendInvitesContent').removeClass("display-none");
 
-        StudioBlockUIManager.blockUI("#inviteResender", 330);
+        StudioBlockUIManager.blockUI("#inviteResender", 350);
         PopupKeyUpActionProvider.ClearActions();
-        PopupKeyUpActionProvider.EnterAction = "jq(\"#resendBtn\").click();";
+        PopupKeyUpActionProvider.EnterAction = "jq(\"#resendBtn\").trigger('click');";
     }
     
     this.Hide = function() {

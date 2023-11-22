@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+
+using ASC.Core.ChunkedUploader;
+using ASC.Data.Storage.ZipOperators;
 
 namespace ASC.Files.Core
 {
@@ -82,7 +85,7 @@ namespace ASC.Files.Core
         /// <param name="searchSubfolders"></param>
         /// <param name="checkShare"></param>
         /// <returns></returns>
-        List<Folder> GetFolders(object[] folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true);
+        List<Folder> GetFolders(IEnumerable<object> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true);
 
         /// <summary>
         ///     Get folder, contains folder with id
@@ -183,6 +186,11 @@ namespace ASC.Files.Core
         /// <returns>Maximum size of file which can be uploaded to folder</returns>
         long GetMaxUploadSize(object folderId, bool chunkedUpload = false);
 
+        IDataWriteOperator CreateDataWriteOperator(
+            string folderId,
+            CommonChunkedUploadSession chunkedUploadSession,
+            CommonChunkedUploadSessionHolder sessionHolder);
+
         #region Only for TMFolderDao
 
         /// <summary>
@@ -190,7 +198,7 @@ namespace ASC.Files.Core
         /// </summary>
         /// <param name="folderIds"></param>
         /// <param name="newOwnerId"></param>
-        void ReassignFolders(object[] folderIds, Guid newOwnerId);
+        void ReassignFolders(IEnumerable<object> folderIds, Guid newOwnerId);
 
         /// <summary>
         /// Search the list of folders containing text in title
@@ -246,8 +254,6 @@ namespace ASC.Files.Core
         object GetFolderIDRecent(bool createIfNotExists);
 
         /// <summary>
-
-        /// <summary>
         /// Returns id folder "Favorites"
         /// Only in TMFolderDao
         /// </summary>
@@ -268,6 +274,7 @@ namespace ASC.Files.Core
         /// Only in TMFolderDao
         /// </summary>
         /// <param name="createIfNotExists"></param>
+        /// <param name="userId"></param>
         /// <returns></returns>
         object GetFolderIDPrivacy(bool createIfNotExists, Guid? userId = null);
 
@@ -303,7 +310,7 @@ namespace ASC.Files.Core
         /// </summary>
         /// <param name="folderIDs"></param>
         /// <returns></returns>
-        Dictionary<string, string> GetBunchObjectIDs(List<object> folderIDs);
+        Dictionary<string, string> GetBunchObjectIDs(IEnumerable<object> folderIDs);
 
         #endregion
     }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ var TariffStandalone = new function () {
     };
 
     var uploadInit = function () {
-        jq("#licenseKey").click(function (e) {
+        jq("#licenseKey").on("click", function (e) {
             e.preventDefault();
-            jq("#uploadButton").click();
+            jq("#uploadButton").trigger("click");
         });
 
         var upload = jq("#uploadButton")
@@ -44,7 +44,7 @@ var TariffStandalone = new function () {
             .bind("fileuploaddone", function (e, data) {
                 LoadingBanner.hideLoaderBtn(".step");
                 try {
-                    var result = jq.parseJSON(data.result);
+                    var result = JSON.parse(data.result);
                 } catch (e) {
                     result = {Success: false};
                 }
@@ -74,7 +74,7 @@ var TariffStandalone = new function () {
         var licenseKey = jq("#licenseKeyText").text();
 
         if (jq("#licenseKeyText").length && !licenseKey.length) {
-            var res = { Status: 0, Message: ASC.Resources.Master.Resource.LicenseKeyError };
+            var res = { Status: 0, Message: ASC.Resources.Master.ResourceJS.LicenseKeyError };
 
             onActivate(res);
             return;
@@ -94,7 +94,7 @@ var TariffStandalone = new function () {
 
     var onActivate = function (res) {
         if (res.Status) {
-            toastr.success(ASC.Resources.Master.Resource.OperationSuccededMsg);
+            toastr.success(ASC.Resources.Master.ResourceJS.OperationSuccededMsg);
             setTimeout(function () {
                 location.reload(true);
             }, 500);
@@ -117,5 +117,5 @@ jq(function () {
 
     jq("#activatePanel").on("click", "#activateButton:not(.disable)", TariffStandalone.activate);
 
-    jq("#policyAccepted").click(TariffStandalone.licenseKeyEdit);
+    jq("#policyAccepted").on("click", TariffStandalone.licenseKeyEdit);
 });

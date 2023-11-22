@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,24 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
+
+using AjaxPro;
+
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
-using ASC.Core.Users;
-using ASC.Web.Studio.Core;
-using AjaxPro;
 using ASC.Core;
+using ASC.Core.Users;
 using ASC.Notify.Model;
 using ASC.Notify.Recipients;
 using ASC.Web.Core;
 using ASC.Web.Core.Subscriptions;
+using ASC.Web.Core.Utility;
+using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Core.Notify;
+using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
 
 namespace ASC.Web.Studio.UserControls.Users
@@ -65,8 +68,15 @@ namespace ASC.Web.Studio.UserControls.Users
             try
             {
                 Page.RegisterBodyScripts("~/UserControls/Users/UserSubscriptions/js/subscription_manager.js")
-                    .RegisterInlineScript("CommonSubscriptionManager.InitNotifyByComboboxes();")
-                    .RegisterStyle("~/UserControls/Users/UserSubscriptions/css/subscriptions.less");
+                    .RegisterInlineScript("CommonSubscriptionManager.InitNotifyByComboboxes();");
+                if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
+                {
+                    Page.RegisterStyle("~/UserControls/Users/UserSubscriptions/css/dark-subscriptions.less");
+                }
+                else
+                {
+                    Page.RegisterStyle("~/UserControls/Users/UserSubscriptions/css/subscriptions.less");
+                }
             }
             catch
             {
@@ -124,22 +134,22 @@ namespace ASC.Web.Studio.UserControls.Users
                         continue;
 
                     var group = new
-                        {
-                            Id = subItem.ID,
-                            ImageUrl = subItem.GetIconAbsoluteURL(),
-                            Name = subItem.Name.HtmlEncode(),
-                            Types = new List<object>()
-                        };
+                    {
+                        Id = subItem.ID,
+                        ImageUrl = subItem.GetIconAbsoluteURL(),
+                        Name = subItem.Name.HtmlEncode(),
+                        Types = new List<object>()
+                    };
 
                     foreach (var type in subscriptionTypes)
                     {
                         var t = new
-                            {
-                                Id = type.ID,
-                                Name = type.Name.HtmlEncode(),
-                                Single = type.Single,
-                                IsSubscribed = type.CanSubscribe ? subItem.Context.SubscriptionManager.SubscriptionProvider.IsSubscribed(type.NotifyAction, recipient, null) : true
-                            };
+                        {
+                            Id = type.ID,
+                            Name = type.Name.HtmlEncode(),
+                            Single = type.Single,
+                            IsSubscribed = type.CanSubscribe ? subItem.Context.SubscriptionManager.SubscriptionProvider.IsSubscribed(type.NotifyAction, recipient, null) : true
+                        };
                         if (t.IsSubscribed)
                             canUnsubscribe = true;
 
@@ -164,22 +174,22 @@ namespace ASC.Web.Studio.UserControls.Users
                             continue;
 
                         var group = new
-                            {
-                                Id = gr.ID,
-                                ImageUrl = "",
-                                Name = gr.Name.HtmlEncode(),
-                                Types = new List<object>()
-                            };
+                        {
+                            Id = gr.ID,
+                            ImageUrl = "",
+                            Name = gr.Name.HtmlEncode(),
+                            Types = new List<object>()
+                        };
 
                         foreach (var type in sTypes)
                         {
                             var t = new
-                                {
-                                    Id = type.ID,
-                                    Name = type.Name.HtmlEncode(),
-                                    Single = type.Single,
-                                    IsSubscribed = type.CanSubscribe ? productSubscriptionManager.SubscriptionProvider.IsSubscribed(type.NotifyAction, recipient, null) : true
-                                };
+                            {
+                                Id = type.ID,
+                                Name = type.Name.HtmlEncode(),
+                                Single = type.Single,
+                                IsSubscribed = type.CanSubscribe ? productSubscriptionManager.SubscriptionProvider.IsSubscribed(type.NotifyAction, recipient, null) : true
+                            };
 
                             if (t.IsSubscribed)
                                 canUnsubscribe = true;
@@ -205,12 +215,12 @@ namespace ASC.Web.Studio.UserControls.Users
                             continue;
 
                         var t = new
-                            {
-                                Id = type.ID,
-                                Name = type.Name.HtmlEncode(),
-                                Single = type.Single,
-                                IsSubscribed = !type.CanSubscribe || !productSubscriptionManager.SubscriptionProvider.IsUnsubscribe((IDirectRecipient)recipient, type.NotifyAction, null)
-                            };
+                        {
+                            Id = type.ID,
+                            Name = type.Name.HtmlEncode(),
+                            Single = type.Single,
+                            IsSubscribed = !type.CanSubscribe || !productSubscriptionManager.SubscriptionProvider.IsUnsubscribe((IDirectRecipient)recipient, type.NotifyAction, null)
+                        };
                         if (t.IsSubscribed)
                             canUnsubscribe = true;
 
@@ -221,19 +231,19 @@ namespace ASC.Web.Studio.UserControls.Users
             }
 
             return new
-                {
-                    Id = webItem.ID,
-                    LogoUrl = webItem.GetIconAbsoluteURL(),
-                    Name = HttpUtility.HtmlEncode(webItem.Name),
-                    IsEmpty = isEmpty,
-                    IsOpen = isOpen,
-                    CanUnSubscribe = canUnsubscribe,
-                    NotifyType = GetNotifyByMethod(webItem.ID),
-                    Groups = groups,
-                    Types = types,
-                    Type = itemType,
-                    Class = webItem.ProductClassName
-                };
+            {
+                Id = webItem.ID,
+                LogoUrl = webItem.GetIconAbsoluteURL(),
+                Name = HttpUtility.HtmlEncode(webItem.Name),
+                IsEmpty = isEmpty,
+                IsOpen = isOpen,
+                CanUnSubscribe = canUnsubscribe,
+                NotifyType = GetNotifyByMethod(webItem.ID),
+                Groups = groups,
+                Types = types,
+                Type = itemType,
+                Class = webItem.ProductClassName
+            };
         }
 
         [AjaxMethod(HttpSessionStateRequirement.ReadWrite)]
@@ -278,14 +288,14 @@ namespace ASC.Web.Studio.UserControls.Users
                 foreach (var subscription in typeObjects)
                 {
                     result.Objects.Add(new
-                        {
-                            Id = subscription.ID,
-                            Name = HttpUtility.HtmlEncode(subscription.Name),
-                            Url = String.IsNullOrEmpty(subscription.URL) ? "" : subscription.URL,
-                            IsSubscribed = subscriptionManager.SubscriptionProvider.IsSubscribed(type.NotifyAction,
+                    {
+                        Id = subscription.ID,
+                        Name = HttpUtility.HtmlEncode(subscription.Name),
+                        Url = String.IsNullOrEmpty(subscription.URL) ? "" : subscription.URL,
+                        IsSubscribed = subscriptionManager.SubscriptionProvider.IsSubscribed(type.NotifyAction,
                                                                                                                        GetCurrentRecipient(),
                                                                                                                        subscription.ID)
-                        });
+                    });
                 }
 
                 return result;
@@ -307,9 +317,9 @@ namespace ASC.Web.Studio.UserControls.Users
         protected string RenderWhatsNewSubscriptionState(bool isSubscribe)
         {
             if (isSubscribe)
-                return "<a class=\"on_off_button on\" href=\"javascript:CommonSubscriptionManager.SubscribeToWhatsNew();\" title=\"" + Resources.Resource.UnsubscribeButton + "\"></a>";
+                return "<a class=\"on_off_button on\" href=\"javascript:CommonSubscriptionManager.SubscribeToWhatsNew();\" title=\"" + Resource.UnsubscribeButton + "\"></a>";
             else
-                return "<a class=\"on_off_button off\" href=\"javascript:CommonSubscriptionManager.SubscribeToWhatsNew();\" title=\"" + Resources.Resource.SubscribeButton + "\"></a>";
+                return "<a class=\"on_off_button off\" href=\"javascript:CommonSubscriptionManager.SubscribeToWhatsNew();\" title=\"" + Resource.SubscribeButton + "\"></a>";
         }
 
         protected string RenderWhatsNewNotifyByCombobox()
@@ -372,9 +382,9 @@ namespace ASC.Web.Studio.UserControls.Users
         protected string RenderTipsAndTricksSubscriptionState(bool isSubscribe)
         {
             if (isSubscribe)
-                return "<a class=\"on_off_button on\" href=\"javascript:CommonSubscriptionManager.SubscribeToTipsAndTricks();\" title=\"" + Resources.Resource.UnsubscribeButton + "\"></a>";
+                return "<a class=\"on_off_button on\" href=\"javascript:CommonSubscriptionManager.SubscribeToTipsAndTricks();\" title=\"" + Resource.UnsubscribeButton + "\"></a>";
             else
-                return "<a class=\"on_off_button off\" href=\"javascript:CommonSubscriptionManager.SubscribeToTipsAndTricks();\" title=\"" + Resources.Resource.SubscribeButton + "\"></a>";
+                return "<a class=\"on_off_button off\" href=\"javascript:CommonSubscriptionManager.SubscribeToTipsAndTricks();\" title=\"" + Resource.SubscribeButton + "\"></a>";
         }
 
         [AjaxMethod(HttpSessionStateRequirement.ReadWrite)]
@@ -416,7 +426,7 @@ namespace ASC.Web.Studio.UserControls.Users
 
         private static IDbManager GetDb()
         {
-            return DbManager.FromHttpContext(TeamlabSiteDbId);
+            return new DbManager(TeamlabSiteDbId);
         }
 
         private static void UnsubscribeFromSpam(string email)
@@ -460,9 +470,9 @@ namespace ASC.Web.Studio.UserControls.Users
         protected string RenderSpamSubscriptionState(bool isSubscribed)
         {
             if (isSubscribed)
-                return "<a class=\"on_off_button on\" href=\"javascript:CommonSubscriptionManager.SubscribeToSpam();\" title=\"" + Resources.Resource.UnsubscribeButton + "\"></a>";
+                return "<a class=\"on_off_button on\" href=\"javascript:CommonSubscriptionManager.SubscribeToSpam();\" title=\"" + Resource.UnsubscribeButton + "\"></a>";
             else
-                return "<a class=\"on_off_button off\" href=\"javascript:CommonSubscriptionManager.SubscribeToSpam();\" title=\"" + Resources.Resource.SubscribeButton + "\"></a>";
+                return "<a class=\"on_off_button off\" href=\"javascript:CommonSubscriptionManager.SubscribeToSpam();\" title=\"" + Resource.SubscribeButton + "\"></a>";
         }
 
         [AjaxMethod(HttpSessionStateRequirement.ReadWrite)]
@@ -511,9 +521,9 @@ namespace ASC.Web.Studio.UserControls.Users
         protected string RenderAdminNotifySubscriptionState(bool isSubscribe)
         {
             if (isSubscribe)
-                return "<a class=\"on_off_button on\" href=\"javascript:CommonSubscriptionManager.SubscribeToAdminNotify();\" title=\"" + Resources.Resource.UnsubscribeButton + "\"></a>";
+                return "<a class=\"on_off_button on\" href=\"javascript:CommonSubscriptionManager.SubscribeToAdminNotify();\" title=\"" + Resource.UnsubscribeButton + "\"></a>";
             else
-                return "<a class=\"on_off_button off\" href=\"javascript:CommonSubscriptionManager.SubscribeToAdminNotify();\" title=\"" + Resources.Resource.SubscribeButton + "\"></a>";
+                return "<a class=\"on_off_button off\" href=\"javascript:CommonSubscriptionManager.SubscribeToAdminNotify();\" title=\"" + Resource.SubscribeButton + "\"></a>";
         }
 
         protected string RenderAdminNotifyNotifyByCombobox()
@@ -805,7 +815,7 @@ namespace ASC.Web.Studio.UserControls.Users
         {
             try
             {
-                return Resources.Resource.ResourceManager.GetString("NotifyBy" + notify.ToString());
+                return Resource.ResourceManager.GetString("NotifyBy" + notify.ToString());
             }
             catch
             {

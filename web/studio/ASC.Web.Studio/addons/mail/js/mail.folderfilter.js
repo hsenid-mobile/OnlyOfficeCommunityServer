@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ window.folderFilter = (function($) {
                 anykey: true,
                 anykeytimeout: 1000,
                 maxfilters: -1,
-                hintDefaultDisable: true,
+                hintDefaultDisable: false,
                 colcount: 2,
                 sorters: [
                     { id: 'date', title: MailScriptResource.FilterByDate, sortOrder: 'descending', def: true }
@@ -161,13 +161,13 @@ window.folderFilter = (function($) {
                 ]
             };
 
-            $('#FolderFilter').advansedFilter(options).bind('setfilter', onSetFilter).bind('resetfilter', onResetFilter).bind('resetallfilters', onResetAllFilters);
+            $('#FolderFilter').advansedFilter(options).on('setfilter', onSetFilter).on('resetfilter', onResetFilter).on('resetallfilters', onResetAllFilters);
 
             // filter object initialization should follow after advansed filter plugin call - because
             // its replace target element with new markup
             filter = $('#FolderFilter');
 
-            filter.find('div.btn-show-filters:first').bind('click', onShowFilters);
+            filter.find('div.btn-show-filters:first').on('click', onShowFilters);
         }
     };
 
@@ -286,8 +286,6 @@ window.folderFilter = (function($) {
             default:
                 return;
         }
-
-        window.ASC.Mail.ga_track(ga_Categories.folder, ga_Actions.filterClick, filterItem.id);
 
         //reset paging
         MailFilter.setFromDate(undefined);

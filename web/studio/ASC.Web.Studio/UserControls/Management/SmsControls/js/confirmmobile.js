@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ ASC.Controls.ConfirmMobileManager = function () {
 
         var mobilePhone = jq("#primaryPhone").val().trim();
         if (!mobilePhone.length) {
-            jq("#errorMobileActivate").html(ASC.Resources.Master.Resource.ActivateMobilePhoneEmptyPhoneNumber).show();
+            jq("#errorMobileActivate").html(ASC.Resources.Master.ResourceJS.ActivateMobilePhoneEmptyPhoneNumber).show();
             jq("#primaryPhone").val(mobilePhone);
             return;
         }
@@ -54,7 +54,7 @@ ASC.Controls.ConfirmMobileManager = function () {
                 jq("#mobileNumberPanel").hide();
                 jq("#phoneNoise").html(res.phoneNoise);
                 jq("#mobileCodePanel").show();
-                jq("#phoneAuthcode").val("").focus();
+                jq("#phoneAuthcode").val("").trigger("focus");
 
                 timerCodeStart();
             } else {
@@ -70,7 +70,7 @@ ASC.Controls.ConfirmMobileManager = function () {
 
         var code = jq("#phoneAuthcode").val().trim();
         if (!code.length) {
-            jq("#errorMobileActivate").html(ASC.Resources.Master.Resource.ActivateMobilePhoneEmptyCode).show();
+            jq("#errorMobileActivate").html(ASC.Resources.Master.ResourceJS.ActivateMobilePhoneEmptyCode).show();
             return;
         }
 
@@ -127,7 +127,7 @@ ASC.Controls.ConfirmMobileManager = function () {
             PhoneController.Init(jq("#primaryPhone"), CountriesManager.countriesList, [country, "US"]);
         }
 
-        jq("#primaryPhone").keyup(function (event) {
+        jq("#primaryPhone").on("keyup", function (event) {
             if (!e) {
                 var e = event;
             }
@@ -148,7 +148,7 @@ ASC.Controls.ConfirmMobileManager = function () {
             return false;
         });
 
-        jq("#phoneAuthcode").keydown(function (event) {
+        jq("#phoneAuthcode").on("keydown", function (event) {
             if (!e) {
                 var e = event;
             }

@@ -179,6 +179,33 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Share files with your team or publicly..
+        /// </summary>
+        public static string DashboardShareFilesFirstLine {
+            get {
+                return ResourceManager.GetString("DashboardShareFilesFirstLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grant access for viewing, editing, reviewing, commenting..
+        /// </summary>
+        public static string DashboardShareFilesSecondLine {
+            get {
+                return ResourceManager.GetString("DashboardShareFilesSecondLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Embed docs into websites..
+        /// </summary>
+        public static string DashboardShareFilesThirdLine {
+            get {
+                return ResourceManager.GetString("DashboardShareFilesThirdLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Document Discussion.
         /// </summary>
         public static string DiscussionDocumentCustomMode {
@@ -261,7 +288,7 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To activate ONLYOFFICE Enterprise Edition you need to buy a license key..
+        ///   Looks up a localized string similar to To activate ONLYOFFICE Enterprise Edition, you need to buy a license key..
         /// </summary>
         public static string LicenseActivateDescrCustomMode {
             get {
@@ -441,55 +468,36 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to $PersonalHeaderStart Connect your favorite cloud storage to ONLYOFFICE $PersonalHeaderEnd
+        ///   Looks up a localized string similar to Want to change the email on your cloud office account?
         ///
-        ///It has been a week since you created your cloud office, so we believe it&apos;s time to unveil some beneficial features you might have missed.
+        ///Click the button below and log in* to your cloud.
         ///
-        ///Connect *Dropbox*, *Google Drive*, *Box*, *OneDrive*, *Nextcloud*, *ownCloud*, *kDrive* or *Yandex.Disk* to ONLYOFFICE and create a single document management space for all your documents. You&apos;ll be able to edit external files in ONLYOFFICE and save them to the storage you keep [rest of string was truncated]&quot;;.
+        ///$GreenButton
+        ///
+        ///The link is valid for 7 days.
+        ///
+        ///*If you are not signed in to your cloud office in this browser, you’ll need to use your old email for confirmation.
+        ///
+        ///Don’t want to change your email? Just ignore this message..
         /// </summary>
-        public static string pattern_personal_custom_mode_after_registration8 {
+        public static string pattern_personal_custom_mode_change_email_v115 {
             get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_after_registration8", resourceCulture);
+                return ResourceManager.GetString("pattern_personal_custom_mode_change_email_v115", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You have requested to change your email address used to enter the ${LetterLogoText} portal.
-        ///
-        ///Please follow the link below to change your email address:
+        ///   Looks up a localized string similar to Want to change the password on your cloud office account? Click the button below to confirm.
         ///
         ///$GreenButton
         ///
-        ///*Note*: this link is valid for 7 days only. Please complete your email change process within that period.
+        ///The link is valid for 7 days.
         ///
-        ///If you do not want to change your email or received this email by mistake, please ignore it.
-        ///
-        ///Sincerely,
-        ///ONLYOFFICE team.
+        ///Don’t want to change your password? Just ignore this message..
         /// </summary>
-        public static string pattern_personal_custom_mode_change_email {
+        public static string pattern_personal_custom_mode_change_password_v115 {
             get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_change_email", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to There has been a request to change your password used to enter the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal.
-        ///
-        ///Please follow the link below to change your password:
-        ///
-        ///$GreenButton
-        ///
-        ///*Note*: this link is valid for 7 days only. Please complete the password change process within that period.
-        ///
-        ///If you do not want to change your password or received this email by mistake, please ignore it.
-        ///
-        ///Sincerely,
-        ///ONLYOFFICE team.
-        /// </summary>
-        public static string pattern_personal_custom_mode_change_password {
-            get {
-                return ResourceManager.GetString("pattern_personal_custom_mode_change_password", resourceCulture);
+                return ResourceManager.GetString("pattern_personal_custom_mode_change_password_v115", resourceCulture);
             }
         }
         
@@ -578,7 +586,7 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Do the same as a user|Link Dropbox, Box and other accounts in the &apos;Common Documents&apos; section|Set up access rights to the documents and folders in the &apos;Common Documents&apos; section.
+        ///   Looks up a localized string similar to Do the same as a user|Link Dropbox, Box and other accounts in the &apos;Common&apos; section|Set up access rights to the documents and folders in the &apos;Common&apos; section.
         /// </summary>
         public static string ProductAdminOpportunitiesCustomMode {
             get {
@@ -713,33 +721,6 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connect your favorite cloud storage to ONLYOFFICE.
-        /// </summary>
-        public static string subject_personal_custom_mode_after_registration7 {
-            get {
-                return ResourceManager.GetString("subject_personal_custom_mode_after_registration7", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ONLYOFFICE Personal. Email change request.
-        /// </summary>
-        public static string subject_personal_custom_mode_change_email {
-            get {
-                return ResourceManager.GetString("subject_personal_custom_mode_change_email", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ONLYOFFICE Personal password assistance.
-        /// </summary>
-        public static string subject_personal_custom_mode_change_password {
-            get {
-                return ResourceManager.GetString("subject_personal_custom_mode_change_password", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to ONLYOFFICE Personal. Please activate your email address.
         /// </summary>
         public static string subject_personal_custom_mode_confirmation {
@@ -776,7 +757,7 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You are using ONLYOFFICE™ Enterprise Edition. {0}Support and updates are no longer available for your license{1}..
+        ///   Looks up a localized string similar to You are using ONLYOFFICE Enterprise Edition. {0}Support and updates are no longer available for your license{1}..
         /// </summary>
         public static string TariffNotPaidStandaloneCustomMode {
             get {
@@ -785,7 +766,7 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You are using ONLYOFFICE™ Enterprise Edition. {0}Support and updates are no longer available for your license since {2}{1}..
+        ///   Looks up a localized string similar to You are using ONLYOFFICE Enterprise Edition. {0}Support and updates are no longer available for your license since {2}{1}..
         /// </summary>
         public static string TariffOverdueStandaloneCustomMode {
             get {
@@ -794,7 +775,7 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You are using ONLYOFFICE™ Enterprise Edition..
+        ///   Looks up a localized string similar to You are using ONLYOFFICE Enterprise Edition..
         /// </summary>
         public static string TariffPaidStandaloneCustomMode {
             get {

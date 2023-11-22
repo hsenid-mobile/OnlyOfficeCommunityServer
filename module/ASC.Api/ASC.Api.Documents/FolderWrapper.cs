@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 using System;
 using System.Runtime.Serialization;
+
 using ASC.Api.Employee;
 using ASC.Core;
 using ASC.Files.Core;
@@ -28,28 +29,38 @@ namespace ASC.Api.Documents
 {
     /// <summary>
     /// </summary>
+    /// <inherited>ASC.Api.Documents.FileEntryWrapper, ASC.Api.Documents</inherited>
     [DataContract(Name = "folder", Namespace = "")]
     public class FolderWrapper : FileEntryWrapper
     {
         /// <summary>
         /// </summary>
+        /// <example type="int">1840746475</example>
         [DataMember(IsRequired = true, EmitDefaultValue = true)]
         public object ParentId { get; set; }
 
         /// <summary>
         /// </summary>
+        /// <example type="int">1840746475</example>
         [DataMember(EmitDefaultValue = true, IsRequired = false)]
         public int FilesCount { get; set; }
 
         /// <summary>
         /// </summary>
+        /// <example type="int">1840746475</example>
         [DataMember(EmitDefaultValue = true, IsRequired = false)]
         public int FoldersCount { get; set; }
 
         /// <summary>
         /// </summary>
+        /// <example>true</example>
         [DataMember(EmitDefaultValue = false, IsRequired = false)]
         public bool IsShareable { get; set; }
+
+        /// <summary>
+        /// </summary>
+        [DataMember(EmitDefaultValue = false, IsRequired = false)]
+        public bool IsFavorite { get; set; }
 
         /// <summary>
         /// </summary>
@@ -74,6 +85,7 @@ namespace ASC.Api.Documents
             FilesCount = folder.TotalFiles;
             FoldersCount = folder.TotalSubFolders;
             IsShareable = folder.Shareable;
+            IsFavorite = folder.IsFavorite;
         }
 
         private FolderWrapper()
@@ -88,21 +100,21 @@ namespace ASC.Api.Documents
         public static FolderWrapper GetSample()
         {
             return new FolderWrapper
-                {
-                    Access = FileShare.ReadWrite,
-                    Updated = ApiDateTime.GetSample(),
-                    Created = ApiDateTime.GetSample(),
-                    CreatedBy = EmployeeWraper.GetSample(),
-                    Id = new Random().Next(),
-                    RootFolderType = FolderType.BUNCH,
-                    Shared = false,
-                    Title = "Some titile",
-                    UpdatedBy = EmployeeWraper.GetSample(),
-                    FilesCount = new Random().Next(),
-                    FoldersCount = new Random().Next(),
-                    ParentId = new Random().Next(),
-                    IsShareable = false
-                };
+            {
+                Access = FileShare.ReadWrite,
+                Updated = ApiDateTime.GetSample(),
+                Created = ApiDateTime.GetSample(),
+                CreatedBy = EmployeeWraper.GetSample(),
+                Id = new Random().Next(),
+                RootFolderType = FolderType.BUNCH,
+                Shared = false,
+                Title = "Some titile",
+                UpdatedBy = EmployeeWraper.GetSample(),
+                FilesCount = new Random().Next(),
+                FoldersCount = new Random().Next(),
+                ParentId = new Random().Next(),
+                IsShareable = false
+            };
         }
     }
 }

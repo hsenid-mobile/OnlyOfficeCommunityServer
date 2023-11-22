@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Web;
+
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.CRM.Core;
@@ -39,24 +40,24 @@ namespace ASC.Web.CRM.Masters.ClientScripts
         {
             var imgs = new Dictionary<string, string>
                 {
-                    {"empty_screen_filter", WebImageSupplier.GetAbsoluteWebPath("empty_screen_filter.png")},
-                    {"empty_screen_tasks", WebImageSupplier.GetAbsoluteWebPath("empty_screen_tasks.png", ProductEntryPoint.ID)},
-                    {"empty_screen_deals", WebImageSupplier.GetAbsoluteWebPath("empty_screen_deals.png", ProductEntryPoint.ID)},
-                    {"empty_screen_cases", WebImageSupplier.GetAbsoluteWebPath("empty_screen_cases.png", ProductEntryPoint.ID)},
-                    {"empty_screen_invoices", WebImageSupplier.GetAbsoluteWebPath("empty_screen_invoices.png", ProductEntryPoint.ID)},
-                    {"empty_screen_products_services", WebImageSupplier.GetAbsoluteWebPath("empty_screen_products_services.png", ProductEntryPoint.ID)},
-                    {"empty_screen_taxes", WebImageSupplier.GetAbsoluteWebPath("empty_screen_taxes.png", ProductEntryPoint.ID)},
-                    {"empty_screen_persons", WebImageSupplier.GetAbsoluteWebPath("empty_screen_persons.png", ProductEntryPoint.ID)},
-                    {"empty_screen_phones", WebImageSupplier.GetAbsoluteWebPath("empty_screen_phones.png", ProductEntryPoint.ID)},
-                    {"empty_screen_voip_settings", WebImageSupplier.GetAbsoluteWebPath("empty_screen_voip_settings.png", ProductEntryPoint.ID)},
+                    {"empty_screen_filter", WebImageSupplier.GetAbsoluteWebPath("empty_screen_filter.svg")},
+                    {"empty_screen_tasks", WebImageSupplier.GetAbsoluteWebPath("empty_screen_tasks.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_deals", WebImageSupplier.GetAbsoluteWebPath("empty_screen_deals.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_cases", WebImageSupplier.GetAbsoluteWebPath("empty_screen_cases.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_invoices", WebImageSupplier.GetAbsoluteWebPath("empty_screen_invoices.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_products_services", WebImageSupplier.GetAbsoluteWebPath("empty_screen_products_services.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_taxes", WebImageSupplier.GetAbsoluteWebPath("empty_screen_taxes.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_persons", WebImageSupplier.GetAbsoluteWebPath("empty_screen_persons.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_phones", WebImageSupplier.GetAbsoluteWebPath("empty_screen_phones.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_voip_settings", WebImageSupplier.GetAbsoluteWebPath("empty_screen_voip_settings.svg", ProductEntryPoint.ID)},
                     {"empty_people_logo_40_40", WebImageSupplier.GetAbsoluteWebPath("empty_people_logo_40_40.png", ProductEntryPoint.ID)},
-                    {"empty_screen_opportunity_participants", WebImageSupplier.GetAbsoluteWebPath("empty_screen_opportunity_participants.png", ProductEntryPoint.ID)},
-                    {"empty_screen_company_participants", WebImageSupplier.GetAbsoluteWebPath("empty_screen_company_participants.png", ProductEntryPoint.ID)},
-                    {"empty_screen_case_participants", WebImageSupplier.GetAbsoluteWebPath("empty_screen_case_participants.png", ProductEntryPoint.ID)},
-                    {"empty_screen_projects", WebImageSupplier.GetAbsoluteWebPath("empty_screen_projects.png", ProductEntryPoint.ID)},
-                    {"empty_screen_userfields", WebImageSupplier.GetAbsoluteWebPath("empty_screen_userfields.png", ProductEntryPoint.ID)},
-                    {"empty_screen_tags", WebImageSupplier.GetAbsoluteWebPath("empty_screen_tags.png", ProductEntryPoint.ID)},
-                    {"empty_screen_twitter", WebImageSupplier.GetAbsoluteWebPath("empty_screen_twitter.png", ProductEntryPoint.ID)}
+                    {"empty_screen_opportunity_participants", WebImageSupplier.GetAbsoluteWebPath("empty_screen_opportunity_participants.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_company_participants", WebImageSupplier.GetAbsoluteWebPath("empty_screen_company_participants.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_case_participants", WebImageSupplier.GetAbsoluteWebPath("empty_screen_case_participants.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_projects", WebImageSupplier.GetAbsoluteWebPath("empty_screen_projects.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_userfields", WebImageSupplier.GetAbsoluteWebPath("empty_screen_userfields.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_tags", WebImageSupplier.GetAbsoluteWebPath("empty_screen_tags.svg", ProductEntryPoint.ID)},
+                    {"empty_screen_twitter", WebImageSupplier.GetAbsoluteWebPath("empty_screen_twitter.svg", ProductEntryPoint.ID)}
                 };
 
             return new List<KeyValuePair<string, object>>(1)
@@ -86,7 +87,7 @@ namespace ASC.Web.CRM.Masters.ClientScripts
                                EmptyScrImgs = imgs,
                                ImageWebPath = WebImageSupplier.GetImageFolderAbsoluteWebPath(ProductEntryPoint.ID),
 
-                               ContactSelectorTypeEnum = 
+                               ContactSelectorTypeEnum =
                                     new Dictionary<string, int>
                                     {
                                         {"All", (int)ContactSelectorTypeEnum.All},
@@ -96,7 +97,7 @@ namespace ASC.Web.CRM.Masters.ClientScripts
                                         {"PersonsWithoutCompany", (int)ContactSelectorTypeEnum.PersonsWithoutCompany}
                                     },
 
-                               HistoryCategorySystem = 
+                               HistoryCategorySystem =
                                    new Dictionary<string, int>
                                        {
                                            {"TaskClosed", (int)HistoryCategorySystem.TaskClosed},
@@ -104,7 +105,7 @@ namespace ASC.Web.CRM.Masters.ClientScripts
                                            {"MailMessage", (int)HistoryCategorySystem.MailMessage}
                                        },
 
-                               DefaultContactPhoto = 
+                               DefaultContactPhoto =
                                    new Dictionary<string, string>
                                        {
                                            {"CompanyBigSizePhoto", ContactPhotoManager.GetBigSizePhoto(0, true)},
@@ -113,7 +114,7 @@ namespace ASC.Web.CRM.Masters.ClientScripts
                                            {"PersonMediumSizePhoto", ContactPhotoManager.GetMediumSizePhoto(0, false)}
                                        },
 
-                               CookieKeyForPagination = 
+                               CookieKeyForPagination =
                                    new Dictionary<string, string>
                                        {
                                            {"contacts", "contactPageNumber"},

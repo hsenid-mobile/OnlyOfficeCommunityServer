@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
 */
 
 
-using ASC.Common.Caching;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+
+using ASC.Common.Caching;
 
 namespace ASC.Common.Threading
 {
@@ -147,7 +148,7 @@ namespace ASC.Common.Threading
             if (distributedTask != null)
             {
                 distributedTask.Status = DistributedTaskStatus.Completed;
-                distributedTask.Exception = task.Exception;
+                distributedTask.Exception = task.Exception?.ToString();
                 if (task.IsFaulted)
                 {
                     distributedTask.Status = DistributedTaskStatus.Failted;
@@ -165,7 +166,12 @@ namespace ASC.Common.Threading
 
         private Action<DistributedTask> GetPublication()
         {
-            return (t) => SetTask(t);
+            return (t) =>
+            {
+                t.LastModifiedOn = DateTime.UtcNow;
+
+                SetTask(t);
+            };
         }
 
 

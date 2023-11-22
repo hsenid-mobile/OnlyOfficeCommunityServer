@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,9 +75,9 @@
     }
 
     function initToolbar() {
-        jq("#studio_sidePanel").find("a.dropdown-item:not(.invite-link)").bind("click", onButtonClick);
+        jq("#studio_sidePanel").find("a.dropdown-item:not(.invite-link)").on("click", onButtonClick);
 
-        jq("#actionGroupMenu").find("a.dropdown-item").bind("click", onButtonClick);
+        jq("#actionGroupMenu").find("a.dropdown-item").on("click", onButtonClick);
 
         bindClipboardEvent();
     }
@@ -97,7 +97,7 @@
                         window.peopleActions.invite_link();
 
                         if (typeof(window.toastr) !== "undefined") {
-                            toastr.success(ASC.Resources.Master.Resource.LinkCopySuccess);
+                            toastr.success(ASC.Resources.Master.ResourceJS.LinkCopySuccess);
                         } else {
                             jq("#shareInviteUserLink, #sideNavInviteLink").yellowFade();
                         }
@@ -108,7 +108,7 @@
     };
 
     function initGroupList() {
-        var groupList = jq.tmpl("groupListTemplate", { groups: window.GroupManager.getAllGroups() });
+        var groupList = jq.tmpl("groupListTemplate", { groups: window.GroupManager.getGroupsArray() });
 
         jq("#groupList").empty().append(groupList);
 
@@ -118,12 +118,57 @@
     };
 
     function initMenuList() {
-        $(window).bind("change-group", onChangeGroup);
+        jq(window).on("change-group", onChangeGroup);
+    }
+
+    function changeAnchor (group) {
+        var anchor = ASC.Controls.AnchorController.getAnchor();
+        if (!anchor) {
+            location.hash = "";
+            return;
+        }
+        var anchorObj = jq.anchorToObject(anchor);
+        if (anchorObj == null) {
+            location.hash = "";
+            return;
+        }
+        if (!group) {
+            delete anchorObj.group
+        } else {
+            anchorObj.group = group;
+        }
+        anchor = jq.objectToAnchor(anchorObj);
+        location.hash = anchor;
+    }
+
+    function bindEvents() {
+        var pathname = "/Products/People/";
+        var filterExist = jq('#peopleFilter').length;
+
+        jq("#groupList .menu-item-label").each(function (index, item) {
+            var id = jq(item).parents(".menu-sub-item").attr("data-id");
+            if (filterExist) {
+                jq(item).on("click", function () { changeAnchor(id) });
+            } else {
+                jq(item).attr("href", pathname + "#employeestatus=active&group=" + id);
+            }
+        });
+
+        if (filterExist) {
+            jq("#defaultLinkPeople").on("click", function () { changeAnchor(null) });
+        } else {
+            jq("#defaultLinkPeople").attr("href", pathname + "#employeestatus=active");
+        }
+
+        jq(".people-import-banner_img").on("click", function () {
+            location.href = pathname + "Import.aspx";
+        });
     }
 
     $(function() {
         initToolbar();
         initGroupList();
         initMenuList();
+        bindEvents();
     });
 })(jQuery);

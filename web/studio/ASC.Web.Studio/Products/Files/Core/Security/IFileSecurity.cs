@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace ASC.Files.Core.Security
         bool CanEdit(FileEntry entry, Guid userId);
 
         bool CanDelete(FileEntry entry, Guid userId);
+
+        bool CanDownload(FileEntry entry, Guid userId);
 
         IEnumerable<Guid> WhoCanRead(FileEntry entry);
     }

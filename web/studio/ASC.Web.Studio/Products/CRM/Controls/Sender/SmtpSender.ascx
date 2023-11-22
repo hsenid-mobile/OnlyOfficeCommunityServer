@@ -51,7 +51,7 @@
             <input type="hidden" id="requiredMessageBody"/>
             <textarea id="ckEditor" name="ckEditor" style="width: 100%;height: 400px;"></textarea>
         </div>
-        <% if (CompanyWhiteLabelSettings.Instance.IsDefault) { %>
+        <% if (CompanyWhiteLabelSettings.Instance.IsDefault && !ASC.Core.CoreContext.Configuration.CustomMode) { %>
         <div id="watermarkInfo" class="headerPanel-splitter">
             <span class="text-medium-describe">*<%: CRMContactResource.TeamlabWatermarkInfo %></span>
         </div>
@@ -131,7 +131,7 @@
         <tbody>
             <tr>
                 <td>
-                    <img src="<%=WebImageSupplier.GetAbsoluteWebPath("mail_send.png", ProductEntryPoint.ID)%>" alt=""/>
+                    <img src="<%=WebImageSupplier.GetAbsoluteWebPath("mail_send.svg", ProductEntryPoint.ID)%>" alt=""/>
                 </td>
                 <td style="color: #787878;font-size: 17px;" colspan="2">
                     <%= String.Format(CRMContactResource.MassSendInfo.HtmlEncode(), "<br/>")%>

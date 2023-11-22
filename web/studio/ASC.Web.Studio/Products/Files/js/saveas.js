@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 window.ASC.Files.FileChoice = (function () {
     var isInit = false;
 
-    var init = function (originForPost) {
+    var init = function (originForPost, folderId, displayPrivacy) {
         if (isInit === false) {
             isInit = true;
 
@@ -63,14 +63,14 @@ window.ASC.Files.FileChoice = (function () {
                         url: createFileUrl,
                         success: function (response) {
                             if (response && response.indexOf("error: ") == 0) {
-                                var data = {error: response.replace("error: ", "")};
+                                var data = { error: response.replace("error: ", "") };
                             } else {
-                                data = {message: response.replace("ok: ", "")};
+                                data = { message: response.replace("ok: ", "") };
                             }
                             finishSubmit(data);
                         },
                         error: function (data) {
-                            finishSubmit({error: data.statusText});
+                            finishSubmit({ error: data.statusText });
                         }
                     });
                 }
@@ -82,7 +82,13 @@ window.ASC.Files.FileChoice = (function () {
                 finishSubmit({});
             };
 
-            ASC.Files.FileSelector.openDialog(null, true);
+            jq(document).on("keyup", function (event) {
+                if (event.keyCode == 27) {
+                    ASC.Files.FileSelector.onCancel();
+                }
+            });
+
+            ASC.Files.FileSelector.openDialog({ folderId: folderId || null, onlyFolder: true, displayPrivacy: displayPrivacy, scrolled: true });
 
             ASC.Files.UI.checkCharacter(jq("#saveAsTitle"));
         }

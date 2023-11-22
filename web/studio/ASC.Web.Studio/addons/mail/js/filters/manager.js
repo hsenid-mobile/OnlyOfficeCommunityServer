@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,6 +174,7 @@ window.filtersManager = (function($) {
 
                             filters.splice(index, 1);
                             eventsHandler.trigger(supportedCustomEvents.OnDelete, filter.id);
+                            window.editFilterPage.close();
                         },
                         error: function(params, errors) {
                             window.toastr.error(errors[0]);
@@ -207,16 +208,17 @@ window.filtersManager = (function($) {
                                                     progressBarIntervalId = null;
 
                                                     if (data.error !== "") {
-                                                        toastr.error(ASC.Resources.Master.Resource.OperationFailedMsg);
+                                                        toastr.error(ASC.Resources.Master.ResourceJS.OperationFailedMsg);
                                                         console.log(data.error);
                                                     } else {
                                                         toastr
-                                                            .success(ASC.Resources.Master.Resource
+                                                            .success(ASC.Resources.Master.ResourceJS
                                                                 .OperationSuccededMsg);
                                                     }
 
                                                     window.serviceManager.updateFolders();
                                                     window.LoadingBanner.hideLoading();
+                                                    window.editFilterPage.close();
                                                 }
                                             },
                                             error: function(params, errors) {
@@ -255,11 +257,11 @@ window.filtersManager = (function($) {
     }
 
     function bind(eventName, fn) {
-        eventsHandler.bind(eventName, fn);
+        eventsHandler.on(eventName, fn);
     }
 
     function unbind(eventName) {
-        eventsHandler.unbind(eventName);
+        eventsHandler.off(eventName);
     }
 
     function isLoading() {

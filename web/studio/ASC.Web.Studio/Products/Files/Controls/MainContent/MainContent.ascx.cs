@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Web;
 using System.Web.UI;
+
+using ASC.Core;
 using ASC.Core.Users;
 using ASC.Web.Core;
 using ASC.Web.Files.Classes;
@@ -29,7 +31,7 @@ using ASC.Web.Files.Services.WCFService;
 using ASC.Web.Files.Services.WCFService.FileOperations;
 using ASC.Web.Studio.UserControls.EmptyScreens;
 using ASC.Web.Studio.UserControls.Management;
-using ASC.Core;
+using ASC.Web.Studio.Utility;
 
 namespace ASC.Web.Files.Controls
 {
@@ -41,6 +43,7 @@ namespace ASC.Web.Files.Controls
         }
 
         public object FolderIDCurrentRoot { get; set; }
+        public object ExternalFolderIDCurrentRoot { get; set; }
 
         public String TitlePage { get; set; }
 
@@ -50,6 +53,9 @@ namespace ASC.Web.Files.Controls
 
         protected bool IsFirstVisit;
 
+        protected bool IsVisitor;
+        protected bool Trial { get; set; }
+
         public void Page_Init(object sender, EventArgs e)
         {
             var mail = WebItemManager.Instance[WebItemManager.MailProductID];
@@ -57,6 +63,8 @@ namespace ASC.Web.Files.Controls
             ProductMailAvailable = mail != null && !mail.IsDisabled();
 
             IsFirstVisit = Global.IsFirstVisit();
+
+            IsVisitor = CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID).IsVisitor();
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -64,6 +72,12 @@ namespace ASC.Web.Files.Controls
             InitControls();
 
             InitScripts();
+
+            if (TenantExtra.Saas)
+            {
+                var quota = TenantExtra.GetTenantQuota();
+                Trial = quota.Trial || quota.Free;
+            }
         }
 
         private void InitControls()
@@ -88,7 +102,7 @@ namespace ASC.Web.Files.Controls
 
             UploaderPlaceHolder.Controls.Add(LoadControl(ChunkUploadDialog.Location));
 
-            if (IsFirstVisit && !CoreContext.Configuration.Personal && !CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID).IsVisitor() && (Page is _Default))
+            if (IsFirstVisit && !CoreContext.Configuration.Personal && !IsVisitor && (Page is _Default))
             {
                 ControlPlaceHolder.Controls.Add(LoadControl(FilesDashboardEmptyScreen.Location));
             }
@@ -126,7 +140,7 @@ namespace ASC.Web.Files.Controls
 
             using (var ms = new MemoryStream())
             {
-                var serializer = new DataContractJsonSerializer(typeof (ItemList<FileOperationResult>));
+                var serializer = new DataContractJsonSerializer(typeof(ItemList<FileOperationResult>));
                 serializer.WriteObject(ms, tasks);
                 ms.Seek(0, SeekOrigin.Begin);
 

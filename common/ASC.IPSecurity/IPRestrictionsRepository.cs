@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,18 @@
 */
 
 
-using ASC.Common.Data;
-using ASC.Common.Data.Sql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using ASC.Common.Data;
+using ASC.Common.Data.Sql;
 
 namespace ASC.IPSecurity
 {
     internal class IPRestrictionsRepository
     {
-        private const string dbId = "core";
+        private const string dbId = "default";
 
 
         public static List<IPRestriction> Get(int tenant)
@@ -33,17 +34,18 @@ namespace ASC.IPSecurity
             using (var db = new DbManager(dbId))
             {
                 return db
-                    .ExecuteList(new SqlQuery("tenants_iprestrictions").Select("id", "ip").Where("tenant", tenant))
+                    .ExecuteList(new SqlQuery("tenants_iprestrictions").Select("id", "ip", "for_admin").Where("tenant", tenant))
                     .ConvertAll(r => new IPRestriction
                     {
                         Id = Convert.ToInt32(r[0]),
                         Ip = Convert.ToString(r[1]),
+                        ForAdmin = Convert.ToBoolean(r[2]),
                         TenantId = tenant,
                     });
             }
         }
 
-        public static List<string> Save(IEnumerable<string> ips, int tenant)
+        public static List<IPRestrictionBase> Save(IEnumerable<IPRestrictionBase> ips, int tenant)
         {
             using (var db = new DbManager(dbId))
             using (var tx = db.BeginTransaction())
@@ -56,7 +58,8 @@ namespace ASC.IPSecurity
                 {
                     var i = new SqlInsert("tenants_iprestrictions")
                         .InColumnValue("tenant", tenant)
-                        .InColumnValue("ip", ip);
+                        .InColumnValue("ip", ip.Ip)
+                        .InColumnValue("for_admin", ip.ForAdmin);
 
                     db.ExecuteNonQuery(i);
                 }

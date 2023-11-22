@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Notify.Jabber;
 using ASC.Mail.Core;
-using ASC.Web.Core;
 using ASC.Web.Core.Files;
 using ASC.Web.Files.Services.DocumentService;
 
@@ -32,6 +31,8 @@ namespace ASC.Api.Settings
     [DataContract(Name = "buildversion", Namespace = "")]
     public class BuildVersion
     {
+        private static ILog Log = LogManager.GetLogger("ASC");
+
         [DataMember]
         public string CommunityServer { get; set; }
 
@@ -57,7 +58,7 @@ namespace ASC.Api.Settings
 
         private static string GetCommunityVersion()
         {
-            return ConfigurationManagerExtension.AppSettings["version.number"] ?? "8.5.0";
+            return ConfigurationManagerExtension.AppSettings["version.number"] ?? "12.5.0";
         }
 
         private static string GetDocumentVersion()
@@ -81,7 +82,7 @@ namespace ASC.Api.Settings
             }
             catch (Exception e)
             {
-                LogManager.GetLogger("ASC").Warn(e.Message, e);
+                Log.Warn(e.Message, e);
             }
 
             return null;
@@ -98,7 +99,7 @@ namespace ASC.Api.Settings
             }
             catch (Exception e)
             {
-                LogManager.GetLogger("ASC").Warn(e.Message, e);
+                Log.Warn(e.Message, e);
             }
 
             return null;

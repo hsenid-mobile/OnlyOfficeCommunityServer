@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,6 @@ namespace ASC.Data.Backup.Service
 {
     public class BackupConfigurationSection : ConfigurationSection
     {
-        [ConfigurationProperty("tmpFolder", DefaultValue = "..\\Data\\Backup\\")]
-        public string TempFolder
-        {
-            get
-            {
-                var path = (string)this["tmpFolder"];
-                return string.IsNullOrEmpty(path) ? path : path.Replace('\\', Path.DirectorySeparatorChar);
-            }
-            set { this["tmpFolder"] = value; }
-        }
-
         [ConfigurationProperty("upgradesPath", DefaultValue = "../../Sql")]
         public string UpgradesPath
         {
@@ -53,6 +42,16 @@ namespace ASC.Data.Backup.Service
                 return Convert.ToInt32(this["limit"]);
             }
             set { this["limit"] = value; }
+        }
+
+        [ConfigurationProperty("chunkSize", DefaultValue = 20971520L)]
+        public long ChunkSize
+        {
+            get
+            {
+                return long.Parse(this["chunkSize"].ToString());
+            }
+            set { this["chunkSize"] = value; }
         }
 
         [ConfigurationProperty("service")]
@@ -98,7 +97,7 @@ namespace ASC.Data.Backup.Service
             set { this["period"] = value; }
         }
 
-        [ConfigurationProperty("workerCount", DefaultValue = 1)]
+        [ConfigurationProperty("workerCount", DefaultValue = 2)]
         public int WorkerCount
         {
             get { return (int)this["workerCount"]; }

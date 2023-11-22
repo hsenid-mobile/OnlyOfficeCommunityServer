@@ -1,6 +1,6 @@
-/*
+﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
+
 using ASC.Core;
-using ASC.Core.Users;
 using ASC.Core.Tenants;
+using ASC.Core.Users;
 using ASC.Web.Core;
-using ASC.Web.Studio.UserControls.Statistics;
-using ASC.Web.Studio.Core.Users;
 using ASC.Web.Core.Users;
-using ASC.Web.Studio.Utility;
-using Resources;
-using Newtonsoft.Json;
 using ASC.Web.Core.Utility;
+using ASC.Web.Studio.Core.Users;
+using ASC.Web.Studio.PublicResources;
+using ASC.Web.Studio.UserControls.Statistics;
+using ASC.Web.Studio.Utility;
+
+using Newtonsoft.Json;
 
 using LdapMapping = ASC.ActiveDirectory.Base.Settings.LdapSettings.MappingFields;
 
@@ -51,6 +53,7 @@ namespace ASC.Web.Studio.UserControls.Users.UserProfile
         protected bool CurrentUserIsMailAdmin;
         protected bool IsPersonal;
         protected bool IsTrial;
+        protected bool CanCreateEmailOnDomain;
         protected string HelpLink;
         protected List<LdapMapping> LdapFields;
 
@@ -75,6 +78,7 @@ namespace ASC.Web.Studio.UserControls.Users.UserProfile
         protected string Position;
         protected string Place;
         protected string Login;
+        protected UserInfo Lead;
         protected string Comment;
         protected string ProfileGender;
         protected string PhotoPath = UserPhotoManager.GetDefaultPhotoAbsoluteWebPath();
@@ -89,10 +93,7 @@ namespace ASC.Web.Studio.UserControls.Users.UserProfile
         protected string UserTypeSelectorGuestItemClass;
         protected string UserTypeSelectorUserItemClass;
 
-        protected int UserPasswordMinLength;
-        protected bool UserPasswordUpperCase;
-        protected bool UserPasswordDigits;
-        protected bool UserPasswordSpecSymbols;
+        protected PasswordSettings TenantPasswordSettings;
 
         protected string PageTitle = Resource.CreateNewProfile;
         protected string ButtonText = Resource.AddButton;
@@ -106,17 +107,24 @@ namespace ASC.Web.Studio.UserControls.Users.UserProfile
             get { return "~/UserControls/Users/UserProfile/UserProfileEditControl.ascx"; }
         }
 
+        protected string TariffPageLink { get; set; }
+
+        protected bool IsFreeTariff { get; set; }
+
         #endregion
 
         #region events
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            TariffPageLink = TenantExtra.GetTariffPageLink();
+            IsFreeTariff = TenantExtra.GetTenantQuota().Free;
             IsPageEditProfileFlag = (Request["action"] == "edit");
             CurrentUserIsPeopleAdmin = WebItemSecurity.IsProductAdministrator(WebItemManager.PeopleProductID, SecurityContext.CurrentAccount.ID);
             CurrentUserIsMailAdmin = WebItemSecurity.IsProductAdministrator(WebItemManager.MailProductID, SecurityContext.CurrentAccount.ID);
             IsPersonal = CoreContext.Configuration.Personal;
             IsTrial = TenantExtra.GetTenantQuota().Trial;
+            CanCreateEmailOnDomain = !IsPageEditProfileFlag && CurrentUserIsMailAdmin && !(TenantExtra.Saas && IsTrial);
             HelpLink = CommonLinkUtility.GetHelpLink();
             LdapFields = ActiveDirectory.Base.Settings.LdapSettings.GetImportedFields;
 
@@ -128,7 +136,10 @@ namespace ASC.Web.Studio.UserControls.Users.UserProfile
 
             RegisterBodyScript();
 
-            InitUserTypeSelector();
+            if (!IsPersonal)
+            {
+                InitUserTypeSelector();
+            }
 
             InitPasswordSettings();
 
@@ -229,6 +240,19 @@ namespace ASC.Web.Studio.UserControls.Users.UserProfile
         {
             Page.RegisterBodyScripts("~/js/third-party/xregexp.js", "~/UserControls/Users/UserProfile/js/userprofileeditcontrol.js")
                 .RegisterStyle("~/UserControls/Users/UserProfile/css/profileeditcontrol_style.less");
+            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
+            {
+                Page.RegisterStyle("~/UserControls/Users/UserProfile/css/dark-profileeditcontrol_style.less");
+            }
+            else
+            {
+                Page.RegisterStyle("~/UserControls/Users/UserProfile/css/profileeditcontrol_style.less");
+            }
+        }
+
+        public bool CanAddVisitor()
+        {
+            return CoreContext.Configuration.Standalone || TenantStatisticsProvider.GetVisitorsCount() < TenantExtra.GetTenantQuota().ActiveUsers * Constants.CoefficientOfVisitors;
         }
 
         private void InitUserTypeSelector()
@@ -242,62 +266,46 @@ namespace ASC.Web.Studio.UserControls.Users.UserProfile
 
             if (canAddUser)
             {
-                if (isVisitorType && !canEditType)
-                {
-                    UserTypeSelectorClass = "disabled";
-                    UserTypeSelectorGuestItemClass = "active";
-                    UserTypeSelectorUserItemClass = "disabled";
-                }
-                else
-                {
-                    if (canEditType)
-                    {
-                        UserTypeSelectorClass = "";
-                        UserTypeSelectorGuestItemClass = isVisitorType ? "active" : "";
-                        UserTypeSelectorUserItemClass = isVisitorType ? "" : "active";
-                    }
-                    else
-                    {
-                        UserTypeSelectorClass = "disabled";
-                        UserTypeSelectorGuestItemClass = "disabled";
-                        UserTypeSelectorUserItemClass = "active";
-                    }
-                }
+                UserTypeSelectorUserItemClass = isVisitorType ? "" : "active";
             }
             else
             {
-                if (isVisitorType || !IsPageEditProfileFlag)
+                UserTypeSelectorUserItemClass = "disabled";
+            }
+            if (CanAddVisitor())
+            {
+                UserTypeSelectorGuestItemClass = isVisitorType ? "active" : "";
+            }
+            else
+            {
+                UserTypeSelectorGuestItemClass = "disabled";
+            }
+            if (canEditType)
+            {
+                UserTypeSelectorClass = "";
+            }
+            else
+            {
+                UserTypeSelectorClass = "disabled";
+            }
+
+            if (IsPageEditProfileFlag)
+            {
+                if (isVisitorType)
                 {
-                    UserTypeSelectorClass = canEditType ? "" : "disabled";
                     UserTypeSelectorGuestItemClass = "active";
-                    UserTypeSelectorUserItemClass = "disabled";
                 }
                 else
                 {
-                    if (canEditType)
-                    {
-                        UserTypeSelectorClass = "";
-                        UserTypeSelectorGuestItemClass = isVisitorType ? "active" : "";
-                        UserTypeSelectorUserItemClass = isVisitorType ? "" : "active";
-                    }
-                    else
-                    {
-                        UserTypeSelectorClass = "disabled";
-                        UserTypeSelectorGuestItemClass = "disabled";
-                        UserTypeSelectorUserItemClass = "active";
-                    }
+                    UserTypeSelectorUserItemClass = "active";
                 }
             }
+
         }
 
         private void InitPasswordSettings()
         {
-            var passwordSettings = PasswordSettings.Load();
-
-            UserPasswordMinLength = passwordSettings.MinLength;
-            UserPasswordDigits = passwordSettings.Digits;
-            UserPasswordSpecSymbols = passwordSettings.SpecSymbols;
-            UserPasswordUpperCase = passwordSettings.UpperCase;
+            TenantPasswordSettings = PasswordSettings.Load();
         }
 
         private void InitProfileFields(ProfileHelper profileHelper)
@@ -307,6 +315,10 @@ namespace ASC.Web.Studio.UserControls.Users.UserProfile
             Email = Profile.Email.HtmlEncode();
             Phone = Profile.MobilePhone.HtmlEncode();
             Position = Profile.Title.HtmlEncode();
+            if (!IsPersonal && Profile.Lead.HasValue)
+            {
+                Lead = CoreContext.UserManager.GetUsers(Profile.Lead.Value);
+            }
             Place = Profile.Location.HtmlEncode();
             Login = Profile.UserName.HtmlEncode();
             Comment = Profile.Notes.HtmlEncode();
@@ -315,7 +327,7 @@ namespace ASC.Web.Studio.UserControls.Users.UserProfile
             WorkFromDate = Profile.WorkFromDate.HasValue ? Profile.WorkFromDate.Value.ToShortDateString() : "";
             BirthDate = Profile.BirthDate.HasValue ? Profile.BirthDate.Value.ToShortDateString() : "";
             Departments = CoreContext.UserManager.GetUserGroups(Profile.ID);
-            
+
             SocContacts = profileHelper.Contacts;
 
             OtherContacts = new List<MyContact>();

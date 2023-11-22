@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading;
 using System.Web;
+
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.Files.Core;
@@ -35,13 +36,13 @@ using ASC.Security.Cryptography;
 using ASC.Web.Core.Files;
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Core;
-using ASC.Web.Files.Core.Entries;
 using ASC.Web.Files.Helpers;
 using ASC.Web.Files.Resources;
 using ASC.Web.Files.Services.NotifyService;
 using ASC.Web.Files.ThirdPartyApp;
 using ASC.Web.Files.Utils;
 using ASC.Web.Studio.Utility;
+
 using CommandMethod = ASC.Web.Core.Files.DocumentService.CommandMethod;
 using File = ASC.Files.Core.File;
 
@@ -68,6 +69,7 @@ namespace ASC.Web.Files.Services.DocumentService
         {
             public List<Action> Actions;
             public string ChangesUrl;
+            public string Filetype;
             public ForceSaveInitiator ForceSaveType;
             public object History;
             public string Key;
@@ -90,7 +92,8 @@ namespace ASC.Web.Files.Services.DocumentService
             {
                 Command = 0,
                 User = 1,
-                Timer = 2
+                Timer = 2,
+                UserSubmit = 3,
             }
         }
 
@@ -140,7 +143,7 @@ namespace ASC.Web.Files.Services.DocumentService
             {
                 using (var ms = new MemoryStream())
                 {
-                    var serializer = new DataContractJsonSerializer(typeof (TrackResponse));
+                    var serializer = new DataContractJsonSerializer(typeof(TrackResponse));
                     serializer.WriteObject(ms, response);
                     ms.Seek(0, SeekOrigin.Begin);
                     return Encoding.UTF8.GetString(ms.GetBuffer(), 0, (int)ms.Length);
@@ -150,23 +153,34 @@ namespace ASC.Web.Files.Services.DocumentService
 
         #endregion
 
-        public static string GetCallbackUrl(string fileId)
+        public static string GetCallbackUrl(string fileId, string sharedLinkKey)
         {
+            var linkId = string.Empty;
+            if (!string.IsNullOrEmpty(sharedLinkKey))
+            {
+                FileShareLink.Parse(sharedLinkKey, out Guid shareLinkId, out _);
+                if (shareLinkId != FileConstant.ShareLinkId)
+                {
+                    linkId = shareLinkId.ToString();
+                }
+            }
+
             var callbackUrl = CommonLinkUtility.GetFullAbsolutePath(FilesLinkUtility.FileHandlerPath
                                                                     + "?" + FilesLinkUtility.Action + "=track"
                                                                     + "&" + FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(fileId)
-                                                                    + "&" + FilesLinkUtility.AuthKey + "=" + EmailValidationKeyProvider.GetEmailKey(fileId));
+                                                                    + "&" + FilesLinkUtility.LinkId + "=" + HttpUtility.UrlEncode(linkId)
+                                                                    + "&" + FilesLinkUtility.AuthKey + "=" + EmailValidationKeyProvider.GetEmailKey(fileId + linkId));
             callbackUrl = DocumentServiceConnector.ReplaceCommunityAdress(callbackUrl);
             return callbackUrl;
         }
 
-        public static bool StartTrack(string fileId, string docKeyForTrack)
+        public static bool StartTrack(string fileId, string docKeyForTrack, string sharedLinkKey)
         {
-            var callbackUrl = GetCallbackUrl(fileId);
+            var callbackUrl = GetCallbackUrl(fileId, sharedLinkKey);
             return DocumentServiceConnector.Command(CommandMethod.Info, docKeyForTrack, fileId, callbackUrl);
         }
 
-        public static TrackResponse ProcessData(string fileId, TrackerData fileData)
+        public static TrackResponse ProcessData(string fileId, TrackerData fileData, string linkId)
         {
             switch (fileData.Status)
             {
@@ -177,7 +191,7 @@ namespace ASC.Web.Files.Services.DocumentService
                     break;
 
                 case TrackerStatus.Editing:
-                    ProcessEdit(fileId, fileData);
+                    ProcessEdit(fileId, fileData, linkId);
                     break;
 
                 case TrackerStatus.MustSave:
@@ -192,7 +206,7 @@ namespace ASC.Web.Files.Services.DocumentService
             return null;
         }
 
-        private static void ProcessEdit(string fileId, TrackerData fileData)
+        private static void ProcessEdit(string fileId, TrackerData fileData, string linkId)
         {
             if (ThirdPartySelector.GetAppByFileId(fileId) != null)
             {
@@ -231,14 +245,15 @@ namespace ASC.Web.Files.Services.DocumentService
                     Guid userId;
                     if (!Guid.TryParse(user, out userId))
                     {
-                        Global.Logger.Error("DocService userId is not Guid: " + user);
+                        Global.Logger.Info("DocService userId is not Guid: " + user);
                         continue;
                     }
                     users.Remove(userId);
 
                     try
                     {
-                        var doc = FileShareLink.CreateKey(fileId);
+                        var linkIdGuid = string.IsNullOrEmpty(linkId) ? FileConstant.ShareLinkId : new Guid(linkId);
+                        var doc = FileShareLink.CreateKey(fileId, linkIdGuid);
                         EntryManager.TrackEditing(fileId, userId, userId, doc);
                     }
                     catch (Exception e)
@@ -276,7 +291,7 @@ namespace ASC.Web.Files.Services.DocumentService
 
             if (fileData.Users == null || fileData.Users.Count == 0 || !Guid.TryParse(fileData.Users[0], out userId))
             {
-                userId = FileTracker.GetEditingBy(fileId).FirstOrDefault();
+                userId = Guid.Empty;
             }
 
             var app = ThirdPartySelector.GetAppByFileId(fileId);
@@ -293,7 +308,7 @@ namespace ASC.Web.Files.Services.DocumentService
                 {
                     Global.Logger.ErrorFormat("DocService saving file {0} ({1}) with key {2}", fileId, docKey, fileData.Key);
 
-                    StoringFileAfterError(fileId, userId.ToString(), DocumentServiceConnector.ReplaceDocumentAdress(fileData.Url));
+                    StoringFileAfterError(fileId, userId.ToString(), DocumentServiceConnector.ReplaceDocumentAdress(fileData.Url), fileData.Filetype);
                     return new TrackResponse { Message = "Expected key " + docKey };
                 }
             }
@@ -301,7 +316,7 @@ namespace ASC.Web.Files.Services.DocumentService
             UserInfo user = null;
             try
             {
-                SecurityContext.AuthenticateMe(userId);
+                SecurityContext.CurrentUser = userId;
 
                 user = CoreContext.UserManager.GetUsers(userId);
                 var culture = string.IsNullOrEmpty(user.CultureName) ? CoreContext.TenantManager.GetCurrentTenant().GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
@@ -355,22 +370,26 @@ namespace ASC.Web.Files.Services.DocumentService
                     {
                         case TrackerData.ForceSaveInitiator.Command:
                             forcesaveType = ForcesaveType.Command;
+                            comments.Add(FilesCommonResource.CommentAutosave);
                             break;
                         case TrackerData.ForceSaveInitiator.Timer:
                             forcesaveType = ForcesaveType.Timer;
+                            comments.Add(FilesCommonResource.CommentAutosave);
                             break;
                         case TrackerData.ForceSaveInitiator.User:
                             forcesaveType = ForcesaveType.User;
+                            comments.Add(FilesCommonResource.CommentForcesave);
+                            break;
+                        case TrackerData.ForceSaveInitiator.UserSubmit:
+                            forcesaveType = ForcesaveType.UserSubmit;
+                            comments.Add(FilesCommonResource.CommentSubmitFillForm);
                             break;
                     }
-                    comments.Add(fileData.ForceSaveType == TrackerData.ForceSaveInitiator.User
-                                     ? FilesCommonResource.CommentForcesave
-                                     : FilesCommonResource.CommentAutosave);
                 }
 
                 try
                 {
-                    file = EntryManager.SaveEditing(fileId, null, DocumentServiceConnector.ReplaceDocumentAdress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forcesaveType);
+                    file = EntryManager.SaveEditing(fileId, fileData.Filetype, DocumentServiceConnector.ReplaceDocumentAdress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forcesaveType, true);
                     saveMessage = fileData.Status == TrackerStatus.MustSave || fileData.Status == TrackerStatus.ForceSave ? null : "Status " + fileData.Status;
                 }
                 catch (Exception ex)
@@ -378,7 +397,7 @@ namespace ASC.Web.Files.Services.DocumentService
                     Global.Logger.Error(string.Format("DocService save error. File id: '{0}'. UserId: {1}. DocKey '{2}'. DownloadUri: {3}", fileId, userId, fileData.Key, fileData.Url), ex);
                     saveMessage = ex.Message;
 
-                    StoringFileAfterError(fileId, userId.ToString(), DocumentServiceConnector.ReplaceDocumentAdress(fileData.Url));
+                    StoringFileAfterError(fileId, userId.ToString(), DocumentServiceConnector.ReplaceDocumentAdress(fileData.Url), fileData.Filetype);
                 }
             }
 
@@ -392,6 +411,10 @@ namespace ASC.Web.Files.Services.DocumentService
 
                 if (!forcesave)
                     SaveHistory(file, (fileData.History ?? "").ToString(), DocumentServiceConnector.ReplaceDocumentAdress(fileData.ChangesUrl));
+
+                if (fileData.Status == TrackerStatus.ForceSave
+                    && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit)
+                    EntryManager.SubmitFillForm(file);
             }
 
             Global.SocketManager.FilesChangeEditors(fileId, !forcesave);
@@ -412,7 +435,7 @@ namespace ASC.Web.Files.Services.DocumentService
 
             try
             {
-                SecurityContext.AuthenticateMe(userId);
+                SecurityContext.CurrentUser = userId;
 
                 var user = CoreContext.UserManager.GetUsers(userId);
                 var culture = string.IsNullOrEmpty(user.CultureName) ? CoreContext.TenantManager.GetCurrentTenant().GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
@@ -485,14 +508,14 @@ namespace ASC.Web.Files.Services.DocumentService
 
                 using (var mailMergeTask =
                     new MailMergeTask
-                        {
-                            From = fileData.MailMerge.From,
-                            Subject = fileData.MailMerge.Subject,
-                            To = fileData.MailMerge.To,
-                            Message = message,
-                            AttachTitle = fileData.MailMerge.Title,
-                            Attach = attach
-                        })
+                    {
+                        From = fileData.MailMerge.From,
+                        Subject = fileData.MailMerge.Subject,
+                        To = fileData.MailMerge.To,
+                        Message = message,
+                        AttachTitle = fileData.MailMerge.Title,
+                        Attach = attach
+                    })
                 {
                     var response = mailMergeTask.Run();
                     Global.Logger.InfoFormat("DocService mailMerge {0}/{1} send: {2}",
@@ -523,11 +546,14 @@ namespace ASC.Web.Files.Services.DocumentService
         }
 
 
-        private static void StoringFileAfterError(string fileId, string userId, string downloadUri)
+        private static void StoringFileAfterError(string fileId, string userId, string downloadUri, string downloadType)
         {
+            if (string.IsNullOrEmpty(downloadUri)) return;
+
             try
             {
-                var fileName = Global.ReplaceInvalidCharsAndTruncate(fileId + FileUtility.GetFileExtension(downloadUri));
+                if (string.IsNullOrEmpty(downloadType)) downloadType = FileUtility.GetFileExtension(downloadUri).Trim('.');
+                var fileName = Global.ReplaceInvalidCharsAndTruncate(fileId + "." + downloadType);
                 var path = string.Format(@"save_crash\{0}\{1}_{2}",
                                          DateTime.UtcNow.ToString("yyyy_MM_dd"),
                                          userId,

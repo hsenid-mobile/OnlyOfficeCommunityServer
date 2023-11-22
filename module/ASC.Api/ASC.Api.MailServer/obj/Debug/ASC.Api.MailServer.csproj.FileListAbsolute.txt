@@ -1,0 +1,10 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\callback.htm
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Api.MailServer.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Api.MailServer.XML
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Api.MailServer.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Api.MailServer.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Api\ASC.Api.MailServer\obj\Debug\ASC.Api.MailServer.csproj.AssemblyReference.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Api\ASC.Api.MailServer\obj\Debug\ASC.Api.MailServer.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Api\ASC.Api.MailServer\obj\Debug\ASC.Api.MailServer.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Api\ASC.Api.MailServer\obj\Debug\ASC.Api.MailServer.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Api\ASC.Api.MailServer\obj\Debug\ASC.Api.MailServer.pdb

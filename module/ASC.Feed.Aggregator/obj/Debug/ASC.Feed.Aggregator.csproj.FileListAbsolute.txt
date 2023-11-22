@@ -1,0 +1,10 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\callback.htm
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Feed.Aggregator.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Feed.Aggregator.xml
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Feed.Aggregator.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Feed.Aggregator.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Feed.Aggregator\obj\Debug\ASC.Feed.Aggregator.csproj.AssemblyReference.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Feed.Aggregator\obj\Debug\ASC.Feed.Aggregator.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Feed.Aggregator\obj\Debug\ASC.Feed.Aggregator.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Feed.Aggregator\obj\Debug\ASC.Feed.Aggregator.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Feed.Aggregator\obj\Debug\ASC.Feed.Aggregator.pdb

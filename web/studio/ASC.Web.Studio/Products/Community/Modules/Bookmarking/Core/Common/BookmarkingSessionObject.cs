@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,18 @@
 */
 
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace ASC.Bookmarking.Common
 {
-	public class BookmarkingSessionObject<T> where T : class, new()
-	{
-		public static T GetCurrentInstanse()
-		{
-			return BookmarkingBusinessFactory.GetObjectFromSession<T>();
-		}
+    public class BookmarkingSessionObject<T> where T : class, new()
+    {
+        public static T GetCurrentInstanse()
+        {
+            return BookmarkingBusinessFactory.GetObjectFromSession<T>();
+        }
 
         public static void UpdateCurrentInstanse(T obj)
         {
             BookmarkingBusinessFactory.UpdateObjectInSession<T>(obj);
         }
-	}
+    }
 }

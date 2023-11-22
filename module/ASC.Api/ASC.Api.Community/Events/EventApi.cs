@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+
 using ASC.Api.Attributes;
 using ASC.Api.Collections;
 using ASC.Api.Events;
@@ -55,13 +56,16 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the list of all events on the portal with the event titles, date of creation and update, event text and author
+        ///Returns a list of all the portal events with the event titles, dates of creation and update, event texts, and authors.
         ///</summary>
         ///<short>
-        ///All events
+        ///Get events
         ///</short>
-        ///<returns>list of events</returns>
+        ///<returns type="ASC.Api.Events.EventWrapper, ASC.Api.Community">List of events</returns>
         ///<category>Events</category>
+        ///<path>api/2.0/community/event</path>
+        ///<httpMethod>GET</httpMethod>
+        /// <collection>list</collection>
         [Read("event")]
         public IEnumerable<EventWrapper> GetEvents()
         {
@@ -72,15 +76,17 @@ namespace ASC.Api.Community
 
 
         ///<summary>
-        ///Creates a new event with the parameters (title, content, type) specified in the request
+        ///Creates a new event with the parameters (title, content, type) specified in the request.
         ///</summary>
         ///<short>
-        ///Create event
+        ///Create an event
         ///</short>        
-        /// <param name="title">Title</param>
-        /// <param name="content">Content</param>
-        /// <param name="type">Type. One of  (News|Order|Advert|Poll)</param>
-        ///<returns>New created event</returns>
+        /// <param type="System.String, System" name="title">Event title</param>
+        /// <param type="System.String, System" name="content">Event content</param>
+        /// <param type="ASC.Web.Community.News.Code.FeedType, ASC.Web.Community.News.Code" name="type">Event type</param>
+        ///<returns type="ASC.Api.Events.EventWrapperFull, ASC.Api.Community">Newly created event</returns>
+        ///<path>api/2.0/community/event</path>
+        ///<httpMethod>POST</httpMethod>
         ///<category>Events</category>
         [Create("event")]
         public EventWrapperFull CreateEvent(string content, string title, FeedType type)
@@ -94,31 +100,33 @@ namespace ASC.Api.Community
                 throw new ArgumentOutOfRangeException(string.Format("Unknown feed type: {0}.", type));
 
             var feed = new Feed
-                           {
-                               Caption = title,
-                               Text = content,
-                               Creator = SecurityContext.CurrentAccount.ID.ToString(),
-                               Date = DateTime.UtcNow,
-                               FeedType = type
-                           };
+            {
+                Caption = title,
+                Text = content,
+                Creator = SecurityContext.CurrentAccount.ID.ToString(),
+                Date = DateTime.UtcNow,
+                FeedType = type
+            };
 
             FeedStorage.SaveFeed(feed, false, type);
-            
+
             return new EventWrapperFull(feed);
         }
 
         ///<summary>
-        ///Updates the selected event changing the event title, content or/and event type specified
+        ///Updates the selected event changing the event title, content or/and event type specified in the request.
         ///</summary>
         ///<short>
-        ///Update event
+        ///Update an event
         ///</short>
-        /// <param name="feedid">Feed ID</param>
-        /// <param name="title">Title</param>
-        /// <param name="content">Content</param>
-        /// <param name="type">Type. One of  (News|Order|Advert|Poll)</param>
-        ///<returns>List of events</returns>
+        /// <param type="System.Int32, System" method="url" name="feedid">Feed ID</param>
+        /// <param type="System.String, System" name="title">New event title</param>
+        /// <param type="System.String, System" name="content">New event content</param>
+        /// <param type="ASC.Web.Community.News.Code.FeedType, ASC.Web.Community.News.Code" name="type">New event type</param>
+        ///<returns type="ASC.Api.Events.EventWrapperFull, ASC.Api.Community">List of events</returns>
         ///<category>Events</category>
+        ///<path>api/2.0/community/event/{feedid}</path>
+        ///<httpMethod>PUT</httpMethod>
         [Update("event/{feedid}")]
         public EventWrapperFull UpdateEvent(int feedid, string content, string title, FeedType type)
         {
@@ -137,18 +145,20 @@ namespace ASC.Api.Community
             feed.Creator = SecurityContext.CurrentAccount.ID.ToString();
 
             FeedStorage.SaveFeed(feed, true, type);
-            
+
             return new EventWrapperFull(feed);
         }
 
         ///<summary>
-        ///Deletes the selected event
+        ///Deletes an event with the ID specified in the request.
         ///</summary>
-        ///<short>Delete event</short>
-        ///<param name="feedid">Feed ID</param>
-        ///<returns>Nothing</returns>
+        ///<short>Delete an event</short>
+        ///<param type="System.Int32, System" method="url" name="feedid">Feed ID</param>
+        ///<returns type="ASC.Api.Events.EventWrapperFull, ASC.Api.Community">Deleted event</returns>
         ///<exception cref="ItemNotFoundException"></exception>
         ///<category>Events</category>
+        ///<path>api/2.0/community/event/{feedid}</path>
+        ///<httpMethod>DELETE</httpMethod>
         [Delete("event/{feedid}")]
         public EventWrapperFull DeleteEvent(int feedid)
         {
@@ -169,13 +179,16 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the list of all events for the current user with the event titles, date of creation and update, event text and author
+        ///Returns a list of all the events for the current user with the event titles, dates of creation and update, event texts, and author.
         ///</summary>
         ///<short>
-        ///My events
+        ///Get my events
         ///</short>
-        ///<returns>List of events</returns>
+        ///<returns type="ASC.Api.Events.EventWrapper, ASC.Api.Community">List of events</returns>
         ///<category>Events</category>
+        ///<path>api/2.0/community/event/@self</path>
+        ///<httpMethod>GET</httpMethod>
+        /// <colletion>list</colletion>
         [Read("event/@self")]
         public IEnumerable<EventWrapper> GetMyEvents()
         {
@@ -185,14 +198,17 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns a list of events matching the search query with the event title, date of creation and update, event type and author
+        ///Returns a list of events matching the search query specified in the request with the event titles, dates of creation and update, event types, and authors.
         ///</summary>
         ///<short>
-        ///Search
+        ///Search events
         ///</short>
-        /// <param name="query">search query</param>
-        ///<returns>List of events</returns>
+        /// <param type="System.String, System" method="url" name="query">Search query</param>
+        ///<returns type="ASC.Api.Events.EventWrapper, ASC.Api.Community">List of events</returns>
         ///<category>Events</category>
+        ///<path>api/2.0/community/event/@search/{query}</path>
+        ///<httpMethod>GET</httpMethod>
+        ///<collection>list</collection>
         [Read("event/@search/{query}")]
         public IEnumerable<EventWrapper> SearchEvents(string query)
         {
@@ -202,14 +218,16 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the detailed information about the event with the specified ID
+        ///Returns the detailed information on the event with the ID specified in the request.
         ///</summary>
         ///<short>
-        ///Specific event
+        ///Get an event
         ///</short>
-        ///<param name="feedid">Event ID</param>
-        ///<returns>Event</returns>
+        ///<param type="System.Int32, System" method="url" name="feedid">Event ID</param>
+        ///<returns type="ASC.Api.Events.EventWrapperFull, ASC.Api.Community">Event information</returns>
         ///<category>Events</category>
+        ///<path>api/2.0/community/event/{feedid}</path>
+        ///<httpMethod>GET</httpMethod>
         [Read("event/{feedid}")]
         public EventWrapperFull GetEvent(int feedid)
         {
@@ -218,14 +236,17 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the detailed information about the comments on the event with the specified ID
+        ///Returns a list of all the comments on the event with the ID specified in the request.
         ///</summary>
         ///<short>
-        ///Get comments
+        ///Get event comments
         ///</short>
-        ///<param name="feedid">Event id</param>
-        ///<returns>List of comments</returns>
+        ///<param type="System.Int32, System" method="url" name="feedid">Event ID</param>
+        ///<returns type="ASC.Api.Events.EventCommentWrapper, ASC.Api.Community">List of comments</returns>
         ///<category>Events</category>
+        ///<path>api/2.0/community/event/{feedid}/comment</path>
+        ///<httpMethod>GET</httpMethod>
+        ///<collection>list</collection>
         [Read("event/{feedid}/comment")]
         public IEnumerable<EventCommentWrapper> GetEventComments(int feedid)
         {
@@ -235,15 +256,15 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Adds a comment to the event with the specified ID. The parent event ID can be also specified if needed.
+        ///Adds a comment to the event with the ID specified in the request. The parent event ID can be also specified if needed.
         ///</summary>
         ///<short>
-        ///Add comment
+        ///Add an event comment by feed ID
         ///</short>
-        ///<param name="feedid">Event ID</param>
-        ///<param name="content">Comment content</param>
-        ///<param name="parentId">Comment parent ID</param>
-        ///<returns>Comments list</returns>
+        ///<param type="System.Int32, System" method="url" name="feedid">Feed ID</param>
+        ///<param type="System.String, System" name="content">Comment text</param>
+        ///<param type="System.Int64, System" name="parentId">Comment parent ID</param>
+        ///<returns type="ASC.Api.Events.EventCommentWrapper, ASC.Api.Community">Comment</returns>
         /// <example>
         /// <![CDATA[
         /// Sending data in application/json:
@@ -258,40 +279,42 @@ namespace ASC.Api.Community
         /// ]]>
         /// </example>
         /// <remarks>
-        /// Send parentId=0 or don't send it at all if you want your comment to be on the root level
+        /// Send parentId=0 or doesn't send it at all if you want your comment to be on the root level.
         /// </remarks>
         /// <category>Events</category>
+        /// <path>api/2.0/community/event/{feedid}/comment</path>
+        /// <httpMethod>POST</httpMethod>
         [Create("event/{feedid}/comment")]
         public EventCommentWrapper AddEventComments(int feedid, string content, long parentId)
         {
-            if (parentId > 0 && FeedStorage.GetFeedComment(parentId) == null) 
+            if (parentId > 0 && FeedStorage.GetFeedComment(parentId) == null)
                 throw new ItemNotFoundException("parent comment not found");
 
             var feed = FeedStorage.GetFeed(feedid).NotFoundIfNull();
 
             var comment = new FeedComment(feedid)
-                              {
-                                  Comment = content,
-                                  Creator = SecurityContext.CurrentAccount.ID.ToString(),
-                                  FeedId = feedid,
-                                  Date = DateTime.UtcNow,
-                                  ParentId = parentId
-                              };
+            {
+                Comment = content,
+                Creator = SecurityContext.CurrentAccount.ID.ToString(),
+                FeedId = feedid,
+                Date = DateTime.UtcNow,
+                ParentId = parentId
+            };
 
             FeedStorage.SaveFeedComment(feed, comment);
-            
+
             return new EventCommentWrapper(comment);
         }
 
         ///<summary>
-        /// Sends a vote to a certain option in a poll-type event with the ID specified
+        /// Sends a vote for a certain option in a poll-type event with the ID specified in the request.
         ///</summary>
         ///<short>
-        /// Vote for event
+        /// Vote for an option
         ///</short>
-        ///<param name="feedid">Event ID</param>
-        ///<param name="variants">Variants</param>
-        ///<returns>Event</returns>
+        ///<param type="System.Int32, System" method="url" name="feedid">Event ID</param>
+        ///<param type="System.Int64[], System" name="variants">Options</param>
+        ///<returns type="ASC.Api.Events.EventWrapperFull, ASC.Api.Community">Event</returns>
         ///<exception cref="ArgumentException">Thrown if not a Poll</exception>
         ///<exception cref="Exception">General error</exception>
         /// <example>
@@ -305,9 +328,11 @@ namespace ASC.Api.Community
         /// ]]>
         /// </example>
         /// <remarks>
-        /// If event is not a poll, then you'll get an error
+        /// If an event is not a poll, then you'll get an error.
         /// </remarks>
         /// <category>Events</category>
+        /// <path>api/2.0/community/event/{feedid}/vote</path>
+        /// <httpMethod>POST</httpMethod>
         [Create("event/{feedid}/vote")]
         public EventWrapperFull VoteForEvent(int feedid, long[] variants)
         {
@@ -327,22 +352,24 @@ namespace ASC.Api.Community
 
 
         ///<summary>
-        /// Subscribe or unsubscribe on comments of event with the ID specified
+        /// Subscribes to or unsubscribes from the comments of the event with the ID specified in the request.
         ///</summary>
         ///<short>
-        /// Subscribe/unsubscribe on comments
+        /// Comment subscription
         ///</short>
-        ///<param name="isSubscribe">is already subscribed or unsubscribed</param>
-        ///<param name="feedid">Feed ID</param>
-        ///<returns>Boolean value</returns>
+        ///<param type="System.Boolean, System" name="isSubscribe">Subscribes to the event comments or unsubscribes from them</param>
+        ///<param type="System.String, System" method="url" name="feedid">Feed ID</param>
+        ///<returns>Boolean value: true means that the user is subscribed to the event comments</returns>
         ///<category>Events</category>
+        ///<path>api/2.0/community/event/{feedid}/subscribe</path>
+        ///<httpMethod>POST</httpMethod>
         [Create("event/{feedid}/subscribe")]
         public bool SubscribeOnComments(bool isSubscribe, string feedid)
         {
             var subscriptionProvider = NewsNotifySource.Instance.GetSubscriptionProvider();
 
             var IAmAsRecipient = (IDirectRecipient)NewsNotifySource.Instance.GetRecipientsProvider().GetRecipient(SecurityContext.CurrentAccount.ID.ToString());
-            
+
             if (IAmAsRecipient == null)
             {
                 return false;
@@ -361,14 +388,16 @@ namespace ASC.Api.Community
 
 
         /// <summary>
-        /// Get comment preview with the content specified in the request
+        /// Returns a comment preview with the content specified in the request.
         /// </summary>
-        /// <short>Get comment preview</short>
+        /// <short>Get a comment preview</short>
         /// <section>Comments</section>
-        /// <param name="commentid">Comment ID</param>
-        /// <param name="htmltext">Comment content</param>
-        /// <returns>Comment info</returns>
+        /// <param type="System.String, System" name="commentid">Comment ID</param>
+        /// <param type="System.String, System" name="htmltext">Comment text in the HTML format</param>
+        /// <returns type="ASC.Web.Studio.UserControls.Common.Comments.CommentInfo, ASC.Web.Studio">Comment information</returns>
         /// <category>Events</category>
+        /// <path>api/2.0/community/event/comment/preview</path>
+        /// <httpMethod>POST</httpMethod>
         [Create("event/comment/preview")]
         public CommentInfo GetEventCommentPreview(string commentid, string htmltext)
         {
@@ -397,13 +426,15 @@ namespace ASC.Api.Community
 
 
         /// <summary>
-        ///Remove comment with the id specified in the request
+        ///Removes a comment with the ID specified in the request.
         /// </summary>
-        /// <short>Remove comment</short>
+        /// <short>Remove a comment</short>
         /// <section>Comments</section>
-        /// <param name="commentid">Comment ID</param>
-        /// <returns>Comment info</returns>
+        /// <param type="System.String, System" method="url" name="commentid">Comment ID</param>
+        /// <returns>Comment information</returns>
         /// <category>Events</category>
+        /// <path>api/2.0/community/event/comment/{commentid}</path>
+        /// <httpMethod>DELETE</httpMethod>
         [Delete("event/comment/{commentid}")]
         public string RemoveEventComment(string commentid)
         {
@@ -420,6 +451,18 @@ namespace ASC.Api.Community
         }
 
 
+        ///<summary>
+        ///Adds a comment to the entity with the ID specified in the request. The parent event ID can be also specified if needed.
+        ///</summary>
+        ///<short>
+        ///Add an event comment by entity ID
+        ///</short>
+        ///<param type="System.String, System" name="parentcommentid">Comment parent ID</param>
+        ///<param type="System.String, System" name="entityid">Entity ID</param>
+        ///<param type="System.String, System" name="content">Comment text</param>
+        /// <returns type="ASC.Web.Studio.UserControls.Common.Comments.CommentInfo, ASC.Web.Studio">Comment information</returns>
+        /// <path>api/2.0/community/event/comment</path>
+        /// <httpMethod>POST</httpMethod>
         /// <category>Events</category>
         [Create("event/comment")]
         public CommentInfo AddEventComment(string parentcommentid, string entityid, string content)
@@ -427,9 +470,9 @@ namespace ASC.Api.Community
             if (String.IsNullOrEmpty(content)) throw new ArgumentException();
 
             var comment = new FeedComment(long.Parse(entityid))
-                {
-                    Comment = content
-                };
+            {
+                Comment = content
+            };
             var storage = FeedStorageFactory.Create();
             if (!string.IsNullOrEmpty(parentcommentid))
                 comment.ParentId = Convert.ToInt64(parentcommentid);
@@ -440,7 +483,18 @@ namespace ASC.Api.Community
             return GetCommentInfo(comment);
         }
 
+        ///<summary>
+        ///Updates the selected event comment with the content specified in the request.
+        ///</summary>
+        ///<short>
+        ///Update a comment
+        ///</short>
         /// <category>Events</category>
+        /// <param type="System.String, System" method="url" name="commentid">Comment ID</param>
+        /// <param type="System.String, System" name="content">New comment text</param>
+        /// <returns>Updated comment</returns>
+        /// <path>api/2.0/community/event/comment/{commentid}</path>
+        /// <httpMethod>PUT</httpMethod>
         [Update("event/comment/{commentid}")]
         public string UpdateComment(string commentid, string content)
         {

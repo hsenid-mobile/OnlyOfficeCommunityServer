@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,11 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Web;
-using ASC.Web.Community.Forum.Common;
-using ASC.Web.Community.Forum.Resources;
+
+using ASC.Web.Community.Modules.Forum.Resources;
 using ASC.Web.Community.Product;
 using ASC.Web.Core;
 using ASC.Web.Core.ModuleManagement;
-using ASC.Web.UserControls.Forum.Common;
 
 namespace ASC.Web.Community.Forum.Common
 {
@@ -53,14 +50,14 @@ namespace ASC.Web.Community.Forum.Common
         {
             get { return "~/Products/Community/Modules/Forum/"; }
         }
-     
+
         public ForumModule()
         {
             Context = new ModuleContext
             {
                 DefaultSortOrder = 2,
-                SmallIconFileName = "forum_mini_icon.png",
-                IconFileName = "forum_icon.png",
+                SmallIconFileName = "forum_mini_icon.svg",
+                IconFileName = "forum_icon.svg",
                 SubscriptionManager = new ForumSubscriptionManager(),
                 GetCreateContentPageAbsoluteUrl = ForumShortcutProvider.GetCreateContentPageUrl,
                 SearchHandler = new ForumSearchHandler(),

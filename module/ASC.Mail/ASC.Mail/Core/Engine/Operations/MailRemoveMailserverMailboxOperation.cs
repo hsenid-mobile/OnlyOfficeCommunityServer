@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,12 @@
 
 
 using System;
-using System.Data;
-using System.IO;
-using System.Linq;
+
 using ASC.Common.Security.Authentication;
 using ASC.Core;
 using ASC.Core.Tenants;
 using ASC.Mail.Core.Engine.Operations.Base;
 using ASC.Mail.Data.Contracts;
-using ASC.Mail.Server.Core.Entities;
 
 namespace ASC.Mail.Core.Engine.Operations
 {
@@ -57,12 +54,12 @@ namespace ASC.Mail.Core.Engine.Operations
 
                 try
                 {
-                    SecurityContext.AuthenticateMe(new Guid(user));
+                    SecurityContext.CurrentUser = new Guid(user);
                 }
                 catch
                 {
                     // User was removed
-                    SecurityContext.AuthenticateMe(ASC.Core.Configuration.Constants.CoreSystem);
+                    SecurityContext.CurrentAccount = ASC.Core.Configuration.Constants.CoreSystem;
                 }
 
                 SetProgress((int?)MailOperationRemoveMailboxProgress.RemoveFromDb, "Remove mailbox from Db");

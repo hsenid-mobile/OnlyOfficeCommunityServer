@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
 */
 
 
-using ASC.Api.Attributes;
 using System;
+
+using ASC.Api.Attributes;
 using ASC.Mail.Core.Engine;
 using ASC.Mail.Data.Contracts;
 
@@ -25,16 +26,21 @@ namespace ASC.Api.Mail
     public partial class MailApi
     {
         /// <summary>
-        /// This method needed for update or create autoreply.
+        /// Updates or creates an autoreply with the parameters specified in the request.
         /// </summary>
-        /// <param name="mailboxId">Id of updated mailbox.</param>
-        /// <param name="turnOn">New autoreply status.</param>
-        /// <param name="onlyContacts">If true then send autoreply only for contacts.</param>
-        /// <param name="turnOnToDate">If true then field To is active.</param>
-        /// <param name="fromDate">Start date of autoreply sending.</param>
-        /// <param name="toDate">End date of autoreply sending.</param>
-        /// <param name="subject">New autoreply subject.</param>
-        /// <param name="html">New autoreply value.</param>
+        /// <short>Update an autoreply</short>
+        /// <category>Autoreply</category>
+        /// <param type="System.Int32, System" method="url" name="mailboxId">Mailbox ID</param>
+        /// <param type="System.Boolean, System" name="turnOn">New autoreply status</param>
+        /// <param type="System.Boolean, System" name="onlyContacts">Specifies whether to send an autoreply only to the contacts or not</param>
+        /// <param type="System.Boolean, System" name="turnOnToDate">Specifies whether to send an autoreply till the specified date or not</param>
+        /// <param type="System.DateTime, System" name="fromDate">New start date of autoreply sending</param>
+        /// <param type="System.DateTime, System" name="toDate">New end date of autoreply sending</param>
+        /// <param type="System.String, System" name="subject">New autoreply subject</param>
+        /// <param type="System.String, System" name="html">New autoreply contents in the HTML format</param>
+        /// <path>api/2.0/mail/autoreply/update/{mailboxId}</path>
+        /// <httpMethod>POST</httpMethod>
+        /// <returns type="ASC.Mail.Data.Contracts.MailAutoreplyData, ASC.Mail">Updated autoreply information</returns>
         [Create(@"autoreply/update/{mailboxId:[0-9]+}")]
         public MailAutoreplyData UpdateAutoreply(int mailboxId, bool turnOn, bool onlyContacts,
             bool turnOnToDate, DateTime fromDate, DateTime toDate, string subject, string html)

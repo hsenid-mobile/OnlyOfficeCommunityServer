@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ window.peopleActions = (function() {
 
         delete_group: function(evt, $btn) {
             jq("#confirmationDeleteDepartmentPanel .confirmationAction").html(jq.format(ASC.Resources.Master.ConfirmRemoveDepartment, "<b>" + jq(".profile-title:first>.header").html() + "</b>"));
-            jq("#confirmationDeleteDepartmentPanel .middle-button-container>.button.blue.middle").unbind("click").bind("click", function() {
+            jq("#confirmationDeleteDepartmentPanel .middle-button-container>.button.blue.middle").off("click").on("click", function() {
                 ASC.People.PeopleController.deleteGroup();
             });
             StudioBlockUIManager.blockUI("#confirmationDeleteDepartmentPanel", 500);
@@ -88,33 +88,29 @@ window.peopleActions = (function() {
             InvitesResender.Show();
         },
 
-        send_email: function(evt, $btn) {
+        send_email: function(evt, $btn, mailModuleEnabled) {
             var userId = $btn.parents('tr.item.profile:first').attr('data-id');
             if (userId) {
                 var email = $btn.parents('tr.item.profile:first').attr('data-email');
                 if (email) {
-                    window.open('../../addons/mail/#composeto/email=' + email, "_blank");
+                    if (mailModuleEnabled && !Teamlab.profile.isVisitor) {
+                        window.open('../../addons/mail/#composeto/email=' + email, "_blank");
+                    } else {
+                        window.location.href = "mailto:" + email;
+                    }
                 }
-                //var profile = getProfile(userId);
-                //if (profile) {
-                //  location.href = 'mailto:' + profile.email;
-                //}
             }
         },
-		
-		open_dialog: function(evt, $btn) {
+
+        open_dialog: function(evt, $btn, talkModuleEnabled) {
             var userId = $btn.parents('tr.item.profile:first').attr('data-id');
-            if (userId) {
+            if (talkModuleEnabled && userId) {
                 var userName = $btn.parents('tr.item.profile:first').attr('data-username');
                 if (userName) {
                     try {
                         ASC.Controls.JabberClient.open(userName);
                     } catch (err) { }
                 }
-                //var profile = getProfile(userId);
-                //if (profile) {
-                //  try { ASC.Controls.JabberClient.open(profile.userName) } catch (err) {console.log(err)}
-                //}
             }
         },
 
@@ -126,21 +122,3 @@ window.peopleActions = (function() {
         }
     };
 })();
-
-jq(function () {
-    var pathname = "/Products/People/";
-    jq("#groupList .menu-item-label").each(function (index, item) {
-        var id = jq(item).parents(".menu-sub-item").attr("data-id");
-        if (location.pathname != pathname) {
-            jq(item).attr("href", pathname + "#group=" + id);
-        }
-    });
-
-    if (location.pathname != pathname) {
-        jq("#defaultLinkPeople").attr("href", pathname);
-    }
-
-    jq(".people-import-banner_img").on("click", function () {
-        location.href = "/Products/People/Import.aspx";
-    });
-})

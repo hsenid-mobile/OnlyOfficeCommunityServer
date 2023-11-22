@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 */
 
 
+using System.Threading;
+
 using Telegram.Bot;
 
 namespace ASC.TelegramService.Core
@@ -23,6 +25,7 @@ namespace ASC.TelegramService.Core
     {
         public string Token { get; set; }
         public TelegramBotClient Client { get; set; }
+        public CancellationTokenSource CancellationTokenSource { get; set; }
         public string Proxy { get; set; }
         public int TokenLifeSpan { get; set; }
         public int TenantId { get; set; }

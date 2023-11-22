@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+
 using ASC.Common.Logging;
 using ASC.Common.Web;
 using ASC.Mail.Core.Dao.Expressions.Attachment;
@@ -35,7 +36,6 @@ using ASC.Mail.Extensions;
 using ASC.Web.Core.Files;
 using ASC.Web.Files.Api;
 using ASC.Web.Files.Utils;
-using File = ASC.Files.Core.File;
 
 namespace ASC.Mail.Core.Engine
 {
@@ -117,7 +117,7 @@ namespace ASC.Mail.Core.Engine
                 if (file == null)
                     throw new AttachmentsException(AttachmentsException.Types.DocumentNotFound, "File not found.");
 
-                if (!FilesIntegration.GetFileSecurity().CanRead(file))
+                if (!FilesIntegration.GetFileSecurity().CanDownload(file))
                     throw new AttachmentsException(AttachmentsException.Types.DocumentAccessDenied,
                                                    "Access denied.");
 
@@ -179,7 +179,7 @@ namespace ASC.Mail.Core.Engine
 
                         using (var memStream = new MemoryStream())
                         {
-                            readStream.StreamCopyTo(memStream);
+                            readStream.CopyTo(memStream);
                             result = AttachFileToDraft(tenant, user, messageId, fileName, memStream, memStream.Length, null, needSaveToTemp);
                             Log.InfoFormat("Attached attachment: ID - {0}, Name - {1}, StoredUrl - {2}", result.fileName, result.fileName, result.storedFileUrl);
                         }
@@ -241,7 +241,7 @@ namespace ASC.Mail.Core.Engine
                 mailboxId = message.MailboxId
             };
 
-            engine.QuotaEngine.QuotaUsedAdd(contentLength);
+            engine.QuotaEngine.QuotaUsedAdd(contentLength, user);
 
             try
             {
@@ -459,7 +459,7 @@ namespace ASC.Mail.Core.Engine
                 }
 
                 var engine = new EngineFactory(mailBoxData.TenantId);
-                engine.QuotaEngine.QuotaUsedAdd(quotaAddSize);
+                engine.QuotaEngine.QuotaUsedAdd(quotaAddSize, mailBoxData.UserId);
             }
             catch
             {

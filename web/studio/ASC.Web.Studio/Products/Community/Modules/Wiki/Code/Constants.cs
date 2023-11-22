@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,14 @@
 */
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using ASC.Notify.Model;
-using ASC.Notify.Patterns;
-using ASC.Web.UserControls.Wiki.Resources;
+using ASC.Web.Community.Modules.Wiki.Resources;
 
 namespace ASC.Web.UserControls.Wiki
 {
     public class Constants
     {
-        public const string WikiCategoryKeyCaption = "Category";	
+        public const string WikiCategoryKeyCaption = "Category";
         public const string WikiInternalCategoriesKey = "Categories";
         public const string WikiInternalFilesKey = "Files";
         public const string WikiInternalHelpKey = "Help";
@@ -40,6 +35,7 @@ namespace ASC.Web.UserControls.Wiki
         public static INotifyAction NewPage = new NotifyAction("new wiki page", WikiResource.NotifyAction_NewPage);
         public static INotifyAction EditPage = new NotifyAction("edit wiki page", WikiResource.NotifyAction_ChangePage);
         public static INotifyAction AddPageToCat = new NotifyAction("add page to cat", WikiResource.NotifyAction_AddPageToCat);
+        public static INotifyAction MentionForWikiComment = new NotifyAction("mention for wiki comment");
 
         public static string TagPageName = "PageName";
         public static string TagURL = "URL";

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,15 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Web;
+
+using ASC.Core.Common.Configuration;
 using ASC.FederatedLogin.Profile;
-using Twitterizer;
+
+using Newtonsoft.Json.Linq;
+
+using Tweetinvi;
+using Tweetinvi.Auth;
+using Tweetinvi.Parameters;
 
 namespace ASC.FederatedLogin.LoginProviders
 {
@@ -37,6 +44,8 @@ namespace ASC.FederatedLogin.LoginProviders
         public override string ClientSecret { get { return this["twitterSecret"]; } }
         public override string CodeUrl { get { return "https://api.twitter.com/oauth/request_token"; } }
 
+        private static readonly IAuthenticationRequestStore _myAuthRequestStore = new LocalAuthenticationRequestStore();
+
         public override bool IsEnabled
         {
             get
@@ -47,7 +56,7 @@ namespace ASC.FederatedLogin.LoginProviders
         }
 
         public TwitterLoginProvider() { }
-        public TwitterLoginProvider(string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null) : base(name, order, props, additional) { }
+        public TwitterLoginProvider(string name, int order, Dictionary<string, Prop> props, Dictionary<string, Prop> additional = null) : base(name, order, props, additional) { }
 
         public override LoginProfile ProcessAuthoriztion(HttpContext context, IDictionary<string, string> @params)
         {
@@ -56,34 +65,70 @@ namespace ASC.FederatedLogin.LoginProviders
                 return LoginProfile.FromError(new Exception("Canceled at provider"));
             }
 
+            var appClient = new TwitterClient(TwitterKey, TwitterSecret);
+
             if (string.IsNullOrEmpty(context.Request["oauth_token"]))
             {
                 var callbackAddress = new UriBuilder(RedirectUri)
-                    {
-                        Query = "state=" + HttpUtility.UrlEncode(context.Request.GetUrlRewriter().AbsoluteUri)
-                    };
+                {
+                    Query = "state=" + HttpUtility.UrlEncode(context.Request.GetUrlRewriter().AbsoluteUri)
+                };
 
-                var reqToken = OAuthUtility.GetRequestToken(TwitterKey, TwitterSecret, callbackAddress.ToString());
-                var url = OAuthUtility.BuildAuthorizationUri(reqToken.Token).ToString();
-                context.Response.Redirect(url, true);
+                var authenticationRequestId = Guid.NewGuid().ToString();
+
+                // Add the user identifier as a query parameters that will be received by `ValidateTwitterAuth`
+                var redirectURL = _myAuthRequestStore.AppendAuthenticationRequestIdToCallbackUrl(callbackAddress.ToString(), authenticationRequestId);
+
+                // Initialize the authentication process
+                var authenticationRequestToken = appClient.Auth.RequestAuthenticationUrlAsync(redirectURL)
+                                       .ConfigureAwait(false)
+                                       .GetAwaiter()
+                                       .GetResult();
+
+                // Store the token information in the store
+                _myAuthRequestStore.AddAuthenticationTokenAsync(authenticationRequestId, authenticationRequestToken)
+                                       .ConfigureAwait(false)
+                                       .GetAwaiter()
+                                       .GetResult();
+
+                context.Response.Redirect(authenticationRequestToken.AuthorizationURL, true);
+
                 return null;
             }
 
-            var requestToken = context.Request["oauth_token"];
-            var pin = context.Request["oauth_verifier"];
+            // Extract the information from the redirection url
+            var requestParameters = RequestCredentialsParameters.FromCallbackUrlAsync(context.Request.RawUrl, _myAuthRequestStore).GetAwaiter().GetResult();
+            // Request Twitter to generate the credentials.
+            var userCreds = appClient.Auth.RequestCredentialsAsync(requestParameters)
+                                       .ConfigureAwait(false)
+                                       .GetAwaiter()
+                                       .GetResult();
 
-            var tokens = OAuthUtility.GetAccessToken(TwitterKey, TwitterSecret, requestToken, pin);
+            // Congratulations the user is now authenticated!
+            var userClient = new TwitterClient(userCreds);
 
-            var accesstoken = new OAuthTokens
-                {
-                    AccessToken = tokens.Token,
-                    AccessTokenSecret = tokens.TokenSecret,
-                    ConsumerKey = TwitterKey,
-                    ConsumerSecret = TwitterSecret
-                };
+            var user = userClient.Users.GetAuthenticatedUserAsync()
+                                       .ConfigureAwait(false)
+                                       .GetAwaiter()
+                                       .GetResult();
 
-            var account = TwitterAccount.VerifyCredentials(accesstoken).ResponseObject;
-            return ProfileFromTwitter(account);
+            var userSettings = userClient.AccountSettings.GetAccountSettingsAsync()
+                                       .ConfigureAwait(false)
+                                       .GetAwaiter()
+                                       .GetResult();
+
+            return user == null
+                       ? null
+                       : new LoginProfile
+                       {
+                           Name = user.Name,
+                           DisplayName = user.ScreenName,
+                           Avatar = user.ProfileImageUrl,
+                           Locale = userSettings.Language.ToString(),
+                           Id = user.Id.ToString(CultureInfo.InvariantCulture),
+                           Provider = ProviderConstants.Twitter
+                       };
+
         }
 
         protected override OAuth20Token Auth(HttpContext context, string scopes, Dictionary<string, string> additional = null)
@@ -96,20 +141,18 @@ namespace ASC.FederatedLogin.LoginProviders
             throw new NotImplementedException();
         }
 
-        internal static LoginProfile ProfileFromTwitter(TwitterUser twitterUser)
+        internal static LoginProfile ProfileFromTwitter(string twitterProfile)
         {
-            return twitterUser == null
-                       ? null
-                       : new LoginProfile
-                           {
-                               Name = twitterUser.Name,
-                               DisplayName = twitterUser.ScreenName,
-                               Avatar = twitterUser.ProfileImageSecureLocation,
-                               TimeZone = twitterUser.TimeZone,
-                               Locale = twitterUser.Language,
-                               Id = twitterUser.Id.ToString(CultureInfo.InvariantCulture),
-                               Provider = ProviderConstants.Twitter
-                           };
+            var jProfile = JObject.Parse(twitterProfile);
+            if (jProfile == null) throw new Exception("Failed to correctly process the response");
+
+            return new LoginProfile
+            {
+                DisplayName = jProfile.Value<string>("name"),
+                Locale = jProfile.Value<string>("lang"),
+                Id = jProfile.Value<string>("id"),
+                Provider = ProviderConstants.Twitter
+            };
         }
     }
 }

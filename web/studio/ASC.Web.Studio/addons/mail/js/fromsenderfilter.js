@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ window.fromSenderFilter = (function($) {
     var type = 'from-sender-filter';
 
     function init() {
-        jQuery(document.body).bind('click', onBodyClick);
+        jQuery(document.body).on('click', onBodyClick);
     }
 
     function onBodyClick(e) {
@@ -55,7 +55,7 @@ window.fromSenderFilter = (function($) {
 
     function customize($container, $filteritem) {
         var $html = $([
-            '<div id="search-mailsender-panel" class="studio-action-panel">',
+            '<div id="search-mailsender-panel" class="studio-action-panel freeze-display">',
             '<div class="advanced-selector-search">',
             '<input class="advanced-selector-search-field" type="text"/>',
             '<div class="advanced-selector-search-btn"></div>',
@@ -105,7 +105,7 @@ window.fromSenderFilter = (function($) {
     function setFocusToInput($el) {
         var length = $el.val().length;
 
-        $el.focus();
+        $el.trigger("focus");
         $el[0].setSelectionRange(length.length, length.length);
     }
 

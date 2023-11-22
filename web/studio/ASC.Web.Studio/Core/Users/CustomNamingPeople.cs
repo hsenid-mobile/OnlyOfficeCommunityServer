@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Xml;
+
 using ASC.Core.Common.Settings;
+using ASC.Web.Studio.PublicResources;
 
 namespace ASC.Web.Studio.Core.Users
 {
@@ -73,6 +75,9 @@ namespace ASC.Web.Studio.Core.Users
         [DataMember(Name = "GroupHeadCaption")]
         private string groupHeadCaption;
 
+        [DataMember(Name = "UserLeadCaption")]
+        private string userLeadCaption;
+
         [DataMember(Name = "RegDateCaption")]
         private string regDateCaption;
 
@@ -82,7 +87,7 @@ namespace ASC.Web.Studio.Core.Users
         [DataMember(Name = "GuestsCaption")]
         private string guestsCaption;
 
-        
+
         public static string DefaultID
         {
             get { return "common"; }
@@ -138,6 +143,11 @@ namespace ASC.Web.Studio.Core.Users
             set { groupHeadCaption = value; }
         }
 
+        public string UserLeadCaption
+        {
+            get { return Id.Equals(CustomID, cmp) ? userLeadCaption ?? string.Empty : GetResourceValue(userLeadCaption); }
+            set { userLeadCaption = value; }
+        }
         public string RegDateCaption
         {
             get { return Id.Equals(CustomID, cmp) ? regDateCaption ?? string.Empty : GetResourceValue(regDateCaption); }
@@ -193,7 +203,7 @@ namespace ASC.Web.Studio.Core.Users
 
         public static string Substitute(string text)
         {
-            return SubstituteGuest(SubstituteUserPost(SubstituteRegDate(SubstituteGroupHead(SubstitutePost(SubstituteGroup(SubstituteUser(text)))))));
+            return SubstituteGuest(SubstituteUserLead(SubstituteUserPost(SubstituteRegDate(SubstituteGroupHead(SubstitutePost(SubstituteGroup(SubstituteUser(text))))))));
         }
 
         public static Dictionary<string, string> GetSchemas()
@@ -201,7 +211,7 @@ namespace ASC.Web.Studio.Core.Users
             Load();
 
             var dict = items.ToDictionary(i => i.Id.ToLower(), i => i.SchemaName);
-            dict.Add(PeopleNamesItem.CustomID, Resources.Resource.CustomNamingPeopleSchema);
+            dict.Add(PeopleNamesItem.CustomID, Resource.CustomNamingPeopleSchema);
             return dict;
         }
 
@@ -221,9 +231,10 @@ namespace ASC.Web.Studio.Core.Users
                         UserCaption = string.Empty,
                         UserPostCaption = string.Empty,
                         UsersCaption = string.Empty,
+                        UserLeadCaption = string.Empty,
                         GuestCaption = string.Empty,
                         GuestsCaption = string.Empty,
-                        SchemaName = Resources.Resource.CustomNamingPeopleSchema
+                        SchemaName = Resource.CustomNamingPeopleSchema
                     };
             }
 
@@ -268,6 +279,7 @@ namespace ASC.Web.Studio.Core.Users
                     Id = node.SelectSingleNode("id").InnerText,
                     SchemaName = node.SelectSingleNode("names/schemaname").InnerText,
                     GroupHeadCaption = node.SelectSingleNode("names/grouphead").InnerText,
+                    UserLeadCaption = node.SelectSingleNode("names/userlead").InnerText,
                     GroupCaption = node.SelectSingleNode("names/group").InnerText,
                     GroupsCaption = node.SelectSingleNode("names/groups").InnerText,
                     UserCaption = node.SelectSingleNode("names/user").InnerText,
@@ -343,6 +355,17 @@ namespace ASC.Web.Studio.Core.Users
                 return text
                     .Replace("{!Head}", item.GroupHeadCaption)
                     .Replace("{!head}", item.GroupHeadCaption.ToLower());
+            }
+            return text;
+        }
+        private static string SubstituteUserLead(string text)
+        {
+            var item = Current;
+            if (item != null)
+            {
+                return text
+                    .Replace("{!Userlead}", item.UserLeadCaption)
+                    .Replace("{!userlead}", item.UserLeadCaption.ToLower());
             }
             return text;
         }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,11 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
+
 using TMResourceData.Model;
 
 namespace TMResourceData
@@ -69,7 +71,7 @@ namespace TMResourceData
 
         public static Dictionary<ResCulture, List<string>> GetCulturesWithAuthors()
         {
-            using (var dbManager = new DbManager("tmresource"))
+            using (var dbManager = new DbManager(Dbid))
             {
                 var sql = new SqlQuery("res_authorslang ral")
                     .Select(new[] { "ral.authorLogin", "rc.title", "rc.value" })
@@ -100,17 +102,17 @@ namespace TMResourceData
                 var resData = db.ExecuteScalar<string>(GetQuery(ResDataTable, cultureTitle, word));
                 var resReserve = db.ExecuteScalar<string>(GetQuery(ResReserveTable, cultureTitle, word));
 
-                //нет ключа
+                //no key
                 if (string.IsNullOrEmpty(resData))
                 {
-                    //добавляем в основную таблицу
+                    //add to main table
                     db.ExecuteNonQuery(Insert(ResDataTable, cultureTitle, word)
                                               .InColumnValue("resourceType", resType)
                                               .InColumnValue("timechanges", date)
                                               .InColumnValue("flag", 2)
                                               .InColumnValue("authorLogin", authorLogin));
 
-                    //добавляем в резервную таблицу
+                    //add to backup table
                     if (isConsole) db.ExecuteNonQuery(Insert(ResReserveTable, cultureTitle, word));
                 }
                 else
@@ -129,10 +131,10 @@ namespace TMResourceData
 
                     if (!updateIfExist) return;
 
-                    //при работе с консолью изменилось по сравнению с res_data и res_reserve, либо при работе с сайтом изменилось по сравнению с res_reserve
+                    //when working with the console has changed compared to res_data and res_reserve, or when working with the site has changed compared to res_reserve
                     if ((isConsole && isChangeResData && isChangeResReserve) || !isConsole)
                     {
-                        // изменилась нейтральная культура - выставлен флаг у всех ключей из выбранного файла с выбранным title
+                        // neutral culture changed - flag set for all keys from the selected file with the selected title
                         if (cultureTitle == "Neutral")
                         {
                             var update = new SqlUpdate(ResDataTable)
@@ -142,7 +144,7 @@ namespace TMResourceData
 
                             db.ExecuteNonQuery(update);
                         }
-                        // изменилась не нейтральная культура 
+                        // non-neutral culture changed
                         db.ExecuteNonQuery(Insert(ResDataTable, cultureTitle, word)
                                               .InColumnValue("resourceType", resType)
                                               .InColumnValue("timechanges", date)
@@ -293,7 +295,7 @@ namespace TMResourceData
                 var exist = new SqlQuery(ResDataTable + " rd3")
                     .Select("rd3.title")
                     .Where("rd3.fileid = rd1.fileid")
-                    .Where("rd3.title = concat('del_', rd1.title)")
+                    .Where("rd1.title = REPLACE(rd3.title, 'del_', '') and LOCATE('del_', rd3.title)")
                     .Where("rd3.cultureTitle = rd1.cultureTitle");
 
                 var sql = new SqlQuery(ResDataTable + " rd1")
@@ -305,7 +307,7 @@ namespace TMResourceData
                     .Where("rd1.cultureTitle", "Neutral")
                     .Where("rd1.flag != 4")
                     .Where("rd1.resourceType", "text")
-                    .Where(!Exp.Like("rd1.title", @"del\_", SqlLike.StartWith) & !Exp.Exists(exist))
+                    .Where(!Exp.Like("rd1.title", @"del\_", SqlLike.StartWith) & !Exp.Like("rd1.title", @".del\_", SqlLike.AnyWhere) & !Exp.Exists(exist))
                     .OrderBy("rd1.id", true);
 
                 if (!String.IsNullOrEmpty(search))
@@ -657,7 +659,7 @@ namespace TMResourceData
             using (var dbManager = new DbManager(Dbid))
             {
                 var sql = new SqlQuery(ResDataTable + " r1")
-                    .SelectCount("r1.title")
+                    .Select("sum(LENGTH(r1.textvalue) - LENGTH(REPLACE(r1.textvalue, ' ', '')) + 1)")
                     .Select("rc.value", "rf.projectName")
                     .Select("sum(LENGTH(r2.textvalue) - LENGTH(REPLACE(r2.textvalue, ' ', '')) + 1)")
                     .InnerJoin(ResFilesTable + " as rf", Exp.EqColumns("rf.id", "r1.fileid"))
@@ -667,7 +669,7 @@ namespace TMResourceData
                     .Where("r1.resourceType", "text")
                     .Where("rf.isLock", 0)
                     .Where("r2.cultureTitle", "Neutral")
-                    .Where(!Exp.In("rf.id", new List<int>{259, 260, 261}))
+                    .Where(!Exp.In("rf.id", new List<int> { 259, 260, 261 }))
                     .GroupBy("rc.value", "rf.projectName")
                     .OrderBy("rc.value", true)
                     .OrderBy("rf.projectName", true);
@@ -681,7 +683,7 @@ namespace TMResourceData
 
                     foreach (var project in stat.Select(data => (string)data[2]).Distinct())
                     {
-                        var data = stat.Where(r => (string) r[1] == culture && (string) r[2] == project).ToList();
+                        var data = stat.Where(r => (string)r[1] == culture && (string)r[2] == project).ToList();
                         cultureData.Counts.Add(project, new Tuple<int, int>(data.Sum(r => Convert.ToInt32(r[0])), data.Sum(r => Convert.ToInt32(r[3]))));
                     }
 
@@ -703,7 +705,7 @@ namespace TMResourceData
             {
                 var sql = new SqlQuery(ResDataTable + " as r1");
 
-                sql.SelectCount().Select(ResCultureTable + ".title", "r1.authorLogin", "sum(length(r2.textvalue))")
+                sql.SelectCount().Select(ResCultureTable + ".title", "r1.authorLogin", "sum(LENGTH(r2.textvalue) - LENGTH(REPLACE(r2.textvalue, ' ', '')) + 1)")
                    .InnerJoin(ResDataTable + " as r2", Exp.And(Exp.EqColumns("r1.fileID", "r2.fileID"), Exp.EqColumns("r1.title", "r2.title")))
                    .InnerJoin(ResCultureTable, Exp.EqColumns("r1.cultureTitle", ResCultureTable + ".title"))
                    .Where(!Exp.Eq("r1.flag", 4))

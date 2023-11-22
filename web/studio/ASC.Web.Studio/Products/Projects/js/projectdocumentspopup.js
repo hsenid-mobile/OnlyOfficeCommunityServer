@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,12 @@ window.ProjectDocumentsPopup = (function () {
 
             window.addEventListener("message",
                 function (message) {
+                    if (!message || typeof message.data != "string") {
+                        return;
+                    }
+
                     try {
-                        var data = jq.parseJSON(message.data);
+                        var data = JSON.parse(message.data);
                     } catch (e) {
                         console.error(e);
                         return;

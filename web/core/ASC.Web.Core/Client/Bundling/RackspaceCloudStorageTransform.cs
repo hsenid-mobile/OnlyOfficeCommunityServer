@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,15 +39,15 @@ namespace ASC.Web.Core.Client.Bundling
     class RackspaceCloudStorageTransform : IBundleTransform
     {
         private static readonly ILog log = LogManager.GetLogger("ASC.Web.Bundle.RackspaceCloudStorageTransform");
-        private static bool successInitialized = false;
+        private static readonly bool successInitialized = false;
         private static readonly Dictionary<string, string> appenders = new Dictionary<string, string>();
         private static int work = 0;
         private static readonly ConcurrentQueue<CdnItem> queue = new ConcurrentQueue<CdnItem>();
 
-        private static String _username = String.Empty;
-        private static String _apiKey = String.Empty;
-        private static String _container = String.Empty;
-        private static String _subDir = String.Empty;
+        private static readonly String _username = String.Empty;
+        private static readonly String _apiKey = String.Empty;
+        private static readonly String _container = String.Empty;
+        private static readonly String _subDir = String.Empty;
 
         static RackspaceCloudStorageTransform()
         {
@@ -199,7 +199,7 @@ namespace ASC.Web.Core.Client.Bundling
 
                                 var cache = TimeSpan.FromDays(365);
 
-                                customHeaders.Add("Cache-Control", String.Format("public, maxage={0}", (int)cache.TotalSeconds));
+                                customHeaders.Add("Cache-Control", String.Format("public, max-age={0}", (int)cache.TotalSeconds));
                                 customHeaders.Add("Expires", DateTime.UtcNow.Add(cache).ToString());
 
                                 client.CreateObject(_container, inputStream, path, mime, 4096, customHeaders);

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
 */
 
 
+@import "params.less";
 @import "../../../../../skins/base.less";
 
 .ui-btn .inner-text {
     .borderRadius();
-    background-color: #fff;
+    background-color: @body-color;
 }
 
 
@@ -60,7 +61,7 @@
     display: block;
     border-left: 4px solid transparent;
     border-right: 4px solid transparent;
-    border-top: 4px solid #666666;
+    border-top: 4px solid @grey-text;
     content: "";
     height: 0;
     position: absolute;
@@ -76,7 +77,7 @@
     position: relative;
     cursor: pointer;
     text-decoration: none;
-    color: #333 !important;
+    color: @text-color !important;
     white-space: nowrap;
 }
 .ui-btn .inner-text {
@@ -94,7 +95,7 @@
     left: 0;
     top: 0;
     z-index: 0;
-    color: #FFF;
+    color: @body-color;
     text-align: center;
     content: " ";
 }
@@ -102,8 +103,8 @@
 .linkAction.button.blue,
 a.linkAction.button.blue:hover,
 a.linkAction.button.blue:visited {
-    margin-right:8px;
-    color: #FFF;
+    margin-right: 8px;
+    color: @body-color;
     text-decoration: none;
 }
 
@@ -154,11 +155,11 @@ table.table-list tbody tr:hover .link.dotted {
     position: relative;
 
     img {
-        background: #fff;
+        background: @body-color;
         width: 32px;
         height: 32px;
         overflow: hidden;
-        border: 1px solid #c7c7c7;
+        border: 1px solid @text-area-border-color;
     }
 
     .role {
@@ -197,10 +198,11 @@ table.table-list tbody tr:hover .link.dotted {
 }
 
 
-#peopleData .group, 
+#peopleData .group,
 #peopleData .info {
     white-space: nowrap;
-    max-width:115px;
+    max-width: 115px;
+    overflow: hidden;
 }
 #peopleData .info .red-text {
     float:left;
@@ -211,18 +213,18 @@ table.table-list tbody tr:hover .link.dotted {
 #peopleData .info .email .email {
     display:inline-block;
     height: 18px;
-    max-width:250px;
+    max-width:200px;
     overflow: hidden;
     padding-right: 13px;
     position:relative;
     text-overflow:ellipsis;
 }
 #peopleData .info .red-text + .email .email {
-      max-width: 200px;
+      max-width: 150px;
 }
 
 #peopleData .profile.hover{
-    background-color: #f2f2f2;
+    background-color: @border-color2;
 }
 
 #peopleData .email:after, .withHoverArrowDown:after {
@@ -235,11 +237,12 @@ table.table-list tbody tr:hover .link.dotted {
 }
 
 #peopleData .profile .birthday {
-    background: url(../imgs/birthday.png) 0 0 no-repeat;
-    color: #ff9000;
+    background: url(../images/svg/birthday-orange.svg) 0 0 no-repeat;
+    background-position: left center;
+    color: #EE831A;
     display: inline-block;
-    margin-left: 2px;
-    padding: 4px 0 4px 20px;
+    margin-left: 4px;
+    padding: 4px 0 4px 18px;
 }
 
 #peopleData td.name,
@@ -280,40 +283,57 @@ table.table-list tbody tr:hover .link.dotted {
         white-space: nowrap;
     }
 }
+
+body.media-width-0-1650 {
+    #peopleData .info .btn.email,
+    #peopleData .info .email .email {
+        max-width: 170px;
+    }
+
+    #peopleData .info .red-text + .email .email {
+        max-width: 120px;
+    }
+
+    #peopleData td.name,
+    #peopleData td.group,
+    #peopleData td.location {
+        max-width: 170px;
+    }
+}
+
 body.media-width-0-1450 {
     #peopleData .info .btn.email,
-    #peopleData .info .email .email{
+    #peopleData .info .email .email {
         max-width: 150px;
     }
+
     #peopleData .info .red-text + .email .email {
         max-width: 100px;
+    }
+
+    #peopleData td.name,
+    #peopleData td.group,
+    #peopleData td.location {
+        max-width: 150px;
     }
 }
 
 body.media-width-0-1200 {
-    #peopleData td.name,
-    #peopleData td.group,
-    #peopleData td.location
-    {
-        max-width:120px;
-    }
-}
-
-body.media-width-0-1100 {
     #peopleData .info .btn.email,
-    #peopleData .info .email .email{
+    #peopleData .info .email .email {
         max-width: 120px;
     }
+
     #peopleData .info .red-text + .email .email {
         max-width: 70px;
     }
+
     #peopleData td.name,
     #peopleData td.group,
     #peopleData td.location {
         max-width: 120px;
     }
 }
-
 /*******************************************************************************
 header menu elements for group operations
 *******************************************************************************/
@@ -321,7 +341,7 @@ header menu elements for group operations
     margin-left:10px;
 }
 .user-list-for-group-operation {
-    border: 1px solid #D1D1D1;
+    border: 1px solid @border-color;
     margin-top: 16px;
     max-height: 250px;
     overflow-x: hidden;
@@ -367,7 +387,6 @@ header menu elements for group operations
     li {
         display: none;
     }*/
-
     /*@media all and (max-width: 1300px) {
         display: block; 
         
@@ -404,7 +423,7 @@ header menu elements for group operations
             }
 
             &.unlockAction a {
-                color: #333;
+                color: @text-color;
                 cursor: pointer;
             }
         }
@@ -442,14 +461,14 @@ header menu elements for group operations
     width: 223px;
 
     &:hover {
-        background-position: center bottom;
+        background-position-y: bottom;
     }
 }
 
 .sso-lock::after,
 .sso-lock-big::after {
     content: "SSO";
-    background-color: #D0E3B5;
+    background-color: @sso-color;
     border-radius: 2px;
     
 }
@@ -586,4 +605,8 @@ header menu elements for group operations
     .menu-item-label {
         white-space: nowrap;
     }
+}
+
+#connectionsBlockContainer {
+    margin: 16px 0 0 0;
 }

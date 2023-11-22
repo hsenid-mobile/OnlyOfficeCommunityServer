@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Web.Community.News.Resources {
+namespace ASC.Web.Community.Modules.News.Resources {
     using System;
     
     
@@ -61,6 +61,23 @@ namespace ASC.Web.Community.News.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to h1.#if($FEED_TYPE == &quot;poll&quot;)You were mentioned in comment to Poll#end#if($FEED_TYPE == &quot;feed&quot;)You were mentioned in comment to Event#end: &quot;$Caption&quot;:&quot;$URL&quot;
+        ///
+        ///$Date &quot;$UserName&quot;:&quot;$UserURL&quot; mentioned you in the comment to the &quot;$Caption&quot;:&quot;$URL&quot; #if($FEED_TYPE == &quot;poll&quot;)poll#end#if($FEED_TYPE == &quot;feed&quot;)event#end:
+        ///
+        ///$CommentBody
+        ///
+        ///&quot;Read More&quot;:&quot;$CommentURL&quot;
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notif [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_mention_for_feed_comment {
+            get {
+                return ResourceManager.GetString("pattern_mention_for_feed_comment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.#if($FEED_TYPE == &quot;feed&quot;)New Event Added: &quot;$Caption&quot;:&quot;$URL&quot;
         ///
         ///$Date &quot;$UserName&quot;:&quot;$UserURL&quot; has added a new event: &quot;$Caption&quot;:&quot;$URL&quot;
@@ -83,7 +100,9 @@ namespace ASC.Web.Community.News.Resources {
         ///
         ///&quot;Vote&quot;:&quot;$URL&quot;
         ///
-        ///#end.
+        ///#end
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_new_text {
             get {
@@ -98,11 +117,31 @@ namespace ASC.Web.Community.News.Resources {
         ///
         ///$CommentBody
         ///
-        ///&quot;Read More&quot;:&quot;$CommentURL&quot;.
+        ///&quot;Read More&quot;:&quot;$CommentURL&quot;
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. If you do not want to receive the notifications about new comments added to this ev [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_new_text_comment {
             get {
                 return ResourceManager.GetString("pattern_new_text_comment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Community. #if($FEED_TYPE == &quot;poll&quot;)Mention in comment to poll#end#if($FEED_TYPE == &quot;feed&quot;)Mention in comment to event#end: $Caption.
+        /// </summary>
+        public static string subject_mention_for_feed_comment {
+            get {
+                return ResourceManager.GetString("subject_mention_for_feed_comment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Community. #if($FEED_TYPE == &quot;poll&quot;)Mention in comment to poll#end#if($FEED_TYPE == &quot;feed&quot;)Mention in comment to event#end: [$Caption]($URL).
+        /// </summary>
+        public static string subject_mention_for_feed_comment_tg {
+            get {
+                return ResourceManager.GetString("subject_mention_for_feed_comment_tg", resourceCulture);
             }
         }
         

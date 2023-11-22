@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,12 @@
 #region Import
 
 using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Net;
 using System.Web;
-using System.Linq;
-using ASC.Collections;
-using ASC.Common.Threading.Workers;
-using ASC.Data.Storage;
-using ASC.Web.CRM.Classes;
-using ASC.Web.CRM.Configuration;
-using ASC.Web.Core.Utility;
-using ASC.Web.Core.Utility.Skins;
-using ASC.Web.Studio.Controls.FileUploader;
-using ASC.Web.Studio.Core;
-using ASC.Web.Studio.Utility;
-using System.Drawing.Imaging;
-using System.Drawing.Drawing2D;
-using ASC.Web.CRM.Resources;
+
 using ASC.Common.Logging;
+using ASC.Web.CRM.Classes;
+using ASC.Web.CRM.Resources;
 
 #endregion
 
@@ -45,6 +31,8 @@ namespace ASC.Web.CRM.HttpHandlers
 {
     public class FileHandler : IHttpHandler
     {
+        private ILog Log = LogManager.GetLogger("ASC");
+
         public void ProcessRequest(HttpContext context)
         {
             var action = context.Request["action"];
@@ -96,7 +84,7 @@ namespace ASC.Web.CRM.HttpHandlers
             }
             catch (HttpException ex)
             {
-                LogManager.GetLogger("ASC").Error("ResponceContactPhotoUrl", ex);
+                Log.Error("ResponceContactPhotoUrl", ex);
             }
         }
 
@@ -124,7 +112,7 @@ namespace ASC.Web.CRM.HttpHandlers
             }
             catch (HttpException ex)
             {
-                LogManager.GetLogger("ASC").Error("ResponceMailMessageContent", ex);
+                Log.Error("ResponceMailMessageContent", ex);
             }
         }
 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,10 @@ window.ASC.Files.Converter = (function () {
     var checkCanOpenEditor = function (fileId, fileTitle, version, forEdit) {
         if (!ASC.Files.Utility.MustConvert(fileTitle) || forEdit == false) {
             if (forEdit == false || !ASC.Files.Utility.CanWebEdit(fileTitle)) {
-                var url = ASC.Files.Utility.GetFileWebViewerUrl(fileId, forEdit ? null : version );
-                window.open(url, "_blank");
-                return ASC.Files.Marker.removeNewIcon("file", fileId);
+                var result = ASC.Files.Actions.checkViewFile(fileId, forEdit ? null : version);
+
+                ASC.Files.UI.updateMainContentHeader();
+                return result;
             }
 
             var fileObj = ASC.Files.UI.getEntryObject("file", fileId);
@@ -42,7 +43,7 @@ window.ASC.Files.Converter = (function () {
                 ASC.Files.Folders.showVersions(fileObj);
             }
 
-            var result = ASC.Files.Actions.checkEditFile(fileId);
+            result = ASC.Files.Actions.checkEditFile(fileId);
 
             ASC.Files.UI.updateMainContentHeader();
             return result;
@@ -62,7 +63,7 @@ window.ASC.Files.Converter = (function () {
 
         jq("#convertPassword").val("");
 
-        PopupKeyUpActionProvider.EnterAction = "jq(\"#confirmCopyConvert .blue:visible:not(.disable):first\").click()";
+        PopupKeyUpActionProvider.EnterAction = "jq(\"#confirmCopyConvert .blue:visible:not(.disable):first\").trigger('click')";
 
         jq("#progressCopyConvert, #convertPasswordPanel, #copyAndConvertOpen").hide();
         jq("#copyConvertDescript, #confirmCopyAndConvert").show();
@@ -79,9 +80,9 @@ window.ASC.Files.Converter = (function () {
                 } else {
                     jq("#confirmCopyConvertToMyText").show();
                 }
-            } else if (ASC.Files.UI.accessDelete(fileObj) && !ASC.Files.UI.lockedForMe(fileObj)) {
+            } else if (ASC.Files.UI.accessDelete(fileObj) && !ASC.Files.UI.lockedForMe(fileObj) && ASC.Resources.Master.IsAuthenticated) {
                 jq("#confirmCopyConvertLabelText").show();
-                jq("#confirmCopyConvertLabelText input").attr("disabled", false);
+                jq("#confirmCopyConvertLabelText input").prop("disabled", false);
             }
         } else if (Teamlab.profile.isVisitor) {
             PopupKeyUpActionProvider.CloseDialog();
@@ -125,10 +126,10 @@ window.ASC.Files.Converter = (function () {
 
         jq("#copyAndConvertOpen").removeClass("disable");
 
-        var sourceFile = jq.parseJSON(jsonStringSource);
+        var sourceFile = JSON.parse(jsonStringSource);
         var sourceFileId = sourceFile.id;
 
-        var file = jq.parseJSON(jsonStringData);
+        var file = JSON.parse(jsonStringData);
         var fileId = file.id;
         var fileTitle = file.title;
         jq("#progressCopyConvertId").val(fileId);
@@ -136,7 +137,7 @@ window.ASC.Files.Converter = (function () {
         jq("#progressCopyConvertEnd").show();
         if (file.folderId != ASC.Files.Folders.currentFolder.id) {
             jq("#progressCopyConvertEndTo, #goToCopySplitter, #goToCopyFolder").show();
-            ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoCrateFileIn.format(fileTitle, file.folderTitle));
+            ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoCrateFileIn.format(fileTitle, file.folderTitle));
             jq(".convert-end-to").html(file.folderTitle);
             jq("#goToCopyFolder").attr("data-id", file.folderId);
             return;
@@ -145,14 +146,15 @@ window.ASC.Files.Converter = (function () {
         //todo: replace with ASC.Files.EventHandler.onGetFile
         var stringXmlFile = file.fileXml;
         var htmlXML = ASC.Files.TemplateManager.translateFromString(stringXmlFile);
-
+        var storeOriginal = ASC.Resources.Master.IsAuthenticated ? ASC.Files.Common.storeOriginal : true;
+        
         ASC.Files.EmptyScreen.hideEmptyScreen();
         var sourceFileObj = ASC.Files.UI.getEntryObject("file", sourceFileId);
-        if (sourceFileObj.length == 0 || ASC.Files.Common.storeOriginal) {
+        if (sourceFileObj.length == 0 || storeOriginal) {
             var replaceWith = ASC.Files.UI.getEntryObject("file", fileId);
             if (replaceWith.length) {
                 replaceWith.after(htmlXML);
-                replaceWith.remove();
+                ASC.Files.UI.removeEntryObject(replaceWith);
             } else {
                 jq("#filesMainContent").prepend(htmlXML);
             }
@@ -172,7 +174,7 @@ window.ASC.Files.Converter = (function () {
 
         ASC.Files.Actions.showActionsViewPanel();
 
-        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.InfoCrateFile.format(fileTitle));
+        ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.InfoCrateFile.format(fileTitle));
     };
 
     var convertFileOpen = function () {
@@ -194,7 +196,7 @@ window.ASC.Files.Converter = (function () {
         jq("#progressCopyConvert, #copyAndConvertOpen").hide();
         jq("#convertPasswordPanel, #confirmCopyAndConvert").show();
 
-        jq("#convertPassword").val("").focus();
+        jq("#convertPassword").val("").trigger("focus");
     };
 
     var showToConvert = function (selectedElements) {
@@ -211,6 +213,11 @@ window.ASC.Files.Converter = (function () {
 
         jq(selectedElements).each(function () {
             var entryData = ASC.Files.UI.getObjectData(this);
+
+            if (ASC.Files.UI.denyDownload(entryData)) {
+                return;
+            }
+
             var entryTitle = entryData.title;
             var entryId = entryData.id;
             var formats;
@@ -218,7 +225,7 @@ window.ASC.Files.Converter = (function () {
             if (entryData.entryType == "file") {
                 formats =
                     [{
-                        name: ASC.Files.FilesJSResources.OriginalFormat,
+                        name: ASC.Files.FilesJSResource.OriginalFormat,
                         value: ASC.Files.Utility.GetFileExtension(entryTitle)
                     }];
 
@@ -261,25 +268,25 @@ window.ASC.Files.Converter = (function () {
             [
                 {
                     blockCssClass: ASC.Files.Utility.getCssClassByFileTitle(ASC.Files.Utility.Resource.InternalFormats.Document),
-                    blockTitle: ASC.Files.FilesJSResources.Documents,
+                    blockTitle: ASC.Files.FilesJSResource.Documents,
                     blockFormats: { format: getFileBlockConvertFormats(selectedFiles.documents) },
                     files: { file: selectedFiles.documents }
                 },
                 {
                     blockCssClass: ASC.Files.Utility.getCssClassByFileTitle(ASC.Files.Utility.Resource.InternalFormats.Spreadsheet),
-                    blockTitle: ASC.Files.FilesJSResources.Spreedsheets,
+                    blockTitle: ASC.Files.FilesJSResource.Spreedsheets,
                     blockFormats: { format: getFileBlockConvertFormats(selectedFiles.spreadsheets) },
                     files: { file: selectedFiles.spreadsheets }
                 },
                 {
                     blockCssClass: ASC.Files.Utility.getCssClassByFileTitle(ASC.Files.Utility.Resource.InternalFormats.Presentation),
-                    blockTitle: ASC.Files.FilesJSResources.Presentations,
+                    blockTitle: ASC.Files.FilesJSResource.Presentations,
                     blockFormats: { format: getFileBlockConvertFormats(selectedFiles.presentations) },
                     files: { file: selectedFiles.presentations }
                 },
                 {
                     blockCssClass: ASC.Files.Utility.getCssClassByFileTitle(),
-                    blockTitle: ASC.Files.FilesJSResources.Other,
+                    blockTitle: ASC.Files.FilesJSResource.Other,
                     blockFormats: { format: [] },
                     files: { file: selectedFiles.other }
                 }
@@ -308,7 +315,7 @@ window.ASC.Files.Converter = (function () {
         if (selectedFiles.length == 0) {
             return result;
         }
-        result.push({ name: ASC.Files.FilesJSResources.OriginalFormat, value: "original" });
+        result.push({ name: ASC.Files.FilesJSResource.OriginalFormat, value: "original" });
         var minCount = selectedFiles[0].fileConvertFormats.format.length;
         var minIndex = 0;
         for (var i = 1; i < selectedFiles.length; i++) {
@@ -334,7 +341,7 @@ window.ASC.Files.Converter = (function () {
                 result.push({ name: ext, value: ext });
             }
         }
-        result.push({ name: ASC.Files.FilesJSResources.CustomFormat, value: "custom" });
+        result.push({ name: ASC.Files.FilesJSResource.CustomFormat, value: "custom" });
         return result;
     };
 
@@ -396,14 +403,14 @@ window.ASC.Files.Converter = (function () {
 
     var onConvertCurrentFile = function (jsonData, params, errorMessage) {
         if (typeof jsonData !== "object" && typeof errorMessage != "undefined" || jsonData == null) {
-            errorMessage = errorMessage || ASC.Files.FilesJSResources.ErrorMassage_ErrorConvert;
+            errorMessage = errorMessage || ASC.Files.FilesJSResource.ErrorMassage_ErrorConvert;
         } else if (!jsonData.length || !jsonData[0]) {
-            errorMessage = ASC.Files.FilesJSResources.ErrorMassage_ErrorConvert;
+            errorMessage = ASC.Files.FilesJSResource.ErrorMassage_ErrorConvert;
         } else if (jsonData[0].error) {
             errorMessage = jsonData[0].error;
             if (jsonData[0].result == "password") {
                 if (!!params.password) {
-                    ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResources.ErrorMassage_PasswordFile, true);
+                    ASC.Files.UI.displayInfoPanel(ASC.Files.FilesJSResource.ErrorMassage_PasswordFile, true);
                 }
                 ASC.Files.Converter.convertFilePasswordRequest();
                 return;
@@ -458,7 +465,7 @@ window.ASC.Files.Converter = (function () {
             ASC.Files.Converter.showToConvert();
         });
 
-        jq("#filesMainContent").on("click", ".pencil.file-edit, .can-coauthoring .pencil.file-editing, .pencil.convert-action", function () {
+        jq("#filesMainContent").on("click", ".pencil.file-edit, .can-coauthoring .pencil.file-editing, .pencil.convert-action, .pencil.fillform-action", function () {
             ASC.Files.Actions.hideAllActionPanels();
             var fileData = ASC.Files.UI.getObjectData(this);
             var fileId = fileData.entryId;
@@ -516,7 +523,7 @@ window.ASC.Files.Converter = (function () {
             }
         });
 
-        jq("#buttonStartConvert").click(function () {
+        jq("#buttonStartConvert").on("click", function () {
             var data = new Array();
 
             jq("#convertFileList .cnvrt-file-block-body select.select-format").each(function () {
@@ -565,7 +572,7 @@ window.ASC.Files.Converter = (function () {
             ASC.Files.Folders.bulkDownload(data);
         });
 
-        jq("#confirmCopyAndConvert").click(ASC.Files.Converter.convertCurrentFile);
+        jq("#confirmCopyAndConvert").on("click", ASC.Files.Converter.convertCurrentFile);
 
         jq("#confirmCopyConvert").on("click", "#copyAndConvertOpen:not(.disable)", function () {
             ASC.Files.Converter.convertFileOpen();

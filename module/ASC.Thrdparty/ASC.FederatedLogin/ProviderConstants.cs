@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ namespace ASC.FederatedLogin
         public const string Twitter = "twitter";
         public const string Facebook = "facebook";
         public const string LinkedIn = "linkedin";
-        public const string OpenId = "openid";
         public const string Box = "box";
         public const string Google = "google";
         public const string Yandex = "yandex";
@@ -30,5 +29,7 @@ namespace ASC.FederatedLogin
         public const string VK = "vk";
         public const string GosUslugi = "gosuslugi";
         public const string Encryption = "e2e";
+        public const string AppleId = "appleid";
+        public const string Microsoft = "microsoft";
     }
 }

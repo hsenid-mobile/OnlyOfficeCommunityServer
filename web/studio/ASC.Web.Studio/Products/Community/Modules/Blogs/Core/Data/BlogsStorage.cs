@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
 */
 
 
-using ASC.Common.Data;
 using System;
+
+using ASC.Common.Data;
 
 namespace ASC.Blogs.Core.Data
 {
     public class BlogsStorage : IDisposable
     {
-        readonly DbManager _db;
+        readonly IDbManager _db;
         readonly int _tenant;
         readonly IPostDao _postDao;
 

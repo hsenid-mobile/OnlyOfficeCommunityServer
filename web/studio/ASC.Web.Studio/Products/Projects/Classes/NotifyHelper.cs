@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ namespace ASC.Web.Projects.Classes
 {
     public class NotifyHelper
     {
-        private static ILog logger;
+        private static readonly ILog logger;
 
         static NotifyHelper()
         {
@@ -85,7 +85,7 @@ namespace ASC.Web.Projects.Classes
                     try
                     {
                         CoreContext.TenantManager.SetCurrentTenant(tenant);
-                        SecurityContext.AuthenticateMe(ASC.Core.Configuration.Constants.CoreSystem);
+                        SecurityContext.CurrentAccount = ASC.Core.Configuration.Constants.CoreSystem;
                         using (var scope = DIHelper.Resolve())
                         {
                             var engineFactory = scope.Resolve<EngineFactory>();
@@ -97,7 +97,7 @@ namespace ASC.Web.Projects.Classes
                                 var user = CoreContext.UserManager.GetUsers(t.CreateBy);
                                 if (!Constants.LostUser.Equals(user) && user.Status == EmployeeStatus.Active)
                                 {
-                                    SecurityContext.AuthenticateMe(user.ID);
+                                    SecurityContext.CurrentUser = user.ID;
 
                                     Thread.CurrentThread.CurrentCulture = user.GetCulture();
                                     Thread.CurrentThread.CurrentUICulture = user.GetCulture();
@@ -194,7 +194,7 @@ namespace ASC.Web.Projects.Classes
                     try
                     {
                         CoreContext.TenantManager.SetCurrentTenant(tenant);
-                        SecurityContext.AuthenticateMe(ASC.Core.Configuration.Constants.CoreSystem);
+                        SecurityContext.CurrentAccount = ASC.Core.Configuration.Constants.CoreSystem;
                         using (var scope = DIHelper.Resolve())
                         {
                             var m = scope.Resolve<IDaoFactory>().MilestoneDao.GetById((int)r[1]);
@@ -204,7 +204,7 @@ namespace ASC.Web.Projects.Classes
                                 var user = CoreContext.UserManager.GetUsers(sender);
                                 if (!Constants.LostUser.Equals(user) && user.Status == EmployeeStatus.Active)
                                 {
-                                    SecurityContext.AuthenticateMe(user.ID);
+                                    SecurityContext.CurrentUser = user.ID;
 
                                     Thread.CurrentThread.CurrentCulture = user.GetCulture();
                                     Thread.CurrentThread.CurrentUICulture = user.GetCulture();
@@ -260,7 +260,7 @@ namespace ASC.Web.Projects.Classes
             var user = CoreContext.UserManager.GetUsers(t.CreateBy);
             if (user.ID == Constants.LostUser.ID || user.Status != EmployeeStatus.Active) return;
 
-            SecurityContext.AuthenticateMe(user.ID);
+            SecurityContext.CurrentUser = user.ID;
 
             Thread.CurrentThread.CurrentCulture = user.GetCulture();
             Thread.CurrentThread.CurrentUICulture = user.GetCulture();

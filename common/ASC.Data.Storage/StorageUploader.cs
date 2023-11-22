@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+
 using ASC.Common.Caching;
 using ASC.Common.Logging;
 using ASC.Common.Threading;
@@ -126,7 +127,7 @@ namespace ASC.Data.Storage
                 Log.DebugFormat("Tenant: {0}", tenantId);
                 var tenant = CoreContext.TenantManager.GetTenant(tenantId);
                 CoreContext.TenantManager.SetCurrentTenant(tenant);
-                SecurityContext.AuthenticateMe(tenant.OwnerId);
+                SecurityContext.CurrentUser = tenant.OwnerId;
 
                 foreach (var module in Modules)
                 {

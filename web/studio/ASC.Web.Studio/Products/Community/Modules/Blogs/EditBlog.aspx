@@ -1,7 +1,7 @@
 ﻿<%@ Assembly Name="ASC.Web.Community" %>
 <%@ Page Language="C#" MasterPageFile="~/Products/Community/Master/Community.Master" AutoEventWireup="true" CodeBehind="EditBlog.aspx.cs" Inherits="ASC.Web.Community.Blogs.EditBlog" Title="Untitled Page" %>
 
-<%@ Import Namespace="ASC.Blogs.Core.Resources" %>
+<%@ Import Namespace="ASC.Web.Community.Modules.Blogs.Core.Resources" %>
 
 <%@ Register TagPrefix="sc" Namespace="ASC.Web.Studio.Controls.Common" Assembly="ASC.Web.Studio" %>
 
@@ -54,7 +54,7 @@
                 <div class="headerPanelSmall-splitter">
                     <b><%=BlogsResource.ContentTitle %>:</b>
                 </div>
-                <textarea id="ckEditor" name="blog_text" style="width:100%; height:400px;visibility:hidden;" autocomplete="off"><%=_text%></textarea>
+                <textarea id="ckEditor" name="blog_text" style="width:100%; height:400px;visibility:hidden;" autocomplete="off"><%:_text%></textarea>
             </div>
             <div class="headerPanel-splitter">
                 <div class="headerPanelSmall-splitter">

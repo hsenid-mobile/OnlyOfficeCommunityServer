@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using System.Web;
+
 using ASC.Web.Core.Client;
 using ASC.Web.Core.Client.HttpHandlers;
 using ASC.Web.Core.Files;
@@ -63,14 +64,20 @@ namespace ASC.Web.Studio.Masters.MasterResources
                             FileUtility.ExtsPresentation,
                             FileUtility.ExtsDocument,
                             InternalFormats = FileUtility.InternalExtension,
+                            FileUtility.MasterFormExtension,
                             ParamVersion = FilesLinkUtility.Version,
                             ParamOutType = FilesLinkUtility.OutType,
                             FilesLinkUtility.FileDownloadUrlString,
+                            FilesLinkUtility.FileViewUrlString,
                             FilesLinkUtility.FileWebViewerUrlString,
                             FilesLinkUtility.FileWebViewerExternalUrlString,
                             FilesLinkUtility.FileWebEditorUrlString,
                             FilesLinkUtility.FileWebEditorExternalUrlString,
-                            FilesLinkUtility.FileRedirectPreviewUrlString
+                            FilesLinkUtility.FileCustomProtocolEditorUrlString,
+                            FilesLinkUtility.OpenPrivateString,
+                            FilesLinkUtility.FileRedirectPreviewUrlString,
+                            FilesLinkUtility.FileThumbnailUrlString,
+                            FilesLinkUtility.FolderShareKey
                         })
                 };
         }

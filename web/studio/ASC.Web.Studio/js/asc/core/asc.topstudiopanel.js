@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,40 @@
 jq(document).ready(function () {
 
     jq("#logout_ref").on('click', function () {
+
+        if ('serviceWorker' in navigator && !jQuery.browser.msie && !jQuery.browser.safari) {
+            document.cookie = "tmtalk" + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+            document.cookie = "tmtalk" + '=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                Array.prototype.forEach.call(registrations, function (registration) {
+                    registration.unregister();
+                });
+            });
+        }
+
         if (localStorage.getItem('onlyoffice') == 'logout') {
             localStorage.setItem('onlyoffice', 'logout_');
         } else {
             localStorage.setItem('onlyoffice', 'logout');
         }
     });
+
+    jq("#back_to_yourself").on('click', function () {
+
+        var reverseAddress = jq.cookies.get("reverse_address") || window.location.origin;
+
+        Teamlab.impersonateLogout({}, {
+            success: function (_, data) {
+                window.location.href = reverseAddress;
+            },
+            error: function (params, errors) {
+                toastr.error(errors[0]);
+                window.location.reload(true);
+            }
+        });
+    });
+
+    ShowSuccessImpersonateMessage();
     
     jq.dropdownToggle({
         switcherSelector: ".studio-top-panel .product-menu",
@@ -52,8 +80,8 @@ jq(document).ready(function () {
             var customContent = wrapper.find(".custom-nav-items");
             var specContent = wrapper.find(".spec-nav-items");
 
-            var customLeft = wrapper.find(".custom-nav-items").position().left;
-            var specLeft = wrapper.find(".spec-nav-items").position().left;
+            var customLeft = customContent.length ? customContent.position().left : 0;
+            var specLeft = specContent.length ? specContent.position().left : 0;
 
             var customCount = customContent.find("li").length;
             var specCount = specContent.find("li").length;
@@ -82,21 +110,12 @@ jq(document).ready(function () {
         addTop: 8,
         addLeft: 0,
         afterShowFunction: function () {
-            jq("#studio_search").focus();
-
-            var w = jq(window),
-                scrWidth = w.width(),
-                leftPadding = w.scrollLeft(),
-                elem = jq(".studio-top-panel .searchActiveBox"),
-                dropElem = jq("#studio_searchPopupPanel");
-
-            if ((elem.offset().left + dropElem.outerWidth()) > scrWidth + leftPadding) {
-                dropElem.css("left", Math.max(0, elem.offset().left - dropElem.outerWidth() + elem.outerWidth()) + "px");
-            }
+            jq("#studio_searchPopupPanel").css("left", "auto");
+            jq("#studio_search").trigger("focus");
         }
     });
 
-    jq("#studio_search").keydown(function (event) {
+    jq("#studio_search").on("keydown", function (event) {
         var code;
 
         if (!e) {
@@ -128,7 +147,7 @@ jq(document).ready(function () {
     var $aboutBtn = jq("#studio_myStaffPopupPanel .dropdown-about-btn:first");
     jq.tmpl("template-blockUIPanel", {
         id: "aboutCompanyPopup",
-        headerTest: jq.trim($aboutBtn.text())
+        headerTest: $aboutBtn.text().trim()
     })
     .insertAfter($aboutBtn)
     .addClass("confirmation-popup");
@@ -145,7 +164,7 @@ jq(document).ready(function () {
         var $appsBtn = jq("#studio_productListPopupPanel .apps .dropdown-item:first");
         jq.tmpl("template-blockUIPanel", {
             id: "appsPopup",
-            headerTest: jq.trim($appsBtn.text())
+            headerTest: $appsBtn.text().trim()
         })
         .insertAfter($appsBtn)
         .addClass("confirmation-popup");
@@ -163,7 +182,7 @@ jq(document).ready(function () {
         var $debugBtn = jq("#studio_myStaffPopupPanel .dropdown-debuginfo-btn:first");
         jq.tmpl("template-blockUIPanel", {
             id: "debugInfoPopUp",
-            headerTest: jq.trim($debugBtn.text()),
+            headerTest: $debugBtn.text().trim(),
             innerHtmlText: ["<div style=\"height: 500px; overflow-y: scroll;\">", jq("#debugInfoPopUpBody").val().replace(/\n\r/g, "<br/>").replace(/\n/g, "<br/>"), "</div>"].join(''),
             OKBtn: 'Ok',
         })
@@ -219,6 +238,17 @@ jq(document).ready(function () {
         });
     }
 });
+
+function ShowSuccessImpersonateMessage() {
+
+    var needShowMessage = jq.cookies.get("showImpersonateLoginMessage");
+
+    if (needShowMessage && jq("#back_to_yourself").length) {
+        jq.cookies.del("showImpersonateLoginMessage");
+        var userName = UserManager.getUser(Teamlab.profile.id).displayName;
+        toastr.success(ASC.Resources.Master.ResourceJS.ImpersonateLoginMessage.format(userName));
+    }
+}
 
 var Searcher = new function () {
     this.Search = function () {
@@ -348,7 +378,7 @@ var UnreadMailManager = new function () {
                                 break;
 
                             if (!mails[i].subject || mails[i].subject.length === 0)
-                                mails[i].subject = ASC.Resources.Master.Resource.MailNoSubject;
+                                mails[i].subject = ASC.Resources.Master.ResourceJS.MailNoSubject;
 
                             var unreadMail = getMailTemplate(mails[i]);
                             unreadMails.push(unreadMail);
@@ -375,6 +405,10 @@ var UnreadMailManager = new function () {
 
             hideLoaderMail(isListEmpty);
             dropMailList.scrollTop(0);
+            if (dropMailList.prop('scrollHeight') > dropMailList.prop('clientHeight')) {
+                $dropMailBox.addClass("scrollbar-popup");
+                dropMailList.addClass("scrollbar-popup-list");
+            }
             return;
         }
     }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ ASC.CRM.ListContactView = (function() {
             jq.cookies.set(ASC.CRM.ListContactView.cookieKey, cookie, { path: path });
         }
     };
-
+    
     var _lockMainActions = function() {
         jq("#contactsHeaderMenu .menuActionDelete").removeClass("unlockAction");
         jq("#contactsHeaderMenu .menuActionAddTag").removeClass("unlockAction");
@@ -132,7 +132,7 @@ ASC.CRM.ListContactView = (function() {
         });
 
 
-        jq("body").unbind("contextmenu").bind("contextmenu", function(event) {
+        jq("body").off("contextmenu").on("contextmenu", function(event) {
             var e = jq.fixEvent(event);
 
             if (typeof e == "undefined" || !e) {
@@ -302,7 +302,7 @@ ASC.CRM.ListContactView = (function() {
         jq("#companyTable tbody tr").remove();
         jq("#contactsHeaderMenu, #companyListBox, #tableForContactNavigation").hide();
         jq("#contactsFilterContainer").show();
-        jq("#mainSelectAll").attr("disabled", true);
+        jq("#mainSelectAll").prop("disabled", true);
 
         ASC.CRM.Common.hideExportButtons();
         jq("#contactsEmptyScreen").hide();
@@ -320,7 +320,7 @@ ASC.CRM.ListContactView = (function() {
         }
         if (contact == null) return;
 
-        jq("#contactActionMenu .addTaskLink").unbind("click").bind("click", function() {
+        jq("#contactActionMenu .addTaskLink").off("click").on("click", function() {
             jq("#contactActionMenu").hide();
             jq("#taskActionMenu").hide();
             jq("#companyTable .entity-menu.active").removeClass("active");
@@ -340,7 +340,7 @@ ASC.CRM.ListContactView = (function() {
 
         if (contact.primaryPhone != null && ASC.Resources.Master.Hub.VoipAllowed) {
             jq("#contactActionMenu .makeVoIPCallLink").removeClass("display-none");
-            jq("#contactActionMenu .makeVoIPCallLink").unbind("click").bind("click", function () {
+            jq("#contactActionMenu .makeVoIPCallLink").off("click").on("click", function () {
                 jq("#contactActionMenu").hide();
                 jq("#companyTable .entity-menu.active").removeClass("active");
                 if (ASC.VoipNavigationItem && ASC.VoipNavigationItem.isInit) {
@@ -368,14 +368,14 @@ ASC.CRM.ListContactView = (function() {
 
 
             jq("#contactActionMenu .addPhoneLink").text(contact.primaryPhone != null ? ASC.CRM.Resources.CRMJSResource.EditPhone : ASC.CRM.Resources.CRMJSResource.AddNewPhone);
-            jq("#contactActionMenu .addPhoneLink").unbind("click").bind("click", function () {
+            jq("#contactActionMenu .addPhoneLink").off("click").on("click", function () {
                 jq("#contactActionMenu").hide();
                 jq("#companyTable .entity-menu.active").removeClass("active");
                 _showAddPrimaryPhoneInput(contactID, contact.primaryPhone);
             });
 
             jq("#contactActionMenu .addEmailLink").text(contact.primaryEmail != null ? ASC.CRM.Resources.CRMJSResource.EditEmail : ASC.CRM.Resources.CRMJSResource.AddNewEmail);
-            jq("#contactActionMenu .addEmailLink").unbind("click").bind("click", function () {
+            jq("#contactActionMenu .addEmailLink").off("click").on("click", function () {
                 jq("#contactActionMenu").hide();
                 jq("#companyTable .entity-menu.active").removeClass("active");
                 _showAddPrimaryEmailInput(contactID, contact.primaryEmail);
@@ -386,7 +386,7 @@ ASC.CRM.ListContactView = (function() {
             jq("#contactActionMenu .editContactLink").attr("href",
                         jq.format("Default.aspx?id={0}&action=manage{1}", contactID, !contact.isCompany ? "&type=people" : ""));
 
-            jq("#contactActionMenu .deleteContactLink").unbind("click").bind("click", function () {
+            jq("#contactActionMenu .deleteContactLink").off("click").on("click", function () {
                 jq("#contactActionMenu").hide();
                 jq("#companyTable .entity-menu.active").removeClass("active");
                 ASC.CRM.ListContactView.showConfirmationPanelForDelete(contact.displayName, contact.id, contact.isCompany, true);
@@ -394,7 +394,7 @@ ASC.CRM.ListContactView = (function() {
 
             jq("#contactActionMenu .showProfileLink").attr("href", jq.format("Default.aspx?id={0}{1}", contactID, !contact.isCompany ? "&type=people" : ""));
 
-            jq("#contactActionMenu .showProfileLinkNewTab").unbind("click").bind("click", function () {
+            jq("#contactActionMenu .showProfileLinkNewTab").off("click").on("click", function () {
                 jq("#contactActionMenu").hide();
                 jq("#companyTable .entity-menu.active").removeClass("active");
                 window.open(jq.format("Default.aspx?id={0}{1}", contactID, !contact.isCompany ? "&type=people" : ""), "_blank");
@@ -412,7 +412,7 @@ ASC.CRM.ListContactView = (function() {
 
         //if (ASC.CRM.Data.IsCRMAdmin === true || Teamlab.profile.id == contact.createdBy.id) {
         //    jq("#contactActionMenu .setPermissionsLink").show();
-        //    jq("#contactActionMenu .setPermissionsLink").unbind("click").bind("click", function() {
+        //    jq("#contactActionMenu .setPermissionsLink").off("click").on("click", function() {
         //        jq("#contactActionMenu").hide();
         //        jq("#companyTable .entity-menu.active").removeClass("active");
 
@@ -439,11 +439,11 @@ ASC.CRM.ListContactView = (function() {
         } else {
             $phoneInput.val("");
         }
-        $phoneInput.show().focus();
+        $phoneInput.show().trigger("focus");
 
-        $phoneInput.unbind("blur").bind("blur", function () {
-            $phoneInput.unbind("blur");
-            var text = jq.trim($phoneInput.val());
+        $phoneInput.off("blur").on("blur", function () {
+            $phoneInput.off("blur");
+            var text = $phoneInput.val().trim();
             if (text.length == 0) {
                 if (primaryPhone == null) {
                     $phoneInput.val("").hide();
@@ -458,9 +458,9 @@ ASC.CRM.ListContactView = (function() {
 
         var keyupfunc = function (event) {
             if (ASC.CRM.ListContactView.isEnterKeyPressed(event)) {
-                $phoneInput.unbind("keyup");
-                $phoneInput.unbind("blur");
-                var text = jq.trim($phoneInput.val());
+                $phoneInput.off("keyup");
+                $phoneInput.off("blur");
+                var text = $phoneInput.val().trim();
                 if (text.length == 0) {
                     if (primaryPhone == null) {
                         $phoneInput.val("").hide();
@@ -473,7 +473,7 @@ ASC.CRM.ListContactView = (function() {
                 }
             }
         };
-        $phoneInput.unbind("keyup").bind("keyup", keyupfunc);
+        $phoneInput.off("keyup").on("keyup", keyupfunc);
     };
 
     var _addPrimaryPhone = function(contactId, phoneNumber, oldPrimaryPhone) {
@@ -543,23 +543,23 @@ ASC.CRM.ListContactView = (function() {
             $emailInput.val("");
         }
 
-        $emailInput.show().focus();
+        $emailInput.show().trigger("focus");
 
-        $emailInput.unbind("blur").bind("blur", function() {
-            var text = jq.trim($emailInput.val());
+        $emailInput.off("blur").on("blur", function() {
+            var text = $emailInput.val().trim();
 
             if (text.length == 0) {
                 if (primaryEmail == null) {
-                    $emailInput.unbind("blur");
+                    $emailInput.off("blur");
                     $emailInput.val("").hide();
                     return false;
                 } else {
-                    $emailInput.unbind("blur");
+                    $emailInput.off("blur");
                     _deletePrimaryEmail(contactId, text, primaryEmail);
                 }
             } else {
                 if (jq.isValidEmail(text)) {
-                    $emailInput.unbind("blur");
+                    $emailInput.off("blur");
                     _addPrimaryEmail(contactId, text, primaryEmail);
                 } else {
                     $emailInput.css("borderColor", "#CC0000");
@@ -570,20 +570,20 @@ ASC.CRM.ListContactView = (function() {
 
         var keyupfunc = function (event) {
             if (ASC.CRM.ListContactView.isEnterKeyPressed(event)) {
-                var text = jq.trim($emailInput.val());
+                var text = $emailInput.val().trim();
                 if (text.length == 0) {
                     if (primaryEmail == null) {
                         $emailInput.val("").hide();
                         return false;
                     } else {
-                        $emailInput.unbind("blur");
-                        $emailInput.unbind("keyup");
+                        $emailInput.off("blur");
+                        $emailInput.off("keyup");
                         _deletePrimaryEmail(contactId, text, primaryEmail);
                     }
                 } else {
                     if (jq.isValidEmail(text)) {
-                        $emailInput.unbind("blur");
-                        $emailInput.unbind("keyup");
+                        $emailInput.off("blur");
+                        $emailInput.off("keyup");
                         _addPrimaryEmail(contactId, text, primaryEmail);
                     } else {
                         $emailInput.css("borderColor", "#CC0000");
@@ -592,7 +592,7 @@ ASC.CRM.ListContactView = (function() {
                 }
             }
         }
-        $emailInput.unbind("keyup").bind("keyup", keyupfunc);
+        $emailInput.off("keyup").on("keyup", keyupfunc);
     };
 
     var _addPrimaryEmail = function(contactId, email, oldPrimaryEmail) {
@@ -672,8 +672,8 @@ ASC.CRM.ListContactView = (function() {
                 default:
                     if (item.hasOwnProperty("apiparamname") && item.params.hasOwnProperty("value") && item.params.value != null) {
                         try {
-                            var apiparamnames = jq.parseJSON(item.apiparamname),
-                                apiparamvalues = jq.parseJSON(item.params.value);
+                            var apiparamnames = JSON.parse(item.apiparamname),
+                                apiparamvalues = JSON.parse(item.params.value);
                             if (apiparamnames.length != apiparamvalues.length) {
                                 settings[item.apiparamname] = item.params.value;
                             }
@@ -737,7 +737,7 @@ ASC.CRM.ListContactView = (function() {
     var _renderTagElement = function(tag) {
         var $tagElem = jq("<a></a>").addClass("dropdown-item")
                         .text(ASC.CRM.Common.convertText(tag.title,false))
-                        .bind("click", function() {
+                        .on("click", function() {
                             _addThisTag(this);
                         });
         jq("#addTagDialog ul.dropdown-content").append(jq("<li></li>").append($tagElem));
@@ -878,7 +878,7 @@ ASC.CRM.ListContactView = (function() {
         jq("#selectedUsers div.selectedUser[id^=selectedUser_]").remove();
         SelectedUsers.IDs = new Array();
         LoadingBanner.hideLoaderBtn("#setPermissionsPanel");
-        jq("#setPermissionsPanel .setPermissionsLink").unbind("click").bind("click", function() {
+        jq("#setPermissionsPanel .setPermissionsLink").off("click").on("click", function() {
             _setPermissions(params);
         });
         PopupKeyUpActionProvider.EnableEsc = false;
@@ -1002,7 +1002,7 @@ ASC.CRM.ListContactView = (function() {
 
     var _showSimpleActionMenu = function (contactID, displayName, email) {
 
-        jq("#simpleContactActionMenu .unlinkContact").unbind("click").bind("click", function () {
+        jq("#simpleContactActionMenu .unlinkContact").off("click").on("click", function () {
             ASC.CRM.ListContactView.removeMember(contactID);
         });
 
@@ -1065,7 +1065,7 @@ ASC.CRM.ListContactView = (function() {
 
         jq('#tableForContactNavigation select')
             .val(entryCountOnPage)
-            .change(function () {
+            .on("change", function () {
                 ASC.CRM.ListContactView.changeCountOfRows(this.value);
             })
             .tlCombobox();
@@ -1136,7 +1136,7 @@ ASC.CRM.ListContactView = (function() {
         ASC.CRM.ListContactView.advansedFilter = jq("#contactsAdvansedFilter")
             .advansedFilter({
                 anykey      : false,
-                hintDefaultDisable: true,
+                hintDefaultDisable: false,
                 maxfilters  : -1,
                 colcount    : 2,
                 maxlength   : "100",
@@ -1359,8 +1359,8 @@ ASC.CRM.ListContactView = (function() {
                             { id: "history", title: ASC.CRM.Resources.CRMCommonResource.History, dsc: true, def: false }
                 ]
             })
-            .bind("setfilter", ASC.CRM.ListContactView.changeFilter)
-            .bind("resetfilter", ASC.CRM.ListContactView.changeFilter);
+            .on("setfilter", ASC.CRM.ListContactView.changeFilter)
+            .on("resetfilter", ASC.CRM.ListContactView.changeFilter);
     };
 
     return {
@@ -1403,7 +1403,7 @@ ASC.CRM.ListContactView = (function() {
                     jq("#companyListBox").show();
                     jq("#companyTable tbody tr").remove();
                     jq("#tableForContactNavigation").show();
-                    jq("#mainSelectAll").attr("disabled", true);
+                    jq("#mainSelectAll").prop("disabled", true);
 
                     ASC.CRM.ListContactView.Total = parseInt(jq("#totalContactsOnPage").text()) || 0;
 
@@ -1428,7 +1428,7 @@ ASC.CRM.ListContactView = (function() {
                 jq("#contactsHeaderMenu, #companyListBox, #tableForContactNavigation").show();
                 jq("#contactsEmptyScreen").hide();
                 jq("#companyListBox").show();
-                jq("#mainSelectAll").removeAttr("disabled");
+                jq("#mainSelectAll").prop("disabled", false);
                 ASC.CRM.Common.showExportButtons();
 
                 var selectedIDs = new Array();
@@ -1623,7 +1623,7 @@ ASC.CRM.ListContactView = (function() {
             },
 
             add_new_task: function(params, task) {
-                if (!ASC.CRM.Common.isArray(task)) {
+                if (!Array.isArray(task)) {
                     ASC.CRM.UpdateCRMCaldavCalendar(task, 0);
                     _add_new_task_render(task);
                 } else {
@@ -1717,6 +1717,23 @@ ASC.CRM.ListContactView = (function() {
             ASC.CRM.ListContactView.cookieKey = "";
         },
 
+        getkey: function () {
+                var key = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + location.pathname + location.search;
+                return encodeURIComponent(key.charAt(key.length - 1) === '/' ? key + 'Default.aspx' : key);
+        },
+
+        clearCookieAnchor: function () {
+            var cookieKey = ASC.CRM.ListContactView.getkey();
+            var path = '/',
+                parts = location.pathname.split('/');
+            parts.splice(parts.length - 1, 1);
+            path = parts.join('/');
+            var cookieAnchor = jq.cookies.get(cookieKey);
+            if (cookieAnchor != "") {
+                jq.cookies.set(cookieKey, "", { path: path });
+            }
+        },
+
         init: function (parentSelector, filterSelector, pagingSelector) {
             if (jq(parentSelector).length == 0) return;
             ASC.CRM.Common.setDocumentTitle(ASC.CRM.Resources.CRMContactResource.AllContacts);
@@ -1738,9 +1755,8 @@ ASC.CRM.ListContactView = (function() {
                     page: 1,
                     countOnPage: jq("#tableForContactNavigation select:first>option:first").val()
                 },
-                key = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + location.pathname + location.search,
                 currentAnchor = location.hash,
-                cookieKey = encodeURIComponent(key.charAt(key.length - 1) === '/' ? key + 'Default.aspx' : key);
+                cookieKey = ASC.CRM.ListContactView.getkey();
 
             currentAnchor = currentAnchor && typeof currentAnchor === 'string' && currentAnchor.charAt(0) === '#'
                 ? currentAnchor.substring(1)
@@ -1786,7 +1802,7 @@ ASC.CRM.ListContactView = (function() {
             }
             _initScrolledGroupMenu();
 
-            jq(document).click(function(event) {
+            jq(document).on("click", function(event) {
                 jq.dropdownToggle().registerAutoHide(event, "#contactsHeaderMenu .menuActionAddTag", "#addTagDialog");
                 jq.dropdownToggle().registerAutoHide(event, "#contactsHeaderMenu .menuActionSendEmail", "#sendEmailDialog");
 
@@ -1797,27 +1813,6 @@ ASC.CRM.ListContactView = (function() {
 
             _initFilter();
 
-            ///*tracking events*/
-            ASC.CRM.ListContactView.advansedFilter.one("adv-ready", function () {
-                var crmAdvansedFilterContainer = jq("#contactsAdvansedFilter .advansed-filter-list");
-                crmAdvansedFilterContainer.find("li[data-id='my'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'me_manager');
-                crmAdvansedFilterContainer.find("li[data-id='responsibleID'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'custom_manager');
-                crmAdvansedFilterContainer.find("li[data-id='company'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'company');
-                crmAdvansedFilterContainer.find("li[data-id='Persons'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'persons');
-                crmAdvansedFilterContainer.find("li[data-id='withopportunity'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'with_opportunity');
-                crmAdvansedFilterContainer.find("li[data-id='lastMonth'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'last_month');
-                crmAdvansedFilterContainer.find("li[data-id='yesterday'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'yesterday');
-                crmAdvansedFilterContainer.find("li[data-id='today'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'today');
-                crmAdvansedFilterContainer.find("li[data-id='thisMonth'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'this_month');
-                crmAdvansedFilterContainer.find("li[data-id='fromToDate'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'from_to_date');
-                crmAdvansedFilterContainer.find("li[data-id='contactStage'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'contact_stage');
-                crmAdvansedFilterContainer.find("li[data-id='contactType'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'contact_type');
-                crmAdvansedFilterContainer.find("li[data-id='tags'] .inner-text").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, 'with_tags');
-
-                jq("#contactsAdvansedFilter .btn-toggle-sorter").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, "sort");
-                jq("#contactsAdvansedFilter .advansed-filter-input").trackEvent(ga_Categories.contacts, ga_Actions.filterClick, "search_text", "enter");
-            });
-            
             ASC.CRM.PartialExport.init(ASC.CRM.ListContactView.advansedFilter, "contact");
         },
 
@@ -1862,6 +1857,10 @@ ASC.CRM.ListContactView = (function() {
             } else {
                 var dsc_created = true,
                     dsc = settings.sortOrder == "descending";
+
+                if (!settings.hasOwnProperty("contactListView")) {
+                    ASC.CRM.ListContactView.clearCookieAnchor();
+                }
 
                 if (settings.sortBy == "created") {
                     dsc_created = dsc;
@@ -1967,8 +1966,6 @@ ASC.CRM.ListContactView = (function() {
                 filter.StartIndex = startIndex;
             }
             filter.Count = ASC.CRM.ListContactView.entryCountOnPage;
-
-            trackingGoogleAnalytics(ga_Categories.contacts, 'crm_search_contacts_by_filter');
 
             Teamlab.getCrmSimpleContacts({}, { filter: filter, success: ASC.CRM.ListContactView.CallbackMethods.get_contacts_by_filter });
         },
@@ -2105,7 +2102,7 @@ ASC.CRM.ListContactView = (function() {
             } else {
                 jq("#confirmationDeleteOneContactPanel .confirmationAction>b").text(jq.format(ASC.CRM.Resources.CRMJSResource.DeletePersonConfirmMessage, Encoder.htmlDecode(contactName)));
             }
-            jq("#confirmationDeleteOneContactPanel .middle-button-container>.button.blue.middle").unbind("click").bind("click", function () {
+            jq("#confirmationDeleteOneContactPanel .middle-button-container>.button.blue.middle").off("click").on("click", function () {
                 ASC.CRM.ListContactView.deleteContact(contactID, isListView);
             });
             PopupKeyUpActionProvider.EnableEsc = false;
@@ -2130,7 +2127,7 @@ ASC.CRM.ListContactView = (function() {
                             LoadingBanner.strLoading = ASC.CRM.Resources.CRMJSResource.DeleteContactInProgress;
                             LoadingBanner.showLoaderBtn("#confirmationDeleteOneContactPanel");
 
-                            jq("#crm_contactMakerDialog input, #crm_contactMakerDialog select, #crm_contactMakerDialog textarea").attr("disabled", true);
+                            jq("#crm_contactMakerDialog input, #crm_contactMakerDialog select, #crm_contactMakerDialog textarea").prop("disabled", true);
                             LoadingBanner.strLoading = ASC.CRM.Resources.CRMJSResource.DeleteContactInProgress;
                             LoadingBanner.showLoaderBtn("#crm_contactMakerDialog");
                         },
@@ -2155,7 +2152,7 @@ ASC.CRM.ListContactView = (function() {
         },
 
         addNewTag: function() {
-            var newTag = jq.trim(jq("#addTagDialog input").val());
+            var newTag = jq("#addTagDialog input").val().trim();
             if (newTag == "") { return false; }
 
             var params = {
@@ -2206,7 +2203,7 @@ ASC.CRM.ListContactView = (function() {
                 }
             }
 
-            jq("#createLinkPanel .middle-button-container a:first").unbind("click").bind("click", function() {
+            jq("#createLinkPanel .middle-button-container a:first").off("click").on("click", function() {
                 ASC.CRM.ListContactView.createLink(selectedEmails);
             });
             PopupKeyUpActionProvider.EnableEsc = false;
@@ -2218,7 +2215,7 @@ ASC.CRM.ListContactView = (function() {
             LoadingBanner.strLoading = ASC.CRM.Resources.CRMContactResource.Generation;
             LoadingBanner.showLoaderBtn("#createLinkPanel");
             var blindAttr = jq("#cbxBlind").is(":checked") ? "bcc=" : "cc=",
-                batchSize = jq.trim(jq("#tbxBatchSize").val()) == "" ? 0 : parseInt(jq.trim(jq("#tbxBatchSize").val())),
+                batchSize = jq("#tbxBatchSize").val().trim() == "" ? 0 : parseInt(jq("#tbxBatchSize").val().trim()),
                 linkList = new Array(),
                 link = "",
                 counter = 0,
@@ -2831,7 +2828,7 @@ ASC.CRM.ContactFullCardView = (function () {
     //+ adding to social media data
     var contactNetworksFactory = function(item) {
         if (item.infoType == 7) { //Address
-            var addressObj = jq.parseJSON(Encoder.htmlDecode(item.data));
+            var addressObj = JSON.parse(Encoder.htmlDecode(item.data));
             item.data = ASC.CRM.Common.getAddressTextForDisplay(addressObj);
             var query = ASC.CRM.Common.getAddressQueryForMap(addressObj);
             item.href = "http://maps.google.com/maps?q=" + query;
@@ -3154,8 +3151,8 @@ ASC.CRM.ContactFullCardView = (function () {
 
             for (var i = 0, n = window.customFieldList.length; i < n; i++) {
                 var field = window.customFieldList[i];
-                if (jQuery.trim(field.mask) != "") {
-                    field.mask = jq.parseJSON(field.mask);
+                if (field.mask.trim() != "") {
+                    field.mask = JSON.parse(field.mask);
                 }
 
                 if (field.fieldType == 4 || i == n - 1) {
@@ -3286,7 +3283,7 @@ ASC.CRM.ContactFullCardView = (function () {
             initMergePanel();
 
             initSliderControl(canEdit);
-            if (jq.trim(jq("#contactManagerList").text()).length == 0) {
+            if (jq("#contactManagerList").text().trim().length == 0) {
                 jq("#contactManagerList").parents("tr:first").remove();
             }
         },
@@ -3301,7 +3298,7 @@ ASC.CRM.ContactFullCardView = (function () {
                 Teamlab.getCrmContactsByPrefix({},
                 {
                     filter: {
-                        prefix     : jq.trim(jq("#baseInfo_Title").val()),
+                        prefix     : jq("#baseInfo_Title").val().trim(),
                         searchType : _selectorType,
                         entityType : _entityType,
                         entityID   : _entityID
@@ -3481,7 +3478,7 @@ ASC.CRM.ContactDetailsView = (function() {
 
             jq.tmpl("projectSelectorOptionTmpl", projectList).appendTo("#projectsInContactPanel select");
             jq("#projectsInContactPanel select")
-                .change(function(evt) {
+                .on("change", function(evt) {
                     chooseProject(jq(this).children("option:selected"), this.value);
                 });
         } else {
@@ -3610,7 +3607,7 @@ ASC.CRM.ContactDetailsView = (function() {
     };
 
     var activateProjectsTab = function (contactID) {
-        jq("#projectsEmptyScreen .emptyScrBttnPnl>a").bind("click", function() {
+        jq("#projectsEmptyScreen .emptyScrBttnPnl>a").on("click", function() {
             jq("#projectsEmptyScreen:not(.display-none)").addClass("display-none");
             jq("#projectsInContactPanel").show();
         });
@@ -3618,7 +3615,7 @@ ASC.CRM.ContactDetailsView = (function() {
         ASC.Projects.AllProject.init(true);
         ASC.Projects.AllProject.contactID = contactID;
 
-        jq("#projectsInContactPanel .createNewProject>div").click(function() {
+        jq("#projectsInContactPanel .createNewProject>div").on("click", function() {
             location.href = [StudioManager.getLocationPathToModule("Projects"), "Projects.aspx?action=add&contactID=", ASC.Projects.AllProject.contactID].join("");
         });
         getProjectsData(ASC.Projects.AllProject.contactID);
@@ -3702,7 +3699,7 @@ ASC.CRM.ContactDetailsView = (function() {
             params = { taskResponsibleSelectorUserIDs: window.contactResponsibleIDs };
         }
 
-        jq("#menuCreateNewTask").bind("click", function () {
+        jq("#menuCreateNewTask").on("click", function () {
             ASC.CRM.TaskActionView.showTaskPanel(0, "contact", 0, window.contactForInitTaskActionPanel, params);
         });
 
@@ -3790,7 +3787,7 @@ ASC.CRM.ContactDetailsView = (function() {
         window.contactSelector.SelectItemEvent = ASC.CRM.ContactDetailsView.addPersonToCompany;
         ASC.CRM.ListContactView.removeMember = ASC.CRM.ContactDetailsView.removePersonFromCompany;
 
-        jq(window).bind("getContactsFromApi", function(event, contacts) {
+        jq(window).on("getContactsFromApi", function(event, contacts) {
             var contactLength = contacts.length;
 
             ASC.CRM.ContactFullCardView.additionalContactsCount = contactLength;
@@ -3982,7 +3979,7 @@ ASC.CRM.ContactActionView = (function () {
                 var networkItem = window.contactNetworks[i];
                 if (networkItem.hasOwnProperty("infoType") && networkItem.hasOwnProperty("data")) {
                     if (networkItem.infoType == 7) { //Address
-                        var address = jq.parseJSON(Encoder.htmlDecode(networkItem.data));
+                        var address = JSON.parse(Encoder.htmlDecode(networkItem.data));
 
                         var $addressJQ = createNewAddress(jq('#addressContainer').children('div:first').clone(), networkItem.isPrimary, networkItem.category, address.street, address.city, address.state, address.zip, address.country);
                         $addressJQ.insertAfter(jq('#addressContainer').children('div:last')).show();
@@ -4153,7 +4150,7 @@ ASC.CRM.ContactActionView = (function () {
     };
 
     var initOtherActionMenu = function() {
-        jq("#menuCreateNewTask").bind("click", function() { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
+        jq("#menuCreateNewTask").on("click", function() { ASC.CRM.TaskActionView.showTaskPanel(0, "", 0, null, {}); });
     };
 
     var initConfirmationAccessRightsPanel = function() {
@@ -4266,8 +4263,8 @@ ASC.CRM.ContactActionView = (function () {
                 $categoryOption = $select.children('option[category="' + category + '"]');
 
             if ($categoryOption.length == 1) {
-                $select.children("option").removeAttr("selected");
-                $categoryOption.attr("selected", "selected");
+                $select.children("option").prop("selected", false);
+                $categoryOption.prop("selected", true);
 
                 $select.val($categoryOption.val());
                 changeAddressCategory($select, category);
@@ -4431,7 +4428,7 @@ ASC.CRM.ContactActionView = (function () {
     };
 
     var validateEmail = function($emailInputObj) {
-        var email = jq.trim($emailInputObj.value),
+        var email = $emailInputObj.value.trim(),
             $tableObj = jq($emailInputObj).parents("table:first");
 
         if (email == "" || jq.isValidEmail(email)) {
@@ -4448,7 +4445,7 @@ ASC.CRM.ContactActionView = (function () {
     };
 
     var validatePhone = function($phoneInputObj) {
-        var phone = jq.trim($phoneInputObj.value),
+        var phone = $phoneInputObj.value.trim(),
             $tableObj = jq($phoneInputObj).parents("table:first"),
             reg = new RegExp(/(^\+)?(\d+)/);
 
@@ -4466,13 +4463,13 @@ ASC.CRM.ContactActionView = (function () {
     };
 
     var disableSubmitForm = function () {
-        jq("#contactProfileEdit input, #contactProfileEdit select, #contactProfileEdit textarea").attr("readonly", "readonly").addClass('disabled');
+        jq("#contactProfileEdit input, #contactProfileEdit select, #contactProfileEdit textarea").prop("readonly", true).addClass('disabled');
         jq("#contactProfileEdit .input_with_type").addClass('disabled');
         jq(".under_logo .linkChangePhoto").addClass("disable");
     };
 
     var enableSubmitForm = function () {
-        jq("#contactProfileEdit input.disabled, #contactProfileEdit select.disabled, #contactProfileEdit textarea.disabled").removeAttr("readonly").removeClass('disabled');
+        jq("#contactProfileEdit input.disabled, #contactProfileEdit select.disabled, #contactProfileEdit textarea.disabled").prop("readonly", false).removeClass('disabled');
         jq("#contactProfileEdit .input_with_type.disabled").removeClass('disabled');
         jq(".under_logo .linkChangePhoto.disable").removeClass("disable");
     };
@@ -4481,17 +4478,17 @@ ASC.CRM.ContactActionView = (function () {
         var isValid = true,
             isEmailValid = true;
         if (jq("#typeAddedContact").val() == "people") {
-            if (jq.trim(jq("#contactProfileEdit input[name=baseInfo_firstName]").val()) == "") {
+            if (jq("#contactProfileEdit input[name=baseInfo_firstName]").val().trim() == "") {
                 ShowRequiredError(jq("#contactProfileEdit input[name=baseInfo_firstName]"));
                 isValid = false;
             }
 
             if (typeof (window.companySelector) != "undefined") {
                 jq("#companySelectorsContainer input[name=baseInfo_compID]").val(typeof (window.companySelector.SelectedContacts[0]) != 'undefined' ? window.companySelector.SelectedContacts[0] : "");
-                jq("#companySelectorsContainer input[name=baseInfo_compName]").val(jq.trim(jq('#contactTitle_companySelector_0').val()));
+                jq("#companySelectorsContainer input[name=baseInfo_compName]").val(jq('#contactTitle_companySelector_0').val().trim());
             }
         } else {
-            if (jq.trim(jq("#contactProfileEdit input[name=baseInfo_companyName]").val()) == "") {
+            if (jq("#contactProfileEdit input[name=baseInfo_companyName]").val().trim() == "") {
                 ShowRequiredError(jq("#contactProfileEdit input[name=baseInfo_companyName]"));
                 isValid = false;
             }
@@ -4529,11 +4526,11 @@ ASC.CRM.ContactActionView = (function () {
         jq('#addressContainer').children('div:first').find('input, textarea, select').attr('name', '');
         jq('#addressContainer').children('div:not(:first)').each(function () {
             var $curObj = jq(this);
-            if (jq.trim($curObj.find('.contact_street').val()) +
-            jq.trim($curObj.find('.contact_city').val()) +
-            jq.trim($curObj.find('.contact_state').val()) +
-            jq.trim($curObj.find('.contact_zip').val()) +
-            jq.trim($curObj.find('.contact_country').val()) == "") {
+            if ($curObj.find('.contact_street').val().trim() +
+            $curObj.find('.contact_city').val().trim() +
+            $curObj.find('.contact_state').val().trim() +
+            $curObj.find('.contact_zip').val().trim() +
+            $curObj.find('.contact_country').val().trim() == "") {
                 $curObj.find('input, textarea, select').attr('name', '');
             } else {
                 $curObj.addClass("not_empty");
@@ -4552,12 +4549,12 @@ ASC.CRM.ContactActionView = (function () {
         jq('#phoneContainer').children('div:first').find('input').attr('name', '');
 
         jq('#emailContainer').children('div:not(:first)').find('input').each(function () {
-            if (jq.trim(jq(this).val()) != '') {
+            if (jq(this).val().trim() != '') {
                 jq(this).parents('table:first').parent().addClass("not_empty");
             }
         });
         jq('#phoneContainer').children('div:not(:first)').find('input').each(function () {
-            if (jq.trim(jq(this).val()) != '') {
+            if (jq(this).val().trim() != '') {
                 jq(this).parents('table:first').parent().addClass("not_empty");
             }
         });
@@ -4636,7 +4633,7 @@ ASC.CRM.ContactActionView = (function () {
 
                 if (isCompany === false) {
                     if (window.presetCompanyForPersonJson != null && window.presetCompanyForPersonJson != "") {
-                        window.presetCompanyForPersonJson = new Array(jq.parseJSON(window.presetCompanyForPersonJson));
+                        window.presetCompanyForPersonJson = new Array(JSON.parse(window.presetCompanyForPersonJson));
                     }
                     window["companySelector"] = new ASC.CRM.ContactSelector.ContactSelector("companySelector",
                     {
@@ -4763,7 +4760,7 @@ ASC.CRM.ContactActionView = (function () {
 
                 if (!isNaN(contactID) && jq("#deleteContactButton").length == 1) {
                     var contactName = jq("#deleteContactButton").attr("contactName");
-                    jq("#deleteContactButton").unbind("click").bind("click", function() {
+                    jq("#deleteContactButton").off("click").on("click", function() {
                         ASC.CRM.ListContactView.showConfirmationPanelForDelete(contactName, contactID, isCompany, false);
                     });
                 }
@@ -4800,7 +4797,7 @@ ASC.CRM.ContactActionView = (function () {
                     $newContact = ASC.CRM.ContactActionView.createNewCommunication(container_id, "", is_primary);
 
                 $newContact.insertAfter(jq('#' + container_id).children('div:last')).show()
-                $newContact.find('input.textEdit').focus();
+                $newContact.find('input.textEdit').trigger("focus");
 
             } else if ($target.hasClass(delete_button_class)) {
                 _bindLeaveThePageEvent(null, $target);
@@ -4867,7 +4864,7 @@ ASC.CRM.ContactActionView = (function () {
                 }
                 var is_primary = jq("#addressContainer").find(".primary_field").length == 0 ? true : undefined,
                     $newContact = createNewAddress(jq('#addressContainer').children('div:first').clone(), is_primary).insertAfter(jq('#addressContainer').children('div:last')).show();
-                $newContact.find('textarea').focus();
+                $newContact.find('textarea').trigger("focus");
             } else if ($target.hasClass(delete_button_class)) {
                 _bindLeaveThePageEvent(null, $target);
                 var $divHTML = $target.parent().parent();
@@ -4908,7 +4905,7 @@ ASC.CRM.ContactActionView = (function () {
             }
 
             if (isShown) {
-                $findProfileObj.unbind('click').click(func);
+                $findProfileObj.off('click').on("click", func);
                 $findProfileObj.attr('title', title).show();
             } else {
                 $findProfileObj.hide();
@@ -4962,7 +4959,7 @@ ASC.CRM.ContactActionView = (function () {
                     jq('#overviewContainer').children('div:first').find('textarea').attr('name', '');
                     jq('#websiteAndSocialProfilesContainer').children('div:first').find('input').attr('name', '');
                     jq('#websiteAndSocialProfilesContainer').children('div:not(:first)').find('input').each(function () {
-                        if (jq.trim(jq(this).val()) != '') {
+                        if (jq(this).val().trim() != '') {
                             jq(this).parents('table:first').parent().addClass("not_empty");
                         }
                     });
@@ -5020,20 +5017,20 @@ ASC.CRM.ContactActionView = (function () {
         },
 
         showBaseCategoriesPanel: function(switcherUI) {
-            jq("#baseCategoriesPanel a.dropdown-item").unbind('click').click(function() {
+            jq("#baseCategoriesPanel a.dropdown-item").off('click').on("click", function() {
                 changeBaseCategory(switcherUI, jq(this).text(), jq(this).attr("category"));
 
             });
         },
 
         showPhoneCategoriesPanel: function(switcherUI) {
-            jq("#phoneCategoriesPanel a.dropdown-item").unbind('click').click(function() {
+            jq("#phoneCategoriesPanel a.dropdown-item").off('click').on("click", function() {
                 changePhoneCategory(switcherUI, jq(this).text(), jq(this).attr("category"));
             });
         },
 
         showSocialProfileCategoriesPanel: function(switcherUI) {
-            jq("#socialProfileCategoriesPanel a.dropdown-item").unbind('click').click(function() {
+            jq("#socialProfileCategoriesPanel a.dropdown-item").off('click').on("click", function() {
                 ASC.CRM.ContactActionView.changeSocialProfileCategory(switcherUI, jq(this).attr("category") * 1, jq(this).text(), jq(this).attr("categoryName"));
             });
         },
@@ -5066,7 +5063,7 @@ ASC.CRM.ContactActionView = (function () {
             ASC.CRM.SocialMedia.socialNetworks = [];
             for (var i = 0, n = $networks.length; i < n; i++) {
                 var $el = jq($networks[i]),
-                    text = jq.trim($el.val());
+                    text = $el.val().trim();
 
                 if (text == "") continue;
                 if ($el.attr("name").indexOf("contactInfo_Twitter_") == 0) {
@@ -5124,17 +5121,18 @@ jQuery.fn.sliderWithSections = function (settings) {
         max: options.max,
         range: false, //multiple select elements = true
         slide: function (e, ui) { //slide function
+            var thisSlider = jQuery(this);
             var thisHandle = jQuery(ui.handle);
             thisHandle.attr('aria-valuetext', options.values[ui.value]).attr('aria-valuenow', ui.value);
 
             if (ui.value != 0) {
-                thisHandle.find('.ui-slider-tooltip .ttContent').html(options.values[ui.value]);
+                thisSlider.next('.ui-slider-tooltip').find('.ttContent').html(options.values[ui.value]);
                 thisHandle.removeClass("ui-slider-tooltip-hide");
             } else {
                 thisHandle.addClass("ui-slider-tooltip-hide");
             }
 
-            var liItems = jQuery(this).children('ol.ui-slider-scale').children('li');
+            var liItems = thisSlider.children('ol.ui-slider-scale').children('li');
 
             for (var i = 0; i < sliderOptions.max; i++) {
                 if (i < ui.value) {
@@ -5154,32 +5152,17 @@ jQuery.fn.sliderWithSections = function (settings) {
     //slider options from settings
     options.sliderOptions = (settings) ? jQuery.extend(sliderOptions, settings.sliderOptions) : sliderOptions;
 
-
-    //create slider component div
-    var sliderComponent = jQuery('<div></div>'),
-        $tooltip = jQuery('<a href="#" tabindex="0" ' +
-        'class="ui-slider-handle" ' +
-        'role="slider" ' +
-        'aria-valuenow="' + options.value + '" ' +
-        'aria-valuetext="' + options.values[options.value] + '"' +
-        '><span class="ui-slider-tooltip ui-widget-content ui-corner-all"><span class="ttContent"></span>' +
-        '<span class="ui-tooltip-pointer-down ui-widget-content"><span class="ui-tooltip-pointer-down-inner"></span></span>' +
-        '</span></a>')
-        .data('handleNum', options.value)
-        .appendTo(sliderComponent);
-    sliderComponent.find('.ui-slider-tooltip .ttContent').html(options.values[options.value]);
-    if (options.values[options.value] == "") {
-        sliderComponent.children(".ui-slider-handle").addClass("ui-slider-tooltip-hide");
-    }
-
-    var scale = sliderComponent.append('<ol class="ui-slider-scale ui-helper-reset" role="presentation" style="width: 100%; height: 100%;"></ol>').find('.ui-slider-scale:eq(0)');
-
-    //var widthVal = (1 / sliderOptions.max * 100).toFixed(2) + '%';
-    var sliderWidth = jQuery(this).css('width').replace('px', '') * 1,
+    var thisElement = jQuery(this),
+        valuetext = options.values[options.value],
+        sliderHandleClass = valuetext ? '' : 'ui-slider-tooltip-hide',
+        sliderComponent = jQuery('<div><a href="#" tabindex="0" class="ui-slider-handle ' + sliderHandleClass + '" role="slider" aria-valuenow="' + options.value + '" aria-valuetext="' + valuetext + '"></a></div>'),
+        sliderTooltip = jQuery('<span class="ui-slider-tooltip ui-widget-content ui-corner-all"><span class="ttContent">' + valuetext + '</span><span class="ui-tooltip-pointer-down ui-widget-content"><span class="ui-tooltip-pointer-down-inner"></span></span></span>'),
+        scale = sliderComponent.append('<ol class="ui-slider-scale ui-helper-reset" role="presentation" style="width: 100%; height: 100%;"></ol>').find('.ui-slider-scale:eq(0)'),
+        sliderWidth = thisElement.css('width').replace('px', '') * 1,
         widthVal = ((sliderWidth - options.marginWidth * (sliderOptions.max - 1) - 2 * options.liBorderWidth * sliderOptions.max) / sliderOptions.max).toFixed(4);
+
     for (var i = 0; i <= sliderOptions.max; i++) {
-        var style = (i == sliderOptions.max || i == 0) ? 'display: none;' : '',
-            liStyle = (i == sliderOptions.max) ? 'display: none;' : '',
+        var liStyle = (i == sliderOptions.max) ? 'display: none;' : '',
             color = 'transparent';
 
         if (i < options.value) {
@@ -5197,12 +5180,31 @@ jQuery.fn.sliderWithSections = function (settings) {
     }
 
     //inject and return
-    sliderComponent.appendTo(jQuery(this)).slider(options.sliderOptions).attr('role', 'application');
-    sliderComponent.find('.ui-tooltip-pointer-down-inner').each(function () {
-        var bWidth = jQuery('.ui-tooltip-pointer-down-inner').css('borderTopWidth'),
-            bColor = jQuery(this).parents('.ui-slider-tooltip').css('backgroundColor');
-        jQuery(this).css('border-top', bWidth + ' solid ' + bColor);
+    sliderComponent.appendTo(thisElement).slider(options.sliderOptions).attr('role', 'application');
+    sliderTooltip.appendTo(thisElement);
+
+    var attrObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function (mu) {
+            if (mu.type !== "attributes" && mu.attributeName !== "class") {
+                return;
+            }
+            var classList = mu.target.classList;
+            if (classList.contains("ui-slider-tooltip-hide")) {
+                sliderTooltip.removeClass("visible");
+                return;
+            }
+            if (classList.contains("ui-state-active") || classList.contains("ui-state-focus") || classList.contains("ui-state-hover")) {
+                var rect = mu.target.getBoundingClientRect();
+                sliderTooltip.css("left", rect.left - 16);
+                sliderTooltip.css("top", rect.top - 36);
+                sliderTooltip.addClass("visible");
+                return;
+            }
+            sliderTooltip.removeClass("visible");
+        });
     });
+
+    attrObserver.observe(sliderComponent.find(".ui-slider-handle")[0], { attributes: true });
 
     if (options.disabled)
         sliderComponent.slider('disable');

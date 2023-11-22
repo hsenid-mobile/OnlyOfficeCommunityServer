@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,19 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security;
+using System.Threading.Tasks;
+
 using AppLimit.CloudComputing.SharpBox;
 using AppLimit.CloudComputing.SharpBox.Exceptions;
+
+using ASC.Common;
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Core;
 using ASC.Files.Core;
 using ASC.Web.Core.Files;
 using ASC.Web.Files.Resources;
 using ASC.Web.Studio.Core;
+
 using File = ASC.Files.Core.File;
 
 namespace ASC.Files.Thirdparty.Sharpbox
@@ -70,14 +75,14 @@ namespace ASC.Files.Thirdparty.Sharpbox
             return new List<File> { GetFile(fileId) };
         }
 
-        public List<File> GetFiles(object[] fileIds)
+        public List<File> GetFiles(IEnumerable<object> fileIds)
         {
             return fileIds.Select(fileId => ToFile(GetFileById(fileId))).ToList();
         }
 
-        public List<File> GetFilesFiltered(object[] fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
+        public List<File> GetFilesFiltered(IEnumerable<object> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
         {
-            if (fileIds == null || fileIds.Length == 0 || filterType == FilterType.FoldersOnly) return new List<File>();
+            if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly) return new List<File>();
 
             var files = GetFiles(fileIds).AsEnumerable();
 
@@ -117,7 +122,10 @@ namespace ASC.Files.Thirdparty.Sharpbox
                     break;
                 case FilterType.ByExtension:
                     if (!string.IsNullOrEmpty(searchText))
-                        files = files.Where(x => FileUtility.GetFileExtension(x.Title).Contains(searchText));
+                    {
+                        searchText = searchText.Trim().ToLower();
+                        files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(searchText));
+                    }
                     break;
             }
 
@@ -133,7 +141,7 @@ namespace ASC.Files.Thirdparty.Sharpbox
 
             return folder
                 .Where(x => !(x is ICloudDirectoryEntry))
-                .Select(x => (object) MakeId(x)).ToList();
+                .Select(x => (object)MakeId(x)).ToList();
         }
 
         public List<File> GetFiles(object parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent, bool withSubfolders = false)
@@ -179,7 +187,10 @@ namespace ASC.Files.Thirdparty.Sharpbox
                     break;
                 case FilterType.ByExtension:
                     if (!string.IsNullOrEmpty(searchText))
-                        files = files.Where(x => FileUtility.GetFileExtension(x.Title).Contains(searchText));
+                    {
+                        searchText = searchText.Trim().ToLower();
+                        files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(searchText));
+                    }
                     break;
             }
 
@@ -225,7 +236,7 @@ namespace ASC.Files.Thirdparty.Sharpbox
             {
                 if (!fileStream.CanSeek)
                 {
-                    var tempBuffer = new FileStream(Path.GetTempFileName(), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 8096, FileOptions.DeleteOnClose);
+                    var tempBuffer = TempStream.Create();
 
                     fileStream.CopyTo(tempBuffer);
                     tempBuffer.Flush();
@@ -310,7 +321,10 @@ namespace ASC.Files.Thirdparty.Sharpbox
         {
             return SaveFile(file, fileStream);
         }
-
+        public void DeleteFile(object fileId, Guid ownerId)
+        {
+            DeleteFile(fileId);
+        }
         public void DeleteFile(object fileId)
         {
             var file = GetFileById(fileId);
@@ -326,9 +340,19 @@ namespace ASC.Files.Thirdparty.Sharpbox
                                        .ConvertAll(x => x[0]);
 
                 db.ExecuteNonQuery(Delete("files_tag_link").Where(Exp.In("entry_id", hashIDs)));
-                db.ExecuteNonQuery(Delete("files_tag").Where(Exp.EqColumns("0", Query("files_tag_link l").SelectCount().Where(Exp.EqColumns("tag_id", "id")))));
                 db.ExecuteNonQuery(Delete("files_security").Where(Exp.In("entry_id", hashIDs)));
                 db.ExecuteNonQuery(Delete("files_thirdparty_id_mapping").Where(Exp.In("hash_id", hashIDs)));
+
+                var tagsToRemove = db.ExecuteList(
+                       Query("files_tag tbl_ft ")
+                           .Select("tbl_ft.id")
+                           .LeftOuterJoin("files_tag_link tbl_ftl", Exp.EqColumns("tbl_ft.tenant_id", "tbl_ftl.tenant_id") &
+                                                                    Exp.EqColumns("tbl_ft.id", "tbl_ftl.tag_id"))
+                           .Where("tbl_ftl.tag_id is null"))
+                       .ConvertAll(r => Convert.ToInt32(r[0]));
+
+                db.ExecuteNonQuery(Delete("files_tag").Where(Exp.In("id", tagsToRemove)));
+
 
                 tx.Commit();
             }
@@ -432,7 +456,7 @@ namespace ASC.Files.Thirdparty.Sharpbox
 
         public ChunkedUploadSession CreateUploadSession(File file, long contentLength)
         {
-            if (SetupInfo.ChunkUploadSize > contentLength)
+            if (SetupInfo.ChunkUploadSize > contentLength && contentLength != -1)
                 return new ChunkedUploadSession(MakeId(file), contentLength) { UseChunks = false };
 
             var uploadSession = new ChunkedUploadSession(file, contentLength);
@@ -459,14 +483,14 @@ namespace ASC.Files.Thirdparty.Sharpbox
             }
             else
             {
-                uploadSession.Items["TempPath"] = Path.GetTempFileName();
+                uploadSession.Items["TempPath"] = TempPath.GetTempFileName();
             }
 
             uploadSession.File = MakeId(uploadSession.File);
             return uploadSession;
         }
 
-        public void UploadChunk(ChunkedUploadSession uploadSession, Stream stream, long chunkLength)
+        public File UploadChunk(ChunkedUploadSession uploadSession, Stream stream, long chunkLength)
         {
             if (!uploadSession.UseChunks)
             {
@@ -475,7 +499,7 @@ namespace ASC.Files.Thirdparty.Sharpbox
 
                 uploadSession.File = SaveFile(uploadSession.File, stream);
                 uploadSession.BytesUploaded = chunkLength;
-                return;
+                return uploadSession.File;
             }
 
             if (uploadSession.Items.ContainsKey("SharpboxSession"))
@@ -502,7 +526,7 @@ namespace ASC.Files.Thirdparty.Sharpbox
 
             uploadSession.BytesUploaded += chunkLength;
 
-            if (uploadSession.BytesUploaded == uploadSession.BytesTotal)
+            if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
             {
                 uploadSession.File = FinalizeUploadSession(uploadSession);
             }
@@ -510,6 +534,7 @@ namespace ASC.Files.Thirdparty.Sharpbox
             {
                 uploadSession.File = MakeId(uploadSession.File);
             }
+            return uploadSession.File;
         }
 
         public File FinalizeUploadSession(ChunkedUploadSession uploadSession)
@@ -543,7 +568,11 @@ namespace ASC.Files.Thirdparty.Sharpbox
             }
             else if (uploadSession.Items.ContainsKey("TempPath"))
             {
-                System.IO.File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+                var path = uploadSession.GetItemOrDefault<string>("TempPath");
+                if (System.IO.File.Exists(path))
+                {
+                    System.IO.File.Delete(path);
+                }
             }
         }
 
@@ -562,11 +591,11 @@ namespace ASC.Files.Thirdparty.Sharpbox
 
         #region Only in TMFileDao
 
-        public void ReassignFiles(object[] fileIds, Guid newOwnerId)
+        public void ReassignFiles(IEnumerable<object> fileIds, Guid newOwnerId)
         {
         }
 
-        public List<File> GetFiles(object[] parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
+        public List<File> GetFiles(IEnumerable<object> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
         {
             return new List<File>();
         }
@@ -599,6 +628,40 @@ namespace ASC.Files.Thirdparty.Sharpbox
         public bool ContainChanges(object fileId, int fileVersion)
         {
             return false;
+        }
+
+        public void SaveThumbnail(File file, Stream thumbnail)
+        {
+            //Do nothing
+        }
+
+        public Stream GetThumbnail(File file)
+        {
+            return null;
+        }
+
+        public Task<Stream> GetFileStreamAsync(File file)
+        {
+            return Task.FromResult(GetFileStream(file));
+        }
+
+        public Task<bool> IsExistOnStorageAsync(File file)
+        {
+            return Task.FromResult(IsExistOnStorage(file));
+        }
+
+        public EntryProperties GetProperties(object fileId)
+        {
+            return null;
+        }
+
+        public void SaveProperties(object fileId, EntryProperties entryProperties)
+        {
+        }
+
+        public Task UploadChunkAsync(ChunkedUploadSession uploadSession, Stream chunkStream, long chunkLength)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

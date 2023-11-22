@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.Web.Core;
 using ASC.Web.Files.Api;
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Configuration;
+using ASC.Web.Files.Utils;
 using ASC.Web.Studio.Utility;
 
 namespace ASC.Files.Core.Security
@@ -108,6 +110,26 @@ namespace ASC.Files.Core.Security
             return Can(entry, userId, FilesSecurityActions.Delete);
         }
 
+        public bool CanDownload(FileEntry entry, Guid userId)
+        {
+            if (!CanRead(entry, userId))
+            {
+                return false;
+            }
+
+            return CheckDenyDownload(entry);
+        }
+
+        public bool CanShare(FileEntry entry, Guid userId)
+        {
+            if (!CanEdit(entry, userId))
+            {
+                return false;
+            }
+
+            return CheckDenySharing(entry);
+        }
+
         public bool CanRead(FileEntry entry)
         {
             return CanRead(entry, SecurityContext.CurrentAccount.ID);
@@ -148,6 +170,16 @@ namespace ASC.Files.Core.Security
             return CanDelete(entry, SecurityContext.CurrentAccount.ID);
         }
 
+        public bool CanDownload(FileEntry entry)
+        {
+            return CanDownload(entry, SecurityContext.CurrentAccount.ID);
+        }
+
+        public bool CanShare(FileEntry entry)
+        {
+            return CanShare(entry, SecurityContext.CurrentAccount.ID);
+        }
+
         public IEnumerable<Guid> WhoCanRead(FileEntry entry)
         {
             return WhoCan(entry, FilesSecurityActions.Read);
@@ -155,7 +187,8 @@ namespace ASC.Files.Core.Security
 
         private IEnumerable<Guid> WhoCan(FileEntry entry, FilesSecurityActions action)
         {
-            var shares = GetShares(entry);
+            var copyshares = GetShares(entry);
+            IEnumerable<FileShareRecord> shares = copyshares.ToList();
 
             FileShareRecord defaultShareRecord;
 
@@ -163,15 +196,15 @@ namespace ASC.Files.Core.Security
             {
                 case FolderType.COMMON:
                     defaultShareRecord = new FileShareRecord
-                        {
-                            Level = int.MaxValue,
-                            EntryId = entry.ID,
-                            EntryType = entry.FileEntryType,
-                            Share = DefaultCommonShare,
-                            Subject = Constants.GroupEveryone.ID,
-                            Tenant = TenantProvider.CurrentTenantID,
-                            Owner = SecurityContext.CurrentAccount.ID
-                        };
+                    {
+                        Level = int.MaxValue,
+                        EntryId = entry.ID,
+                        EntryType = entry.FileEntryType,
+                        Share = DefaultCommonShare,
+                        Subject = Constants.GroupEveryone.ID,
+                        Tenant = TenantProvider.CurrentTenantID,
+                        Owner = SecurityContext.CurrentAccount.ID
+                    };
 
                     if (!shares.Any())
                     {
@@ -187,15 +220,15 @@ namespace ASC.Files.Core.Security
 
                 case FolderType.USER:
                     defaultShareRecord = new FileShareRecord
-                        {
-                            Level = int.MaxValue,
-                            EntryId = entry.ID,
-                            EntryType = entry.FileEntryType,
-                            Share = DefaultMyShare,
-                            Subject = entry.RootFolderCreator,
-                            Tenant = TenantProvider.CurrentTenantID,
-                            Owner = entry.RootFolderCreator
-                        };
+                    {
+                        Level = int.MaxValue,
+                        EntryId = entry.ID,
+                        EntryType = entry.FileEntryType,
+                        Share = DefaultMyShare,
+                        Subject = entry.RootFolderCreator,
+                        Tenant = TenantProvider.CurrentTenantID,
+                        Owner = entry.RootFolderCreator
+                    };
 
                     if (!shares.Any())
                         return new List<Guid>
@@ -207,15 +240,15 @@ namespace ASC.Files.Core.Security
 
                 case FolderType.Privacy:
                     defaultShareRecord = new FileShareRecord
-                        {
-                            Level = int.MaxValue,
-                            EntryId = entry.ID,
-                            EntryType = entry.FileEntryType,
-                            Share = DefaultPrivacyShare,
-                            Subject = entry.RootFolderCreator,
-                            Tenant = TenantProvider.CurrentTenantID,
-                            Owner = entry.RootFolderCreator
-                        };
+                    {
+                        Level = int.MaxValue,
+                        EntryId = entry.ID,
+                        EntryType = entry.FileEntryType,
+                        Share = DefaultPrivacyShare,
+                        Subject = entry.RootFolderCreator,
+                        Tenant = TenantProvider.CurrentTenantID,
+                        Owner = entry.RootFolderCreator
+                    };
 
                     if (!shares.Any())
                         return new List<Guid>
@@ -255,7 +288,7 @@ namespace ASC.Files.Core.Security
             }
 
             if (defaultShareRecord != null)
-                shares = shares.Concat(new[] {defaultShareRecord});
+                shares = shares.Concat(new[] { defaultShareRecord });
 
             return shares.SelectMany(x =>
                                          {
@@ -267,66 +300,80 @@ namespace ASC.Files.Core.Security
                                                                 .Where(p => p.Status == EmployeeStatus.Active)
                                                                 .Select(y => y.ID);
 
-                                             return new[] {x.Subject};
+                                             return new[] { x.Subject };
                                          })
                          .Distinct()
-                         .Where(x => Can(entry, x, action))
+                         .Where(x => Can(entry, x, action, copyshares))
                          .ToList();
         }
 
-        public IEnumerable<FileEntry> FilterRead(IEnumerable<FileEntry> entries)
+        public List<T> FilterRead<T>(List<T> entries) where T : FileEntry
         {
             return Filter(entries, FilesSecurityActions.Read, SecurityContext.CurrentAccount.ID);
         }
 
-        public IEnumerable<File> FilterRead(IEnumerable<File> entries)
+        public List<FileEntry> FilterRead(List<FileEntry> entries)
         {
-            return Filter(entries.Cast<FileEntry>(), FilesSecurityActions.Read, SecurityContext.CurrentAccount.ID).Cast<File>();
+            return Filter(entries, FilesSecurityActions.Read, SecurityContext.CurrentAccount.ID);
         }
 
-        public IEnumerable<Folder> FilterRead(IEnumerable<Folder> entries)
+        public IEnumerable<T> FilterEdit<T>(IEnumerable<T> entries) where T : FileEntry
         {
-            return Filter(entries.Cast<FileEntry>(), FilesSecurityActions.Read, SecurityContext.CurrentAccount.ID).Cast<Folder>();
+            return Filter(entries, FilesSecurityActions.Edit, SecurityContext.CurrentAccount.ID);
         }
 
-        public IEnumerable<File> FilterEdit(IEnumerable<File> entries)
+        private bool Can(FileEntry entry, Guid userId, FilesSecurityActions action, IEnumerable<FileShareRecord> shares = null)
         {
-            return Filter(entries.Cast<FileEntry>(), FilesSecurityActions.Edit, SecurityContext.CurrentAccount.ID).Cast<File>();
+            return Filter(new[] { entry }, action, userId, shares).Any();
         }
 
-        public IEnumerable<Folder> FilterEdit(IEnumerable<Folder> entries)
+        public List<T> FilterDownload<T>(List<T> entries) where T : FileEntry
         {
-            return Filter(entries.Cast<FileEntry>(), FilesSecurityActions.Edit, SecurityContext.CurrentAccount.ID).Cast<Folder>();
+            return FilterRead(entries).FindAll(CheckDenyDownload);
         }
 
-        private bool Can(FileEntry entry, Guid userId, FilesSecurityActions action)
+        private bool CheckDenyDownload(FileEntry entry)
         {
-            return Filter(new[] {entry}, action, userId).Any();
+            return entry.DenyDownload
+                ? entry.Access != FileShare.Read && entry.Access != FileShare.Comment
+                : true;
+        }
+
+        public IEnumerable<T> FilterSharing<T>(IEnumerable<T> entries) where T : FileEntry
+        {
+            return FilterEdit(entries).Where(CheckDenySharing);
+        }
+
+        private bool CheckDenySharing(FileEntry entry)
+        {
+            return entry.DenySharing
+                ? entry.Access != FileShare.ReadWrite
+                : SecurityContext.IsAuthenticated;
         }
 
         private List<Tuple<FileEntry, bool>> Can(IEnumerable<FileEntry> entry, Guid userId, FilesSecurityActions action)
         {
             var filtres = Filter(entry, action, userId);
-            return entry.Select(r=> new Tuple<FileEntry, bool>(r, filtres.Any(a=> a.ID.Equals(r.ID)))).ToList();
+            return entry.Select(r => new Tuple<FileEntry, bool>(r, filtres.Any(a => a.ID.Equals(r.ID)))).ToList();
         }
 
-        private IEnumerable<FileEntry> Filter(IEnumerable<FileEntry> entries, FilesSecurityActions action, Guid userId)
+        private List<T> Filter<T>(IEnumerable<T> entries, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord> shares = null) where T : FileEntry
         {
-            if (entries == null || !entries.Any()) return Enumerable.Empty<FileEntry>();
+            if (entries == null || !entries.Any()) return new List<T>(0);
 
             var user = CoreContext.UserManager.GetUsers(userId);
             var isOutsider = user.IsOutsider();
 
-            if (isOutsider && action != FilesSecurityActions.Read) return Enumerable.Empty<FileEntry>();
+            if (isOutsider && action != FilesSecurityActions.Read) return new List<T>(0);
 
             entries = entries.Where(f => f != null).ToList();
-            var result = new List<FileEntry>(entries.Count());
+            var result = new List<T>(entries.Count());
 
             // save entries order
-            var order = entries.Select((f, i) => new {Id = f.UniqID, Pos = i}).ToDictionary(e => e.Id, e => e.Pos);
+            var order = entries.Select((f, i) => new { Id = f.UniqID, Pos = i }).ToDictionary(e => e.Id, e => e.Pos);
 
             // common or my files
-            Func<FileEntry, bool> filter =
+            Func<T, bool> filter =
                 f => f.RootFolderType == FolderType.COMMON ||
                      f.RootFolderType == FolderType.USER ||
                      f.RootFolderType == FolderType.SHARE ||
@@ -340,13 +387,22 @@ namespace ASC.Files.Core.Security
 
             if (entries.Any(filter))
             {
-                var subjects = GetUserSubjects(userId);
-                List<FileShareRecord> shares = null;
+                List<Guid> subjects = null;
+
                 foreach (var e in entries.Where(filter))
                 {
-                    if (!CoreContext.Authentication.GetAccountByID(userId).IsAuthenticated && userId != FileConstant.ShareLinkId)
+                    var isShareLink = userId == FileConstant.ShareLinkId;
+
+                    if (!CoreContext.Authentication.GetAccountByID(userId).IsAuthenticated && !isShareLink)
                     {
-                        continue;
+                        var record = GetShareRecord(userId);
+
+                        isShareLink = (record != null && record.SubjectType == SubjectType.ExternalLink) || FileShareLink.TryGetCurrentLinkId(out _);
+
+                        if (!isShareLink)
+                        {
+                            continue;
+                        }
                     }
 
                     if (isOutsider && (e.RootFolderType == FolderType.USER
@@ -376,40 +432,63 @@ namespace ASC.Files.Core.Security
                         continue;
                     }
 
-                    if (action != FilesSecurityActions.Read && e.FileEntryType == FileEntryType.Folder && ((Folder) e).FolderType == FolderType.Projects)
+                    var folder = e as Folder;
+                    var file = e as File;
+
+                    if (action != FilesSecurityActions.Read && e.FileEntryType == FileEntryType.Folder)
                     {
-                        // Root Projects folder read-only
-                        continue;
+                        if (folder == null) continue;
+
+                        if (folder.FolderType == FolderType.Projects)
+                        {
+                            // Root Projects folder read-only
+                            continue;
+                        }
+
+                        if (folder.FolderType == FolderType.SHARE)
+                        {
+                            // Root Share folder read-only
+                            continue;
+                        }
+
+                        if (folder.FolderType == FolderType.Recent)
+                        {
+                            // Recent folder read-only
+                            continue;
+                        }
+
+                        if (folder.FolderType == FolderType.Favorites)
+                        {
+                            // Favorites folder read-only
+                            continue;
+                        }
+
+                        if (folder.FolderType == FolderType.Templates)
+                        {
+                            // Templates folder read-only
+                            continue;
+                        }
                     }
 
-                    if (action != FilesSecurityActions.Read && e.FileEntryType == FileEntryType.Folder && ((Folder) e).FolderType == FolderType.SHARE)
-                    {
-                        // Root Share folder read-only
-                        continue;
-                    }
 
-                    if (action != FilesSecurityActions.Read && e.FileEntryType == FileEntryType.Folder && ((Folder)e).FolderType == FolderType.Recent)
-                    {
-                        // Recent folder read-only
-                        continue;
-                    }
-
-                    if (action != FilesSecurityActions.Read && e.FileEntryType == FileEntryType.Folder && ((Folder) e).FolderType == FolderType.Favorites)
-                    {
-                        // Favorites folder read-only
-                        continue;
-                    }
-
-                    if (action != FilesSecurityActions.Read && e.FileEntryType == FileEntryType.Folder && ((Folder)e).FolderType == FolderType.Templates)
-                    {
-                        // Templates folder read-only
-                        continue;
-                    }
 
                     if (isVisitor && e.ProviderEntry)
                     {
                         continue;
                     }
+
+                    //if (e.FileEntryType == FileEntryType.File
+                    //    && file.IsFillFormDraft)
+                    //{
+                    //    e.Access = FileShare.FillForms;
+
+                    //    if (action != FilesSecurityActions.Read
+                    //        && action != FilesSecurityActions.FillForms
+                    //        && action != FilesSecurityActions.Delete)
+                    //    {
+                    //        continue;
+                    //    }
+                    //}
 
                     if (e.RootFolderType == FolderType.USER && e.RootFolderCreator == userId && !isVisitor)
                     {
@@ -425,45 +504,46 @@ namespace ASC.Files.Core.Security
                         continue;
                     }
 
-                    if (DefaultCommonShare == FileShare.Read && action == FilesSecurityActions.Read && e.FileEntryType == FileEntryType.Folder &&
-                        ((Folder) e).FolderType == FolderType.COMMON)
+                    if (e.FileEntryType == FileEntryType.Folder)
                     {
-                        // all can read Common folder
-                        result.Add(e);
-                        continue;
+                        if (folder == null) continue;
+
+                        if (DefaultCommonShare == FileShare.Read && action == FilesSecurityActions.Read && folder.FolderType == FolderType.COMMON)
+                        {
+                            // all can read Common folder
+                            result.Add(e);
+                            continue;
+                        }
+
+                        if (action == FilesSecurityActions.Read && folder.FolderType == FolderType.SHARE)
+                        {
+                            // all can read Share folder
+                            result.Add(e);
+                            continue;
+                        }
+
+                        if (action == FilesSecurityActions.Read && folder.FolderType == FolderType.Recent)
+                        {
+                            // all can read recent folder
+                            result.Add(e);
+                            continue;
+                        }
+
+                        if (action == FilesSecurityActions.Read && folder.FolderType == FolderType.Favorites)
+                        {
+                            // all can read favorites folder
+                            result.Add(e);
+                            continue;
+                        }
+
+                        if (action == FilesSecurityActions.Read && folder.FolderType == FolderType.Templates)
+                        {
+                            // all can read templates folder
+                            result.Add(e);
+                            continue;
+                        }
                     }
 
-                    if (action == FilesSecurityActions.Read && e.FileEntryType == FileEntryType.Folder &&
-                        ((Folder) e).FolderType == FolderType.SHARE)
-                    {
-                        // all can read Share folder
-                        result.Add(e);
-                        continue;
-                    }
-
-                    if (action == FilesSecurityActions.Read && e.FileEntryType == FileEntryType.Folder &&
-                        ((Folder)e).FolderType == FolderType.Recent)
-                    {
-                        // all can read recent folder
-                        result.Add(e);
-                        continue;
-                    }
-
-                    if (action == FilesSecurityActions.Read && e.FileEntryType == FileEntryType.Folder &&
-                        ((Folder) e).FolderType == FolderType.Favorites)
-                    {
-                        // all can read favorites folder
-                        result.Add(e);
-                        continue;
-                    }
-
-                    if (action == FilesSecurityActions.Read && e.FileEntryType == FileEntryType.Folder &&
-                        ((Folder)e).FolderType == FolderType.Templates)
-                    {
-                        // all can read templates folder
-                        result.Add(e);
-                        continue;
-                    }
 
                     if (e.RootFolderType == FolderType.COMMON && IsAdministrator(userId))
                     {
@@ -472,10 +552,16 @@ namespace ASC.Files.Core.Security
                         continue;
                     }
 
-                    if (shares == null)
+                    if (subjects == null)
                     {
-                        shares = GetShares(entries).Join(subjects, r => r.Subject, s => s, (r, s) => r).ToList();
-                        // shares ordered by level
+                        subjects = GetUserSubjects(userId, isShareLink);
+                        if (shares == null)
+                        {
+                            shares = GetShares(entries);
+                        }
+                        shares = shares
+                            .Join(subjects, r => r.Subject, s => s, (r, s) => r)
+                            .ToList();
                     }
 
                     FileShareRecord ace;
@@ -488,7 +574,7 @@ namespace ASC.Files.Core.Security
                         if (ace == null)
                         {
                             // share on parent folders
-                            ace = shares.Where(r => Equals(r.EntryId, ((File) e).FolderID) && r.EntryType == FileEntryType.Folder)
+                            ace = shares.Where(r => Equals(r.EntryId, file.FolderID) && r.EntryType == FileEntryType.Folder)
                                         .OrderBy(r => r, new SubjectComparer(subjects))
                                         .ThenBy(r => r.Level)
                                         .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
@@ -503,16 +589,21 @@ namespace ASC.Files.Core.Security
                                     .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
                                     .FirstOrDefault();
                     }
-                    var defaultShare = e.RootFolderType == FolderType.USER
-                        ? DefaultMyShare
-                        : e.RootFolderType == FolderType.Privacy
-                            ? DefaultPrivacyShare
-                            : DefaultCommonShare;
-                    e.Access = ace != null
-                        ? ace.Share
-                        : userId == FileConstant.ShareLinkId
-                            ? FileShare.Restrict
-                            : defaultShare;
+
+                    if (ace != null && ace.SubjectType == SubjectType.ExternalLink && ace.EntryType == FileEntryType.Folder && ace.Subject != userId && !FileShareLink.CheckCookieOrPasswordKey(ace, null, out _))
+                    {
+                        continue;
+                    }
+
+                    var defaultShare = isShareLink
+                        ? FileShare.Restrict
+                        : e.RootFolderType == FolderType.USER
+                            ? DefaultMyShare
+                            : e.RootFolderType == FolderType.Privacy
+                                ? DefaultPrivacyShare
+                                : DefaultCommonShare;
+
+                    e.Access = ace != null ? ace.Share : defaultShare;
 
                     if (action == FilesSecurityActions.Read && e.Access != FileShare.Restrict) result.Add(e);
                     else if (action == FilesSecurityActions.Comment && (e.Access == FileShare.Comment || e.Access == FileShare.Review || e.Access == FileShare.CustomFilter || e.Access == FileShare.ReadWrite)) result.Add(e);
@@ -521,9 +612,9 @@ namespace ASC.Files.Core.Security
                     else if (action == FilesSecurityActions.CustomFilter && (e.Access == FileShare.CustomFilter || e.Access == FileShare.ReadWrite)) result.Add(e);
                     else if (action == FilesSecurityActions.Edit && e.Access == FileShare.ReadWrite) result.Add(e);
                     else if (action == FilesSecurityActions.Create && e.Access == FileShare.ReadWrite) result.Add(e);
-                    else if (e.Access != FileShare.Restrict && e.CreateBy == userId && (e.FileEntryType == FileEntryType.File || ((Folder)e).FolderType != FolderType.COMMON)) result.Add(e);
+                    else if (e.Access != FileShare.Restrict && e.CreateBy == userId && (userId != ASC.Core.Configuration.Constants.Guest.ID || e.Access == FileShare.ReadWrite) && (e.FileEntryType == FileEntryType.File || folder.FolderType != FolderType.COMMON)) result.Add(e);
 
-                    if (e.CreateBy == userId) e.Access = FileShare.None; //HACK: for client
+                    if (e.CreateBy == userId && (userId != ASC.Core.Configuration.Constants.Guest.ID || (e.FileEntryType == FileEntryType.File && e.Access == FileShare.ReadWrite))) e.Access = FileShare.None; //HACK: for client
                 }
             }
 
@@ -536,7 +627,7 @@ namespace ASC.Files.Core.Security
                     var filteredEntries = entries.Where(filter).ToList();
                     var roots = filteredEntries
                             .Select(r => r.RootFolderId)
-                            .ToArray();
+                            .ToList();
 
                     var rootsFolders = folderDao.GetFolders(roots);
                     var bunches = folderDao.GetBunchObjectIDs(rootsFolders.Select(r => r.ID).ToList());
@@ -633,19 +724,21 @@ namespace ASC.Files.Core.Security
             return result;
         }
 
-        public void Share(object entryId, FileEntryType entryType, Guid @for, FileShare share)
+        public void Share(object entryId, FileEntryType entryType, Guid @for, SubjectType subjectType, FileShare share, FileShareOptions shareOptions = null)
         {
             using (var securityDao = daoFactory.GetSecurityDao())
             {
                 var r = new FileShareRecord
-                    {
-                        Tenant = TenantProvider.CurrentTenantID,
-                        EntryId = entryId,
-                        EntryType = entryType,
-                        Subject = @for,
-                        Owner = SecurityContext.CurrentAccount.ID,
-                        Share = share,
-                    };
+                {
+                    Tenant = TenantProvider.CurrentTenantID,
+                    EntryId = entryId,
+                    EntryType = entryType,
+                    Subject = @for,
+                    SubjectType = subjectType,
+                    Owner = SecurityContext.CurrentAccount.ID,
+                    Share = share,
+                    Options = shareOptions
+                };
                 securityDao.SetShare(r);
             }
         }
@@ -666,13 +759,21 @@ namespace ASC.Files.Core.Security
             }
         }
 
+        public FileShareRecord GetShareRecord(Guid subject)
+        {
+            using (var securityDao = daoFactory.GetSecurityDao())
+            {
+                return securityDao.GetShares(new[] { subject }).FirstOrDefault();
+            }
+        }
+
         public List<FileEntry> GetSharesForMe(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", bool searchInContent = false, bool withSubfolders = false)
         {
             using (var folderDao = daoFactory.GetFolderDao())
             using (var fileDao = daoFactory.GetFileDao())
             using (var securityDao = daoFactory.GetSecurityDao())
             {
-                var subjects = GetUserSubjects(SecurityContext.CurrentAccount.ID);
+                var subjects = GetUserSubjects(SecurityContext.CurrentAccount.ID, false);
 
                 var records = securityDao.GetShares(subjects);
 
@@ -704,7 +805,7 @@ namespace ASC.Files.Core.Security
 
                 if (filterType != FilterType.FoldersOnly)
                 {
-                    var files = fileDao.GetFilesFiltered(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, searchInContent);
+                    var files = fileDao.GetFilesFiltered(fileIds.Keys.ToList(), filterType, subjectGroup, subjectID, searchText, searchInContent);
 
                     files.ForEach(x =>
                         {
@@ -720,11 +821,11 @@ namespace ASC.Files.Core.Security
 
                 if (filterType == FilterType.None || filterType == FilterType.FoldersOnly)
                 {
-                    var folders = folderDao.GetFolders(folderIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, withSubfolders, false);
+                    var folders = folderDao.GetFolders(folderIds.Keys.ToList(), filterType, subjectGroup, subjectID, searchText, withSubfolders, false);
 
                     if (withSubfolders)
                     {
-                        folders = FilterRead(folders).ToList();
+                        folders = FilterRead(folders);
                     }
                     folders.ForEach(x =>
                         {
@@ -735,13 +836,13 @@ namespace ASC.Files.Core.Security
                             }
                         });
 
-                    entries.AddRange(folders.Cast<FileEntry>());
+                    entries.AddRange(folders);
                 }
 
                 if (filterType != FilterType.FoldersOnly && withSubfolders)
                 {
-                    var filesInSharedFolders = fileDao.GetFiles(folderIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, searchInContent);
-                    filesInSharedFolders = FilterRead(filesInSharedFolders).ToList();
+                    var filesInSharedFolders = fileDao.GetFiles(folderIds.Keys.ToList(), filterType, subjectGroup, subjectID, searchText, searchInContent);
+                    filesInSharedFolders = FilterRead(filesInSharedFolders);
                     entries.AddRange(filesInSharedFolders);
                     entries = entries.Distinct().ToList();
                 }
@@ -749,6 +850,7 @@ namespace ASC.Files.Core.Security
                 entries = entries.Where(f =>
                                         f.RootFolderType == FolderType.USER // show users files
                                         && f.RootFolderCreator != SecurityContext.CurrentAccount.ID // don't show my files
+                                        && (!f.ProviderEntry || FilesSettings.EnableThirdParty) // show thirdparty provider only if enabled
                     ).ToList();
 
                 if (CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID).IsVisitor())
@@ -817,7 +919,7 @@ namespace ASC.Files.Core.Security
 
                 if (filterType != FilterType.FoldersOnly)
                 {
-                    var files = fileDao.GetFilesFiltered(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, searchInContent);
+                    var files = fileDao.GetFilesFiltered(fileIds.Keys.ToList(), filterType, subjectGroup, subjectID, searchText, searchInContent);
 
                     files.ForEach(x =>
                         {
@@ -833,11 +935,11 @@ namespace ASC.Files.Core.Security
 
                 if (filterType == FilterType.None || filterType == FilterType.FoldersOnly)
                 {
-                    var folders = folderDao.GetFolders(folderIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, withSubfolders, false);
+                    var folders = folderDao.GetFolders(folderIds.Keys.ToList(), filterType, subjectGroup, subjectID, searchText, withSubfolders, false);
 
                     if (withSubfolders)
                     {
-                        folders = FilterRead(folders).ToList();
+                        folders = FilterRead(folders);
                     }
                     folders.ForEach(x =>
                         {
@@ -848,13 +950,13 @@ namespace ASC.Files.Core.Security
                             }
                         });
 
-                    entries.AddRange(folders.Cast<FileEntry>());
+                    entries.AddRange(folders);
                 }
 
                 if (filterType != FilterType.FoldersOnly && withSubfolders)
                 {
-                    var filesInSharedFolders = fileDao.GetFiles(folderIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, searchInContent);
-                    filesInSharedFolders = FilterRead(filesInSharedFolders).ToList();
+                    var filesInSharedFolders = fileDao.GetFiles(folderIds.Keys.ToList(), filterType, subjectGroup, subjectID, searchText, searchInContent);
+                    filesInSharedFolders = FilterRead(filesInSharedFolders);
                     entries.AddRange(filesInSharedFolders);
                     entries = entries.Distinct().ToList();
                 }
@@ -868,21 +970,25 @@ namespace ASC.Files.Core.Security
             }
         }
 
-        public void RemoveSubject(Guid subject)
+        public void RemoveSubjects(IEnumerable<Guid> subjects)
         {
             using (var securityDao = daoFactory.GetSecurityDao())
             {
-                securityDao.RemoveSubject(subject);
+                securityDao.RemoveSubjects(subjects);
             }
         }
 
-        public List<Guid> GetUserSubjects(Guid userId)
+        public List<Guid> GetUserSubjects(Guid userId, bool isLink)
         {
             // priority order
             // User, Departments, admin, everyone
 
             var result = new List<Guid> { userId };
-            if (userId == FileConstant.ShareLinkId)
+
+            var isExist = FileShareLink.TryGetCurrentLinkId(out var linkId);
+            if (isExist) result.Add(linkId);
+
+            if (userId == FileConstant.ShareLinkId || isLink)
                 return result;
 
             result.AddRange(CoreContext.UserManager.GetUserGroups(userId).Select(g => g.ID));

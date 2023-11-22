@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 
 using ASC.Common.Caching;
@@ -31,6 +33,8 @@ using ASC.Data.Backup.Storage;
 using ASC.Data.Backup.Tasks;
 using ASC.Data.Backup.Tasks.Modules;
 using ASC.Data.Backup.Utils;
+using ASC.Data.Storage.ZipOperators;
+using ASC.Web.Studio.Core;
 
 namespace ASC.Data.Backup.Service
 {
@@ -45,19 +49,24 @@ namespace ASC.Data.Backup.Service
         private static int limit;
         private static string upgradesPath;
 
-        public static void Start(BackupConfigurationSection config)
+        static BackupWorker()
         {
-            TempFolder = PathHelper.ToRootedPath(config.TempFolder);
+            TempFolder = Path.Combine(TempPath.GetTempPath(), "backup");
             if (!Directory.Exists(TempFolder))
             {
                 Directory.CreateDirectory(TempFolder);
             }
+        }
 
+        public static void Start(BackupConfigurationSection config)
+        {
             limit = config.Limit;
             upgradesPath = config.UpgradesPath;
             currentRegion = config.WebConfigs.CurrentRegion;
             configPaths = config.WebConfigs.Cast<WebConfigElement>().ToDictionary(el => el.Region, el => PathHelper.ToRootedConfigPath(el.Path));
             configPaths[currentRegion] = PathHelper.ToRootedConfigPath(config.WebConfigs.CurrentPath);
+
+            SetupInfo.ChunkUploadSize = config.ChunkSize;
 
             var invalidConfigPath = configPaths.Values.FirstOrDefault(path => !File.Exists(path));
             if (invalidConfigPath != null)
@@ -237,6 +246,17 @@ namespace ASC.Data.Backup.Service
             return progress;
         }
 
+        private static string GetBackupHash(string path)
+        {
+            using (var sha256 = SHA256.Create())
+            using (var fileStream = File.OpenRead(path))
+            {
+                fileStream.Position = 0;
+                var hash = sha256.ComputeHash(fileStream);
+                return BitConverter.ToString(hash).Replace("-", string.Empty);
+            }
+        }
+
         private class BackupProgressItem : IProgressItem
         {
             private const string ArchiveFormat = "tar.gz";
@@ -278,23 +298,34 @@ namespace ASC.Data.Backup.Service
                 var backupName = string.Format("{0}_{1:yyyy-MM-dd_HH-mm-ss}.{2}", CoreContext.TenantManager.GetTenant(TenantId).TenantAlias, dateTime, ArchiveFormat);
                 var tempFile = Path.Combine(TempFolder, backupName);
                 var storagePath = tempFile;
+                string hash;
                 try
                 {
+                    CoreContext.TenantManager.SetCurrentTenant(TenantId);
                     var backupTask = new BackupPortalTask(Log, TenantId, configPaths[currentRegion], tempFile, limit);
+                    var backupStorage = BackupStorageFactory.GetBackupStorage(StorageType, TenantId, StorageParams);
+                    var writer = ZipWriteOperatorFactory.GetWriteOperator(StorageBasePath, backupName, TempFolder, UserId, backupStorage as IGetterWriteOperator);
+                    backupTask.WriteOperator = writer;
+
                     if (!BackupMail)
                     {
                         backupTask.IgnoreModule(ModuleName.Mail);
                     }
-                    backupTask.IgnoreTable("tenants_tariff");
+
                     backupTask.ProgressChanged += (sender, args) => Percentage = 0.9 * args.Progress;
                     backupTask.RunJob();
 
-                    var backupStorage = BackupStorageFactory.GetBackupStorage(StorageType, TenantId, StorageParams);
-                    if (backupStorage != null)
+                    if (writer.NeedUpload)
                     {
                         storagePath = backupStorage.Upload(StorageBasePath, tempFile, UserId);
-                        Link = backupStorage.GetPublicLink(storagePath);
+                        hash = GetBackupHash(tempFile);
                     }
+                    else
+                    {
+                        storagePath = writer.StoragePath;
+                        hash = writer.Hash;
+                    }
+                    Link = backupStorage.GetPublicLink(storagePath);
 
                     var repo = BackupStorageFactory.GetBackupRepository();
                     repo.SaveBackupRecord(
@@ -303,13 +334,15 @@ namespace ASC.Data.Backup.Service
                             Id = (Guid)Id,
                             TenantId = TenantId,
                             IsScheduled = IsScheduled,
-                            FileName = Path.GetFileName(tempFile),
+                            FileName = backupName,
                             StorageType = StorageType,
                             StorageBasePath = StorageBasePath,
                             StoragePath = storagePath,
                             CreatedOn = DateTime.UtcNow,
                             ExpiresOn = StorageType == BackupStorageType.DataStore ? DateTime.UtcNow.AddDays(1) : DateTime.MinValue,
-                            StorageParams = StorageParams
+                            StorageParams = StorageParams,
+                            Hash = hash,
+                            Removed = false
                         });
 
                     Percentage = 100;
@@ -323,7 +356,7 @@ namespace ASC.Data.Backup.Service
                 }
                 catch (Exception error)
                 {
-                    Log.ErrorFormat("RunJob - Params: {0}, Error = {1}", new { Id = Id, Tenant = TenantId, File = tempFile, BasePath = StorageBasePath, }, error);
+                    Log.ErrorFormat("RunJob - Params: {0}, Error = {1}", new { Id = Id, Tenant = TenantId, File = backupName, BasePath = StorageBasePath, }, error);
                     Error = error;
                     IsCompleted = true;
                 }
@@ -384,6 +417,17 @@ namespace ASC.Data.Backup.Service
                     var storage = BackupStorageFactory.GetBackupStorage(StorageType, TenantId, StorageParams);
                     storage.Download(StoragePath, tempFile);
 
+                    if (!CoreContext.Configuration.Standalone)
+                    {
+                        var backupHash = GetBackupHash(tempFile);
+                        var repo = BackupStorageFactory.GetBackupRepository();
+                        var record = repo.GetBackupRecord(backupHash, TenantId);
+                        if (record == null)
+                        {
+                            throw new Exception(BackupResource.BackupNotFound);
+                        }
+                    }
+
                     Percentage = 10;
 
                     tenant = CoreContext.TenantManager.GetTenant(TenantId);
@@ -395,7 +439,6 @@ namespace ASC.Data.Backup.Service
                     columnMapper.Commit();
 
                     var restoreTask = new RestorePortalTask(Log, TenantId, configPaths[currentRegion], tempFile, columnMapper, upgradesPath);
-                    restoreTask.IgnoreTable("tenants_tariff");
                     restoreTask.ProgressChanged += (sender, args) => Percentage = (10d + 0.65 * args.Progress);
                     restoreTask.RunJob();
 
@@ -403,9 +446,9 @@ namespace ASC.Data.Backup.Service
 
                     if (restoreTask.Dump)
                     {
+                        AscCache.OnClearCache();
                         if (Notify)
                         {
-                            AscCache.OnClearCache();
                             var tenants = CoreContext.TenantManager.GetTenants();
                             foreach (var t in tenants)
                             {
@@ -420,7 +463,7 @@ namespace ASC.Data.Backup.Service
                         restoredTenant = CoreContext.TenantManager.GetTenant(columnMapper.GetTenantMapping());
                         restoredTenant.SetStatus(TenantStatus.Active);
                         restoredTenant.TenantAlias = tenant.TenantAlias;
-                        restoredTenant.PaymentId = string.Empty;
+                        restoredTenant.PaymentId = string.IsNullOrEmpty(restoredTenant.PaymentId) ? ConfigurationManagerExtension.AppSettings["core.payment-region"] + TenantId : restoredTenant.PaymentId;
                         if (string.IsNullOrEmpty(restoredTenant.MappedDomain) && !string.IsNullOrEmpty(tenant.MappedDomain))
                         {
                             restoredTenant.MappedDomain = tenant.MappedDomain;
@@ -507,7 +550,7 @@ namespace ASC.Data.Backup.Service
                     transferProgressItem.RunJob();
 
                     Link = GetLink(alias, false);
-                    NotifyHelper.SendAboutTransferComplete(TenantId, TargetRegion, Link, !Notify);
+                    NotifyHelper.SendAboutTransferComplete(TenantId, TargetRegion, Link, !Notify, transferProgressItem.ToTenantId);
                 }
                 catch (Exception error)
                 {
@@ -529,7 +572,7 @@ namespace ASC.Data.Backup.Service
 
             private string GetLink(string alias, bool isErrorLink)
             {
-                return "http://" + alias + "." + ConfigurationProvider.Open(configPaths[isErrorLink ? currentRegion : TargetRegion]).AppSettings.Settings["core.base-domain"].Value;
+                return "https://" + alias + "." + ConfigurationProvider.Open(configPaths[isErrorLink ? currentRegion : TargetRegion]).AppSettings.Settings["core.base-domain"].Value;
             }
 
             public object Clone()

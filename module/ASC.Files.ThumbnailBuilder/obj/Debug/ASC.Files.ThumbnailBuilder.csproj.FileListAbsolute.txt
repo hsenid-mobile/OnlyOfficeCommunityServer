@@ -1,0 +1,9 @@
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\callback.htm
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Files.ThumbnailBuilder.dll.config
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Files.ThumbnailBuilder.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Files.ThumbnailBuilder.pdb
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Files.ThumbnailBuilder\obj\Debug\ASC.Files.ThumbnailBuilder.csproj.AssemblyReference.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Files.ThumbnailBuilder\obj\Debug\ASC.Files.ThumbnailBuilder.csproj.CoreCompileInputs.cache
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Files.ThumbnailBuilder\obj\Debug\ASC.Files.ThumbnailBuilder.csproj.CopyComplete
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Files.ThumbnailBuilder\obj\Debug\ASC.Files.ThumbnailBuilder.dll
+C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Files.ThumbnailBuilder\obj\Debug\ASC.Files.ThumbnailBuilder.pdb

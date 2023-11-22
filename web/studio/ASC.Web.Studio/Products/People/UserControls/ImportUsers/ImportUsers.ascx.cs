@@ -1,6 +1,6 @@
-/*
+﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,15 @@
 using System;
 using System.Web;
 using System.Web.UI;
+
+using AjaxPro;
+
 using ASC.Core;
 using ASC.Core.Users;
+using ASC.Web.Core.Utility;
 using ASC.Web.People.Core;
 using ASC.Web.Studio.UserControls.Statistics;
 using ASC.Web.Studio.Utility;
-using AjaxPro;
 
 namespace ASC.Web.People.UserControls
 {
@@ -46,6 +49,12 @@ namespace ASC.Web.People.UserControls
 
         protected string HelpLink { get; set; }
 
+        public int EnableUsers { get; set; }
+
+        public int EnableGuests { get; set; }
+
+        public bool IsStandalone { get; set; }
+
         protected bool EnableInviteLink = TenantStatisticsProvider.GetUsersCount() < TenantExtra.GetTenantQuota().ActiveUsers;
 
         protected void Page_Load(object sender, EventArgs e)
@@ -55,8 +64,11 @@ namespace ASC.Web.People.UserControls
                 Response.Redirect(CommonLinkUtility.GetDefault());
             }
 
-            var tariff = (ASC.Web.Studio.UserControls.Management.TariffLimitExceed)LoadControl(Studio.UserControls.Management.TariffLimitExceed.Location);
-            Tariff.Controls.Add(tariff);
+            EnableUsers = TenantExtra.GetTenantQuota().ActiveUsers - TenantStatisticsProvider.GetUsersCount();
+            EnableGuests = Constants.CoefficientOfVisitors * TenantExtra.GetTenantQuota().ActiveUsers - TenantStatisticsProvider.GetVisitorsCount();
+            EnableGuests = EnableGuests >= 0 ? EnableGuests : 0;
+            IsStandalone = CoreContext.Configuration.Standalone;
+
             var quota = TenantExtra.GetTenantQuota();
 
             PeopleLimit = Math.Min(quota.ActiveUsers - TenantStatisticsProvider.GetUsersCount(), 0);
@@ -78,8 +90,15 @@ namespace ASC.Web.People.UserControls
 
         private void RegisterScript()
         {
-            Page.RegisterStyle(PeopleProduct.ProductPath + "UserControls/ImportUsers/css/import.less")
-                .RegisterBodyScripts("~/js/uploader/ajaxupload.js", "~/js/third-party/xregexp.js",
+            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
+            {
+                Page.RegisterStyle(PeopleProduct.ProductPath + "UserControls/ImportUsers/css/dark-import.less");
+            }
+            else
+            {
+                Page.RegisterStyle(PeopleProduct.ProductPath + "UserControls/ImportUsers/css/import.less");
+            }
+            Page.RegisterBodyScripts("~/js/uploader/ajaxupload.js", "~/js/third-party/xregexp.js",
                 PeopleProduct.ProductPath + "UserControls/ImportUsers/js/importusers.js");
         }
     }

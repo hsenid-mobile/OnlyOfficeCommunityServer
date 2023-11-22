@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,17 @@ using System.Net;
 using System.Threading;
 using System.Web;
 using System.Web.Services;
+
 using ASC.Common.Web;
 using ASC.Core;
 using ASC.Files.Core;
 using ASC.Files.Core.Data;
 using ASC.MessagingSystem;
 using ASC.Security.Cryptography;
-using ASC.Web.Core;
 using ASC.Web.Core.Files;
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Core;
+using ASC.Web.Files.Core.Compress;
 using ASC.Web.Files.Helpers;
 using ASC.Web.Files.Resources;
 using ASC.Web.Files.Services.DocumentService;
@@ -41,8 +42,14 @@ using ASC.Web.Files.Services.FFmpegService;
 using ASC.Web.Files.Utils;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.UserControls.Statistics;
-using JWT;
+using ASC.Web.Studio.Utility;
+
+using JWT.Algorithms;
+using JWT.Builder;
+using JWT.Exceptions;
+
 using Newtonsoft.Json.Linq;
+
 using File = ASC.Files.Core.File;
 using FileShare = ASC.Files.Core.Security.FileShare;
 using MimeMapping = ASC.Common.Web.MimeMapping;
@@ -73,6 +80,8 @@ namespace ASC.Web.Files
                 switch ((context.Request[FilesLinkUtility.Action] ?? "").ToLower())
                 {
                     case "view":
+                        DownloadFile(context, true);
+                        break;
                     case "download":
                         DownloadFile(context);
                         break;
@@ -97,6 +106,9 @@ namespace ASC.Web.Files
                     case "diff":
                         DifferenceFile(context);
                         break;
+                    case "thumb":
+                        ThumbnailFile(context);
+                        break;
                     case "track":
                         TrackFile(context);
                         break;
@@ -113,14 +125,50 @@ namespace ASC.Web.Files
 
         private static void BulkDownloadFile(HttpContext context)
         {
-            if (!SecurityContext.AuthenticateMe(CookiesManager.GetCookies(CookiesType.AuthKey)))
+            var filename = context.Request.QueryString["filename"];
+            var session = context.Request.QueryString["session"];
+
+            if (!SecurityContext.IsAuthenticated && string.IsNullOrEmpty(session))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return;
             }
 
+            if (String.IsNullOrEmpty(filename))
+            {
+                var ext = CompressToArchive.GetExt(context.Request.QueryString["ext"]);
+
+                filename = FileConstant.DownloadTitle + ext;
+            }
+            else
+            {
+                filename = InstanceCrypto.Decrypt(Uri.UnescapeDataString(filename));
+            }
+
+            string path = null;
+
+            if (!string.IsNullOrEmpty(session))
+            {
+                if (FileShareLink.ParseDownloadSessionKey(session, out var linkId, out var sessionId)
+                    && FileShareLink.TryGetSessionId(out var cookieSessionId) 
+                    && sessionId == cookieSessionId
+                    && FileShareLink.CheckCookieKey(linkId, out _))
+                {
+                    path = string.Format(@"{0}\{1}\{2}", linkId, sessionId, filename);
+                }
+                else
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    return;
+                }
+            }
+            else
+            {
+                path = string.Format(@"{0}\{1}", SecurityContext.CurrentAccount.ID, filename);
+            }
+
             var store = Global.GetStore();
-            var path = string.Format(@"{0}\{1}.zip", SecurityContext.CurrentAccount.ID, FileConstant.DownloadTitle);
+
             if (!store.IsFile(FileConstant.StorageDomainTmp, path))
             {
                 Global.Logger.ErrorFormat("BulkDownload file error. File is not exist on storage. UserId: {0}.", SecurityContext.CurrentAccount.ID);
@@ -130,7 +178,11 @@ namespace ASC.Web.Files
 
             if (store.IsSupportedPreSignedUri)
             {
-                var url = store.GetPreSignedUri(FileConstant.StorageDomainTmp, path, TimeSpan.FromHours(1), null).ToString();
+                var headers = SecurityContext.IsAuthenticated
+                    ? null
+                    : new string[] { ASC.Data.Storage.SecureHelper.GenerateSecureKeyHeader(path) };
+
+                var url = store.GetPreSignedUri(FileConstant.StorageDomainTmp, path, TimeSpan.FromHours(1), headers).ToString();
                 context.Response.Redirect(url);
                 return;
             }
@@ -150,7 +202,7 @@ namespace ASC.Web.Files
                         readStream.Seek(offset, SeekOrigin.Begin);
                     }
 
-                    SendStreamByChunks(context, length, FileConstant.DownloadTitle + ".zip", readStream, ref flushed);
+                    SendStreamByChunks(context, length, filename, readStream, ref flushed);
                 }
 
                 context.Response.Flush();
@@ -164,7 +216,7 @@ namespace ASC.Web.Files
             }
         }
 
-        private static void DownloadFile(HttpContext context)
+        private static void DownloadFile(HttpContext context, bool forView = false)
         {
             var flushed = false;
             try
@@ -174,13 +226,13 @@ namespace ASC.Web.Files
 
                 using (var fileDao = Global.DaoFactory.GetFileDao())
                 {
-                    File file;
-                    var readLink = FileShareLink.Check(doc, true, fileDao, out file);
+                    int version = 0;
+                    var readLink = FileShareLink.Check(doc, true, fileDao, out File file, out FileShare linkShare, out Guid linkId);
+
                     if (!readLink && file == null)
                     {
                         fileDao.InvalidateCache(id);
 
-                        int version;
                         file = int.TryParse(context.Request[FilesLinkUtility.Version], out version) && version > 0
                                    ? fileDao.GetFile(id, version)
                                    : fileDao.GetFile(id);
@@ -193,7 +245,13 @@ namespace ASC.Web.Files
                         return;
                     }
 
-                    if (!readLink && !Global.GetFilesSecurity().CanRead(file))
+                    if (!readLink && !Global.GetFilesSecurity().CanDownload(file))
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                        return;
+                    }
+
+                    if (readLink && (linkShare == FileShare.Comment || linkShare == FileShare.Read) && file.DenyDownload)
                     {
                         context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                         return;
@@ -209,13 +267,39 @@ namespace ASC.Web.Files
                         return;
                     }
 
+                    if (readLink && !FileShareLink.CheckCookieKey(linkId, out string _))
+                    {
+                        context.Response.Redirect(FileShareLink.GetPasswordProtectedFileLink(doc));
+                        return;
+                    }
+
                     FileMarker.RemoveMarkAsNew(file);
 
                     context.Response.Clear();
                     context.Response.ClearHeaders();
                     context.Response.Charset = "utf-8";
 
-                    FilesMessageService.Send(file, context.Request, MessageAction.FileDownloaded, file.Title);
+                    var range = (context.Request.Headers["Range"] ?? "").Split(new[] { '=', '-' });
+                    var isNeedSendAction = range.Count() < 2 || Convert.ToInt64(range[1]) == 0;
+
+                    if (isNeedSendAction)
+                    {
+                        if (forView)
+                        {
+                            FilesMessageService.Send(file, context.Request, MessageAction.FileReaded, file.Title);
+                        }
+                        else
+                        {
+                            if (version == 0)
+                            {
+                                FilesMessageService.Send(file, context.Request, MessageAction.FileDownloaded, file.Title);
+                            }
+                            else
+                            {
+                                FilesMessageService.Send(file, context.Request, MessageAction.FileRevisionDownloaded, file.Title, file.Version.ToString());
+                            }
+                        }
+                    }
 
                     if (string.Equals(context.Request.Headers["If-None-Match"], GetEtag(file)))
                     {
@@ -267,7 +351,7 @@ namespace ASC.Web.Files
                                     var fullLength = store.GetFileSize(string.Empty, mp4Path);
 
                                     length = ProcessRangeHeader(context, fullLength, ref offset);
-                                    fileStream = store.GetReadStream(string.Empty, mp4Path, (int)offset);
+                                    fileStream = store.GetReadStream(string.Empty, mp4Path, offset);
 
                                     title = FileUtility.ReplaceFileExtension(title, ".mp4");
                                 }
@@ -461,7 +545,8 @@ namespace ASC.Web.Files
                     fileDao.InvalidateCache(id);
 
                     File file;
-                    var linkRight = FileShareLink.Check(doc, fileDao, out file);
+                    var linkRight = FileShareLink.Check(doc, fileDao, out file, out Guid linkId);
+
                     if (linkRight == FileShare.Restrict && !SecurityContext.IsAuthenticated)
                     {
                         var auth = context.Request[FilesLinkUtility.AuthKey];
@@ -482,15 +567,20 @@ namespace ASC.Web.Files
                             try
                             {
                                 var header = context.Request.Headers[FileUtility.SignatureHeader];
+
                                 if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer "))
                                 {
                                     throw new Exception("Invalid header " + header);
                                 }
+
                                 header = header.Substring("Bearer ".Length);
 
-                                JsonWebToken.JsonSerializer = new DocumentService.JwtSerializer();
-
-                                var stringPayload = JsonWebToken.Decode(header, FileUtility.SignatureSecret);
+                                var stringPayload = JwtBuilder.Create()
+                                                        .WithAlgorithm(new HMACSHA256Algorithm())
+                                                        .WithSerializer(new DocumentService.JwtSerializer())
+                                                        .WithSecret(FileUtility.SignatureSecret)
+                                                        .MustVerifySignature()
+                                                        .Decode(header);
 
                                 Global.Logger.Debug("DocService StreamFile payload: " + stringPayload);
                                 //var data = JObject.Parse(stringPayload);
@@ -536,7 +626,7 @@ namespace ASC.Web.Files
                         return;
                     }
 
-                    if (linkRight == FileShare.Restrict && SecurityContext.IsAuthenticated && !Global.GetFilesSecurity().CanRead(file))
+                    if (linkRight == FileShare.Restrict && SecurityContext.IsAuthenticated && !Global.GetFilesSecurity().CanDownload(file))
                     {
                         context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                         return;
@@ -549,6 +639,12 @@ namespace ASC.Web.Files
                         return;
                     }
 
+                    if (linkRight != FileShare.Restrict && !FileShareLink.CheckSignatureKey(doc))
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                        return;
+                    }
+
                     context.Response.AddHeader("Content-Disposition", ContentDispositionUtil.GetHeaderValue(file.Title));
                     context.Response.ContentType = MimeMapping.GetMimeMapping(file.Title);
 
@@ -558,7 +654,7 @@ namespace ASC.Web.Files
                                                    stream.CanSeek
                                                        ? stream.Length.ToString(CultureInfo.InvariantCulture)
                                                        : file.ContentLength.ToString(CultureInfo.InvariantCulture));
-                        stream.StreamCopyTo(context.Response.OutputStream);
+                        stream.CopyTo(context.Response.OutputStream);
                     }
                 }
             }
@@ -578,7 +674,7 @@ namespace ASC.Web.Files
             }
             catch (HttpException he)
             {
-                Global.Logger.ErrorFormat("StreamFile", he);
+                Global.Logger.Error("StreamFile", he);
             }
         }
 
@@ -598,9 +694,12 @@ namespace ASC.Web.Files
                         }
                         header = header.Substring("Bearer ".Length);
 
-                        JsonWebToken.JsonSerializer = new DocumentService.JwtSerializer();
-
-                        var stringPayload = JsonWebToken.Decode(header, FileUtility.SignatureSecret);
+                        var stringPayload = JwtBuilder.Create()
+                                                        .WithAlgorithm(new HMACSHA256Algorithm())
+                                                        .WithSerializer(new DocumentService.JwtSerializer())
+                                                        .WithSecret(FileUtility.SignatureSecret)
+                                                        .MustVerifySignature()
+                                                        .Decode(header);
 
                         Global.Logger.Debug("DocService EmptyFile payload: " + stringPayload);
                         //var data = JObject.Parse(stringPayload);
@@ -635,7 +734,7 @@ namespace ASC.Web.Files
                 var fileExtension = FileUtility.GetInternalExtension(toExtension);
                 fileName = "new" + fileExtension;
                 var path = FileConstant.NewDocPath
-                           + (CoreContext.Configuration.CustomMode ? "ru-RU/" : "default/")
+                           + (CoreContext.Configuration.CustomMode ? "ru-RU/" : "en-US/")
                            + fileName;
 
                 var storeTemplate = Global.GetStoreTemplate();
@@ -655,7 +754,7 @@ namespace ASC.Web.Files
                                                stream.CanSeek
                                                    ? stream.Length.ToString(CultureInfo.InvariantCulture)
                                                    : storeTemplate.GetFileSize("", path).ToString(CultureInfo.InvariantCulture));
-                    stream.StreamCopyTo(context.Response.OutputStream);
+                    stream.CopyTo(context.Response.OutputStream);
                 }
             }
             catch (Exception ex)
@@ -674,7 +773,7 @@ namespace ASC.Web.Files
             }
             catch (HttpException he)
             {
-                Global.Logger.ErrorFormat("EmptyFile", he);
+                Global.Logger.Error("EmptyFile", he);
             }
         }
 
@@ -713,7 +812,7 @@ namespace ASC.Web.Files
             using (var readStream = store.GetReadStream(FileConstant.StorageDomainTmp, path))
             {
                 context.Response.AddHeader("Content-Length", readStream.Length.ToString(CultureInfo.InvariantCulture));
-                readStream.StreamCopyTo(context.Response.OutputStream);
+                readStream.CopyTo(context.Response.OutputStream);
             }
 
             store.Delete(FileConstant.StorageDomainTmp, path);
@@ -726,7 +825,7 @@ namespace ASC.Web.Files
             }
             catch (HttpException he)
             {
-                Global.Logger.ErrorFormat("TempFile", he);
+                Global.Logger.Error("TempFile", he);
             }
         }
 
@@ -742,7 +841,8 @@ namespace ASC.Web.Files
                     var doc = context.Request[FilesLinkUtility.DocShareKey];
 
                     File file;
-                    var linkRight = FileShareLink.Check(doc, fileDao, out file);
+                    var linkRight = FileShareLink.Check(doc, fileDao, out file, out Guid linkId);
+
                     if (linkRight == FileShare.Restrict && !SecurityContext.IsAuthenticated)
                     {
                         var auth = context.Request[FilesLinkUtility.AuthKey];
@@ -788,13 +888,19 @@ namespace ASC.Web.Files
                         return;
                     }
 
+                    if (linkRight != FileShare.Restrict && !FileShareLink.CheckSignatureKey(doc))
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                        return;
+                    }
+
                     context.Response.AddHeader("Content-Disposition", ContentDispositionUtil.GetHeaderValue(".zip"));
                     context.Response.ContentType = MimeMapping.GetMimeMapping(".zip");
 
                     using (var stream = fileDao.GetDifferenceStream(file))
                     {
                         context.Response.AddHeader("Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture));
-                        stream.StreamCopyTo(context.Response.OutputStream);
+                        stream.CopyTo(context.Response.OutputStream);
                     }
                 }
             }
@@ -814,7 +920,82 @@ namespace ASC.Web.Files
             }
             catch (HttpException he)
             {
-                Global.Logger.ErrorFormat("DifferenceFile", he);
+                Global.Logger.Error("DifferenceFile", he);
+            }
+        }
+
+        private static void ThumbnailFile(HttpContext context)
+        {
+            try
+            {
+                using (var fileDao = Global.DaoFactory.GetFileDao())
+                {
+                    var id = context.Request[FilesLinkUtility.FileId];
+                    int version;
+                    int.TryParse(context.Request[FilesLinkUtility.Version] ?? "", out version);
+
+                    var file = version > 0
+                                   ? fileDao.GetFile(id, version)
+                                   : fileDao.GetFile(id);
+
+                    if (file == null)
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                        return;
+                    }
+
+                    if (!Global.GetFilesSecurity().CanRead(file))
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                        return;
+                    }
+
+                    if (!string.IsNullOrEmpty(file.Error))
+                    {
+                        context.Response.StatusDescription = file.Error;
+                        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        return;
+                    }
+
+                    if (file.ThumbnailStatus != Thumbnail.Created)
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                        return;
+                    }
+
+                    context.Response.AddHeader("Content-Disposition", ContentDispositionUtil.GetHeaderValue("." + Global.ThumbnailExtension));
+                    context.Response.ContentType = MimeMapping.GetMimeMapping("." + Global.ThumbnailExtension);
+
+                    using (var stream = fileDao.GetThumbnail(file))
+                    {
+                        context.Response.AddHeader("Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture));
+                        stream.CopyTo(context.Response.OutputStream);
+                    }
+                }
+            }
+            catch (FileNotFoundException ex)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                Global.Logger.Error("Error for: " + context.Request.Url, ex);
+                return;
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                context.Response.Write(ex.Message);
+                Global.Logger.Error("Error for: " + context.Request.Url, ex);
+                return;
+            }
+
+            try
+            {
+                context.Response.Flush();
+                context.Response.SuppressContent = true;
+                context.ApplicationInstance.CompleteRequest();
+            }
+            catch (HttpException he)
+            {
+                Global.Logger.Error("Thumbnail", he);
             }
         }
 
@@ -827,11 +1008,7 @@ namespace ASC.Web.Files
         {
             if (!SecurityContext.IsAuthenticated)
             {
-                var refererURL = context.Request.GetUrlRewriter().AbsoluteUri;
-
-                context.Session["refererURL"] = refererURL;
-                var authUrl = "~/Auth.aspx";
-                context.Response.Redirect(authUrl, true);
+                context.Response.Redirect(context.Request.AppendRefererURL("~/Auth.aspx"), true);
                 return;
             }
 
@@ -879,7 +1056,11 @@ namespace ASC.Web.Files
 
             if (responseMessage)
             {
-                context.Response.Write("ok: " + string.Format(FilesCommonResource.MessageFileCreated, folder.Title));
+                var message = string.Format(FilesCommonResource.MessageFileCreated, folder.Title);
+                if (FileUtility.CanWebRestrictedEditing(file.Title))
+                    message = string.Format(FilesCommonResource.MessageFileCreatedForm, folder.Title);
+
+                context.Response.Write("ok: " + message);
                 return;
             }
 
@@ -909,7 +1090,7 @@ namespace ASC.Web.Files
 
             var templatePath = FileConstant.NewDocPath + lang + "/";
             if (!storeTemplate.IsDirectory(templatePath))
-                templatePath = FileConstant.NewDocPath + "default/";
+                templatePath = FileConstant.NewDocPath + "en-US/";
             templatePath += templateName;
 
             if (string.IsNullOrEmpty(fileTitle))
@@ -922,11 +1103,11 @@ namespace ASC.Web.Files
             }
 
             var file = new File
-                {
-                    Title = fileTitle,
-                    FolderID = folder.ID,
-                    Comment = FilesCommonResource.CommentCreate,
-                };
+            {
+                Title = fileTitle,
+                FolderID = folder.ID,
+                Comment = FilesCommonResource.CommentCreate,
+            };
 
             using (var fileDao = Global.DaoFactory.GetFileDao())
             using (var stream = storeTemplate.GetReadStream("", templatePath))
@@ -942,11 +1123,11 @@ namespace ASC.Web.Files
                 fileTitle = Path.GetFileName(HttpUtility.UrlDecode(fileUri));
 
             var file = new File
-                {
-                    Title = fileTitle,
-                    FolderID = folder.ID,
-                    Comment = FilesCommonResource.CommentCreate,
-                };
+            {
+                Title = fileTitle,
+                FolderID = folder.ID,
+                Comment = FilesCommonResource.CommentCreate,
+            };
 
             var req = (HttpWebRequest)WebRequest.Create(fileUri);
 
@@ -967,7 +1148,7 @@ namespace ASC.Web.Files
 
         private static void Redirect(HttpContext context)
         {
-            if (!SecurityContext.AuthenticateMe(CookiesManager.GetCookies(CookiesType.AuthKey)))
+            if (!SecurityContext.IsAuthenticated)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return;
@@ -1011,10 +1192,12 @@ namespace ASC.Web.Files
         {
             var auth = context.Request[FilesLinkUtility.AuthKey];
             var fileId = context.Request[FilesLinkUtility.FileId];
-            Global.Logger.Debug("DocService track fileid: " + fileId);
+            var linkId = context.Request[FilesLinkUtility.LinkId];
+
+            Global.Logger.Debug("DocService track fileid: " + fileId + " linkId: " + linkId);
 
             var callbackSpan = TimeSpan.FromDays(128);
-            var validateResult = EmailValidationKeyProvider.ValidateEmailKey(fileId, auth ?? "", callbackSpan);
+            var validateResult = EmailValidationKeyProvider.ValidateEmailKey(fileId + linkId, auth ?? "", callbackSpan);
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
                 Global.Logger.ErrorFormat("DocService track auth error: {0}, {1}: {2}", validateResult.ToString(), FilesLinkUtility.AuthKey, auth);
@@ -1052,13 +1235,19 @@ namespace ASC.Web.Files
 
             if (!string.IsNullOrEmpty(FileUtility.SignatureSecret))
             {
-                JsonWebToken.JsonSerializer = new DocumentService.JwtSerializer();
                 if (!string.IsNullOrEmpty(fileData.Token))
                 {
                     try
                     {
-                        var dataString = JsonWebToken.Decode(fileData.Token, FileUtility.SignatureSecret);
+                        var dataString = JwtBuilder.Create()
+                                                    .WithAlgorithm(new HMACSHA256Algorithm())
+                                                    .WithSerializer(new DocumentService.JwtSerializer())
+                                                    .WithSecret(FileUtility.SignatureSecret)
+                                                    .MustVerifySignature()
+                                                    .Decode(fileData.Token);
+
                         var data = JObject.Parse(dataString);
+
                         if (data == null)
                         {
                             throw new ArgumentException("DocService request token is incorrect");
@@ -1084,7 +1273,12 @@ namespace ASC.Web.Files
 
                     try
                     {
-                        var stringPayload = JsonWebToken.Decode(header, FileUtility.SignatureSecret);
+                        var stringPayload = JwtBuilder.Create()
+                                .WithAlgorithm(new HMACSHA256Algorithm())
+                                .WithSerializer(new DocumentService.JwtSerializer())
+                                .WithSecret(FileUtility.SignatureSecret)
+                                .MustVerifySignature()
+                                .Decode(header);
 
                         Global.Logger.Debug("DocService track payload: " + stringPayload);
                         var jsonPayload = JObject.Parse(stringPayload);
@@ -1106,7 +1300,7 @@ namespace ASC.Web.Files
             DocumentServiceTracker.TrackResponse result;
             try
             {
-                result = DocumentServiceTracker.ProcessData(fileId, fileData);
+                result = DocumentServiceTracker.ProcessData(fileId, fileData, linkId);
             }
             catch (Exception e)
             {

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Web;
+
 using ASC.Core.Tenants;
-using ASC.Web.Core.Mobile;
+using ASC.Web.Community.Modules.Wiki.Resources;
+using ASC.Web.Core.Utility;
 using ASC.Web.UserControls.Wiki.Data;
-using ASC.Web.UserControls.Wiki.Resources;
 
 namespace ASC.Web.UserControls.Wiki.UC
 {
@@ -443,8 +443,14 @@ namespace ASC.Web.UserControls.Wiki.UC
             //{
             //    script += string.Format(linkCssFormat, MainCssFile);
             //}
-
-            script += string.Format(linkCssFormat, VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Wiki/content/main.css"));
+            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
+            {
+                script += string.Format(linkCssFormat, VirtualPathUtility.ToAbsolute("~/Products/Community/App_Themes/dark/dark-main.less"));
+            }
+            else
+            {
+                script += string.Format(linkCssFormat, VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Wiki/content/main.less"));
+            }
 
             script += string.Format(scriptFormat, VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Wiki/scripts/editpage.js"));
 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using ASC.Common.Logging;
 using ASC.Common.Utils;
 using ASC.Core.Notify.Senders;
@@ -31,6 +32,7 @@ namespace ASC.Core.Notify
     {
         private static readonly string senderName = ASC.Core.Configuration.Constants.NotifyEMailSenderSysName;
         private readonly INotifySender sender;
+        private ILog Log = LogManager.GetLogger("ASC.Notify");
 
 
         public EmailSenderSink(INotifySender sender)
@@ -94,7 +96,7 @@ namespace ASC.Core.Notify
 
             var from = MailAddressUtils.Create(CoreContext.Configuration.SmtpSettings.SenderAddress, CoreContext.Configuration.SmtpSettings.SenderDisplayName);
             var fromTag = message.Arguments.FirstOrDefault(x => x.Tag.Equals("MessageFrom"));
-            if ((CoreContext.Configuration.SmtpSettings.IsDefaultSettings || string.IsNullOrEmpty(CoreContext.Configuration.SmtpSettings.SenderDisplayName)) && 
+            if ((CoreContext.Configuration.SmtpSettings.IsDefaultSettings || string.IsNullOrEmpty(CoreContext.Configuration.SmtpSettings.SenderDisplayName)) &&
                 fromTag != null && fromTag.Value != null)
             {
                 try
@@ -121,7 +123,7 @@ namespace ASC.Core.Notify
                 }
                 catch (Exception e)
                 {
-                    LogManager.GetLogger("ASC.Notify").Error("Error creating reply to tag for: " + replyTag.Value, e);
+                    Log.Error("Error creating reply to tag for: " + replyTag.Value, e);
                 }
             }
 
@@ -146,7 +148,7 @@ namespace ASC.Core.Notify
                 }
                 catch (Exception e)
                 {
-                    LogManager.GetLogger("ASC.Notify").Error("Error creating AutoSubmitted tag for: " + autoSubmittedTag.Value, e);
+                    Log.Error("Error creating AutoSubmitted tag for: " + autoSubmittedTag.Value, e);
                 }
             }
 

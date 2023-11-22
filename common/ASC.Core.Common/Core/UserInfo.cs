@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Linq;
+using System.Text;
+
 using ASC.Collections;
 using ASC.Notify.Recipients;
 
@@ -39,60 +40,96 @@ namespace ASC.Core.Users
             LastModified = DateTime.UtcNow;
         }
 
-
+        ///<example>38c0f464-f1e7-493e-8d95-dc4ee8ee834a</example>
         public Guid ID { get; set; }
 
+        ///<example>FirstName</example>
         public string FirstName { get; set; }
 
+        ///<example>LastName</example>
         public string LastName { get; set; }
 
+        ///<example>UserName</example>
         public string UserName { get; set; }
 
+        ///<example>2019-07-26T00:00:00</example>
         public DateTime? BirthDate { get; set; }
 
+        ///<example>true</example>
         public bool? Sex { get; set; }
 
+        ///<example type="int">1</example>
         public EmployeeStatus Status { get; set; }
 
+        ///<example type="int">1</example>
         public EmployeeActivationStatus ActivationStatus { get; set; }
 
+        ///<example>2019-07-26T00:00:00</example>
         public DateTime? TerminatedDate { get; set; }
 
+        ///<example>Title</example>
         public string Title { get; set; }
 
+        ///<example>2019-07-26T00:00:00</example>
         public DateTime? WorkFromDate { get; set; }
 
+        ///<example>Email</example>
         public string Email { get; set; }
 
+        ///<example>Contacts</example>
+        ///<collection>list</collection>
         public List<string> Contacts { get; set; }
 
+        ///<example>Location</example>
         public string Location { get; set; }
 
+        ///<example>Notes</example>
         public string Notes { get; set; }
 
+        ///<example>false</example>
         public bool Removed { get; set; }
 
+        ///<example>2019-07-26T00:00:00</example>
         public DateTime LastModified { get; set; }
 
+        ///<example type="int">1</example>
         public int Tenant { get; set; }
 
+        ///<example>072A8452-ADF3-40AA-B359-22DA7B8923E2</example>
+        public Guid? Lead {get; set;}
+
+        ///<example>false</example>
         public bool IsActive
         {
             get { return ActivationStatus.HasFlag(EmployeeActivationStatus.Activated); }
         }
 
+        ///<example>CultureName</example>
         public string CultureName { get; set; }
 
+        ///<example>MobilePhone</example>
         public string MobilePhone { get; set; }
 
+        ///<example type="int">1</example>
         public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
+        ///<example>Sid</example>
         public string Sid { get; set; } // LDAP user identificator
 
+        ///<example>LdapQouta</example>
+        public long LdapQouta { get; set; } // LDAP user quota attribute
+
+        ///<example>SsoNameId</example>
         public string SsoNameId { get; set; } // SSO SAML user identificator
+
+        ///<example>SsoSessionId</example>
         public string SsoSessionId { get; set; } // SSO SAML user session identificator
 
+        ///<example>2019-07-26T00:00:00</example>
         public DateTime CreateDate { get; set; }
+
+        ///<example>UsedSpace</example>
+        public long UsedSpace { get; set; }
 
         public override string ToString()
         {
@@ -118,7 +155,7 @@ namespace ASC.Core.Users
 
         string[] IDirectRecipient.Addresses
         {
-            get { return !string.IsNullOrEmpty(Email) ? new[] {Email} : new string[0]; }
+            get { return !string.IsNullOrEmpty(Email) ? new[] { Email } : new string[0]; }
         }
 
         public bool CheckActivation
@@ -143,7 +180,13 @@ namespace ASC.Core.Users
 
         internal GroupInfo[] GetGroups(IncludeType includeType, Guid? categoryId)
         {
-            var groups = groupCache.Get(ID.ToString(), () => CoreContext.UserManager.GetUserGroups(ID, IncludeType.Distinct, null));
+            var groups = groupCache.Get(ID.ToString(), () => {
+                if (CoreContext.Configuration.Personal)
+                {
+                    return new GroupInfo[2] { Constants.GroupUser, Constants.GroupEveryone };
+                }
+                return CoreContext.UserManager.GetUserGroups(ID, IncludeType.Distinct, null);
+            });
 
             if (categoryId.HasValue)
             {
@@ -178,7 +221,7 @@ namespace ASC.Core.Users
         {
             if (string.IsNullOrEmpty(contacts)) return this;
             Contacts.Clear();
-            foreach (var contact in contacts.Split(new[] {'|'}, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var contact in contacts.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 Contacts.Add(contact);
             }

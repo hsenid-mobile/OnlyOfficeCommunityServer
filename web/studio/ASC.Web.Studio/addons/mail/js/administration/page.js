@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +32,16 @@ window.administrationPage = (function($) {
             page = $('#id_administration_page');
             header = $('#pageActionContainer');
 
-            administrationManager.events.bind('onadddomain', onAddDomain);
-            administrationManager.events.bind('onremovedomain', onRemoveMailDomain);
-            administrationManager.events.bind('onaddmailbox', onAddMailbox);
-            administrationManager.events.bind('onaddgroup', onAddMailGroup);
-            administrationManager.events.bind('onremovemailbox', onRemoveMailbox);
-            administrationManager.events.bind('onremovemailgroup', onRemoveMailGroup);
-            administrationManager.events.bind('onremovemaildomain', onRemoveMailDomain);
-            administrationManager.events.bind('ongetfullinformation', onRefreshPage);
-            administrationManager.events.bind('onupdatemailbox', onUpdateMailbox);
-            administrationManager.events.bind('onupdatemailgroup', onUpdateMailgroup);
+            administrationManager.events.on('onadddomain', onAddDomain);
+            administrationManager.events.on('onremovedomain', onRemoveMailDomain);
+            administrationManager.events.on('onaddmailbox', onAddMailbox);
+            administrationManager.events.on('onaddgroup', onAddMailGroup);
+            administrationManager.events.on('onremovemailbox', onRemoveMailbox);
+            administrationManager.events.on('onremovemailgroup', onRemoveMailGroup);
+            administrationManager.events.on('onremovemaildomain', onRemoveMailDomain);
+            administrationManager.events.on('ongetfullinformation', onRefreshPage);
+            administrationManager.events.on('onupdatemailbox', onUpdateMailbox);
+            administrationManager.events.on('onupdatemailgroup', onUpdateMailgroup);
 
             mailboxActionButtons = [
                 { selector: "#mailboxActionMenu .editMailbox", handler: editMailbox },
@@ -86,7 +86,7 @@ window.administrationPage = (function($) {
         processAliasesMore(html);
         bindDnsSettingsBtn(html);
         page.find('.domains_list_position').append(html);
-        $('#administation_data_container .domain').actionMenu('domainActionMenu', domainActionButtons, pretreatmentDomains);
+        $('#administation_data_container .domain').actionMenu('domainActionMenu', domainActionButtons);
         $('#administation_data_container .mailbox_table_container').actionMenu('mailboxActionMenu', mailboxActionButtons, pretreatmentMailbox);
         $('#administation_data_container .group_menu').actionMenu('groupActionMenu', groupActionButtons);
 
@@ -94,16 +94,6 @@ window.administrationPage = (function($) {
         bindCreationLinks();
         makeSortablTables();
         show();
-    }
-
-    function pretreatmentDomains() {
-        var $showConnectionSettingsDomain = $("#domainActionMenu .showConnectionSettingsDomain");
-
-        if (ASC.Resources.Master.Standalone) {
-            $showConnectionSettingsDomain.show();
-        } else {
-            $showConnectionSettingsDomain.hide();
-        }
     }
 
     function pretreatmentMailbox(id) {
@@ -123,12 +113,7 @@ window.administrationPage = (function($) {
             $editMailboxAlias.hide();
             $changeMailboxPassword.hide();
         } else {
-            if (ASC.Resources.Master.Standalone) {
-                $changeMailboxPassword.show();
-            } else {
-                $changeMailboxPassword.hide();
-            }
-
+            $changeMailboxPassword.show();
             $editMailboxAlias.show();
             $editMailboxAlias.removeClass('disable');
             $editMailboxAlias.removeAttr('title');
@@ -136,13 +121,15 @@ window.administrationPage = (function($) {
     }
 
     function bindCreationLinks() {
-        $('.create_new_mailbox').unbind('click').bind('click', function() {
-            var domainId = $(this).closest('.domain_table_container').attr('domain_id');
-            var domain = administrationManager.getDomain(domainId);
-            createMailboxModal.show(domain);
+        $('.create_new_mailbox').off('click').on('click', function () {
+            if (ASC.Mail.Constants.ENABLE_MAIL_SERVER) {
+                var domainId = $(this).closest('.domain_table_container').attr('domain_id');
+                var domain = administrationManager.getDomain(domainId);
+                createMailboxModal.show(domain);
+            }
         });
 
-        $('.create_new_mailgroup').unbind('click').bind('click', function() {
+        $('.create_new_mailgroup').off('click').on('click', function() {
             var domainId = $(this).closest('.domain_table_container').attr('domain_id');
             var domain = administrationManager.getDomain(domainId);
             createMailgroupModal.show(domain);
@@ -150,7 +137,7 @@ window.administrationPage = (function($) {
     }
 
     function bindDnsSettingsBtn($html) {
-        $html.find('#dns_settings_button').unbind('click').bind('click', function() {
+        $html.find('#dns_settings_button').off('click').on('click', function() {
             var domainId = $(this).attr('data_id');
             showDomainDns(domainId);
         });
@@ -169,7 +156,7 @@ window.administrationPage = (function($) {
                 error: function(e, error) {
                     administrationError.showErrorToastr("getDomainDnsSettings", error);
                 }
-            }, ASC.Resources.Master.Resource.LoadingProcessing);
+            }, ASC.Resources.Master.ResourceJS.LoadingProcessing);
         }
     }
 
@@ -219,7 +206,7 @@ window.administrationPage = (function($) {
             questionText: question
         });
 
-        body.find('.button.remove').unbind('click').bind('click', function() {
+        body.find('.button.remove').off('click').on('click', function() {
             deleteDomain(domainId);
             popup.hide();
         });
@@ -236,7 +223,7 @@ window.administrationPage = (function($) {
             questionText: question
         });
 
-        body.find('.button.remove').unbind('click').bind('click', function() {
+        body.find('.button.remove').off('click').on('click', function() {
             deleteMailbox(mailboxId);
             popup.hide();
         });
@@ -253,7 +240,7 @@ window.administrationPage = (function($) {
             questionText: question
         });
 
-        body.find('.button.remove').unbind('click').bind('click', function() {
+        body.find('.button.remove').off('click').on('click', function() {
             deleteMailGroup(groupId);
             popup.hide();
         });
@@ -277,7 +264,7 @@ window.administrationPage = (function($) {
                     },
                     error: administrationError.getErrorHandler("removeMailDomain")
                 },
-                ASC.Resources.Master.Resource.LoadingProcessing);
+                ASC.Resources.Master.ResourceJS.LoadingProcessing);
     }
 
     function checkRemoveDomainStatus(operation, id) {
@@ -363,7 +350,7 @@ window.administrationPage = (function($) {
                     },
                     error: administrationError.getErrorHandler("removeMailbox")
                 },
-                ASC.Resources.Master.Resource.LoadingProcessing);
+                ASC.Resources.Master.ResourceJS.LoadingProcessing);
         }
     }
 
@@ -425,7 +412,7 @@ window.administrationPage = (function($) {
         var groupAddressElement = $('.group_table_container tr[data_id=' + id + ']');
 
         if (groupAddressElement.length > 0) {
-            serviceManager.removeMailGroup(id, {}, { error: administrationError.getErrorHandler("removeMailGroup") }, ASC.Resources.Master.Resource.LoadingProcessing);
+            serviceManager.removeMailGroup(id, {}, { error: administrationError.getErrorHandler("removeMailGroup") }, ASC.Resources.Master.ResourceJS.LoadingProcessing);
         }
 
         return false;
@@ -488,9 +475,9 @@ window.administrationPage = (function($) {
     }
 
     function processAliasesMore($html) {
-        $html.find('.more_aliases').unbind('.processAliasesMore').bind('click.processAliasesMore', function(event) {
+        $html.find('.more_aliases').off('.processAliasesMore').on('click.processAliasesMore', function(event) {
             var $this = $(this);
-            $this.unbind('.processAliasesMore');
+            $this.off('.processAliasesMore');
             var mailboxId = $this.closest('.row').attr('data_id');
             var mailbox = administrationManager.getMailbox(mailboxId);
             var buttons = [];

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,11 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web;
 using System.Web.UI;
-using System.Web.UI.WebControls;
-using ASC.Web.Studio.Core;
-using ASC.Core.Users;
+
 using ASC.Core;
+using ASC.Core.Users;
+using ASC.Web.Studio.Core;
 
 namespace ASC.Web.Studio.UserControls.Common
 {
@@ -34,20 +30,14 @@ namespace ASC.Web.Studio.UserControls.Common
         {
             get { return "~/UserControls/Common/ActivateEmailPanel.ascx"; }
         }
-        
-        protected UserInfo CurrentUser
-        {
-            get { return CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID); }
-        }
+
+        protected UserInfo CurrentUser;
 
         protected void Page_Load(object sender, EventArgs e)
         {
             AjaxPro.Utility.RegisterTypeForAjax(typeof(EmailOperationService));
 
-            var stringBuilder = new StringBuilder();
-            stringBuilder.Append("if (jq('div.mainPageLayout table.mainPageTable').hasClass('with-mainPageTableSidePanel'))jq('.info-box.excl').removeClass('display-none');");
-
-            Page.RegisterInlineScript(stringBuilder.ToString());
+            CurrentUser = CoreContext.UserManager.GetUsers(SecurityContext.CurrentAccount.ID);
         }
     }
 }

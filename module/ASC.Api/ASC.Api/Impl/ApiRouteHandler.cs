@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,11 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Routing;
+
 using ASC.Api.Interfaces;
 using ASC.Api.Utils;
 using ASC.Common.Logging;
+
 using Autofac;
 
 namespace ASC.Api.Impl
@@ -70,7 +72,7 @@ namespace ASC.Api.Impl
 
         public virtual IHttpHandler GetHandler(RequestContext requestContext)
         {
-            return Container.BeginLifetimeScope().Resolve<IApiHttpHandler>(new TypedParameter(typeof(RouteData), requestContext.RouteData));
+            return Container.BeginLifetimeScope().Resolve<ApiHttpAsyncHandler>(new TypedParameter(typeof(RouteData), requestContext.RouteData));
         }
     }
 

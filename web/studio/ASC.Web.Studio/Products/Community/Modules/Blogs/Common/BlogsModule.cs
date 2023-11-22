@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 
 using System;
 using System.Web;
-using ASC.Blogs.Core.Resources;
+
 using ASC.Blogs.Core.Security;
 using ASC.Core;
+using ASC.Web.Community.Modules.Blogs.Core.Resources;
 using ASC.Web.Community.Product;
 using ASC.Web.Core;
 using ASC.Web.Core.ModuleManagement;
@@ -51,15 +52,15 @@ namespace ASC.Web.Community.Blogs.Common
         public override string StartURL
         {
             get { return ASC.Blogs.Core.Constants.BaseVirtualPath; }
-        }        
+        }
 
         public BlogsModule()
         {
             Context = new ModuleContext
             {
                 DefaultSortOrder = 1,
-                SmallIconFileName = "blog_add.png",
-                IconFileName = "blogiconwg.png",
+                SmallIconFileName = "blog_add.svg",
+                IconFileName = "blogiconwg.svg",
                 SubscriptionManager = new BlogsSubscriptionManager(),
                 GetCreateContentPageAbsoluteUrl = () => CanEdit() ? VirtualPathUtility.ToAbsolute(ASC.Blogs.Core.Constants.BaseVirtualPath + "AddBlog.aspx") : null,
                 SearchHandler = new BlogsSearchHandler(),

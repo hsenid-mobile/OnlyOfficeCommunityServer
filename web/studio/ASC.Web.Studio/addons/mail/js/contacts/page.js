@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,19 +38,19 @@ window.contactsPage = (function($) {
             window.Teamlab.bind(window.Teamlab.events.updateMailContact, onUpdateContact);
             window.Teamlab.bind(window.Teamlab.events.createMailContact, onCreateContact);
 
-            crmFilter.events.bind('set', onSetCrmFilter);
-            crmFilter.events.bind('reset', onResetFilter);
-            crmFilter.events.bind('resetall', onResetAllFilter);
-            tlFilter.events.bind('set', onSetTlFilter);
-            tlFilter.events.bind('reset', onResetFilter);
-            tlFilter.events.bind('resetall', onResetAllFilter);
-            customFilter.events.bind('set', onSetCustomFilter);
-            customFilter.events.bind('reset', onResetFilter);
-            customFilter.events.bind('resetall', onResetAllFilter);
+            crmFilter.events.on('set', onSetCrmFilter);
+            crmFilter.events.on('reset', onResetFilter);
+            crmFilter.events.on('resetall', onResetAllFilter);
+            tlFilter.events.on('set', onSetTlFilter);
+            tlFilter.events.on('reset', onResetFilter);
+            tlFilter.events.on('resetall', onResetAllFilter);
+            customFilter.events.on('set', onSetCustomFilter);
+            customFilter.events.on('reset', onResetFilter);
+            customFilter.events.on('resetall', onResetAllFilter);
 
-            tlFilter.events.bind('ready', onFilterReady);
-            crmFilter.events.bind('ready', onFilterReady);
-            customFilter.events.bind('ready', onFilterReady);
+            tlFilter.events.on('ready', onFilterReady);
+            crmFilter.events.on('ready', onFilterReady);
+            customFilter.events.on('ready', onFilterReady);
 
             tlFilter.init();
             crmFilter.init();
@@ -183,8 +183,6 @@ window.contactsPage = (function($) {
             }
             if (isChange) {
                 ASC.Controls.AnchorController.move(getAnchorByType(filter.ContactsStore) + toAnchor());
-
-                window.ASC.Mail.ga_track(ga_Categories.crmContacts, ga_Actions.filterClick, params.id);
             }
         }
     }
@@ -217,9 +215,6 @@ window.contactsPage = (function($) {
             }
             if (isChange) {
                 ASC.Controls.AnchorController.move(getAnchorByType(filter.ContactsStore) + toAnchor());
-
-                //google analytics
-                window.ASC.Mail.ga_track(ga_Categories.teamlabContacts, ga_Actions.filterClick, params.id);
             }
         }
 
@@ -259,9 +254,6 @@ window.contactsPage = (function($) {
             }
             if (isChange) {
                 ASC.Controls.AnchorController.move(getAnchorByType(filter.ContactsStore) + toAnchor());
-
-                //google analytics
-                window.ASC.Mail.ga_track(ga_Categories.teamlabContacts, ga_Actions.filterClick, params.id);
             }
         }
 
@@ -315,9 +307,9 @@ window.contactsPage = (function($) {
 
     function onFilterReady() {
         doResetFilter();
-        tlFilter.events.unbind('ready');
-        crmFilter.events.unbind('ready');
-        customFilter.events.unbind('ready');
+        tlFilter.events.off('ready');
+        crmFilter.events.off('ready');
+        customFilter.events.off('ready');
     }
 
     function redrawPage() {
@@ -504,7 +496,7 @@ window.contactsPage = (function($) {
 
         createSelectActionPandel();
 
-        pageActionContainer.find('#SelectAllContactsCB').bind('click', function (e) {
+        pageActionContainer.find('#SelectAllContactsCB').on('click', function (e) {
             if (e.target.checked) {
                 actionPanelSelectAll();
             } else {
@@ -514,30 +506,21 @@ window.contactsPage = (function($) {
             $('#SelectAllContactsDropdown').parent().actionPanel('hide');
         });
 
-        pageActionContainer.find('.menuActionSendEmail').click(function () {
+        pageActionContainer.find('.menuActionSendEmail').on("click", function () {
             if ($(this).hasClass('unlockAction')) {
                 massMailing();
-
-                var category = ga_Categories.crmContacts;
-                if (TMMail.pageIs('tlContact')) {
-                    category = ga_Categories.teamlabContacts;
-                }
-                else if (TMMail.pageIs('personalContact')) {
-                    category = ga_Categories.personalContacts;
-                }
-                window.ASC.Mail.ga_track(category, ga_Actions.buttonClick, "write_letter");
             }
         });
 
         if (TMMail.pageIs('personalContact')) {
-            pageActionContainer.find('.menuActionDelete').click(function () {
+            pageActionContainer.find('.menuActionDelete').on("click", function () {
                 if (!$(this).hasClass('unlockAction')) {
                     return false;
                 }
 
                 deleteContacts();
             });
-            pageActionContainer.find('.menuActionCreate').click(function () {
+            pageActionContainer.find('.menuActionCreate').on("click", function () {
                 editContactModal.show(null, true);
             });
         } else {
@@ -546,7 +529,7 @@ window.contactsPage = (function($) {
         }
 
         // _Selection checkbox clicked
-        page.find('#ContactsList .row > .checkbox').unbind('click').bind('click', onClickCheckbox);
+        page.find('#ContactsList .row > .checkbox').off('click').on('click', onClickCheckbox);
 
         var $rows = page.find('#ContactsList .row');
         prepareContactcInfo($rows, data);
@@ -599,7 +582,7 @@ window.contactsPage = (function($) {
                 var primaryEmail = $($emails[0]);
                 primaryEmail.show();
 
-                primaryEmail.find('span').bind('click', function(event) {
+                primaryEmail.find('span').on('click', function(event) {
                     writeLetter(event, { name: $(event.target).text(), contact_name: $(event.target).attr('contactName') });
                 });
             }
@@ -610,9 +593,9 @@ window.contactsPage = (function($) {
 
             var $more = $row.find('.emails .more_lnk');
             // async action panel initialization - only after click on "more" element
-            $more.find('.gray').unbind('.contactsPage').bind('click.contactsPage', function() {
+            $more.find('.gray').off('.contactsPage').on('click.contactsPage', function() {
                 // action panel need to be initialized just once - so imidiatly unbind
-                $(this).unbind('.contactsPage');
+                $(this).off('.contactsPage');
                 // add action panel with more emails
                 itemListActionPanel((this.parentElement).parentElement, "email");
             });
@@ -628,9 +611,9 @@ window.contactsPage = (function($) {
 
             $more = $row.find('.phones .more_lnk');
             // async action panel initialization - only after click on "more" element
-            $more.find('.gray').unbind('.contactsPage').bind('click.contactsPage', function() {
+            $more.find('.gray').off('.contactsPage').on('click.contactsPage', function() {
                 // action panel need to be initialized just once - so imidiatly unbind
-                $(this).unbind('.contactsPage');
+                $(this).off('.contactsPage');
                 // add action panel with more emails
                 itemListActionPanel((this.parentElement).parentElement, "phone");
             });
@@ -670,7 +653,7 @@ window.contactsPage = (function($) {
 
             $('#ContactsList').find('.row[data_id="' + contact.id + '"]').replaceWith(contactListHtml);
             $row = $('#ContactsList').find('.row[data_id="' + contact.id + '"]');
-            $row.find('.checkbox').unbind('click').bind('click', onClickCheckbox);
+            $row.find('.checkbox').off('click').on('click', onClickCheckbox);
 
             prepareContactcInfo($row, contact);
         } else {
@@ -747,7 +730,7 @@ window.contactsPage = (function($) {
             }
         }
 
-        $(items).find('.gray').actionPanel({ 'buttons': btns }).click();
+        $(items).find('.gray').actionPanel({ 'buttons': btns }).trigger("click");
     }
 
     function setDefaultValueFilter() {
@@ -820,15 +803,6 @@ window.contactsPage = (function($) {
 
     function actionPanelSelectAll() {
 
-        var category = ga_Categories.crmContacts;
-        if (TMMail.pageIs('tlContact')) {
-            category = ga_Categories.teamlabContacts;
-        }
-        else if (TMMail.pageIs('personalContact')) {
-            category = ga_Categories.personalContacts;
-        }
-        window.ASC.Mail.ga_track(category, ga_Actions.actionClick, "all_select");
-
         $('#ContactsList .row').each(function() {
             if ($(this).find('input[type="checkbox"]').hasClass('disable')) {
                 return true;
@@ -841,15 +815,6 @@ window.contactsPage = (function($) {
     }
 
     function actionPanelSelectNone() {
-
-        var category = ga_Categories.crmContacts;
-        if (TMMail.pageIs('tlContact')) {
-            category = ga_Categories.teamlabContacts;
-        }
-        else if (TMMail.pageIs('personalContact')) {
-            category = ga_Categories.personalContacts;
-        }
-        window.ASC.Mail.ga_track(category, ga_Actions.actionClick, "none_select");
 
         clearCurrentPageSelection();
 
@@ -933,8 +898,6 @@ window.contactsPage = (function($) {
 
     function actionPanelSelectWithTags() {
 
-        window.ASC.Mail.ga_track(ga_Categories.crmContacts, ga_Actions.actionClick, "whith_tag_select");
-
         clearCurrentPageSelection();
         $('#ContactsList .row').each(function() {
             var $row = $(this);
@@ -947,8 +910,6 @@ window.contactsPage = (function($) {
     }
 
     function actionPanelSelectWithoutTags() {
-
-        window.ASC.Mail.ga_track(ga_Categories.crmContacts, ga_Actions.actionClick, "without_select");
 
         clearCurrentPageSelection();
         $('#ContactsList .row').each(function() {
@@ -1088,7 +1049,7 @@ window.contactsPage = (function($) {
             questionText: question
         });
 
-        body.find('.button.remove').unbind('click').bind('click', function () {
+        body.find('.button.remove').off('click').on('click', function () {
             serviceManager.deleteMailContacts(ids, {}, {
                 success: function (e, contactIds) {
                     if (totalCount <= filter.Count) {
@@ -1120,7 +1081,7 @@ window.contactsPage = (function($) {
                     window.toastr.error(window.MailApiErrorsResource.ErrorDeleteContact);
                     console.error(error);
                 }
-            }, ASC.Resources.Master.Resource.LoadingProcessing);
+            }, ASC.Resources.Master.ResourceJS.LoadingProcessing);
             popup.hide();
         });
 
@@ -1363,7 +1324,7 @@ window.contactsPage = (function($) {
 
             serviceManager.getCrmContacts({ Page: getPageFromFilter(), ContactsStore: filter.ContactsStore },
                 { filter: filterData, success: onGetCrmContacts },
-                ASC.Resources.Master.Resource.LoadingProcessing);
+                ASC.Resources.Master.ResourceJS.LoadingProcessing);
 
         } else if ('teamlab' == type) {
             filterData.StartIndex = filter.StartIndex;
@@ -1384,7 +1345,7 @@ window.contactsPage = (function($) {
             var options = { filter: filterData, success: onGetTlContacts };
 
             serviceManager.getProfilesByFilter({ Page: getPageFromFilter(), ContactsStore: filter.ContactsStore },
-                options, ASC.Resources.Master.Resource.LoadingProcessing);
+                options, ASC.Resources.Master.ResourceJS.LoadingProcessing);
         } else if ('custom' == type) {
             filterData.sortorder = filter.CustomSortOrder;
             filterData.fromIndex = filter.StartIndex;
@@ -1395,7 +1356,7 @@ window.contactsPage = (function($) {
             }
 
             serviceManager.getMailContacts(filterData, { Page: getPageFromFilter(), ContactsStore: filter.ContactsStore },
-                {success: onGetMailContacts }, ASC.Resources.Master.Resource.LoadingProcessing);
+                {success: onGetMailContacts }, ASC.Resources.Master.ResourceJS.LoadingProcessing);
         }
     }
 

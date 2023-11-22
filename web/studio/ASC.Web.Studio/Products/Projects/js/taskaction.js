@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ ASC.Projects.TaskAction = (function () {
         master = baseObject.Master,
         resources = baseObject.Resources,
         projectsJSResource = resources.ProjectsJSResource,
-        noneMilestone = { id: 0, title: resources.TasksResource.None, deadline: "" },
+        noneMilestone = { id: 0, title: resources.TaskResource.None, deadline: "" },
         common = baseObject.Common,
         loadingBanner = LoadingBanner,
         studioBlockUIManager = StudioBlockUIManager,
@@ -120,15 +120,12 @@ ASC.Projects.TaskAction = (function () {
         
         jq($taskProjectSelector, $taskMilestoneSelector, $taskResponsiblesSelector).css('max-width', 300);
 
-        if (jq.browser.mobile) {
-            jq("#ui-datepicker-div").addClass("blockMsg");
-        }
-
-        
         var datePickers = jq($taskDeadlineDate).add($taskStartDate);
         datePickers.datepicker({ selectDefaultDate: false });
         datePickers.mask(ASC.Resources.Master.DatePatternJQ);
-        datePickers.on("keydown", onDatePickerKeyDown).off("change").on("change", onDatePickerChange);
+
+        jq("#ui-datepicker-div").addClass("blockMsg");
+
         $taskDeadlineDate.on("change",
             function () {
                 var date = getTaskDataDate($taskDeadlineDate);
@@ -150,19 +147,6 @@ ASC.Projects.TaskAction = (function () {
                 }
             });
     };
-
-    function onDatePickerKeyDown(e) {
-        if (e.keyCode === 13) {
-            onDatePickerChange(e);
-        }
-    }
-
-    function onDatePickerChange(e) {
-        var obj = jq(e.target);
-        var date = obj.datepicker("getDate");
-        obj.unmask().blur().mask(ASC.Resources.Master.DatePatternJQ);
-        obj.datepicker("setDate", date);
-    }
 
     function boldDeadlineLeft(dataValue) {
         var dotline = "dotline", bold = "bold";
@@ -321,7 +305,7 @@ ASC.Projects.TaskAction = (function () {
 
     function getTaskData() {
         var data = {
-            title: jq.trim($taskTitle.val()),
+            title: $taskTitle.val().trim(),
             description: $taskDescription.val(),
             notify: $notifyCheckbox.is(':checked'),
             milestoneId: $taskMilestoneSelector.attr("data-id"),
@@ -449,8 +433,8 @@ ASC.Projects.TaskAction = (function () {
             onechosen: true,
             inPopup: true,
             sortMethod: common.milestoneSort,
-            noresults: ASC.Resources.Master.Resource.MilestoneSelectorNoResult,
-            noitems: ASC.Resources.Master.Resource.MilestoneSelectorNoItems
+            noresults: ASC.Resources.Master.ResourceJS.MilestoneSelectorNoResult,
+            noitems: ASC.Resources.Master.ResourceJS.MilestoneSelectorNoItems
         };
 
         $taskMilestoneSelector.projectadvancedSelector(selectorObj);
@@ -521,9 +505,9 @@ ASC.Projects.TaskAction = (function () {
         var disabledAttr = "disabled";
         elements.forEach(function (item) {
             if (lock) {
-                item.attr(disabledAttr, disabledAttr);
+                item.prop(disabledAttr, true);
             } else {
-                item.removeAttr(disabledAttr);
+                item.prop(disabledAttr, false);
             }
         });
     }
@@ -539,7 +523,7 @@ ASC.Projects.TaskAction = (function () {
             currentTask = task;
             renderTaskForm(getEmptyTask());
             $taskPopup.find(".success-popup").show();
-            $taskTitle.focus();
+            $taskTitle.trigger("focus");
         }
 
         var project = common.getProjectById(task.projectOwner.id);
@@ -600,17 +584,23 @@ ASC.Projects.TaskAction = (function () {
         teamWithoutVisitors = common.removeBlockedUsersFromTeam(teamWithoutVisitors);
 
         resetResponsibles();
-        $taskResponsiblesSelector.advancedSelector("rewriteItemList", teamWithoutVisitors.map(
-            function (item) {
-                return { id: item.id, title: item.displayName };
-            }), []);
-
+        
+        if (currentTask && currentTask.responsibles.length && currentTask.projectId == selectedPrjId && teamWithoutVisitors) {
+            $taskResponsiblesSelector.advancedSelector("rewriteItemList", teamWithoutVisitors.map(
+                function (item) {
+                    return { id: item.id, title: item.displayName };
+                }), currentTask.responsibles.map(function (item) { return item.id; }))
+        } else {
+            $taskResponsiblesSelector.advancedSelector("rewriteItemList", teamWithoutVisitors.map(
+                function (item) {
+                    return { id: item.id, title: item.displayName };
+                }), []);
+        }
         updateTaskResponsibleSelector();
     };
 
     function updateTaskResponsibleSelector() {
         if (currentTask && currentTask.responsibles.length && currentTask.projectId == selectedPrjId && teamWithoutVisitors) {
-            $taskResponsiblesSelector.advancedSelector("select", currentTask.responsibles.map(function (item) { return item.id; }));
             $taskResponsiblesSelector.trigger("showList", [currentTask.responsibles.map(function(item){ return {id: item.id, title: item.displayName}})]);
         }
         if (currentTask && !currentTask.responsibles.length && updateTaskFlag !== updateTaskFlagEnum.add) {
@@ -681,7 +671,7 @@ ASC.Projects.TaskAction = (function () {
         var setDateAction = "setDate";
         if (task.deadline) {
             $taskDeadlineDate.datepicker(setDateAction, task.deadline);
-            $taskDeadlineDate.change();
+            $taskDeadlineDate.trigger("change");
         } else {
             if (updateTaskFlag !== updateTaskFlagEnum.add) {
                 $taskDeadlineDate.datepicker(setDateAction, null);
@@ -712,7 +702,7 @@ ASC.Projects.TaskAction = (function () {
         //buttons and title
         var saveButton = $taskPopup.find('#saveTaskAction');
         var createNewButton = jq("#createTaskAndCreateNew");
-        var commonResource = resources.CommonResource;
+        var ProjectsCommonResource = resources.ProjectsCommonResource;
 
         if (updateTaskFlag === updateTaskFlagEnum.update) {
             createNewButton.hide();
@@ -720,7 +710,7 @@ ASC.Projects.TaskAction = (function () {
 
             $copyContainer.hide();
 
-            saveButton.html(commonResource.SaveChanges);
+            saveButton.html(ProjectsCommonResource.SaveChanges);
             $taskPopup.find('.containerHeaderBlock table td:first').html(projectsJSResource.EditThisTask);
         } else if (updateTaskFlag === updateTaskFlagEnum.add) {
             createNewButton.show();
@@ -728,10 +718,10 @@ ASC.Projects.TaskAction = (function () {
 
             $copyContainer.hide();
 
-            saveButton.html(commonResource.Save);
+            saveButton.html(ProjectsCommonResource.Save);
             $taskPopup.find('.containerHeaderBlock table td:first').html(projectsJSResource.CreateNewTask);
         } else if (updateTaskFlag === updateTaskFlagEnum.copy) {
-            createNewButton.html(commonResource.Replace);
+            createNewButton.html(ProjectsCommonResource.Replace);
             createNewButton.show();
             createNewButton.siblings(".splitter-buttons").show();
 
@@ -739,8 +729,8 @@ ASC.Projects.TaskAction = (function () {
             $copyFilesCheckbox.prop("checked", false);
             $copyContainer.show();
 
-            saveButton.html(commonResource.Copy);
-            $taskPopup.find('.containerHeaderBlock table td:first').html(resources.TasksResource.CopyTaskHeader);
+            saveButton.html(ProjectsCommonResource.Copy);
+            $taskPopup.find('.containerHeaderBlock table td:first').html(resources.TaskResource.CopyTaskHeader);
         }
 
         if (firstLoadFlag) {
@@ -800,7 +790,7 @@ ASC.Projects.TaskAction = (function () {
 
     function show(task, updateTaskFlagVal) {
         if (!isInitData) {
-            var tasksResource = resources.TasksResource;
+            var TaskResource = resources.TaskResource;
 
             jq("#addTaskPanel")
                 .html(jq.tmpl("common_containerTmpl",
@@ -811,19 +801,19 @@ ASC.Projects.TaskAction = (function () {
                         IsPopup: true
                     },
                     header: {
-                        data: { title: tasksResource.AddTask },
+                        data: { title: TaskResource.AddTask },
                         title: "projects_common_popup_header"
                     },
                     body: {
                         title: "projects_task_action",
                         data: {
                             title: {
-                                error: tasksResource.EachTaskMustHaveTitle,
-                                header: tasksResource.TaskTitle
+                                error: TaskResource.EachTaskMustHaveTitle,
+                                header: TaskResource.TaskTitle
                             },
-                            description: tasksResource.TaskDescription,
+                            description: TaskResource.TaskDescription,
                             project: {
-                                error: tasksResource.ChooseProject,
+                                error: TaskResource.ChooseProject,
                                 header: resources.ProjectResource.Project
                             }
                         }

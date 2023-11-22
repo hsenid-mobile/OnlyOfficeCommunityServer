@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Core;
+using ASC.Core.ChunkedUploader;
+using ASC.Data.Storage.ZipOperators;
 using ASC.Files.Core;
 using ASC.Web.Studio.Core;
 
@@ -102,7 +105,7 @@ namespace ASC.Files.Thirdparty.Dropbox
             return folders.ToList();
         }
 
-        public List<Folder> GetFolders(object[] folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true)
+        public List<Folder> GetFolders(IEnumerable<object> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true)
         {
             if (filterType == FilterType.FilesOnly || filterType == FilterType.ByExtension
                 || filterType == FilterType.DocumentsOnly || filterType == FilterType.ImagesOnly
@@ -193,9 +196,19 @@ namespace ASC.Files.Thirdparty.Dropbox
                                 .ConvertAll(x => x[0]);
 
                 db.ExecuteNonQuery(Delete("files_tag_link").Where(Exp.In("entry_id", hashIDs)));
-                db.ExecuteNonQuery(Delete("files_tag").Where(Exp.EqColumns("0", Query("files_tag_link l").SelectCount().Where(Exp.EqColumns("tag_id", "id")))));
                 db.ExecuteNonQuery(Delete("files_security").Where(Exp.In("entry_id", hashIDs)));
                 db.ExecuteNonQuery(Delete("files_thirdparty_id_mapping").Where(Exp.In("hash_id", hashIDs)));
+
+                var tagsToRemove = db.ExecuteList(
+                            Query("files_tag tbl_ft ")
+                                .Select("tbl_ft.id")
+                                .LeftOuterJoin("files_tag_link tbl_ftl", Exp.EqColumns("tbl_ft.tenant_id", "tbl_ftl.tenant_id") &
+                                                                         Exp.EqColumns("tbl_ft.id", "tbl_ftl.tag_id"))
+                                .Where("tbl_ftl.tag_id is null"))
+                            .ConvertAll(r => Convert.ToInt32(r[0]));
+
+                db.ExecuteNonQuery(Delete("files_tag").Where(Exp.In("id", tagsToRemove)));
+
 
                 tx.Commit();
             }
@@ -308,9 +321,17 @@ namespace ASC.Files.Thirdparty.Dropbox
             return chunkedUpload ? storageMaxUploadSize : Math.Min(storageMaxUploadSize, SetupInfo.AvailableFileSize);
         }
 
+        public IDataWriteOperator CreateDataWriteOperator(
+            string folderId,
+            CommonChunkedUploadSession chunkedUploadSession,
+            CommonChunkedUploadSessionHolder sessionHolder)
+        {
+            return new ChunkZipWriteOperator(chunkedUploadSession, sessionHolder);
+        }
+
         #region Only for TMFolderDao
 
-        public void ReassignFolders(object[] folderIds, Guid newOwnerId)
+        public void ReassignFolders(IEnumerable<object> folderIds, Guid newOwnerId)
         {
         }
 
@@ -385,7 +406,7 @@ namespace ASC.Files.Thirdparty.Dropbox
             return null;
         }
 
-        public Dictionary<string, string> GetBunchObjectIDs(List<object> folderIDs)
+        public Dictionary<string, string> GetBunchObjectIDs(IEnumerable<object> folderIDs)
         {
             return null;
         }

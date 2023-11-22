@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,73 +15,72 @@
 */
 
 
-/// This Class implements the Difference Algorithm published in
-/// "An O(ND) Difference Algorithm and its Variations" by Eugene Myers
-/// Algorithmica Vol. 1 No. 2, 1986, p 251.  
-/// 
-/// There are many C, Java, Lisp implementations public available but they all seem to come
-/// from the same source (diffutils) that is under the (unfree) GNU public License
-/// and cannot be reused as a sourcecode for a commercial application.
-/// There are very old C implementations that use other (worse) algorithms.
-/// Microsoft also published sourcecode of a diff-tool (windiff) that uses some tree data.
-/// Also, a direct transfer from a C source to C# is not easy because there is a lot of pointer
-/// arithmetic in the typical C solutions and i need a managed solution.
-/// These are the reasons why I implemented the original published algorithm from the scratch and
-/// make it avaliable without the GNU license limitations.
-/// I do not need a high performance diff tool because it is used only sometimes.
-/// I will do some performace tweaking when needed.
-/// 
-/// The algorithm itself is comparing 2 arrays of numbers so when comparing 2 text documents
-/// each line is converted into a (hash) number. See DiffText(). 
-/// 
-/// Some chages to the original algorithm:
-/// The original algorithm was described using a recursive approach and comparing zero indexed arrays.
-/// Extracting sub-arrays and rejoining them is very performance and memory intensive so the same
-/// (readonly) data arrays are passed arround together with their lower and upper bounds.
-/// This circumstance makes the LCS and SMS functions more complicate.
-/// I added some code to the LCS function to get a fast response on sub-arrays that are identical,
-/// completely deleted or inserted.
-/// 
-/// The result from a comparisation is stored in 2 arrays that flag for modified (deleted or inserted)
-/// lines in the 2 data arrays. These bits are then analysed to produce a array of Item objects.
-/// 
-/// Further possible optimizations:
-/// (first rule: don't do it; second: don't do it yet)
-/// The arrays DataA and DataB are passed as parameters, but are never changed after the creation
-/// so they can be members of the class to avoid the paramter overhead.
-/// In SMS is a lot of boundary arithmetic in the for-D and for-k loops that can be done by increment
-/// and decrement of local variables.
-/// The DownVector and UpVector arrays are alywas created and destroyed each time the SMS gets called.
-/// It is possible to reuse tehm when transfering them to members of the class.
-/// See TODO: hints.
-/// 
-/// diff.cs: A port of the algorythm to C#
-/// Created by Matthias Hertel, see http://www.mathertel.de
-/// This work is licensed under a Creative Commons Attribution 2.0 Germany License.
-/// see http://creativecommons.org/licenses/by/2.0/de/
-/// 
-/// Changes:
-/// 2002.09.20 There was a "hang" in some situations.
-/// Now I undestand a little bit more of the SMS algorithm. 
-/// There have been overlapping boxes; that where analyzed partial differently.
-/// One return-point is enough.
-/// A assertion was added in CreateDiffs when in debug-mode, that counts the number of equal (no modified) lines in both arrays.
-/// They must be identical.
-/// 
-/// 2003.02.07 Out of bounds error in the Up/Down vector arrays in some situations.
-/// The two vetors are now accessed using different offsets that are adjusted using the start k-Line. 
-/// A test case is added. 
-/// 
-/// 2006.03.05 Some documentation and a direct Diff entry point.
-/// 
-/// 2006.03.08 Refactored the API to static methods on the Diff class to make usage simpler.
-/// 2006.03.10 using the standard Debug class for self-test now.
-///            compile with: csc /target:exe /out:diffTest.exe /d:DEBUG /d:TRACE /d:SELFTEST Diff.cs
+// This Class implements the Difference Algorithm published in
+// "An O(ND) Difference Algorithm and its Variations" by Eugene Myers
+// Algorithmica Vol. 1 No. 2, 1986, p 251.  
+// 
+// There are many C, Java, Lisp implementations public available but they all seem to come
+// from the same source (diffutils) that is under the (unfree) GNU public License
+// and cannot be reused as a sourcecode for a commercial application.
+// There are very old C implementations that use other (worse) algorithms.
+// Microsoft also published sourcecode of a diff-tool (windiff) that uses some tree data.
+// Also, a direct transfer from a C source to C# is not easy because there is a lot of pointer
+// arithmetic in the typical C solutions and i need a managed solution.
+// These are the reasons why I implemented the original published algorithm from the scratch and
+// make it avaliable without the GNU license limitations.
+// I do not need a high performance diff tool because it is used only sometimes.
+// I will do some performace tweaking when needed.
+// 
+// The algorithm itself is comparing 2 arrays of numbers so when comparing 2 text documents
+// each line is converted into a (hash) number. See DiffText(). 
+// 
+// Some chages to the original algorithm:
+// The original algorithm was described using a recursive approach and comparing zero indexed arrays.
+// Extracting sub-arrays and rejoining them is very performance and memory intensive so the same
+// (readonly) data arrays are passed arround together with their lower and upper bounds.
+// This circumstance makes the LCS and SMS functions more complicate.
+// I added some code to the LCS function to get a fast response on sub-arrays that are identical,
+// completely deleted or inserted.
+// 
+// The result from a comparisation is stored in 2 arrays that flag for modified (deleted or inserted)
+// lines in the 2 data arrays. These bits are then analysed to produce a array of Item objects.
+// 
+// Further possible optimizations:
+// (first rule: don't do it; second: don't do it yet)
+// The arrays DataA and DataB are passed as parameters, but are never changed after the creation
+// so they can be members of the class to avoid the paramter overhead.
+// In SMS is a lot of boundary arithmetic in the for-D and for-k loops that can be done by increment
+// and decrement of local variables.
+// The DownVector and UpVector arrays are alywas created and destroyed each time the SMS gets called.
+// It is possible to reuse tehm when transfering them to members of the class.
+// See TODO: hints.
+// 
+// diff.cs: A port of the algorythm to C#
+// Created by Matthias Hertel, see http://www.mathertel.de
+// This work is licensed under a Creative Commons Attribution 2.0 Germany License.
+// see http://creativecommons.org/licenses/by/2.0/de/
+// 
+// Changes:
+// 2002.09.20 There was a "hang" in some situations.
+// Now I undestand a little bit more of the SMS algorithm. 
+// There have been overlapping boxes; that where analyzed partial differently.
+// One return-point is enough.
+// A assertion was added in CreateDiffs when in debug-mode, that counts the number of equal (no modified) lines in both arrays.
+// They must be identical.
+// 
+// 2003.02.07 Out of bounds error in the Up/Down vector arrays in some situations.
+// The two vetors are now accessed using different offsets that are adjusted using the start k-Line. 
+// A test case is added. 
+// 
+// 2006.03.05 Some documentation and a direct Diff entry point.
+// 
+// 2006.03.08 Refactored the API to static methods on the Diff class to make usage simpler.
+// 2006.03.10 using the standard Debug class for self-test now.
+//            compile with: csc /target:exe /out:diffTest.exe /d:DEBUG /d:TRACE /d:SELFTEST Diff.cs
 
 
 using System;
 using System.Collections;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ASC.Web.UserControls.Wiki
@@ -120,92 +119,92 @@ namespace ASC.Web.UserControls.Wiki
         #region self-Test
 
 
-//#if (SELFTEST)
-//    /// <summary>
-//    /// start a self- / box-test for some diff cases and report to the debug output.
-//    /// </summary>
-//    /// <param name="args">not used</param>
-//    /// <returns>always 0</returns>
-//    public static int Main(string[] args) {
-//      StringBuilder ret = new StringBuilder();
-//      string a, b;
+        //#if (SELFTEST)
+        //    /// <summary>
+        //    /// start a self- / box-test for some diff cases and report to the debug output.
+        //    /// </summary>
+        //    /// <param name="args">not used</param>
+        //    /// <returns>always 0</returns>
+        //    public static int Main(string[] args) {
+        //      StringBuilder ret = new StringBuilder();
+        //      string a, b;
 
-//      System.Diagnostics.ConsoleTraceListener ctl = new System.Diagnostics.ConsoleTraceListener(false);
-//      System.Diagnostics.Debug.Listeners.Add(ctl);
+        //      System.Diagnostics.ConsoleTraceListener ctl = new System.Diagnostics.ConsoleTraceListener(false);
+        //      System.Diagnostics.Debug.Listeners.Add(ctl);
 
-//      System.Console.WriteLine("Diff Self Test...");
-      
-//      // test all changes
-//      a = "a,b,c,d,e,f,g,h,i,j,k,l".Replace(',', '\n');
-//      b = "0,1,2,3,4,5,6,7,8,9".Replace(',', '\n');
-//      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
-//        == "12.10.0.0*", 
-//        "all-changes test failed.");
-//      System.Diagnostics.Debug.WriteLine("all-changes test passed.");
-//      // test all same
-//      a = "a,b,c,d,e,f,g,h,i,j,k,l".Replace(',', '\n');
-//      b = a;
-//      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
-//        == "",
-//        "all-same test failed.");
-//      System.Diagnostics.Debug.WriteLine("all-same test passed.");
+        //      System.Console.WriteLine("Diff Self Test...");
 
-//      // test snake
-//      a = "a,b,c,d,e,f".Replace(',', '\n');
-//      b = "b,c,d,e,f,x".Replace(',', '\n');
-//      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
-//        == "1.0.0.0*0.1.6.5*",
-//        "snake test failed.");
-//      System.Diagnostics.Debug.WriteLine("snake test passed.");
+        //      // test all changes
+        //      a = "a,b,c,d,e,f,g,h,i,j,k,l".Replace(',', '\n');
+        //      b = "0,1,2,3,4,5,6,7,8,9".Replace(',', '\n');
+        //      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
+        //        == "12.10.0.0*", 
+        //        "all-changes test failed.");
+        //      System.Diagnostics.Debug.WriteLine("all-changes test passed.");
+        //      // test all same
+        //      a = "a,b,c,d,e,f,g,h,i,j,k,l".Replace(',', '\n');
+        //      b = a;
+        //      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
+        //        == "",
+        //        "all-same test failed.");
+        //      System.Diagnostics.Debug.WriteLine("all-same test passed.");
 
-//      // 2002.09.20 - repro
-//      a = "c1,a,c2,b,c,d,e,g,h,i,j,c3,k,l".Replace(',', '\n');
-//      b = "C1,a,C2,b,c,d,e,I1,e,g,h,i,j,C3,k,I2,l".Replace(',', '\n');
-//      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
-//        == "1.1.0.0*1.1.2.2*0.2.7.7*1.1.11.13*0.1.13.15*",
-//        "repro20020920 test failed.");
-//      System.Diagnostics.Debug.WriteLine("repro20020920 test passed.");
-      
-//      // 2003.02.07 - repro
-//      a = "F".Replace(',', '\n');
-//      b = "0,F,1,2,3,4,5,6,7".Replace(',', '\n');
-//      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
-//        == "0.1.0.0*0.7.1.2*", 
-//        "repro20030207 test failed.");
-//      System.Diagnostics.Debug.WriteLine("repro20030207 test passed.");
-      
-//      // Muegel - repro
-//      a = "HELLO\nWORLD";
-//      b = "\n\nhello\n\n\n\nworld\n";
-//      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
-//        == "2.8.0.0*", 
-//        "repro20030409 test failed.");
-//      System.Diagnostics.Debug.WriteLine("repro20030409 test passed.");
+        //      // test snake
+        //      a = "a,b,c,d,e,f".Replace(',', '\n');
+        //      b = "b,c,d,e,f,x".Replace(',', '\n');
+        //      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
+        //        == "1.0.0.0*0.1.6.5*",
+        //        "snake test failed.");
+        //      System.Diagnostics.Debug.WriteLine("snake test passed.");
 
-//    // test some differences
-//      a = "a,b,-,c,d,e,f,f".Replace(',', '\n');
-//      b = "a,b,x,c,e,f".Replace(',', '\n');
-//      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
-//        == "1.1.2.2*1.0.4.4*1.0.6.5*", 
-//        "some-changes test failed.");
-//      System.Diagnostics.Debug.WriteLine("some-changes test passed.");
+        //      // 2002.09.20 - repro
+        //      a = "c1,a,c2,b,c,d,e,g,h,i,j,c3,k,l".Replace(',', '\n');
+        //      b = "C1,a,C2,b,c,d,e,I1,e,g,h,i,j,C3,k,I2,l".Replace(',', '\n');
+        //      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
+        //        == "1.1.0.0*1.1.2.2*0.2.7.7*1.1.11.13*0.1.13.15*",
+        //        "repro20020920 test failed.");
+        //      System.Diagnostics.Debug.WriteLine("repro20020920 test passed.");
 
-//      System.Diagnostics.Debug.WriteLine("End.");
-//      System.Diagnostics.Debug.Flush();
+        //      // 2003.02.07 - repro
+        //      a = "F".Replace(',', '\n');
+        //      b = "0,F,1,2,3,4,5,6,7".Replace(',', '\n');
+        //      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
+        //        == "0.1.0.0*0.7.1.2*", 
+        //        "repro20030207 test failed.");
+        //      System.Diagnostics.Debug.WriteLine("repro20030207 test passed.");
 
-//      return (0);
-//    }
+        //      // Muegel - repro
+        //      a = "HELLO\nWORLD";
+        //      b = "\n\nhello\n\n\n\nworld\n";
+        //      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
+        //        == "2.8.0.0*", 
+        //        "repro20030409 test failed.");
+        //      System.Diagnostics.Debug.WriteLine("repro20030409 test passed.");
+
+        //    // test some differences
+        //      a = "a,b,-,c,d,e,f,f".Replace(',', '\n');
+        //      b = "a,b,x,c,e,f".Replace(',', '\n');
+        //      System.Diagnostics.Debug.Assert(TestHelper(Diff.DiffText(a, b, false, false, false))
+        //        == "1.1.2.2*1.0.4.4*1.0.6.5*", 
+        //        "some-changes test failed.");
+        //      System.Diagnostics.Debug.WriteLine("some-changes test passed.");
+
+        //      System.Diagnostics.Debug.WriteLine("End.");
+        //      System.Diagnostics.Debug.Flush();
+
+        //      return (0);
+        //    }
 
 
-//    public static string TestHelper(Item []f) {
-//      StringBuilder ret = new StringBuilder();
-//      for (int n = 0; n < f.Length; n++) {
-//        ret.Append(f[n].deletedA.ToString() + "." + f[n].insertedB.ToString() + "." + f[n].StartA.ToString() + "." + f[n].StartB.ToString() + "*");
-//      }
-//      // Debug.Write(5, "TestHelper", ret.ToString());
-//      return (ret.ToString());
-//    }
-//#endif
+        //    public static string TestHelper(Item []f) {
+        //      StringBuilder ret = new StringBuilder();
+        //      for (int n = 0; n < f.Length; n++) {
+        //        ret.Append(f[n].deletedA.ToString() + "." + f[n].insertedB.ToString() + "." + f[n].StartA.ToString() + "." + f[n].StartB.ToString() + "*");
+        //      }
+        //      // Debug.Write(5, "TestHelper", ret.ToString());
+        //      return (ret.ToString());
+        //    }
+        //#endif
         #endregion
 
 
@@ -278,6 +277,8 @@ namespace ASC.Web.UserControls.Wiki
         /// <param name="aText">the input text</param>
         /// <param name="h">This extern initialized hashtable is used for storing all ever used textlines.</param>
         /// <param name="trimSpace">ignore leading and trailing space characters</param>
+        /// <param name="ignoreSpace"></param>
+        /// <param name="ignoreCase"></param>
         /// <returns>a array of integers.</returns>
         private static int[] DiffCodes(string aText, Hashtable h, bool trimSpace, bool ignoreSpace, bool ignoreCase)
         {
@@ -345,10 +346,10 @@ namespace ASC.Web.UserControls.Wiki
             int Delta = (UpperA - LowerA) - (UpperB - LowerB);
             bool oddDelta = (Delta & 1) != 0;
 
-            /// vector for the (0,0) to (x,y) search
+            // vector for the (0,0) to (x,y) search
             int[] DownVector = new int[2 * MAX + 2];
 
-            /// vector for the (u,v) to (N,M) search
+            // vector for the (u,v) to (N,M) search
             int[] UpVector = new int[2 * MAX + 2];
 
             // The vectors in the publication accepts negative indexes. the vectors implemented here are 0-based
@@ -590,7 +591,7 @@ namespace ASC.Web.UserControls.Wiki
         /// <summary>
         /// Initialize the Diff-Data buffer.
         /// </summary>
-        /// <param name="data">reference to the buffer</param>
+        /// <param name="initData">reference to the buffer</param>
         internal DiffData(int[] initData)
         {
             data = initData;

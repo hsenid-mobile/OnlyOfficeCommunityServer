@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+
 using Newtonsoft.Json.Linq;
 
 namespace ASC.Core.Billing
@@ -30,41 +31,29 @@ namespace ASC.Core.Billing
         public string OriginalLicense { get; set; }
 
 
-        [DataMember(Name = "affiliate_id")]
-        public string AffiliateId { get; set; }
-
-        [DataMember(Name = "whitelabel")]
-        public bool WhiteLabel { get; set; }
-
         [DataMember(Name = "customization")]
         public bool Customization { get; set; }
-
-        [DataMember(Name = "branding")]
-        public bool Branding { get; set; }
-
-        [DataMember(Name = "ssbranding")]
-        public bool SSBranding { get; set; }
 
         [DataMember(Name = "end_date")]
         public DateTime DueDate { get; set; }
 
-        [DataMember(Name = "portal_count")]
-        public int PortalCount { get; set; }
-
         [DataMember(Name = "trial")]
         public bool Trial { get; set; }
-
-        [DataMember(Name = "user_quota")]
-        public int ActiveUsers { get; set; }
 
         [DataMember(Name = "customer_id")]
         public string CustomerId { get; set; }
 
+        [DataMember(Name = "users_count")]
+        public int DSUsersCount { get; set; }
+
+        [DataMember(Name = "users_expire")]
+        public int DSUsersExpire { get; set; }
+
+        [DataMember(Name = "connections")]
+        public int DSConnections { get; set; }
+
         [DataMember(Name = "signature")]
         public string Signature { get; set; }
-
-        [DataMember(Name = "discencryption")]
-        public bool? DiscEncryption { get; set; }
 
 
         public static License Parse(string licenseString)

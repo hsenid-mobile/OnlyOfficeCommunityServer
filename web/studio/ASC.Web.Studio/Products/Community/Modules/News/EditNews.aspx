@@ -1,6 +1,6 @@
 ﻿<%@ Page Language="C#" MasterPageFile="~/Products/Community/Modules/News/News.Master" AutoEventWireup="true" CodeBehind="EditNews.aspx.cs" Inherits="ASC.Web.Community.News.EditNews" %>
 
-<%@ Import Namespace="ASC.Web.Community.News.Resources" %>
+<%@ Import Namespace="ASC.Web.Community.Modules.News.Resources" %>
 
 
 <asp:Content ContentPlaceHolderID="NewsTitleContent" runat="server">
@@ -29,7 +29,7 @@
         <div class="headerPanelSmall-splitter">
             <b><%=NewsResource.NewsBody%>:</b>
         </div>
-        <textarea id="ckEditor" name="news_text" style="width:100%; height:400px;visibility:hidden;" autocomplete="off"><%=_text%></textarea>
+        <textarea id="ckEditor" name="news_text" style="width:100%; height:400px;visibility:hidden;" autocomplete="off"><%:_text%></textarea>
     </div>
 
     <div class="big-button-container" id="panel_buttons">

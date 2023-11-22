@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -262,7 +262,7 @@ function disableFieldsForSaveBookmarkAjaxRequest(flag, singleBookmarkDivID) {
 function disableBookmarkingField(elementID, flag) {
 	var el = jq('#' + elementID);
 	if (el != null) {
-		el.attr('disabled', flag);
+		el.prop('disabled', flag);
 	}
 }
 
@@ -281,13 +281,13 @@ function animateBookmarkChange(singleBookmarkDivID) {
 		var el = jq('#' + singleBookmarkDivID);
 		var bg = el.css("background-color");
 		bg = bg.toLowerCase();
-		el.css({ "background-color": "#ffffcc" });
+		el.css({ "background-color": ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#ffffcc" : "rgba(204, 184, 102, 0.2)" });
 		if (bg == "#edf6fd" || bg == "rgb(237, 246, 253)") {
 			el.animate({ backgroundColor: '##EDF6FD' }, 2000);
 		} else {
-			el.animate({ backgroundColor: "#ffffff" }, 2000);
+			el.animate({ backgroundColor: ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#ffffff" : "#333" }, 2000);
 		}
-	} catch (err) { el.css({ "background-color": "#ffffff" }); }
+	} catch (err) { el.css({ "background-color": ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#ffffff" : "#333" }); }
 }
 ///////////////////////////////////////////////////////////////
 ///////			Ajax Request preparation end
@@ -420,8 +420,8 @@ function cancelButtonClick() {
 }
 
 function disableSaveButton(flag) {
-	jq('#SaveBookmarkButton').attr('disabled', flag);
-	jq('#SaveBookmarkButtonCopy').attr('disabled', flag);
+	jq('#SaveBookmarkButton').prop('disabled', flag);
+	jq('#SaveBookmarkButtonCopy').prop('disabled', flag);
 }
 
 function copyValue(sourceElementID, destElementID) {
@@ -460,10 +460,10 @@ function getBookmarkByUrl() {
 }
 
 function disableAddBookmarkElements(disableFlag) {
-	getBookmarkUrlInput().attr('disabled', !disableFlag);
-	getBookmarkNameInput().attr('disabled', disableFlag);
-	getBookmarkDescriptionInput().attr('disabled', disableFlag);
-	getBookmarkTagsInput().attr('disabled', disableFlag);
+	getBookmarkUrlInput().prop('disabled', !disableFlag);
+	getBookmarkNameInput().prop('disabled', disableFlag);
+	getBookmarkDescriptionInput().prop('disabled', disableFlag);
+	getBookmarkTagsInput().prop('disabled', disableFlag);
 }
 
 function showHideCheckBookmarkUrlButtons(showHideFlag) {
@@ -517,7 +517,7 @@ function getBookmarkByUrlButtonClick() {
 		emptyUrlAlert(true);
 		return;
 	}
-	getBookmarkUrlInput().attr('disabled', true);
+	getBookmarkUrlInput().prop('disabled', true);
 	moveAddBookmarkToFavouritePanel();
 	getBookmarkByUrl();
 }
@@ -643,7 +643,7 @@ function bookmarkInputUrlOnKeyDown(event) {
 	//Enter key was pressed
 	if (event.keyCode == 13) {
 		//getBookmarkByUrlButtonClick();
-		jq('#CheckBookmarkUrlLinkButton').click();
+		jq('#CheckBookmarkUrlLinkButton').trigger("click");
 		return false;
 	}
 	return true;
@@ -670,7 +670,7 @@ function createBookmarkOnCtrlEnterKeyDown(event, textArea) {
 
 
 function setFocusOnFeild(fieldID) {
-	setTimeout('jq("#' + fieldID + '").focus();', 100);
+	setTimeout('jq("#' + fieldID + '").trigger("focus");', 100);
 }
 
 function isCtrlEnterKeyPressed(event) {
@@ -690,9 +690,13 @@ function isEscapeKeyPressed(event) {
 }
 
 function createBookmarkActionButtonClick() {
-	jq('#SaveBookmarkButton').click();
-	jq('#SaveBookmarkButtonCopy').click();
-	eval(jq('#SaveBookmarkButtonCopy').attr('href'));
+	if (jq('#SaveBookmarkButton').is(":visible")) {
+		jq('#SaveBookmarkButton').trigger("click");
+	}
+	if (jq('#SaveBookmarkButtonCopy').is(":visible")) {
+		jq('#SaveBookmarkButtonCopy').trigger("click");
+		eval(jq('#SaveBookmarkButtonCopy').attr('href'));
+	}
 }
 
 function getURLParam(strParamName) {
@@ -760,7 +764,7 @@ jq(document).ready(function() {
     }
     var textInput = jq("#BookmarkUrl");
     if (textInput.length)
-        textInput.focus();
+        textInput.trigger("focus");
 
     var $actionButton = jq('.bookmarksHeaderBlock .menu-small');
     jq.dropdownToggle({

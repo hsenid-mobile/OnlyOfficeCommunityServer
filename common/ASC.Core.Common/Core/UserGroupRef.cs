@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 
 using System;
 using System.Diagnostics;
+
+using ASC.Core.Caching;
 
 namespace ASC.Core
 {
@@ -91,5 +93,39 @@ namespace ASC.Core
             var r = obj as UserGroupRef;
             return r != null && r.Tenant == Tenant && r.UserId == UserId && r.GroupId == GroupId && r.RefType == RefType;
         }
+
+        public static implicit operator UserGroupRef(UserGroupRefCacheItem cache)
+        {
+            var result = new UserGroupRef
+            {
+                UserId = new Guid(cache.UserId),
+                GroupId = new Guid(cache.GroupId)
+            };
+
+            if (Enum.TryParse<UserGroupRefType>(cache.RefType, out var refType))
+            {
+                result.RefType = refType;
+            }
+
+            result.Tenant = cache.Tenant;
+            result.LastModified = new DateTime(cache.LastModified);
+            result.Removed = cache.Removed;
+
+            return result;
+        }
+
+        public static implicit operator UserGroupRefCacheItem(UserGroupRef cache)
+        {
+            return new UserGroupRefCacheItem
+            {
+                GroupId = cache.GroupId.ToString(),
+                UserId = cache.UserId.ToString(),
+                RefType = cache.RefType.ToString(),
+                LastModified = cache.LastModified.Ticks,
+                Removed = cache.Removed,
+                Tenant = cache.Tenant
+            };
+        }
+
     }
 }

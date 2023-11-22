@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@
                 return ASC.Mail.Utility.ParseAddresses(value).addresses;
             }
 
-            if (jq.isArray(value)) {
+            if (Array.isArray(value)) {
                 jq.each(value, function (index, item) {
                     if (typeof item === "object")
                         result.push(item);
@@ -264,7 +264,7 @@
                     return false;
                 },
                 create: function() {
-                    jq(window).resize(function () {
+                    jq(window).on("resize", function () {
                         self.closeSelector();
                     });
                 },
@@ -324,9 +324,9 @@
             });
 
             if (self.canEdit) {
-                self.input.removeAttr("disabled").show();
+                self.input.prop("disabled", false).show();
             } else {
-                self.input.attr("disabled", true).hide();
+                self.input.prop("disabled", true).hide();
             }
 
             if (self.container) {

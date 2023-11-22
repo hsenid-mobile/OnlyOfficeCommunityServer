@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 
 using System;
 using System.Web.UI;
+
+using ASC.Core;
 using ASC.Web.Core.Files;
 using ASC.Web.Files.Classes;
 
@@ -30,12 +32,19 @@ namespace ASC.Web.Files.Controls
         }
 
         protected bool EnableCreateFile;
+        protected bool EnableCreateForm;
 
         public object FolderIDCurrentRoot { get; set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             EnableCreateFile = FileUtility.ExtsWebEdited.Count != 0;
+            EnableCreateForm = !CoreContext.Configuration.CustomMode;
+
+            if (EnableCreateForm)
+            {
+                FileChoisePopupHolder.Controls.Add(LoadControl(FileChoisePopup.Location));
+            }
         }
     }
 }

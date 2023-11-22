@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,7 +245,10 @@ window.filtersPage = (function($) {
 
         filtersManager.refresh()
             .then(function() {
-                    window.LoadingBanner.hideLoading();
+                window.LoadingBanner.hideLoading();
+
+                if (ASC.Controls.AnchorController.getAnchor() !== "filtersettings")
+                    return;
 
                     var filters = filtersManager.getList();
 
@@ -370,7 +373,7 @@ window.filtersPage = (function($) {
 
                                     row.toggleClass("disable");
 
-                                    show();
+                                    show(); 
 
                                     return false;
                                 });

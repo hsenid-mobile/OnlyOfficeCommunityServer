@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,29 +28,27 @@ window.tlFilter = (function($) {
                 anykey: true,
                 anykeytimeout: 1000,
                 maxfilters: -1,
-                hintDefaultDisable: true,
+                hintDefaultDisable: false,
                 sorters: [
-                    { id: 'firstname', title: ASC.Resources.Master.Resource.FirstName, sortOrder: 'ascending', def: ASC.Mail.Master.userDisplayFormat == 1 },
-                    { id: 'lastname', title: ASC.Resources.Master.Resource.LastName, sortOrder: 'ascending', def: ASC.Mail.Master.userDisplayFormat == 2 }
+                    { id: 'firstname', title: ASC.Resources.Master.ResourceJS.FirstName, sortOrder: 'ascending', def: ASC.Mail.Master.userDisplayFormat == 1 },
+                    { id: 'lastname', title: ASC.Resources.Master.ResourceJS.LastName, sortOrder: 'ascending', def: ASC.Mail.Master.userDisplayFormat == 2 }
                 ],
                 filters: [
                     {
                         type: "combobox",
                         id: "group",
                         apiparamname: "group",
-                        title: ASC.Mail.Constants.FiLTER_BY_GROUP_LOCALIZE,
+                        title: Encoder.htmlDecode(ASC.Mail.Constants.FiLTER_BY_GROUP_LOCALIZE),
                         group: MailScriptResource.FilterShowGroup,
                         options: [],
                         defaulttitle: MailScriptResource.FilterChoose
                     }
                 ]
-            }).bind('setfilter', onSetFilter).bind('resetfilter', onResetFilter).bind('resetallfilters', onResetAllFilters);
+            }).on('setfilter', onSetFilter).on('resetfilter', onResetFilter).on('resetallfilters', onResetAllFilters);
 
             // filter object initialization should follow after advanced filter plugin call - because
             // its replace target element with new markup
             filter = $('#tlFilter');
-
-            tlGroups.events.bind('update', onUpdateGroups);
         }
     };
 
@@ -76,13 +74,8 @@ window.tlFilter = (function($) {
 
     var update = function() {
         filter.advansedFilter('resize');
-        tlGroups.update();
-    };
-
-    var onUpdateGroups = function() {
-        var groups = [];
-        $.each(tlGroups.getGroups(), function(index, value) {
-            groups.push({ value: value.id, classname: '', title: value.name });
+        var groups = window.GroupManager.getGroupsArray(function (group) {
+            return { value: group.id, classname: '', title: group.name };
         });
         filter.advansedFilter({ filters: [{ type: 'combobox', id: 'group', options: groups, enable: groups.length > 0 }] });
         events.trigger('ready');

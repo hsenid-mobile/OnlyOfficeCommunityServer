@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,24 @@ using System.Net;
 using System.Security;
 using System.Text;
 using System.Web;
+
+using ASC.Common;
 using ASC.FederatedLogin;
 using ASC.FederatedLogin.Helpers;
 using ASC.FederatedLogin.LoginProviders;
 using ASC.Web.Core.Files;
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Core;
+
 using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
+
 using Newtonsoft.Json.Linq;
+
 using DriveFile = Google.Apis.Drive.v3.Data.File;
 using MimeMapping = ASC.Common.Web.MimeMapping;
 
@@ -60,7 +65,7 @@ namespace ASC.Files.Thirdparty.GoogleDrive
 
         public bool IsOpened { get; private set; }
 
-        public const long MaxChunkedUploadFileSize = 2L*1024L*1024L*1024L;
+        public const long MaxChunkedUploadFileSize = 2L * 1024L * 1024L * 1024L;
 
         public void Open(OAuth20Token token)
         {
@@ -71,28 +76,28 @@ namespace ASC.Files.Thirdparty.GoogleDrive
             _token = token;
 
             var tokenResponse = new TokenResponse
-                {
-                    AccessToken = _token.AccessToken,
-                    RefreshToken = _token.RefreshToken,
-                    IssuedUtc = _token.Timestamp,
-                    ExpiresInSeconds = _token.ExpiresIn,
-                    TokenType = "Bearer"
-                };
+            {
+                AccessToken = _token.AccessToken,
+                RefreshToken = _token.RefreshToken,
+                IssuedUtc = _token.Timestamp,
+                ExpiresInSeconds = _token.ExpiresIn,
+                TokenType = "Bearer"
+            };
 
             var apiCodeFlow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
+            {
+                ClientSecrets = new ClientSecrets
                 {
-                    ClientSecrets = new ClientSecrets
-                        {
-                            ClientId = _token.ClientID,
-                            ClientSecret = _token.ClientSecret
-                        },
-                    Scopes = new[] { DriveService.Scope.Drive }
-                });
+                    ClientId = _token.ClientID,
+                    ClientSecret = _token.ClientSecret
+                },
+                Scopes = new[] { DriveService.Scope.Drive }
+            });
 
             _driveService = new DriveService(new BaseClientService.Initializer
-                {
-                    HttpClientInitializer = new UserCredential(apiCodeFlow, string.Empty, tokenResponse)
-                });
+            {
+                HttpClientInitializer = new UserCredential(apiCodeFlow, string.Empty, tokenResponse)
+            });
 
             IsOpened = true;
         }
@@ -167,13 +172,14 @@ namespace ASC.Files.Thirdparty.GoogleDrive
             return files;
         }
 
-        public Stream DownloadStream(DriveFile file, int offset = 0)
+        public Stream DownloadStream(DriveFile file, int offset, out long length)
         {
             if (file == null) throw new ArgumentNullException("file");
 
             var downloadArg = string.Format("{0}?alt=media", file.Id);
 
             var ext = MimeMapping.GetExtention(file.MimeType);
+            var converted = false;
             if (GoogleLoginProvider.GoogleDriveExt.Contains(ext))
             {
                 var internalExt = FileUtility.GetGoogleDownloadableExtension(ext);
@@ -182,6 +188,7 @@ namespace ASC.Files.Thirdparty.GoogleDrive
                 downloadArg = string.Format("{0}/export?mimeType={1}",
                                             file.Id,
                                             HttpUtility.UrlEncode(requiredMimeType));
+                converted = true;
             }
 
             var request = WebRequest.Create(GoogleLoginProvider.GoogleUrlFile + downloadArg);
@@ -190,12 +197,13 @@ namespace ASC.Files.Thirdparty.GoogleDrive
 
             var response = (HttpWebResponse)request.GetResponse();
 
-            if (offset == 0 && file.Size.HasValue && file.Size > 0)
+            if (!converted && offset == 0 && file.Size.HasValue && file.Size > 0)
             {
+                length = file.Size.Value;
                 return new ResponseStream(response.GetResponseStream(), file.Size.Value);
             }
 
-            var tempBuffer = new FileStream(Path.GetTempFileName(), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 8096, FileOptions.DeleteOnClose);
+            var tempBuffer = TempStream.Create();
             using (var str = response.GetResponseStream())
             {
                 if (str != null)
@@ -205,6 +213,8 @@ namespace ASC.Files.Thirdparty.GoogleDrive
                     tempBuffer.Seek(offset, SeekOrigin.Begin);
                 }
             }
+
+            length = tempBuffer.Length;
 
             return tempBuffer;
         }
@@ -353,7 +363,7 @@ namespace ASC.Files.Thirdparty.GoogleDrive
             return uploadSession;
         }
 
-        public void Transfer(ResumableUploadSession googleDriveSession, Stream stream, long chunkLength)
+        public void Transfer(ResumableUploadSession googleDriveSession, Stream stream, long chunkLength, bool lastChunk)
         {
             if (stream == null)
                 throw new ArgumentNullException("stream");
@@ -365,10 +375,21 @@ namespace ASC.Files.Thirdparty.GoogleDrive
             request.Method = "PUT";
             request.ContentLength = chunkLength;
             request.Headers.Add("Authorization", "Bearer " + AccessToken);
-            request.Headers.Add("Content-Range", string.Format("bytes {0}-{1}/{2}",
+            if (googleDriveSession.BytesToTransfer > 0)
+            {
+                request.Headers.Add("Content-Range", string.Format("bytes {0}-{1}/{2}",
                                                                googleDriveSession.BytesTransfered,
                                                                googleDriveSession.BytesTransfered + chunkLength - 1,
                                                                googleDriveSession.BytesToTransfer));
+            }
+            else
+            {
+                var bytesToTransfer = lastChunk ? (googleDriveSession.BytesTransfered + chunkLength).ToString() : "*";
+                request.Headers.Add("Content-Range", string.Format("bytes {0}-{1}/{2}",
+                                                               googleDriveSession.BytesTransfered,
+                                                               googleDriveSession.BytesTransfered + chunkLength - 1,
+                                                               bytesToTransfer));
+            }
 
             using (var requestStream = request.GetRequestStream())
             {
@@ -382,7 +403,7 @@ namespace ASC.Files.Thirdparty.GoogleDrive
             }
             catch (WebException exception)
             {
-                if (exception.Status == WebExceptionStatus.ProtocolError)
+                if (exception.Status == WebExceptionStatus.ProtocolError || exception.Status == WebExceptionStatus.UnknownError) //Status is UnknownError (unix)
                 {
                     if (exception.Response != null && exception.Response.Headers.AllKeys.Contains("Range"))
                     {

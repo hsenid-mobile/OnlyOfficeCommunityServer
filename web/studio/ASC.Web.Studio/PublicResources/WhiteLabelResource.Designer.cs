@@ -19,7 +19,7 @@ namespace ASC.Web.Studio.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class WhiteLabelResource {
@@ -115,11 +115,20 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Logo for the About/Login page.
+        ///   Looks up a localized string similar to Logo for the Login page - dark theme.
         /// </summary>
-        public static string LogoDark {
+        public static string LoginPageLogoDark {
             get {
-                return ResourceManager.GetString("LogoDark", resourceCulture);
+                return ResourceManager.GetString("LoginPageLogoDark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Logo for the Login page - light theme.
+        /// </summary>
+        public static string LoginPageLogoLight {
+            get {
+                return ResourceManager.GetString("LoginPageLogoLight", resourceCulture);
             }
         }
         
@@ -129,6 +138,15 @@ namespace ASC.Web.Studio.PublicResources {
         public static string LogoDocsEditor {
             get {
                 return ResourceManager.GetString("LogoDocsEditor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Logo for the editors header - embedded mode.
+        /// </summary>
+        public static string LogoDocsEditorEmbed {
+            get {
+                return ResourceManager.GetString("LogoDocsEditorEmbed", resourceCulture);
             }
         }
         
@@ -160,7 +178,7 @@ namespace ASC.Web.Studio.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to We recommended that you use images in {0}PNG{1} format with transparent background.
+        ///   Looks up a localized string similar to Use {0}PNG{1} images with a transparent background..
         /// </summary>
         public static string LogoUploadRecommendation {
             get {

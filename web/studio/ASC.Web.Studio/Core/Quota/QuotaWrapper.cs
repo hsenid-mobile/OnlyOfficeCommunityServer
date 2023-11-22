@@ -1,6 +1,6 @@
-/*
+﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+
 using ASC.Core;
+using ASC.Core.Users;
 using ASC.Web.Core;
 using ASC.Web.Studio.UserControls.Statistics;
 using ASC.Web.Studio.Utility;
@@ -29,21 +31,27 @@ namespace ASC.Web.Studio.Core.Quota
     [DataContract(Name = "quota", Namespace = "")]
     public class QuotaWrapper
     {
+        ///<example type="int" name="storageSize">1073741824</example>
         [DataMember(Name = "storageSize")]
         public ulong StorageSize { get; set; }
 
+        ///<example type="int" name="maxFileSize">26214400</example>
         [DataMember(Name = "maxFileSize")]
         public ulong MaxFileSize { get; set; }
 
+        ///<example type="int" name="usedSize">262144000</example>
         [DataMember(Name = "usedSize")]
         public ulong UsedSize { get; set; }
 
+        ///<example type="int" name="maxUsersCount">0</example>
         [DataMember(Name = "maxUsersCount")]
         public int MaxUsersCount { get; set; }
 
+        ///<example type="int" name="usersCount">0</example>
         [DataMember(Name = "usersCount")]
         public int UsersCount { get; set; }
 
+        ///<example type="int" name="availableSize">0</example>
         [DataMember(Name = "availableSize")]
         public ulong AvailableSize
         {
@@ -74,6 +82,11 @@ namespace ASC.Web.Studio.Core.Quota
             set { throw new NotImplementedException(); }
         }
 
+        [DataMember(Name = "maxVisitors")]
+        public long MaxVisitors { get; set; }
+
+        [DataMember(Name = "visitorsCount")]
+        public long VisitorsCount { get; set; }
 
         public static QuotaWrapper GetCurrent()
         {
@@ -81,16 +94,19 @@ namespace ASC.Web.Studio.Core.Quota
             var quotaRows = TenantStatisticsProvider.GetQuotaRows(TenantProvider.CurrentTenantID).ToList();
 
             var result = new QuotaWrapper
-                {
-                    StorageSize = (ulong)Math.Max(0, quota.MaxTotalSize),
-                    UsedSize = (ulong)Math.Max(0, quotaRows.Sum(r => r.Counter)),
-                    MaxUsersCount = TenantExtra.GetTenantQuota().ActiveUsers,
-                    UsersCount = CoreContext.Configuration.Personal ? 1 : TenantStatisticsProvider.GetUsersCount(),
+            {
+                StorageSize = (ulong)Math.Max(0, quota.MaxTotalSize),
+                UsedSize = (ulong)Math.Max(0, quotaRows.Sum(r => r.Counter)),
+                MaxUsersCount = quota.ActiveUsers,
+                UsersCount = CoreContext.Configuration.Personal ? 1 : TenantStatisticsProvider.GetUsersCount(),
+                MaxVisitors = CoreContext.Configuration.Standalone ? -1 : Constants.CoefficientOfVisitors * quota.ActiveUsers,
+                VisitorsCount = CoreContext.Configuration.Personal ? 0 : TenantStatisticsProvider.GetVisitorsCount(),
 
-                    StorageUsage = quotaRows
+
+                StorageUsage = quotaRows
                         .Select(x => new QuotaUsage { Path = x.Path.TrimStart('/').TrimEnd('/'), Size = x.Counter, })
                         .ToList()
-                };
+            };
 
             if (CoreContext.Configuration.Personal && SetupInfo.IsVisibleSettings("PersonalMaxSpace"))
             {
@@ -109,16 +125,16 @@ namespace ASC.Web.Studio.Core.Quota
         public static QuotaWrapper GetSample()
         {
             return new QuotaWrapper
-                {
-                    MaxFileSize = 25 * 1024 * 1024,
-                    StorageSize = 1024 * 1024 * 1024,
-                    UsedSize = 250 * 1024 * 1024,
-                    StorageUsage = new List<QuotaUsage>
+            {
+                MaxFileSize = 25 * 1024 * 1024,
+                StorageSize = 1024 * 1024 * 1024,
+                UsedSize = 250 * 1024 * 1024,
+                StorageUsage = new List<QuotaUsage>
                         {
                             new QuotaUsage { Size = 100*1024*1024, Path = "crm" },
                             new QuotaUsage { Size = 150*1024*1024, Path = "files" }
                         }
-                };
+            };
         }
 
 

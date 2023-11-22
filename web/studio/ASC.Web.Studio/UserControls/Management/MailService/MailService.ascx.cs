@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 using System;
 using System.Web;
 using System.Web.UI;
+
 using ASC.Core;
 using ASC.Data.Storage;
 using ASC.Web.Core.Mail;
@@ -42,7 +43,7 @@ namespace ASC.Web.Studio.UserControls.Management
         {
             AjaxPro.Utility.RegisterTypeForAjax(GetType(), Page);
             Page.RegisterBodyScripts("~/UserControls/Management/MailService/js/mailservice.js");
-            Page.ClientScript.RegisterClientScriptBlock(GetType(), "mailservice_style", "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + WebPath.GetPath("UserControls/Management/MailService/css/mailservice.css") + "\">", false);
+            Page.ClientScript.RegisterClientScriptBlock(GetType(), "mailservice_style", "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + WebPath.GetPath("UserControls/Management/MailService/css/mailservice.less") + "\">", false);
 
             var mailServerInfo = CoreContext.Configuration.Standalone ? MailServiceHelper.GetMailServerInfo() : null;
 
@@ -71,7 +72,7 @@ namespace ASC.Web.Studio.UserControls.Management
                     if (connectionPart.StartsWith("User ID="))
                         User = connectionPart.Replace("User ID=", "");
 
-                    if(connectionPart.StartsWith("Password="))
+                    if (connectionPart.StartsWith("Password="))
                         Password = connectionPart.Replace("Password=", "");
                 }
             }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,20 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+
 using ASC.Common.Threading.Progress;
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.Data.Storage;
 using ASC.Mail.Core.Engine;
 using ASC.MessagingSystem;
-using ASC.Web.CRM.Core;
 using ASC.Web.Core;
+using ASC.Web.CRM.Core;
 using ASC.Web.Files.Services.WCFService;
 using ASC.Web.Studio.Core.Notify;
+
 using Autofac;
+
 using CrmDaoFactory = ASC.CRM.Core.Dao.DaoFactory;
 
 namespace ASC.Data.Reassigns
@@ -51,11 +54,23 @@ namespace ASC.Data.Reassigns
         private readonly IFileStorageService _docService;
         private readonly MailGarbageEngine _mailEraser;
 
+
+        ///<example type="int">123124</example>
         public object Id { get; set; }
+
+        ///<example type="int">1</example>
         public object Status { get; set; }
+
+        ///<example>error</example>
         public object Error { get; set; }
+
+        ///<example type="double">55.5</example>
         public double Percentage { get; set; }
+
+        ///<example>false</example>
         public bool IsCompleted { get; set; }
+
+        ///<example>f528a377-b268-4cdb-8209-91d0fa1417c2</example>
         public Guid FromUser { get { return _userId; } }
 
         public RemoveProgressItem(HttpContext context, int tenantId, UserInfo user, Guid currentUserId, bool notify)
@@ -89,7 +104,7 @@ namespace ASC.Data.Reassigns
                 Status = ProgressStatus.Started;
 
                 CoreContext.TenantManager.SetCurrentTenant(_tenantId);
-                SecurityContext.AuthenticateMe(Core.Configuration.Constants.CoreSystem);
+                SecurityContext.CurrentAccount = Core.Configuration.Constants.CoreSystem;
 
                 long docsSpace, crmSpace, mailSpace, talkSpace;
                 GetUsageSpace(out docsSpace, out mailSpace, out talkSpace);
@@ -99,7 +114,7 @@ namespace ASC.Data.Reassigns
                 logger.Info("deleting of data from documents");
 
                 Percentage = 25;
-                _docService.DeleteStorage(_userId);
+                _docService.DeleteStorage(_userId, _currentUserId);
 
                 logger.Info("deleting of data from crm");
 
@@ -137,7 +152,7 @@ namespace ASC.Data.Reassigns
             {
                 logger.Info("data deletion is complete");
                 IsCompleted = true;
-                SecurityContext.AuthenticateMe(_currentUserId);
+                SecurityContext.CurrentUser = _currentUserId;
             }
         }
 
@@ -196,7 +211,7 @@ namespace ASC.Data.Reassigns
 
             if (storage != null && storage.IsDirectory(md5Hash))
             {
-                storage.DeleteDirectory(md5Hash);
+                storage.DeleteDirectory(_userId, md5Hash);
             }
         }
 
@@ -208,7 +223,7 @@ namespace ASC.Data.Reassigns
 
             if (_httpHeaders != null)
                 MessageService.Send(_httpHeaders, MessageAction.UserDataRemoving, MessageTarget.Create(_userId),
-                                    new[] {_userName});
+                                    new[] { _userName });
             else
                 MessageService.Send(_context.Request, MessageAction.UserDataRemoving, MessageTarget.Create(_userId),
                                     _userName);

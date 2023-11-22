@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,17 @@
 */
 
 
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Text;
+using System.Web.UI;
+
+using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Billing;
+using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.Web.Core;
 using ASC.Web.Core.Utility;
@@ -24,17 +33,10 @@ using ASC.Web.Core.Utility.Skins;
 using ASC.Web.Core.WebZones;
 using ASC.Web.Core.WhiteLabel;
 using ASC.Web.Studio.Core;
+using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Management;
 using ASC.Web.Studio.UserControls.Statistics;
 using ASC.Web.Studio.Utility;
-using Resources;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Web.UI;
-using ASC.Common.Logging;
 
 namespace ASC.Web.Studio.UserControls.Common
 {
@@ -48,6 +50,7 @@ namespace ASC.Web.Studio.UserControls.Common
         protected UserInfo CurrentUser;
         protected bool DisplayModuleList;
         protected bool UserInfoVisible;
+        protected bool IsImpersonator;
 
         public bool? DisableUserInfo;
 
@@ -66,7 +69,7 @@ namespace ASC.Web.Studio.UserControls.Common
                 if (!String.IsNullOrEmpty(_topLogo)) return _topLogo;
 
                 _topLogo = CoreContext.Configuration.Personal && !CoreContext.Configuration.CustomMode ?
-                    WebImageSupplier.GetAbsoluteWebPath("personal_logo/logo_personal.png") :
+                    WebImageSupplier.GetAbsoluteWebPath("personal_logo/logo_personal.svg") :
                     TenantLogoManager.GetTopLogo(!TenantLogoManager.IsRetina(Request));
 
                 return _topLogo;
@@ -79,31 +82,33 @@ namespace ASC.Web.Studio.UserControls.Common
             get
             {
                 if (CoreContext.Configuration.Personal && !CoreContext.Configuration.CustomMode)
-                    return String.Format("height:72px; width: 220px; background: url('{0}') no-repeat;",
-                                         WebImageSupplier.GetAbsoluteWebPath("personal_logo/logo_personal_auth_old.png"));
+                    return String.Format("height:48px; width: 334px; background: url('{0}') no-repeat;",
+                                         WebImageSupplier.GetAbsoluteWebPath("personal_logo/logo_personal_about.svg"));
 
                 var general = !TenantLogoManager.IsRetina(Request);
-
                 var height = TenantWhiteLabelSettings.logoDarkSize.Height / 2;
-
                 var width = TenantWhiteLabelSettings.logoDarkSize.Width / 2;
-
-                if (TenantLogoManager.WhiteLabelEnabled)
-                {
-                    return String.Format("height:{0}px; width: {1}px; background: url('{2}') no-repeat; background-size: {1}px {0}px;",
-                                         height, width, TenantLogoManager.GetLogoDark(general));
-                }
+                var theme = ModeThemeSettings.GetModeThemesSettings().ModeThemeName;
+                var path = theme == ModeTheme.light ? TenantLogoManager.GetLogoAboutDark(general) : TenantLogoManager.GetLogoAboutLight(general);
 
                 return String.Format("height:{0}px; width: {1}px; background: url('{2}') no-repeat; background-size: {1}px {0}px;",
-                                     height, width, TenantWhiteLabelSettings.GetAbsoluteDefaultLogoPath(WhiteLabelLogoTypeEnum.Dark,general));
+                                     height, width, path);
             }
         }
 
-        protected string VersionNumber {
+        protected string VersionNumber
+        {
             get
             {
                 return ConfigurationManagerExtension.AppSettings["version.number"] ?? String.Empty;
-                  
+
+            }
+        }
+        protected bool EnableAppServer
+        {
+            get
+            {
+                return SetupInfo.EnableAppServer;
             }
         }
         protected IEnumerable<IWebItem> SearchProducts { get; set; }
@@ -133,6 +138,8 @@ namespace ASC.Web.Studio.UserControls.Common
         protected IEnumerable<IWebItem> Addons { get; set; }
         protected List<IWebItem> CustomModules { get; set; }
         protected IEnumerable<CustomNavigationItem> CustomNavigationItems { get; set; }
+
+        protected bool Startup { get; set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -166,10 +173,11 @@ namespace ASC.Web.Studio.UserControls.Common
             }
 
             if (!SecurityContext.IsAuthenticated
-                || !TenantExtra.EnableTarrifSettings
+                || !TenantExtra.EnableTariffSettings
                 || CoreContext.Configuration.Personal
                 || CurrentUser.IsVisitor()
-                || (!CurrentUser.IsAdmin() && (TariffSettings.HidePricingPage || CoreContext.Configuration.Standalone)))
+                || (!CurrentUser.IsAdmin() && (TariffSettings.HidePricingPage || CoreContext.Configuration.Standalone))
+                || (CurrentUser.IsAdmin() && CoreContext.Configuration.Standalone && TenantControlPanelSettings.Instance.LimitedAccess))
             {
                 DisableTariff = true;
             }
@@ -190,8 +198,8 @@ namespace ASC.Web.Studio.UserControls.Common
                 foreach (var webItem in productsList)
                 {
                     if (webItem.ID != WebItemManager.DocumentsProductID
-                        && webItem.ID != WebItemManager.ProjectsProductID 
-                        && webItem.ID != WebItemManager.CRMProductID 
+                        && webItem.ID != WebItemManager.ProjectsProductID
+                        && webItem.ID != WebItemManager.CRMProductID
                         && webItem.ID != WebItemManager.PeopleProductID
                         && webItem.ID != WebItemManager.CommunityProductID)
                     {
@@ -292,6 +300,10 @@ namespace ASC.Web.Studio.UserControls.Common
                     string.IsNullOrEmpty(SetupInfo.ControlPanelUrl)
                     || OpensourceGiftSettings.LoadForCurrentUser().Readed;
             }
+
+            Startup = !CoreContext.Configuration.CustomMode && TenantExtra.Saas && TenantExtra.GetTenantQuota().Free;
+
+            IsImpersonator = ImpersonationSettings.IsImpersonator();
         }
 
         #region currentProduct
@@ -336,8 +348,8 @@ namespace ASC.Web.Studio.UserControls.Common
                     int managementType;
 
                     if (Int32.TryParse(Request["type"], out managementType) &&
-                        Enum.IsDefined(typeof (ManagementType), managementType) &&
-                        (ManagementType) managementType == ManagementType.ThirdPartyAuthorization)
+                        Enum.IsDefined(typeof(ManagementType), managementType) &&
+                        (ManagementType)managementType == ManagementType.ThirdPartyAuthorization)
                     {
                         CurrentProductClassName = "apps";
                         CurrentProductName = Resource.Apps;
@@ -407,11 +419,11 @@ namespace ASC.Web.Studio.UserControls.Common
                 sb.Append(rendered);
             }
 
-/*            rendered = VoipNavigation.RenderCustomNavigation(Page);
-            if (!string.IsNullOrEmpty(rendered))
-            {
-                sb.Append(rendered);
-            }*/
+            /*            rendered = VoipNavigation.RenderCustomNavigation(Page);
+                        if (!string.IsNullOrEmpty(rendered))
+                        {
+                            sb.Append(rendered);
+                        }*/
 
             return sb.ToString();
         }

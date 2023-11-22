@@ -1,5 +1,7 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="ConfirmPortalActivity.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Management.ConfirmPortalActivity" %>
 
+<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+
 <div class="header-base"><%=_title%></div>        
 
 <asp:PlaceHolder ID="_confirmContentHolder" runat="server">
@@ -10,7 +12,7 @@
             <%=_buttonTitle%>
         </a>
         <span class="splitter-buttons"></span>
-        <a class="button gray big" href="./" ><%=Resources.Resource.CancelButton %></a>
+        <a class="button gray big" href="./" ><%=Resource.CancelButton %></a>
     </div>
 </asp:PlaceHolder>
 
@@ -30,7 +32,7 @@
                     toastr.error(response.error.Message);
                     jq(".big-button-container .button.blue:first").removeClass("disable");
                 } else {
-                    var resp = jq.parseJSON(response.value);
+                    var resp = JSON.parse(response.value);
 
                     jq(".big-button-container").hide();
                     jq("#successMessagePortalRemove").html(resp.successMessage).show();

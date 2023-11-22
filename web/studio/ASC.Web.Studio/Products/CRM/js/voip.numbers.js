@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -319,7 +319,7 @@ ASC.CRM.Voip.NumbersView = (function ($) {
 
         buttonObj.on("click", function(e) {
             e.preventDefault();
-            jq("#fileupload_" + audioType).click();
+            jq("#fileupload_" + audioType).trigger("click");
         });
 
         return inputObj;
@@ -336,17 +336,17 @@ ASC.CRM.Voip.NumbersView = (function ($) {
 
     function correctFile(file) {
         if (getFileExtension(file.name) != ".mp3") {
-            toastr.error(ASC.Resources.Master.Resource.UploadVoipRingtoneFileFormatErrorMsg);
+            toastr.error(ASC.Resources.Master.ResourceJS.UploadVoipRingtoneFileFormatErrorMsg);
             return false;
         }
 
         if (file.size <= 0) {
-            toastr.error(ASC.Resources.Master.Resource.UploadVoipRingtoneEmptyFileErrorMsg);
+            toastr.error(ASC.Resources.Master.ResourceJS.UploadVoipRingtoneEmptyFileErrorMsg);
             return false;
         }
 
         if (file.size > 20 * 1024 * 1024) {
-            toastr.error(ASC.Resources.Master.Resource.UploadVoipRingtoneFileSizeErrorMsg);
+            toastr.error(ASC.Resources.Master.ResourceJS.UploadVoipRingtoneFileSizeErrorMsg);
             return false;
         }
 
@@ -378,12 +378,12 @@ ASC.CRM.Voip.NumbersView = (function ($) {
                 }
             })
             .bind("fileuploaddone", function(e, data) {
-                var response = $.parseJSON(data.result);
+                var response = JSON.parse(data.result);
                 if (!response.Success || !response.Data) {
                     if (response.Message) {
                         toastr.error(response.Message);
                     } else {
-                        toastr.error(ASC.Resources.Master.Resource.UploadVoipRingtoneFileErrorMsg);
+                        toastr.error(ASC.Resources.Master.ResourceJS.UploadVoipRingtoneFileErrorMsg);
                     }
                     hideLoader();
                     return;
@@ -410,7 +410,7 @@ ASC.CRM.Voip.NumbersView = (function ($) {
             })
             .bind("fileuploadfail", function() {
                 hideLoader();
-                toastr.error(ASC.Resources.Master.Resource.UploadVoipRingtoneFileErrorMsg);
+                toastr.error(ASC.Resources.Master.ResourceJS.UploadVoipRingtoneFileErrorMsg);
             })
             .bind("fileuploadstart", showLoader)
             .bind("fileuploadstop", hideLoader);
@@ -452,9 +452,9 @@ ASC.CRM.Voip.NumbersView = (function ($) {
         bindUploader('hold-ringtone-load-btn', 1, 'hold-ringtone-selector');
         bindUploader('voicemail-ringtone-load-btn', 2, 'voicemail-ringtone-selector');
 
-        $numberSettingsBox.find('#greeting-ringtone-player').bind('ended', recorPlayerEndedHandler);
-        $numberSettingsBox.find('#hold-ringtone-player').bind('ended', recorPlayerEndedHandler);
-        $numberSettingsBox.find('#voicemail-ringtone-player').bind('ended', recorPlayerEndedHandler);
+        $numberSettingsBox.find('#greeting-ringtone-player').on('ended', recorPlayerEndedHandler);
+        $numberSettingsBox.find('#hold-ringtone-player').on('ended', recorPlayerEndedHandler);
+        $numberSettingsBox.find('#voicemail-ringtone-player').on('ended', recorPlayerEndedHandler);
     };
 
     function renderOperators() {
@@ -571,12 +571,12 @@ ASC.CRM.Voip.NumbersView = (function ($) {
     function workHoursChangedHandler(e) {
         var wasOn = quickSettingChangedHandler(e);
         if (wasOn) {
-            $workingHoursFromInput.add($workingHoursToInput).val("").attr("disabled", "disabled");
+            $workingHoursFromInput.add($workingHoursToInput).val("").prop("disabled", true);
         } else {
-            $workingHoursFromInput.add($workingHoursToInput).removeAttr("disabled");
+            $workingHoursFromInput.add($workingHoursToInput).prop("disabled", false);
             $workingHoursFromInput.val("6:00");
             $workingHoursToInput.val("23:00");
-            $workingHoursFromInput.focus();
+            $workingHoursFromInput.trigger("focus");
         }
 
     };
@@ -798,11 +798,11 @@ ASC.CRM.Voip.NumbersView = (function ($) {
     };
 
     function showSuccessOpearationMessage() {
-        toastr.success(ASC.Resources.Master.Resource.ChangesSuccessfullyAppliedMsg);
+        toastr.success(ASC.Resources.Master.ResourceJS.ChangesSuccessfullyAppliedMsg);
     };
 
     function showErrorMessage() {
-        toastr.error(ASC.Resources.Master.Resource.CommonJSErrorMsg);
+        toastr.error(ASC.Resources.Master.ResourceJS.CommonJSErrorMsg);
     };
 
     //#endregion

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@
 using System;
 using System.Web;
 using System.Web.UI;
+
 using AjaxPro;
+
 using ASC.Core;
 using ASC.Core.Users;
 using ASC.MessagingSystem;
@@ -27,10 +29,11 @@ using ASC.Web.Core;
 using ASC.Web.Core.Security;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Core.TFA;
+using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Common;
 using ASC.Web.Studio.Utility;
+
 using Google.Authenticator;
-using Resources;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -53,24 +56,25 @@ namespace ASC.Web.Studio.UserControls.Management
         protected override void OnPreRender(EventArgs e)
         {
             if (Activation) return;
-            if (SecurityContext.IsAuthenticated) Response.Redirect(GetRefererURL());
+            if (SecurityContext.IsAuthenticated) Response.Redirect(Context.GetRefererURL());
         }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (SecurityContext.IsAuthenticated && User.ID != SecurityContext.CurrentAccount.ID)
             {
-                Response.Redirect(GetRefererURL(), true);
+                Response.Redirect(Context.GetRefererURL(), true);
                 return;
             }
-            if (!TfaAppAuthSettings.IsVisibleSettings || !TfaAppAuthSettings.Enable)
+
+            if (!TfaAppAuthSettings.IsVisibleSettings || !TfaAppAuthSettings.TfaEnabledForUser(User.ID))
             {
-                Response.Redirect(GetRefererURL(), true);
+                Response.Redirect(Context.GetRefererURL(), true);
                 return;
             }
             if (!Activation && !TfaAppUserSettings.EnableForUser(User.ID))
             {
-                Response.Redirect(GetRefererURL(), true);
+                Response.Redirect(Context.GetRefererURL(), true);
                 return;
             }
 
@@ -85,7 +89,7 @@ namespace ASC.Web.Studio.UserControls.Management
 
             if (Activation)
             {
-                SetupCode = User.GenerateSetupCode(300);
+                SetupCode = User.GenerateSetupCode();
             }
         }
 
@@ -99,7 +103,7 @@ namespace ASC.Web.Studio.UserControls.Management
             var queryString = HttpUtility.ParseQueryString(query);
 
             var email = (queryString["email"] ?? "").Trim();
-            var type = typeof (ConfirmType).TryParseEnum(queryString["type"] ?? "", ConfirmType.EmpInvite);
+            var type = typeof(ConfirmType).TryParseEnum(queryString["type"] ?? "", ConfirmType.EmpInvite);
             var checkKeyResult = EmailValidationKeyProvider.ValidateEmailKey(email + type, queryString["key"], SetupInfo.ValidAuthKeyInterval);
 
             if (checkKeyResult == EmailValidationKeyProvider.ValidationResult.Expired)
@@ -116,17 +120,6 @@ namespace ASC.Web.Studio.UserControls.Management
             return user;
         }
 
-        private string GetRefererURL()
-        {
-            var refererURL = (string)Context.Session["refererURL"];
-            Context.Session["refererURL"] = null;
-
-            if (string.IsNullOrEmpty(refererURL))
-                refererURL = CommonLinkUtility.GetDefault();
-
-            return refererURL;
-        }
-
         [SecurityPassthrough]
         [AjaxMethod(HttpSessionStateRequirement.ReadWrite)]
         public object ValidateTfaCode(string query, string code)
@@ -137,8 +130,6 @@ namespace ASC.Web.Studio.UserControls.Management
             try
             {
                 newBackupCodes = user.ValidateAuthCode(code, !Activation);
-
-                MessageService.Send(HttpContext.Current.Request, MessageAction.LoginSuccesViaTfaApp);
             }
             catch (Authorize.BruteForceCredentialException)
             {
@@ -151,7 +142,11 @@ namespace ASC.Web.Studio.UserControls.Management
                 throw;
             }
 
-            var refererUrl = GetRefererURL();
+            var refererUrl = HttpUtility.ParseQueryString(query)["refererurl"];
+            if (string.IsNullOrEmpty(refererUrl))
+            {
+                refererUrl = Context.GetRefererURL();
+            }
 
             if (newBackupCodes)
             {
@@ -160,7 +155,7 @@ namespace ASC.Web.Studio.UserControls.Management
                 refererUrl = CommonLinkUtility.GetUserProfile(user.ID) + "#codes";
             }
 
-            if (query.Contains("desktop="))
+            if (query.Contains("desktop=true"))
             {
                 refererUrl = CommonLinkUtility.GetFullAbsolutePath(WebItemManager.Instance[WebItemManager.DocumentsProductID].StartURL + "?desktop=true");
             }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ using System.Reflection;
 
 using ASC.Common.Logging;
 using ASC.Common.Module;
+using ASC.Core.Common.Contracts;
+
+using LogManager = ASC.Common.Logging.BaseLogManager;
 
 namespace ASC.Thumbnails.Svc
 {
@@ -30,7 +33,10 @@ namespace ASC.Thumbnails.Svc
     {
         private ProcessStartInfo startInfo;
         private Process proc;
+        private HealthCheckSvc HealthCheckSvc;
         private static readonly ILog Logger = LogManager.GetLogger("ASC");
+        private const string ResultOfPing = "OK";
+        private const string PathToPing = "/isLife";
 
         public void Start()
         {
@@ -58,6 +64,8 @@ namespace ASC.Thumbnails.Svc
                 startInfo.EnvironmentVariables.Add("savePath", Path.GetFullPath(savePath));
 
                 StartNode();
+                HealthCheckSvc = new HealthCheckSvc(cfg.Port, ResultOfPing, Logger, PathToPing);
+                HealthCheckSvc.StartPing();
             }
             catch (Exception e)
             {
@@ -71,6 +79,8 @@ namespace ASC.Thumbnails.Svc
             {
                 if (proc != null && !proc.HasExited)
                 {
+                    HealthCheckSvc.StopPing();
+
                     proc.Kill();
                     proc.WaitForExit(10000);
 

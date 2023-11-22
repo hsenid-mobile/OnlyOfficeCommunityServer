@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  *
 */
 
+
+using System.Collections.Generic;
 
 namespace ASC.Common.Data.Sql.Expressions
 {
@@ -39,7 +41,7 @@ namespace ASC.Common.Data.Sql.Expressions
                                  string.IsNullOrEmpty(alias) ? string.Empty : " as " + alias);
         }
 
-        public override object[] GetParameters()
+        public override IEnumerable<object> GetParameters()
         {
             return subQuery.GetParameters();
         }

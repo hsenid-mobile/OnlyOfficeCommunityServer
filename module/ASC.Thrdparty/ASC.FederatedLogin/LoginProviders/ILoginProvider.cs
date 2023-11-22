@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
 */
 
 
-using ASC.FederatedLogin.Profile;
 using System.Collections.Generic;
 using System.Web;
+
+using ASC.FederatedLogin.Profile;
 
 namespace ASC.FederatedLogin.LoginProviders
 {
@@ -26,6 +27,10 @@ namespace ASC.FederatedLogin.LoginProviders
         LoginProfile ProcessAuthoriztion(HttpContext context, IDictionary<string, string> @params);
 
         LoginProfile GetLoginProfile(string accessToken);
+
+        LoginProfile GetLoginProfile(OAuth20Token token);
+
+        OAuth20Token GetToken(string codeOAuth);
     }
 
     public interface IOAuthProvider
@@ -40,7 +45,7 @@ namespace ASC.FederatedLogin.LoginProviders
 
         string ClientID { get; }
 
-        string ClientSecret {get; }
+        string ClientSecret { get; }
 
         bool IsEnabled { get; }
     }

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ namespace ASC.Api.Utils
                     var value = GetValue(GetName(propertyInfo), values, prefix);
                     if (value != null)
                     {
-                        propertyInfo.SetValue(binded, ConvertUtils.GetConverted(value,propertyInfo), null);
+                        propertyInfo.SetValue(binded, ConvertUtils.GetConverted(value, propertyInfo), null);
                         isBinded = true;
                     }
                 }
@@ -159,6 +159,7 @@ namespace ASC.Api.Utils
                             if (result != null)
                             {
                                 propertyInfo.SetValue(binded, result, null);
+                                isBinded = true;
                                 break;
                             }
                         }
@@ -182,9 +183,10 @@ namespace ASC.Api.Utils
         {
             return new[]
                        {
-                           name, 
+                           name,
                            StringUtils.ToCamelCase(name),
-                           name.ToLower()
+                           name.ToLower(),
+                           name.ToLowerInvariant()
                        };
         }
 
@@ -209,8 +211,9 @@ namespace ASC.Api.Utils
 
         private static readonly ConcurrentDictionary<string, Regex> CollectionPrefixCache = new ConcurrentDictionary<string, Regex>();
 
-        private static void BindCollection(string prefix, IList collection, NameValueCollection values)
+        private static bool BindCollection(string prefix, IList collection, NameValueCollection values)
         {
+            var isBinded = false;
             Regex parse = GetParseRegex(prefix);
 
             //Parse values related to collection
@@ -219,6 +222,7 @@ namespace ASC.Api.Utils
                        let match = parse.Match(key)
                        group key by string.IsNullOrEmpty(match.Groups["pos"].Value) ? (match.Groups["arrleft"].Success ? string.Empty : simple) : match.Groups["pos"].Value into key
                        select key;
+
             foreach (var key in keys)
             {
                 int index;
@@ -238,7 +242,6 @@ namespace ASC.Api.Utils
 
                 if (genericType != null)
                 {
-
                     var newprefix = simple.Equals(key.Key) ? prefix : prefix + "[" + (indexed ? index.ToString(CultureInfo.InvariantCulture) : "") + "]";
                     if (IsSimple(genericType))
                     {
@@ -248,20 +251,24 @@ namespace ASC.Api.Utils
                         {
                             foreach (var collectionValue in collectionValues)
                             {
-                                collection.Add(ConvertUtils.GetConverted(collectionValue,genericType));
+                                collection.Add(ConvertUtils.GetConverted(collectionValue, genericType));
+                                isBinded = true;
                             }
                         }
-
                     }
                     else
                     {
                         var constructed = Bind(genericType, values, newprefix);
                         if (constructed != null)
+                        {
                             collection.Insert(index, constructed);
+                            isBinded = true;
+                        }
                     }
                 }
             }
 
+            return isBinded;
         }
 
         private static Regex GetParseRegex(string prefix)

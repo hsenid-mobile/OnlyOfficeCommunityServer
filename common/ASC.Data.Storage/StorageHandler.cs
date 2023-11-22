@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Routing;
+
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Security.Cryptography;
@@ -88,16 +89,21 @@ namespace ASC.Data.Storage.DiscStorage
 
         public void ProcessRequest(HttpContext context)
         {
+            var path = _path;
+            var header = context.Request[Constants.QUERY_HEADER] ?? "";
+            var headers = header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode) : new string[] { };
+
             if (_checkAuth && !SecurityContext.IsAuthenticated)
             {
-                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                return;
+                var secureKeyHeader = headers.FirstOrDefault(x => x.StartsWith(Constants.SECUREKEY_HEADER));
+                if (!SecureHelper.CheckSecureKeyHeader(secureKeyHeader, path))
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    return;
+                }
             }
 
             var storage = StorageFactory.GetStorage(CoreContext.TenantManager.GetCurrentTenant().TenantId.ToString(CultureInfo.InvariantCulture), _module);
-
-            var path = _path;
-            var header = context.Request[Constants.QUERY_HEADER] ?? "";
 
             var auth = context.Request[Constants.QUERY_AUTH];
             var storageExpire = storage.GetExpire(_domain);
@@ -121,10 +127,10 @@ namespace ASC.Data.Storage.DiscStorage
                 return;
             }
 
-            var headers = header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode) : new string[] { };
-
             const int bigSize = 5 * 1024 * 1024;
-            if (storage.IsSupportInternalUri && bigSize < storage.GetFileSize(_domain, path))
+            var fileSize = storage.GetFileSize(_domain, path);
+            
+            if (storage.IsSupportInternalUri && bigSize < fileSize)
             {
                 var uri = storage.GetInternalUri(_domain, path, TimeSpan.FromMinutes(15), headers);
 
@@ -133,6 +139,20 @@ namespace ASC.Data.Storage.DiscStorage
 
                 context.Response.Redirect(uri.ToString());
                 return;
+            }
+
+            if (storage.TryGetFileEtag(_domain, path, out var etag))
+            {
+                if (string.Equals(context.Request.Headers["If-None-Match"], etag))
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.NotModified;
+                    return;
+                }
+
+                context.Response.CacheControl = "public";
+                context.Response.AppendHeader("Cache-Control", "public");
+                context.Response.Cache.SetETag(etag);
+                context.Response.Cache.SetCacheability(HttpCacheability.Public);
             }
 
             string encoding = null;
@@ -154,45 +174,31 @@ namespace ASC.Data.Storage.DiscStorage
             if (encoding != null)
                 context.Response.Headers["Content-Encoding"] = encoding;
 
-            using (var stream = storage.GetReadStream(_domain, path))
+            if (!context.Response.IsClientConnected)
+            {
+                context.Response.End();
+                return;
+            }
+
+            long offset = 0;
+            var length = ProcessRangeHeader(context, fileSize, ref offset);
+
+            context.Response.AddHeader("Connection", "Keep-Alive");
+            context.Response.AddHeader("Content-Length", length.ToString(CultureInfo.InvariantCulture));
+
+            using (var stream = storage.GetReadStream(_domain, path, offset))
             {
                 context.Response.Buffer = false;
 
-                long offset = 0;
-                long length = stream.Length;
-                if (stream.CanSeek)
+                try
                 {
-                    length = ProcessRangeHeader(context, stream.Length, ref offset);
-                    stream.Seek(offset, SeekOrigin.Begin);
+                    stream.CopyTo(context.Response.OutputStream);
+                    context.Response.Flush();
                 }
-
-                context.Response.AddHeader("Connection", "Keep-Alive");
-                context.Response.AddHeader("Content-Length", length.ToString(CultureInfo.InvariantCulture));
-
-                const int bufferSize = 32 * 1024; // 32KB
-                var buffer = new byte[bufferSize];
-                var toRead = length;
-
-                while (toRead > 0)
+                catch (Exception e)
                 {
-                    int read;
-
-                    try
-                    {
-                        read = stream.Read(buffer, 0, bufferSize);
-
-                        if (!context.Response.IsClientConnected) throw new Exception("StorageHandler: ProcessRequest failed: client disconnected");
-
-                        context.Response.OutputStream.Write(buffer, 0, read);
-                        context.Response.Flush();
-                        toRead -= read;
-                    }
-                    catch (Exception e)
-                    {
-                        LogManager.GetLogger("ASC").Error("storage", e);
-
-                        throw;
-                    }
+                    LogManager.GetLogger("ASC").Debug("StorageHandler.ProcessRequest", e);
+                    context.Response.End();
                 }
             }
         }

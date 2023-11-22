@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace ASC.Api.Calendar.Wrappers
@@ -36,13 +34,14 @@ namespace ASC.Api.Calendar.Wrappers
 
         public static object GetSample()
         {
-            return new { users = new List<object>(){ ASC.Api.Calendar.Wrappers.UserParams.GetSample() } };
+            return new { users = new List<object>() { ASC.Api.Calendar.Wrappers.UserParams.GetSample() } };
         }
     }
 
     [DataContract(Name = "permissions", Namespace = "")]
     public class CalendarPermissions : Permissions
     {
+        ///<type>ASC.Api.Calendar.Wrappers.PublicItemCollection, ASC.Api.Calendar</type>
         [DataMember(Name = "data")]
         public PublicItemCollection Data { get; set; }
 
@@ -55,11 +54,13 @@ namespace ASC.Api.Calendar.Wrappers
     [DataContract(Name = "userparams", Namespace = "")]
     public class UserParams
     {
+        ///<example name="objectId">2fdfe577-3c26-4736-9df9-b5a683bb8520</example>
         [DataMember(Name="objectId")]
-        public Guid Id{get; set;}
+        public Guid Id { get; set; }
 
+        ///<example name="name">Valery Zykov</example>
         [DataMember(Name="name")]
-        public string Name{get; set;}
+        public string Name { get; set; }
 
         public static object GetSample()
         {

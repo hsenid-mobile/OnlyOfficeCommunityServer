@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
 */
 
 
-using ASC.Common.Caching;
-using ASC.Files.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
+
+using ASC.Common.Caching;
+using ASC.Files.Core;
 
 namespace ASC.Files.Thirdparty
 {
@@ -60,6 +61,7 @@ namespace ASC.Files.Thirdparty
             base.RemoveProviderInfo(linkId);
 
             var key = _rootKey + linkId.ToString(CultureInfo.InvariantCulture);
+            RemoveFromCache(key);
             cacheNotify.Publish(new ProviderAccountCacheItem { Key = key }, CacheNotifyAction.Remove);
         }
 
@@ -68,6 +70,7 @@ namespace ASC.Files.Thirdparty
             var result = base.UpdateProviderInfo(linkId, customerTitle, authData, folderType, userId);
 
             var key = _rootKey + linkId.ToString(CultureInfo.InvariantCulture);
+            RemoveFromCache(key);
             cacheNotify.Publish(new ProviderAccountCacheItem { Key = key }, CacheNotifyAction.Update);
             return result;
         }
@@ -77,6 +80,7 @@ namespace ASC.Files.Thirdparty
             var result = base.UpdateProviderInfo(linkId, authData);
 
             var key = _rootKey + linkId.ToString(CultureInfo.InvariantCulture);
+            RemoveFromCache(key);
             cacheNotify.Publish(new ProviderAccountCacheItem { Key = key }, CacheNotifyAction.Update);
             return result;
         }

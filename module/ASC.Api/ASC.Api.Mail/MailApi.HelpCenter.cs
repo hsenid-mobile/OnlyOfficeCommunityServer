@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 
 using System;
+
 using ASC.Api.Attributes;
 using ASC.Web.Studio.UserControls.Common.HelpCenter;
 
@@ -24,11 +25,13 @@ namespace ASC.Api.Mail
     public partial class MailApi
     {
         /// <summary>
-        ///    Returns the string with html of help center page
+        /// Returns the Help Center page HTML.
         /// </summary>
-        /// <returns>String with html of help center page</returns>
-        /// <short>Get html of help center page</short> 
-        /// <category>HelpCenter</category>
+        /// <returns>String with the Help Center page HTML</returns>
+        /// <short>Get the Help Center page HTML</short> 
+        /// <category>Help Center</category>
+        /// <path>api/2.0/mail/helpcenter</path>
+        /// <httpMethod>GET</httpMethod>
         [Read(@"helpcenter")]
         public string GetHelpCenterHtml()
         {

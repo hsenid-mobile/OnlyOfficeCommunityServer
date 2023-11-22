@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,12 @@ var CommentsManagerObj = new function() {
     this._jsObjName = "";
 
     this.onLoadComplete = null;
+
+    var popupBox = new PopupBox("pb_StudioUserProfileInfo", 320, 140, "tintLight", "borderBaseShadow", "",
+        {
+            apiMethodName: "Teamlab.getProfile",
+            tmplName: "userProfileCardTmpl"
+        });
 
     function hideAddButton() {
         jq('#add_comment_btn').addClass("display-none");
@@ -101,7 +107,7 @@ var CommentsManagerObj = new function() {
 
         var text = CommentsManagerObj.editorInstance.getData();
         if (text.trim().length == 0) {
-            toastr.error(ASC.Resources.Master.Resource.EmptyCommentErrorMessage);
+            toastr.error(ASC.Resources.Master.ResourceJS.EmptyCommentErrorMessage);
             return false;
         }
 
@@ -119,7 +125,8 @@ var CommentsManagerObj = new function() {
                         toastr.error(errors[0]);
                     },
                     success: (jq("#hdnAction").val() == "add" ? callBackAddComment : callBackUpdateComment)
-                };
+            };
+            
 
 
             if (jq("#hdnAction").val() == "add") {
@@ -129,26 +136,26 @@ var CommentsManagerObj = new function() {
                     content: CommentsManagerObj.editorInstance.getData()
                 };
 
-                switch (CommentsManagerObj.moduleName) {
-                    case "projects_Message":
-                    case "projects_Task":
-                        data = jq.extend(data, { type: CommentsManagerObj.moduleName .split('_')[1]});
-                        Teamlab.addPrjComment(data, data, ajax_opts);
-                        break;
-                    case "wiki":
-                        data.entityid = jq("#hdnPageName").val();
-                        Teamlab.addWikiComment(data, data, ajax_opts);
-                        break;
-                    case "blogs":
-                        Teamlab.addBlogComment(data, data, ajax_opts);
-                        break;
-                    case "news":
-                        Teamlab.addNewsComment(data, data, ajax_opts);
-                        break;
-                    case "bookmarks":
-                        Teamlab.addBookmarksComment(data, data, ajax_opts);
-                        break;
-                }
+                    switch (CommentsManagerObj.moduleName) {
+                        case "projects_Message":
+                        case "projects_Task":
+                            data = jq.extend(data, { type: CommentsManagerObj.moduleName .split('_')[1]});
+                            Teamlab.addPrjComment(data, data, ajax_opts);
+                            break;
+                        case "wiki":
+                            data.entityid = jq("#hdnPageName").val();
+                            Teamlab.addWikiComment(data, data, ajax_opts);
+                            break;
+                        case "blogs":
+                            Teamlab.addBlogComment(data, data, ajax_opts);
+                            break;
+                        case "news":
+                            Teamlab.addNewsComment(data, data, ajax_opts);
+                            break;
+                        case "bookmarks":
+                            Teamlab.addBookmarksComment(data, data, ajax_opts);
+                            break;
+                    }
             } else if (jq('#hdnAction').val() == "update") {
 
                 var data = {
@@ -262,24 +269,37 @@ var CommentsManagerObj = new function() {
     function copyToClipboard(elt) {
         var id = jq(elt).attr("id").replace("clip_", "");
         var link = window.location.href.replace(window.location.hash, '') + '#comment_' + id
-        jq('#commentsClip').val(link).select();
+        jq('#commentsClip').val(link).trigger("select");
         document.execCommand('copy');
-        window.toastr.success(ASC.Resources.Master.Resource.LinkCopySuccess);
+        window.toastr.success(ASC.Resources.Master.ResourceJS.LinkCopySuccess);
     };
 
     function redraw() {
         oddcnt = jq('#mainCommentsContainer div[id^=comment_]:even')
-                    .css({ 'border-top': '1px solid #DDD', 'border-bottom': '1px solid #DDD' })
+            .css({ 'border-top': ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? '1px solid #DDD' : '1px solid #474747', 'border-bottom': ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? '1px solid #DDD' : '1px solid #474747' })
                     .length;
         evencnt = jq('#mainCommentsContainer div[id^=comment_]:odd')
                     .css({ 'border-top': '', 'border-bottom': '' })
                     .length;
 
         if (oddcnt == evencnt) {
-            jq('#mainCommentsContainer').css('border-bottom', '1px solid #DDD');
+            jq('#mainCommentsContainer').css('border-bottom', ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? '1px solid #DDD' : '1px solid #474747');
         } else {
             jq('#mainCommentsContainer').css('border-bottom', '');
         }
+
+        var mentionLinks = jq("#commentsTempContainer_" + CommentsManagerObj.objectID).find('a[mention]');
+
+        mentionLinks.each(function () {
+            var linkObj = jq(this);
+            var id = linkObj.attr("id");
+            if (!id) {
+                linkObj.uniqueId();
+                id = linkObj.attr("id");
+                popupBox.RegistryElement(id, "\"" + linkObj.attr("data-uid") + "\"");
+            }
+        });
+
     };
 
     function scrollToElement(target) {
@@ -380,8 +400,10 @@ var CommentsManagerObj = new function() {
 
         scrollToElement(obj, 500);
 
-        obj.css({ "background-color": "#ffffcc" });
-        obj.animate({ backgroundColor: '#ffffff' }, 1000);
+        obj.css({ "background-color": ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#ffffcc" : "rgba(204, 184, 102, 0.2)" });
+        obj.animate({ backgroundColor: ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#ffffff" : "#333" }, 1000);
+
+        CommentsManagerObj.comments.push(comment);
 
         CommentsManagerObj.CallFCKComplete();
     };
@@ -398,10 +420,13 @@ var CommentsManagerObj = new function() {
 
         CommentsManagerObj.currentCommentID = params.commentid;
 
+        var index = CommentsManagerObj.comments.findIndex(x => x.commentID == params.commentid);
+        CommentsManagerObj.comments[index].commentBody = response;
+
         scrollToElement(obj, 500);
 
-        obj.css({ "background-color": "#ffffcc" });
-        obj.animate({ backgroundColor: '#ffffff' }, 1000);
+        obj.css({ "background-color": ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#ffffcc" : "rgba(204, 184, 102, 0.2)" });
+        obj.animate({ backgroundColor: ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#ffffff" : "#333" }, 1000);
 
         CommentsManagerObj.CallFCKComplete();
     };
@@ -427,7 +452,8 @@ var CommentsManagerObj = new function() {
         }
 
         if (ContentDiv != null) {
-            CommentsManagerObj.editorInstance.setData(ContentDiv.innerHTML);
+            var comment = CommentsManagerObj.comments.find(x => x.commentID == id);
+            CommentsManagerObj.editorInstance.setData(comment ? comment.commentBody : ContentDiv.innerHTML);
         } else {
             CommentsManagerObj.editorInstance.setData('');
             timeOut = 600;
@@ -442,6 +468,7 @@ var CommentsManagerObj = new function() {
             CommentsManagerObj.editorInstance.focus();
         }, timeOut);
     };
+
 
     function setParentComment(value) {
         jq('#hdnParentComment').val(value);
@@ -460,7 +487,7 @@ var CommentsManagerObj = new function() {
                 .ckeditor(
                     {
                         toolbar: "Comment",
-                        extraPlugins: "teamlabquote,codemirror",
+                        extraPlugins: "mentions,teamlabquote,codemirror",
                         filebrowserUploadUrl: uploadUrl || CommentsManagerObj.CkUploadHandlerPath,
                         height: "200"
                     })
@@ -469,6 +496,9 @@ var CommentsManagerObj = new function() {
         CommentsManagerObj.editorInstance.keystrokeHandler.keystrokes[window.CKEDITOR.CTRL + 13] = "ctrlEnter";
         CommentsManagerObj.editorInstance.addCommand("ctrlEnter", {
             exec: function (editor, data) {
+                if (jq('#btnAddComment').hasClass('disable') || jq('#commentBox').is(':hidden')) {
+                    return false;
+                }
                 addCommentClick();
             }
         });
@@ -484,7 +514,7 @@ var CommentsManagerObj = new function() {
 
     this.Init = function () {
         try {
-            CommentsManagerObj.comments = jq.parseJSON(jq.base64.decode(CommentsManagerObj.comments));
+            CommentsManagerObj.comments = JSON.parse(jq.base64.decode(CommentsManagerObj.comments));
         } catch (e) {
             console.log(e);
             CommentsManagerObj.comments = [];
@@ -524,7 +554,7 @@ var CommentsManagerObj = new function() {
             if (hash.indexOf("#comment_") == 0) {
                 setTimeout(function () {
                     scrollToElement(hash, 500);
-                    jq(hash).css({ "background-color": "#ffffcc" }).animate({ backgroundColor: '#ffffff' }, 1000);
+                    jq(hash).css({ "background-color": ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#ffffcc" : "rgba(204, 184, 102, 0.2)" }).animate({ backgroundColor: ASC.Resources.Master.ModeThemeSettings.ModeThemeName == 0 ? "#ffffff" : "#333" }, 1000);
                 }, 1000);
             }
         }

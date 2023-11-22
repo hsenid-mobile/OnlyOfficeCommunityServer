@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,12 @@ using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Tenants;
 using ASC.Data.Backup.Extensions;
+using ASC.Data.Backup.Storage;
 using ASC.Data.Backup.Tasks.Modules;
 using ASC.Data.Storage;
+using ASC.Data.Storage.ZipOperators;
+
+using Newtonsoft.Json;
 
 namespace ASC.Data.Backup.Tasks
 {
@@ -98,6 +102,8 @@ namespace ASC.Data.Backup.Tasks
                         }
                         restoreTask.RunJob();
                     }
+                    var backupRepository = BackupStorageFactory.GetBackupRepository();
+                    backupRepository.MigrationBackupRecords(TenantId, _columnMapper.GetTenantMapping(), ConfigPath);
                 }
 
                 Logger.Debug("end restore data");
@@ -136,10 +142,11 @@ namespace ASC.Data.Backup.Tasks
             Logger.Debug("end restore portal");
         }
 
-        private void RestoreFromDump(IDataReadOperator dataReader)
+        private void RestoreFromDump(IDataReadOperator dataReader) 
         {
             var keyBase = KeyHelper.GetDatabaseSchema();
-            var keys = dataReader.Entries.Where(r => r.StartsWith(keyBase)).ToList();
+            var keys = dataReader.GetEntries(keyBase).Select(r => Path.GetFileName(r)).ToList();
+            var dbs = dataReader.GetDirectories("").Where(r => Path.GetFileName(r).StartsWith("mailservice")).Select(r => Path.GetFileName(r)).ToList();
             var upgrades = new List<string>();
 
             var upgradesPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), UpgradesPath));
@@ -149,6 +156,14 @@ namespace ASC.Data.Backup.Tasks
             }
 
             var stepscount = keys.Count * 2 + upgrades.Count;
+
+            Dictionary<string, List<string>> databases = new Dictionary<string, List<string>>();
+            foreach (var db in dbs)
+            {
+                var keys1 = dataReader.GetEntries(db + "/" + keyBase).Select(k => Path.GetFileName(k)).ToList();
+                stepscount += keys1.Count() * 2;
+                databases.Add(db, keys1);
+            }
 
             if (ProcessStorage)
             {
@@ -166,18 +181,44 @@ namespace ASC.Data.Backup.Tasks
                 SetStepsCount(stepscount);
             }
 
-
             for (var i = 0; i < keys.Count; i += TasksLimit)
             {
                 var tasks = new List<Task>(TasksLimit * 2);
 
                 for (var j = 0; j < TasksLimit && i + j < keys.Count; j++)
                 {
-                    var key1 = keys[i + j];
-                    tasks.Add(RestoreFromDumpFile(dataReader, key1).ContinueWith(r => RestoreFromDumpFile(dataReader, KeyHelper.GetDatabaseData(key1.Substring(keyBase.Length + 1)))));
+                    var key1 = Path.Combine(KeyHelper.GetDatabaseSchema(), keys[i + j]);
+                    var key2 = Path.Combine(KeyHelper.GetDatabaseData(), keys[i + j]);
+                    tasks.Add(RestoreFromDumpFile(dataReader, key1, key2));
                 }
 
                 Task.WaitAll(tasks.ToArray());
+            }
+
+            using (var dbManager = new DbManager("default", 100000))
+            {
+                dbManager.ExecuteList("select id, connection_string from mail_server_server").ForEach(r =>
+                {
+                    RegisterDatabase((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
+                });
+            }
+
+            foreach (var database in databases)
+            {
+
+                for (var i = 0; i < database.Value.Count; i += TasksLimit)
+                {
+                    var tasks = new List<Task>(TasksLimit * 2);
+
+                    for (var j = 0; j < TasksLimit && i + j < database.Value.Count; j++)
+                    {
+                        var key1 = Path.Combine(database.Key, KeyHelper.GetDatabaseSchema(), database.Value[i + j]);
+                        var key2 = Path.Combine(database.Key, KeyHelper.GetDatabaseData(), database.Value[i + j]);
+                        tasks.Add(RestoreFromDumpFile(dataReader, key1, key2, database.Key));
+                    }
+
+                    Task.WaitAll(tasks.ToArray());
+                }
             }
 
             var comparer = new SqlComparer();
@@ -187,7 +228,7 @@ namespace ASC.Data.Backup.Tasks
                 {
                     if (u.Contains(".upgrade."))
                     {
-                        RunMysqlFile(s, null).Wait();
+                        RunMysqlFile(s, "default", null).Wait();
                     }
                     else if (u.Contains(".data") || u.Contains(".upgrade"))
                     {
@@ -195,7 +236,7 @@ namespace ASC.Data.Backup.Tasks
                     }
                     else
                     {
-                        RunMysqlFile(s).Wait();
+                        RunMysqlFile(s, "default").Wait();
                     }
                 }
 
@@ -203,14 +244,25 @@ namespace ASC.Data.Backup.Tasks
             }
         }
 
-        private async Task RestoreFromDumpFile(IDataReadOperator dataReader, string fileName)
+        private async Task RestoreFromDumpFile(IDataReadOperator dataReader, string fileName1, string fileName2 = null, string db = "default")
         {
-            Logger.DebugFormat("Restore from {0}", fileName);
-            using (var stream = dataReader.GetEntry(fileName))
+            Logger.DebugFormat("Restore from {0}", fileName1);
+            using (var stream = dataReader.GetEntry(fileName1))
             {
-                await RunMysqlFile(stream);
+                await RunMysqlFile(stream, db);
             }
             SetStepCompleted();
+
+            Logger.DebugFormat("Restore from {0}", fileName2);
+            if (fileName2 != null)
+            {
+                using (var stream = dataReader.GetEntry(fileName2))
+                {
+                    await RunMysqlFile(stream, db);
+                }
+
+                SetStepCompleted();
+            }
         }
 
         private class SqlComparer : IComparer<string>

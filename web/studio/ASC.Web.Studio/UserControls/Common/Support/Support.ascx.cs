@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
 */
 
 
-using System.Globalization;
-using ASC.Web.Core.WhiteLabel;
 using System;
 using System.Web.UI;
+
+using ASC.Core;
+using ASC.Web.Core.WhiteLabel;
+using ASC.Web.Studio.Core;
 using ASC.Web.Studio.Utility;
 
 namespace ASC.Web.Studio.UserControls.Common.Support
@@ -30,21 +32,42 @@ namespace ASC.Web.Studio.UserControls.Common.Support
             get { return "~/UserControls/Common/Support/Support.ascx"; }
         }
 
-        protected String SupportFeedbackLink
-        {
-            get
-            {
-                var settings = AdditionalWhiteLabelSettings.Instance;
-
-                if (!settings.FeedbackAndSupportEnabled || String.IsNullOrEmpty(settings.FeedbackAndSupportUrl))
-                    return null;
-
-                return CommonLinkUtility.GetRegionalUrl(settings.FeedbackAndSupportUrl, CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
-            }
-        }   
+        protected string SupportFeedbackLink { get; private set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (CoreContext.Configuration.Personal || CoreContext.Configuration.CustomMode)
+                return;
+
+            SupportFeedbackLink = CommonLinkUtility.GetFeedbackAndSupportLink();
+
+            var quota = TenantExtra.GetTenantQuota();
+            var isAdministrator = CoreContext.UserManager.IsUserInGroup(SecurityContext.CurrentAccount.ID, ASC.Core.Users.Constants.GroupAdmin.ID);
+            var showDemonstration = !CoreContext.Configuration.Standalone && quota.Trial;
+            var showTrainig = !quota.Free;
+
+            if (showTrainig)
+            {
+                LiveChat = !string.IsNullOrEmpty(SetupInfo.ZendeskKey);
+                EmailSupport = !string.IsNullOrEmpty(SupportFeedbackLink);
+                RequestTraining = isAdministrator && !quota.Trial;
+            }
+
+            ProductDemo = !string.IsNullOrEmpty(SetupInfo.DemoOrder) && isAdministrator && showDemonstration;
+
+            BaseCondition = AdditionalWhiteLabelSettings.Instance.FeedbackAndSupportEnabled && (LiveChat || EmailSupport || RequestTraining || ProductDemo);
+
         }
+
+        protected bool LiveChat;
+
+        protected bool EmailSupport;
+
+        protected bool RequestTraining;
+
+        protected bool ProductDemo;
+
+        protected bool BaseCondition;
+
     }
 }

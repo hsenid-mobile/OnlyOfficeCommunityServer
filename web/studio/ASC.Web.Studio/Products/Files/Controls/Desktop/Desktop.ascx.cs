@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 using System;
 using System.Web;
 using System.Web.UI;
+
 using ASC.Core;
 using ASC.Web.Core.Files;
 using ASC.Web.Core.WhiteLabel;
@@ -39,7 +40,7 @@ namespace ASC.Web.Files.Controls
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            Page.RegisterStyle(FilesLinkUtility.FilesBaseAbsolutePath + "Controls/Desktop/desktop.css");
+            Page.RegisterStyle(FilesLinkUtility.FilesBaseAbsolutePath + "Controls/Desktop/desktop.less");
             Page.RegisterBodyScripts("~/Products/Files/Controls/Desktop/desktop.js");
 
             desktopWelcomeDialog.Options.IsPopup = true;

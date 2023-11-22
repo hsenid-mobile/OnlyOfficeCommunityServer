@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,15 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+
 using ASC.Common.Data;
 using ASC.Common.Data.Sql;
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Core;
 using ASC.Core.Tenants;
+
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ASC.Feed.Data
 {
@@ -76,15 +79,17 @@ namespace ASC.Feed.Data
                 var i = new SqlInsert("feed_aggregate", true)
                     .InColumns("id", "tenant", "product", "module", "author", "modified_by", "group_id", "created_date",
                         "modified_date", "json", "keywords", "aggregated_date");
-                var i2 = new SqlInsert("feed_users", true).InColumns("feed_id", "user_id");
+                var i2 = new SqlInsert("feed_users", true).InColumns("feed_id", "user_id", "aggregated_date");
+
+                var hasValues = false;
 
                 foreach (var f in feeds)
                 {
                     if (0 >= f.Users.Count) continue;
 
-                   i.Values(f.Id, f.Tenant, f.ProductId, f.ModuleId, f.AuthorId, f.ModifiedById, f.GroupId, f.CreatedDate, f.ModifiedDate, f.Json, f.Keywords, aggregatedDate);
+                    hasValues = true;
 
-
+                    i.Values(f.Id, f.Tenant, f.ProductId, f.ModuleId, f.AuthorId, f.ModifiedById, f.GroupId, f.CreatedDate, f.ModifiedDate, f.Json, f.Keywords, aggregatedDate);
 
                     if (f.ClearRightsBeforeInsert)
                     {
@@ -96,36 +101,48 @@ namespace ASC.Feed.Data
 
                     foreach (var u in f.Users)
                     {
-                        i2.Values(f.Id, u.ToString());
+                        i2.Values(f.Id, u.ToString(), aggregatedDate);
                     }
                 }
 
-                db.ExecuteNonQuery(i);
-                db.ExecuteNonQuery(i2);
+                if (hasValues)
+                {
+                    db.ExecuteNonQuery(i);
+                    db.ExecuteNonQuery(i2);
 
-                tx.Commit();
+                    tx.Commit();
+                }
             }
         }
 
-        public static void RemoveFeedAggregate(DateTime fromTime)
+        public static void RemoveFeedAggregate(DateTime fromTime, int queryLimit)
         {
-            using (var db = new DbManager(Constants.FeedDbId))
-            using (var command = db.Connection.CreateCommand())
-            using (var tx = db.Connection.BeginTransaction(IsolationLevel.ReadUncommitted))
+            using (var db = new DbManager(Constants.FeedDbId, 60 * 60)) // a hour
             {
-                command.Transaction = tx;
-                command.CommandTimeout = 60 * 60; // a hour
                 var dialect = DbRegistry.GetSqlDialect(Constants.FeedDbId);
-                if (dialect.SupportMultiTableUpdate)
+                int affected_users = 1;
+                int affected_aggregate = 1;
+                do
                 {
-                    command.ExecuteNonQuery("delete from feed_aggregate, feed_users using feed_aggregate, feed_users where id = feed_id and aggregated_date < @date", new { date = fromTime });
+                    using (var tx = db.Connection.BeginTransaction(IsolationLevel.ReadUncommitted))
+                    {
+
+                        if (affected_users > 0)
+                        {
+                            affected_users = db.ExecuteNonQuery(new SqlDelete("feed_users").Where(Exp.Lt("aggregated_date", fromTime)).SetLimit(queryLimit), dialect);
+                        }
+
+                        if (affected_aggregate > 0)
+                        {
+                            affected_aggregate = db.ExecuteNonQuery(new SqlDelete("feed_aggregate").Where(Exp.Lt("aggregated_date", fromTime)).SetLimit(queryLimit), dialect);
+                        }
+
+                        tx.Commit();
+                    }
+
                 }
-                else
-                {
-                    command.ExecuteNonQuery(new SqlDelete("feed_users").Where(Exp.In("feed_id", new SqlQuery("feed_aggregate").Select("id").Where(Exp.Lt("aggregated_date", fromTime)))), dialect);
-                    command.ExecuteNonQuery(new SqlDelete("feed_aggregate").Where(Exp.Lt("aggregated_date", fromTime)), dialect);
-                }
-                tx.Commit();
+                while (affected_users + affected_aggregate > 0);
+
             }
         }
 
@@ -234,7 +251,7 @@ namespace ASC.Feed.Data
                 .InnerJoin("feed_users u", Exp.EqColumns("a.id", "u.feed_id"))
                 .Where("u.user_id", SecurityContext.CurrentAccount.ID)
                 .SetMaxResults(1001);
-                
+
             if (1 < lastReadedTime.Year)
             {
                 q.Where(Exp.Ge("a.aggregated_date", lastReadedTime));
@@ -284,17 +301,13 @@ namespace ASC.Feed.Data
 
         public static void RemoveFeedItem(string id)
         {
-            using (var db = new DbManager(Constants.FeedDbId))
-            using (var command = db.Connection.CreateCommand())
+            using (var db = new DbManager(Constants.FeedDbId, 60 * 60))// a hour
             using (var tx = db.Connection.BeginTransaction(IsolationLevel.ReadUncommitted))
             {
-                command.Transaction = tx;
-                command.CommandTimeout = 60 * 60; // a hour
-
                 var dialect = DbRegistry.GetSqlDialect(Constants.FeedDbId);
 
-                command.ExecuteNonQuery(new SqlDelete("feed_users").Where("feed_id", id), dialect);
-                command.ExecuteNonQuery(new SqlDelete("feed_aggregate").Where("id", id), dialect);
+                db.ExecuteNonQuery(new SqlDelete("feed_users").Where("feed_id", id), dialect);
+                db.ExecuteNonQuery(new SqlDelete("feed_aggregate").Where("id", id), dialect);
 
                 tx.Commit();
             }
@@ -305,13 +318,13 @@ namespace ASC.Feed.Data
     public class FeedResultItem
     {
         public FeedResultItem(
-            string json, 
-            string module, 
-            Guid authorId, 
+            string json,
+            string module,
+            Guid authorId,
             Guid modifiedById,
-            string groupId, 
+            string groupId,
             DateTime createdDate,
-            DateTime modifiedDate, 
+            DateTime modifiedDate,
             DateTime aggregatedDate)
         {
             var now = TenantUtil.DateTimeFromUtc(DateTime.UtcNow);
@@ -321,14 +334,22 @@ namespace ASC.Feed.Data
 
             AuthorId = authorId;
             ModifiedById = modifiedById;
-            
+
             GroupId = groupId;
 
-            if (now.Year == createdDate.Year && now.Date == createdDate.Date)
+            var compareDate = JObject.Parse(Json).Value<bool>("IsAllDayEvent")
+                ? TenantUtil.DateTimeToUtc(createdDate).Date
+                : createdDate.Date;
+
+            if (now.Date == compareDate.AddDays(-1))
+            {
+                IsTomorrow = true;
+            }
+            else if (now.Date == compareDate)
             {
                 IsToday = true;
             }
-            else if (now.Year == createdDate.Year && now.Date == createdDate.Date.AddDays(1))
+            else if (now.Date == compareDate.AddDays(1))
             {
                 IsYesterday = true;
             }
@@ -351,6 +372,8 @@ namespace ASC.Feed.Data
         public bool IsToday { get; private set; }
 
         public bool IsYesterday { get; private set; }
+
+        public bool IsTomorrow { get; private set; }
 
         public DateTime CreatedDate { get; private set; }
 

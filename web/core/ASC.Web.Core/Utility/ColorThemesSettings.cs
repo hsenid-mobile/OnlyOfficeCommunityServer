@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Web;
+
 using ASC.Core.Common.Settings;
 
 namespace ASC.Web.Core.Utility
@@ -40,10 +41,10 @@ namespace ASC.Web.Core.Utility
         public override ISettings GetDefault()
         {
             return new ColorThemesSettings
-                {
-                    ColorThemeName = DefaultName,
-                    FirstRequest = true
-                };
+            {
+                ColorThemeName = DefaultName,
+                FirstRequest = true
+            };
         }
 
         public override Guid ID
@@ -83,9 +84,14 @@ namespace ASC.Web.Core.Utility
 
         public static string GetColorThemesSettings()
         {
+            var modetheme = ModeThemeSettings.GetModeThemesSettings();
             var colorTheme = Load();
             var colorThemeName = colorTheme.ColorThemeName;
-
+            if(modetheme.ModeThemeName == ModeTheme.dark)
+            {
+                colorThemeName = "dark-" + colorThemeName;
+            }
+            
             if (colorTheme.FirstRequest)
             {
                 colorTheme.FirstRequest = false;
@@ -111,7 +117,7 @@ namespace ASC.Web.Core.Utility
             }
             catch (Exception)
             {
-                
+
             }
         }
     }

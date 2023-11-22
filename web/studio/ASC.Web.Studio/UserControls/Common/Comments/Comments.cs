@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
+using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Linq;
-using ASC.Web.Studio.Controls.Common;
-using ASC.Web.Studio.Utility;
-using Resources;
+
+using ASC.Web.Studio.PublicResources;
 
 namespace ASC.Web.Studio.UserControls.Common.Comments
 {
@@ -89,7 +86,7 @@ namespace ASC.Web.Studio.UserControls.Common.Comments
             get { return _items; }
             set { _items = value; }
         }
-        
+
         public string ModuleName { get; set; }
 
         public string JavaScriptCallBackAddComment { get; set; }
@@ -164,8 +161,8 @@ namespace ASC.Web.Studio.UserControls.Common.Comments
                 .RegisterStyle("~/UserControls/Common/Comments/css/codehighlighter/vs.less");
 
 
-            var uploadPath = string.Format("{0}://{1}:{2}{3}", Page.Request.GetUrlRewriter().Scheme, Page.Request.GetUrlRewriter().Host, Page.Request.GetUrlRewriter().Port, VirtualPathUtility.ToAbsolute("~/") + "fckuploader.ashx?newEditor=true");
-            uploadPath += "&esid=" + FckDomainName;
+            var uploadPath = string.Format("{0}://{1}:{2}{3}", Page.Request.GetUrlRewriter().Scheme, Page.Request.GetUrlRewriter().Host, Page.Request.GetUrlRewriter().Port, VirtualPathUtility.ToAbsolute("~/") + "fckuploader.ashx");
+            uploadPath += "?esid=" + FckDomainName;
 
             Items = CleanInactive(Items.ToList());
 

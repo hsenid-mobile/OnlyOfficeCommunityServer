@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ ASC.CRM.Voip.CommonView = (function ($) {
 
     var loadingBanner = LoadingBanner,
         master = ASC.Resources.Master,
-        resource = master.Resource,
+        ResourceJS = master.ResourceJS,
         toastrLocal = toastr;
 
     function init() {
@@ -148,10 +148,10 @@ ASC.CRM.Voip.CommonView = (function ($) {
 
     function getTypedRingtones(rawRingtones) {
         var result = [
-            ringtoneFactory(0, resource.GreetingRingtones),
-            ringtoneFactory(1, resource.WaitingRingtones),
-            ringtoneFactory(2, resource.VoicemailRingtones),
-            ringtoneFactory(3, resource.QueueRingtones)
+            ringtoneFactory(0, ASC.CRM.Resources.CRMVoipResource.GreetingRingtones),
+            ringtoneFactory(1, ASC.CRM.Resources.CRMVoipResource.WaitingRingtones),
+            ringtoneFactory(2, ASC.CRM.Resources.CRMVoipResource.VoicemailRingtones),
+            ringtoneFactory(3, ASC.CRM.Resources.CRMVoipResource.QueueRingtones)
         ];
 
         for (var i = 0; i < rawRingtones.length; i++) {
@@ -178,7 +178,7 @@ ASC.CRM.Voip.CommonView = (function ($) {
 
         buttonObj.on("click", function (e) {
             e.preventDefault();
-            jq("#fileupload_" + audioType).click();
+            jq("#fileupload_" + audioType).trigger("click");
         });
 
         return inputObj;
@@ -195,17 +195,17 @@ ASC.CRM.Voip.CommonView = (function ($) {
 
     function correctFile (file) {
         if (getFileExtension(file.name) != ".mp3") {
-            toastrLocal.error(resource.UploadVoipRingtoneFileFormatErrorMsg);
+            toastrLocal.error(ResourceJS.UploadVoipRingtoneFileFormatErrorMsg);
             return false;
         }
 
         if (file.size <= 0) {
-            toastrLocal.error(resource.UploadVoipRingtoneEmptyFileErrorMsg);
+            toastrLocal.error(ResourceJS.UploadVoipRingtoneEmptyFileErrorMsg);
             return false;
         }
 
         if (file.size > 20 * 1024 * 1024) {
-            toastrLocal.error(resource.UploadVoipRingtoneFileSizeErrorMsg);
+            toastrLocal.error(ResourceJS.UploadVoipRingtoneFileSizeErrorMsg);
             return false;
         }
 
@@ -421,12 +421,12 @@ ASC.CRM.Voip.CommonView = (function ($) {
     }
 
     function ringtoneUploadedHandler(e, data) {
-        var response = $.parseJSON(data.result);
+        var response = JSON.parse(data.result);
         if (!response.Success || !response.Data) {
             if (response.Message) {
                 toastrLocal.error(response.Message);
             } else {
-                toastrLocal.error(resource.UploadVoipRingtoneFileErrorMsg);
+                toastrLocal.error(ResourceJS.UploadVoipRingtoneFileErrorMsg);
             }
             return;
         }
@@ -451,7 +451,7 @@ ASC.CRM.Voip.CommonView = (function ($) {
 
     function ringtoneUploadedErrorHandler() {
         hideLoader();
-        toastrLocal.error(resource.UploadVoipRingtoneFileErrorMsg);
+        toastrLocal.error(ResourceJS.UploadVoipRingtoneFileErrorMsg);
     }
 
     function ringtoneDeletedHandler(e) {
@@ -496,11 +496,11 @@ ASC.CRM.Voip.CommonView = (function ($) {
     }
 
     function showSuccessOpearationMessage() {
-        toastrLocal.success(resource.ChangesSuccessfullyAppliedMsg);
+        toastrLocal.success(ResourceJS.ChangesSuccessfullyAppliedMsg);
     }
 
     function showErrorMessage() {
-        toastrLocal.error(resource.CommonJSErrorMsg);
+        toastrLocal.error(ResourceJS.CommonJSErrorMsg);
     }
     
     //#endregion

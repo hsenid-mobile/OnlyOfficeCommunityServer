@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Web;
+
 using ASC.Blogs.Core;
 using ASC.Blogs.Core.Domain;
-using ASC.Blogs.Core.Resources;
 using ASC.Blogs.Core.Security;
 using ASC.Core;
 using ASC.Core.Users;
+using ASC.Web.Community.Modules.Blogs.Core.Resources;
 using ASC.Web.Community.Product;
 using ASC.Web.Core.Utility.Skins;
 using ASC.Web.Studio.Controls.Common;
 using ASC.Web.Studio.Utility;
-using System.Globalization;
 
 namespace ASC.Web.Community.Blogs
 {
@@ -127,7 +128,7 @@ namespace ASC.Web.Community.Blogs
 
             var jsResource = new StringBuilder();
             jsResource.Append(String.Format("ASC.Community.BlogsJSResource = {{}};ASC.Community.BlogsJSResource.ReadMoreLink = \"{0}\";", BlogsResource.ReadMoreLink));
-            jsResource.Append("jq('#tableForNavigation select').val(" + BlogsPageSize + ").change(function(evt) {changeBlogsCountOfRows(this.value);}).tlCombobox();");
+            jsResource.Append("jq('#tableForNavigation select').val(" + BlogsPageSize + ").on('change', function(evt) {changeBlogsCountOfRows(this.value);}).tlCombobox();");
             Page.RegisterInlineScript(jsResource.ToString(), true);
         }
 
@@ -159,7 +160,7 @@ namespace ASC.Web.Community.Blogs
         private void FillPosts(PostsQuery query, BlogsEngine engine)
         {
             query
-                .SetOffset((SelectedPage - 1)*BlogsPageSize)
+                .SetOffset((SelectedPage - 1) * BlogsPageSize)
                 .SetCount(BlogsPageSize);
 
             SetTotalPostsCount(engine.GetPostsCount(query));
@@ -174,11 +175,11 @@ namespace ASC.Web.Community.Blogs
             if (posts == null || posts.Count == 0)
             {
                 var emptyScreenControl = new EmptyScreenControl
-                    {
-                        ImgSrc = WebImageSupplier.GetAbsoluteWebPath("blog_icon.png", ASC.Blogs.Core.Constants.ModuleId),
-                        Header = BlogsResource.EmptyScreenBlogCaption,
-                        Describe = currentUser.IsVisitor() ? BlogsResource.EmptyScreenBlogTextVisitor : BlogsResource.EmptyScreenBlogText
-                    };
+                {
+                    ImgSrc = WebImageSupplier.GetAbsoluteWebPath("blog_icon.svg", ASC.Blogs.Core.Constants.ModuleId),
+                    Header = BlogsResource.EmptyScreenBlogCaption,
+                    Describe = currentUser.IsVisitor() ? BlogsResource.EmptyScreenBlogTextVisitor : BlogsResource.EmptyScreenBlogText
+                };
 
                 if (CommunitySecurity.CheckPermissions(new PersonalBlogSecObject(currentUser), ASC.Blogs.Core.Constants.Action_AddPost)
                     && string.IsNullOrEmpty(UserID) && string.IsNullOrEmpty(Search))
@@ -199,21 +200,21 @@ namespace ASC.Web.Community.Blogs
         private void SetTotalPostsCount(int count)
         {
             var pageNavigator = new PageNavigator
-                {
-                    PageUrl = string.Format(
+            {
+                PageUrl = string.Format(
                         CultureInfo.CurrentCulture,
                         "{0}?{1}",
                         VirtualPathUtility.ToAbsolute("~/Products/Community/Modules/Blogs/"),
                         QueryString("page")
                         //BlogsPageSize
                         ),
-                    //"./" + "?" + QueryString("page"),
-                    CurrentPageNumber = SelectedPage,
-                    EntryCountOnPage = BlogsPageSize,
-                    VisiblePageCount = 5,
-                    ParamName = "page",
-                    EntryCount = count
-                };
+                //"./" + "?" + QueryString("page"),
+                CurrentPageNumber = SelectedPage,
+                EntryCountOnPage = BlogsPageSize,
+                VisiblePageCount = 5,
+                ParamName = "page",
+                EntryCount = count
+            };
 
             blogsCount = count;
             pageNavigatorHolder.Controls.Add(pageNavigator);

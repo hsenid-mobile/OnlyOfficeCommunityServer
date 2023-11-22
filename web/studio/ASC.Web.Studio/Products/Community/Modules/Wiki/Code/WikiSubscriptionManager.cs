@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 
 using System;
 using System.Collections.Generic;
+
 using ASC.Core;
 using ASC.Notify;
 using ASC.Notify.Model;
 using ASC.Notify.Patterns;
 using ASC.Notify.Recipients;
+using ASC.Web.Community.Modules.Wiki.Resources;
 using ASC.Web.Core.Subscriptions;
-using ASC.Web.UserControls.Wiki.Resources;
 
 namespace ASC.Web.UserControls.Wiki
 {
@@ -36,13 +37,27 @@ namespace ASC.Web.UserControls.Wiki
             NotifyClient = WorkContext.NotifyContext.NotifyService.RegisterClient(WikiNotifySource.Instance);
         }
 
-        public static void SendNoticeAsync(string AuthorID, INotifyAction action, string objectID, SendNoticeCallback sendCallback, params ITagValue[] args)
+        public static void SendNoticeAsync(string AuthorID, INotifyAction action, string objectID, params ITagValue[] args)
         {
             InitiatorInterceptor initatorInterceptor = new InitiatorInterceptor(new DirectRecipient(AuthorID, ""));
             try
             {
                 NotifyClient.AddInterceptor(initatorInterceptor);
-                NotifyClient.SendNoticeAsync(action, objectID, sendCallback, args);
+                NotifyClient.SendNoticeAsync(action, objectID, args);
+            }
+            finally
+            {
+                NotifyClient.RemoveInterceptor(initatorInterceptor.Name);
+            }
+        }
+
+        public static void SendNoticeToAsync(string AuthorID, INotifyAction action, string objectID, IRecipient[] recipients, params ITagValue[] args)
+        {
+            InitiatorInterceptor initatorInterceptor = new InitiatorInterceptor(new DirectRecipient(AuthorID, ""));
+            try
+            {
+                NotifyClient.AddInterceptor(initatorInterceptor);
+                NotifyClient.SendNoticeToAsync(action, objectID, recipients, false, args);
             }
             finally
             {
@@ -54,14 +69,14 @@ namespace ASC.Web.UserControls.Wiki
 
 
     public class WikiSubscriptionManager : ISubscriptionManager
-    {        
+    {
         private Guid _wikiSubscriptionTypeNewPageID = new Guid("{5A3F7831-D970-4e53-8BDE-C3CA990553C1}");
         private Guid _wikiSubscriptionTypeChangePageID = new Guid("{1B8408F6-88CC-416b-93B6-ADEE8AECB389}");
         private Guid _wikiSubscriptionTypeAddPageToCat = new Guid("{AE362537-3746-4231-A0A8-1A85FD79E2A9}");
 
         private List<SubscriptionObject> GetSubscriptionObjectsByType(Guid productID, Guid moduleID, Guid typeID)
         {
-           
+
             List<SubscriptionObject> subscriptionObjects = new List<SubscriptionObject>();
             ISubscriptionProvider subscriptionProvider = SubscriptionProvider;
 
@@ -142,7 +157,7 @@ namespace ASC.Web.UserControls.Wiki
 
             return true;
         }
-       
+
         #region ISubscriptionManager Members
 
         public ISubscriptionProvider SubscriptionProvider
@@ -155,7 +170,7 @@ namespace ASC.Web.UserControls.Wiki
 
         public List<SubscriptionObject> GetSubscriptionObjects(Guid subItem)
         {
-           
+
             List<SubscriptionObject> subscriptionObjects = new List<SubscriptionObject>();
 
             ISubscriptionProvider subscriptionProvider = SubscriptionProvider;

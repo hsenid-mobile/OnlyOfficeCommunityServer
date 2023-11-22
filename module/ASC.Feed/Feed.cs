@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ namespace ASC.Feed.Aggregator
         {
             AuthorId = author;
             ModifiedBy = author;
-            
+
             CreatedDate = date;
             ModifiedDate = date;
 
@@ -69,6 +69,9 @@ namespace ASC.Feed.Aggregator
 
         [DataMember]
         public string Module { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public bool? IsAllDayEvent { get; set; }
 
         [DataMember]
         public string ExtraLocation { get; set; }
@@ -116,8 +119,8 @@ namespace ASC.Feed.Aggregator
         public IEnumerable<FeedComment> Comments { get; set; }
 
 
-        // это значит, что новость может обновляться (пр. добавление комментариев);
-        // следовательно и права доступа могут устаревать
+        // this means that the news can be updated (eg adding comments);
+        // consequently, access rights may become obsolete
         public bool Variate { get; private set; }
 
         public string GroupId { get; set; }

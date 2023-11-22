@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using ASC.Api.Attributes;
 using ASC.Api.Bookmarks;
 using ASC.Api.Collections;
@@ -34,6 +35,7 @@ using ASC.Web.UserControls.Bookmarking.Common.Util;
 
 namespace ASC.Api.Community
 {
+    ///<name>community</name>
     public partial class CommunityApi
     {
         private BookmarkingService _bookmarkingDao;
@@ -44,13 +46,16 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the list of all bookmarks on the portal with the bookmark titles, date of creation and update, bookmark text and author
+        ///Returns a list of all the portal bookmarks with the bookmark titles, dates of creation and update, bookmark texts, and authors.
         ///</summary>
         ///<short>
-        ///All bookmarks
+        ///Get bookmarks
         ///</short>
         ///<category>Bookmarks</category>
-        ///<returns>List of all bookmarks</returns>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">List of all bookmarks</returns>
+        ///<collection>list</collection>
+        ///<path>api/2.0/community/bookmark</path>
+        ///<httpMethod>GET</httpMethod>
         [Read("bookmark")]
         public IEnumerable<BookmarkWrapper> GetBookmarks()
         {
@@ -60,13 +65,16 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the list of all bookmarks for the current user with the bookmark titles, date of creation and update, bookmark text and author
+        ///Returns a list of all the bookmarks for the current user with the bookmark titles, dates of creation and update, bookmark texts, and author.
         ///</summary>
         ///<short>
-        ///Added by me
+        ///Get my bookmarks
         ///</short>
         ///<category>Bookmarks</category>
-        ///<returns>List of bookmarks</returns>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">List of bookmarks</returns>
+        ///<path>api/2.0/community/bookmark/@self</path>
+        ///<httpMethod>GET</httpMethod>
+        /// <collection>list</collection>
         [Read("bookmark/@self")]
         public IEnumerable<BookmarkWrapper> GetMyBookmarks()
         {
@@ -76,30 +84,36 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns a list of bookmarks matching the search query with the bookmark title, date of creation and update, bookmark description and author
+        ///Returns a list of bookmarks matching the search query specified in the request with the bookmark titles, dates of creation and update, bookmark descriptions, and authors.
         ///</summary>
         ///<short>
-        ///Search
+        ///Search bookmarks
         ///</short>
         ///<category>Bookmarks</category>
-        /// <param name="query">search query</param>
-        ///<returns>List of bookmarks</returns>
+        /// <param type="System.String, System" method="url" name="query">Search query</param>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">List of bookmarks</returns>
+        ///<path>api/2.0/community/bookmark/@search/{query}</path>
+        ///<httpMethod>GET</httpMethod>
+        /// <collection>list</collection>
         [Read("bookmark/@search/{query}")]
         public IEnumerable<BookmarkWrapper> SearchBookmarks(string query)
         {
-            var bookmarks = BookmarkingDao.SearchBookmarks(new List<string> {query}, (int)_context.StartIndex, (int)_context.Count);
+            var bookmarks = BookmarkingDao.SearchBookmarks(new List<string> { query }, (int)_context.StartIndex, (int)_context.Count);
             _context.SetDataPaginated();
             return bookmarks.Select(x => new BookmarkWrapper(x)).ToSmartList();
         }
 
         ///<summary>
-        ///Returns the list of favorite bookmarks for the current user with the bookmark titles, date of creation and update, bookmark text and author
+        ///Returns a list of favorite bookmarks for the current user with the bookmark titles, dates of creation and update, bookmark texts, and authors.
         ///</summary>
         ///<short>
-        ///My favorite
+        ///Get my favorite bookmarks
         ///</short>
         ///<category>Bookmarks</category>
-        ///<returns>List of bookmarks</returns>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">List of bookmarks</returns>
+        ///<path>api/2.0/community/bookmark/@favs</path>
+        ///<httpMethod>GET</httpMethod>
+        /// <collection>list</collection>
         [Read("bookmark/@favs")]
         public IEnumerable<BookmarkWrapper> GetFavsBookmarks()
         {
@@ -109,13 +123,16 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns a list of all tags used for bookmarks with the number showing the tag usage
+        ///Returns a list of all the bookmark tags with a number specifying the tag usage.
         ///</summary>
         ///<short>
-        ///All tags
+        ///Get tags
         ///</short>
         ///<category>Bookmarks</category>
-        ///<returns>List of tags</returns>
+        ///<returns type="ASC.Api.Bookmarks.TagWrapper, ASC.Api.Community">List of tags</returns>
+        ///<collection>list</collection>
+        ///<path>api/2.0/community/bookmark/tag</path>
+        ///<httpMethod>GET</httpMethod>
         [Read("bookmark/tag")]
         public IEnumerable<TagWrapper> GetBookmarksTags()
         {
@@ -124,14 +141,17 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the list of all bookmarks marked by the tag specified with the bookmark titles, date of creation and update, bookmark text and author
+        ///Returns a list of all the bookmarks marked by the tag specified in the request with the bookmark titles, dates of creation and update, bookmark texts, and authors.
         ///</summary>
         ///<short>
-        ///By tag
+        ///Get bookmarks by tag
         ///</short>
         ///<category>Bookmarks</category>
-        ///<param name="tag">tag</param>
-        ///<returns>List of bookmarks</returns>
+        ///<param type="System.String, System" method="url" name="tag">Tag name</param>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">List of bookmarks</returns>
+        ///<collection>list</collection>
+        ///<path>api/2.0/community/bookmark/bytag</path>
+        ///<httpMethod>GET</httpMethod>
         [Read("bookmark/bytag")]
         public IEnumerable<BookmarkWrapper> GetBookmarksByTag(string tag)
         {
@@ -141,13 +161,16 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the list of recenty added bookmarks with the bookmark titles, date of creation and update, bookmark text and author
+        ///Returns a list of recently added bookmarks with the bookmark titles, dates of creation and update, bookmark texts, and authors.
         ///</summary>
         ///<short>
-        ///Recently added
+        ///Get recent bookmarks
         ///</short>
         ///<category>Bookmarks</category>
-        ///<returns>List of bookmarks</returns>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">List of bookmarks</returns>
+        ///<path>api/2.0/community/bookmark/top/recent</path>
+        ///<httpMethod>GET</httpMethod>
+        /// <collection>list</collection>
         [Read("bookmark/top/recent")]
         public IEnumerable<BookmarkWrapper> GetRecentBookmarks()
         {
@@ -157,13 +180,16 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the list of the bookmarks most popular on the current date with the bookmark titles, date of creation and update, bookmark text and author
+        ///Returns a list of the most popular bookmarks for the current date with the bookmark titles, dates of creation and update, bookmark texts, and authors.
         ///</summary>
         ///<short>
-        ///Top of day
+        ///Get top of the day bookmarks
         ///</short>
         ///<category>Bookmarks</category>
-        ///<returns>List of bookmarks</returns>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">List of bookmarks</returns>
+        ///<path>api/2.0/community/bookmark/top/day</path>
+        ///<httpMethod>GET</httpMethod>
+        /// <collection>list</collection>
         [Read("bookmark/top/day")]
         public IEnumerable<BookmarkWrapper> GetTopDayBookmarks()
         {
@@ -173,13 +199,16 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the list of the bookmarks most popular in the current month with the bookmark titles, date of creation and update, bookmark text and author
+        ///Returns a list of the most popular bookmarks for the current month with the bookmark titles, dates of creation and update, bookmark texts, and authors.
         ///</summary>
         ///<short>
-        ///Top of month
+        ///Get top of the month bookmarks
         ///</short>
         ///<category>Bookmarks</category>
-        ///<returns>List of bookmarks</returns>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">List of bookmarks</returns>
+        ///<path>api/2.0/community/bookmark/top/month</path>
+        ///<httpMethod>GET</httpMethod>
+        /// <collection>list</collection>
         [Read("bookmark/top/month")]
         public IEnumerable<BookmarkWrapper> GetTopMonthBookmarks()
         {
@@ -189,13 +218,16 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the list of the bookmarks most popular on the current week with the bookmark titles, date of creation and update, bookmark text and author
+        ///Returns a list of the most popular bookmarks for the current week with the bookmark titles, dates of creation and update, bookmark texts, and authors.
         ///</summary>
         ///<short>
-        ///Top of week
+        ///Get top of the week bookmarks
         ///</short>
         ///<category>Bookmarks</category>
-        ///<returns>list of bookmarks</returns>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">List of bookmarks</returns>
+        ///<path>api/2.0/community/bookmark/top/week</path>
+        ///<httpMethod>GET</httpMethod>
+        /// <collection>list</collection>
         [Read("bookmark/top/week")]
         public IEnumerable<BookmarkWrapper> GetTopWeekBookmarks()
         {
@@ -205,13 +237,16 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        ///Returns the list of the bookmarks most popular in the current year with the bookmark titles, date of creation and update, bookmark text and author
+        ///Returns a list of the most popular bookmarks for the current year with the bookmark titles, dates of creation and update, bookmark texts, and authors.
         ///</summary>
         ///<short>
-        ///Top of year
+        ///Get top of the year bookmarks
         ///</short>
         ///<category>Bookmarks</category>
-        ///<returns>list of bookmarks</returns>
+        ///<returns  type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">List of bookmarks</returns>
+        /// <path>api/2.0/community/bookmark/top/year</path>
+        ///<httpMethod>GET</httpMethod>
+        /// <collection>list</collection>
         [Read("bookmark/top/year")]
         public IEnumerable<BookmarkWrapper> GetTopYearBookmarks()
         {
@@ -221,14 +256,17 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        /// Returns the list of all comments to the bookmark with the specified ID
+        /// Returns a list of all the comments on the bookmark with the ID specified in the request.
         ///</summary>
         ///<short>
-        /// Get comments
+        /// Get bookmark comments
         ///</short>
         ///<category>Bookmarks</category>
-        ///<param name="id">Bookmark ID</param>
-        ///<returns>list of bookmark comments</returns>
+        ///<param type="System.Int64, System" method="url" name="id">Bookmark ID</param>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkCommentWrapper, ASC.Api.Community">List of bookmark comments</returns>
+        ///<path>api/2.0/community/bookmark/{id}/comment</path>
+        ///<httpMethod>GET</httpMethod>
+        ///<collection>list</collection>
         [Read("bookmark/{id}/comment")]
         public IEnumerable<BookmarkCommentWrapper> GetBookmarkComments(long id)
         {
@@ -237,15 +275,15 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        /// Adds a comment to the bookmark with the specified ID. The parent bookmark ID can be also specified if needed.
+        /// Adds a comment to the bookmark with the ID specified in the request. The parent bookmark ID can be also specified if needed.
         ///</summary>
         ///<short>
-        /// Add comment
+        /// Add a bookmark comment by bookmark ID
         ///</short>
-        ///<param name="id">Bookmark ID</param>
-        ///<param name="content">comment content</param>
-        ///<param name="parentId">parent comment ID</param>
-        ///<returns>list of bookmark comments</returns>
+        ///<param type="System.Int64, System" method="url" name="id">Bookmark ID</param>
+        ///<param type="System.String, System" name="content">Comment text</param>
+        ///<param type="System.Guid, System" name="parentId">Parent comment ID</param>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkCommentWrapper, ASC.Api.Community">List of bookmark comments</returns>
         /// <example>
         /// <![CDATA[
         /// Sending data in application/json:
@@ -260,9 +298,11 @@ namespace ASC.Api.Community
         /// ]]>
         /// </example>
         /// <remarks>
-        /// Send parentId=00000000-0000-0000-0000-000000000000 or don't send it at all if you want your comment to be on the root level
+        /// Send parentId=00000000-0000-0000-0000-000000000000 or doesn't send it at all if you want your comment to be on the root level.
         /// </remarks>
         /// <category>Bookmarks</category>
+        /// <path>api/2.0/community/bookmark/{id}/comment</path>
+        /// <httpMethod>POST</httpMethod>
         [Create("bookmark/{id}/comment")]
         public BookmarkCommentWrapper AddBookmarkComment(long id, string content, Guid parentId)
         {
@@ -270,27 +310,29 @@ namespace ASC.Api.Community
             if (bookmark == null) throw new ItemNotFoundException("bookmark not found");
 
             var comment = new Comment
-                {
-                    ID = Guid.NewGuid(),
-                    BookmarkID = id,
-                    Content = content,
-                    Datetime = DateTime.UtcNow,
-                    UserID = SecurityContext.CurrentAccount.ID,
-                    Parent = parentId.ToString()
-                };
+            {
+                ID = Guid.NewGuid(),
+                BookmarkID = id,
+                Content = content,
+                Datetime = DateTime.UtcNow,
+                UserID = SecurityContext.CurrentAccount.ID,
+                Parent = parentId.ToString()
+            };
             BookmarkingDao.AddComment(comment);
             return new BookmarkCommentWrapper(comment);
         }
 
         ///<summary>
-        /// Returns a detailed information on the bookmark with the specified ID
+        /// Returns the detailed information on the bookmark with the ID specified in the request.
         ///</summary>
         ///<short>
-        /// Get bookmarks by ID
+        /// Get a bookmark
         ///</short>
-        ///<param name="id">Bookmark ID</param>
-        ///<returns>bookmark</returns>
+        ///<param type="System.Int64, System" method="url" name="id">Bookmark ID</param>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">Bookmark information</returns>
         ///<category>Bookmarks</category>
+        ///<path>api/2.0/community/bookmark/{id}</path>
+        ///<httpMethod>GET</httpMethod>
         [Read("bookmark/{id}")]
         public BookmarkWrapper GetBookmarkById(long id)
         {
@@ -298,50 +340,68 @@ namespace ASC.Api.Community
         }
 
         ///<summary>
-        /// Adds a bookmark with a specified title, description and tags
+        /// Adds a bookmark with the title, description and tags specified in the request.
         ///</summary>
         ///<short>
-        /// Add bookmark
+        /// Add a bookmark
         ///</short>
-        ///<param name="url">url of bookmarking page</param>
-        ///<param name="title">title to show</param>
-        ///<param name="description">description</param>
-        ///<param name="tags">tags. separated by semicolon</param>
-        ///<returns>newly added bookmark</returns>
+        ///<param type="System.String, System" name="url">Absolute URL to the bookmark page</param>
+        ///<param type="System.String, System" name="title">Bookmark title</param>
+        ///<param type="System.String, System" name="description">Bookmark description</param>
+        ///<param type="System.String, System" name="tags">Bookmark tags separated with semicolon</param>
+        ///<returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">Newly added bookmark</returns>
         /// <example>
         /// <![CDATA[
         /// Sending data in application/json:
         /// 
         /// {
-        ///     url:"www.teamlab.com",
+        ///     url:"https://www.teamlab.com",
         ///     title: "TeamLab",
         ///     description: "best site i've ever seen",
         ///     tags: "project management, collaboration"
         /// }
         /// 
         /// Sending data in application/x-www-form-urlencoded
-        /// url="www.teamlab.com"&title="TeamLab"&description="best site i've ever seen"&tags="project management, collaboration"
+        /// url="https://www.teamlab.com"&title="TeamLab"&description="best site i've ever seen"&tags="project management, collaboration"
         /// ]]>
         /// </example>
         /// <category>Bookmarks</category>
+        /// <path>api/2.0/community/bookmark</path>
+        /// <httpMethod>POST</httpMethod>
         [Create("bookmark")]
         public BookmarkWrapper AddBookmark(string url, string title, string description, string tags)
         {
-            var bookmark = new Bookmark(url, TenantUtil.DateTimeNow(), title, description) {UserCreatorID = SecurityContext.CurrentAccount.ID};
-            BookmarkingDao.AddBookmark(bookmark, !string.IsNullOrEmpty(tags) ? tags.Split(',').Select(x => new Tag {Name = x}).ToList() : new List<Tag>());
+            try
+            {
+                var uri = new Uri(url, UriKind.Absolute);
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException("invalid absolute url", "url");
+            }
+
+            if (string.IsNullOrEmpty(title))
+            {
+                throw new ArgumentException("title can't be empty", "title");
+            }
+
+            var bookmark = new Bookmark(url, TenantUtil.DateTimeNow(), title, description) { UserCreatorID = SecurityContext.CurrentAccount.ID };
+            BookmarkingDao.AddBookmark(bookmark, !string.IsNullOrEmpty(tags) ? tags.Split(',').Select(x => new Tag { Name = x }).ToList() : new List<Tag>());
             return new BookmarkWrapper(bookmark);
         }
 
 
         /// <summary>
-        /// Get comment preview with the content specified in the request
+        /// Returns a comment preview with the content specified in the request.
         /// </summary>
-        /// <short>Get comment preview</short>
+        /// <short>Get a comment preview</short>
         /// <section>Comments</section>
-        /// <param name="commentid">Comment ID</param>
-        /// <param name="htmltext">Comment content</param>
-        /// <returns>Comment info</returns>
+        /// <param type="System.String, System" name="commentid">Comment ID</param>
+        /// <param type="System.String, System" name="htmltext">Comment content in the HTML format</param>
+        /// <returns type="ASC.Web.Studio.UserControls.Common.Comments.CommentInfo, ASC.Web.Studio">Comment information</returns>
         /// <category>Bookmarks</category>
+        /// <path>api/2.0/community/bookmark/comment/preview</path>
+        /// <httpMethod>POST</httpMethod>
         [Create("bookmark/comment/preview")]
         public CommentInfo GetBookmarkCommentPreview(string commentid, string htmltext)
         {
@@ -370,13 +430,15 @@ namespace ASC.Api.Community
 
 
         /// <summary>
-        ///Remove comment with the id specified in the request
+        ///Removes a comment with the ID specified in the request.
         /// </summary>
-        /// <short>Remove comment</short>
+        /// <short>Remove a comment</short>
         /// <section>Comments</section>
-        /// <param name="commentid">Comment ID</param>
-        /// <returns>Comment id</returns>
+        /// <param type="System.String, System" method="url" name="commentid">Comment ID</param>
+        /// <returns>Comment ID</returns>
         /// <category>Bookmarks</category>
+        /// <path>api/2.0/community/bookmark/comment/{commentid}</path>
+        /// <httpMethod>DELETE</httpMethod>
         [Delete("bookmark/comment/{commentid}")]
         public string RemoveBookmarkComment(string commentid)
         {
@@ -389,6 +451,18 @@ namespace ASC.Api.Community
             return null;
         }
 
+        ///<summary>
+        /// Adds a comment to the entity with the ID specified in the request. The parent bookmark ID can be also specified if needed.
+        ///</summary>
+        ///<short>
+        /// Add a bookmark comment by entity ID
+        ///</short>
+        ///<param type="System.String, System" name="parentcommentid">Parent comment ID</param>
+        ///<param type="System.Int64, System" name="entityid">Entity ID</param>
+        ///<param type="System.String, System" name="content">Comment text</param>
+        /// <returns type="ASC.Web.Studio.UserControls.Common.Comments.CommentInfo, ASC.Web.Studio">List of bookmark comments</returns>
+        /// <path>api/2.0/community/bookmark/comment</path>
+        /// <httpMethod>POST</httpMethod>
         /// <category>Bookmarks</category>
         [Create("bookmark/comment")]
         public CommentInfo AddBookmarkComment(string parentcommentid, long entityid, string content)
@@ -421,6 +495,15 @@ namespace ASC.Api.Community
             return BookmarkingConverter.ConvertComment(comment, new List<Comment>());
         }
 
+        /// <summary>
+        /// Updates the selected bookmark comment with the content specified in the request.
+        /// </summary>
+        /// <short>Update a bookmark comment</short>
+        /// <param type="System.String, System" method="url" name="commentid">Comment ID</param>
+        /// <param type="System.String, System" name="content">New comment text</param>
+        /// <returns>Updated bookmark</returns>
+        /// <path>api/2.0/community/bookmark/comment/{commentid}</path>
+        /// <httpMethod>PUT</httpMethod>
         /// <category>Bookmarks</category>
         [Update("bookmark/comment/{commentid}")]
         public string UpdateBookmarkComment(string commentid, string content)
@@ -433,12 +516,14 @@ namespace ASC.Api.Community
         }
 
         /// <summary>
-        /// Removes bookmark from favourite. If after removing user bookmark raiting of this bookmark is 0, the bookmark will be removed completely.
+        /// Removes a bookmark from favorites. If after removing the user bookmark, its rating is 0, then the bookmark will be removed completely.
         /// </summary>
-        /// <short>Removes bookmark from favourite</short>
-        /// <param name="id">Bookmark ID</param>
-        /// <returns>bookmark</returns>
+        /// <short>Remove a bookmark from favorites</short>
+        /// <param type="System.Int64, System" method="url" name="id">Bookmark ID</param>
+        /// <returns type="ASC.Api.Bookmarks.BookmarkWrapper, ASC.Api.Community">Bookmark</returns>
         /// <category>Bookmarks</category>
+        /// <path>api/2.0/community/bookmark/@favs/{id}</path>
+        /// <httpMethod>DELETE</httpMethod>
         [Delete("bookmark/@favs/{id}")]
         public BookmarkWrapper RemoveBookmarkFromFavourite(long id)
         {
@@ -448,11 +533,14 @@ namespace ASC.Api.Community
         }
 
         /// <summary>
-        /// Removes bookmark
+        /// Removes a bookmark with the ID specified in the request.
         /// </summary>
-        /// <short>Removes bookmark</short>
-        /// <param name="id">Bookmark ID</param>
+        /// <short>Remove a bookmark</short>
+        /// <param type="System.Int64, System" method="url" name="id">Bookmark ID</param>
+        /// <returns></returns>
         /// <category>Bookmarks</category>
+        /// <path>api/2.0/community/bookmark/{id}</path>
+        /// <httpMethod>DELETE</httpMethod>
         [Delete("bookmark/{id}")]
         public void RemoveBookmark(long id)
         {

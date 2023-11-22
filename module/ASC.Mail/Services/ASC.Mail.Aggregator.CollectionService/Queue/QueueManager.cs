@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Threading;
+
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Mail.Aggregator.CollectionService.Queue.Data;
@@ -29,6 +30,7 @@ using ASC.Mail.Core;
 using ASC.Mail.Core.Dao.Expressions.Mailbox;
 using ASC.Mail.Data.Contracts;
 using ASC.Mail.Extensions;
+
 using LiteDB;
 
 namespace ASC.Mail.Aggregator.CollectionService.Queue
@@ -53,13 +55,13 @@ namespace ASC.Mail.Aggregator.CollectionService.Queue
         private readonly object _locker = new object();
 
         private LiteDatabase _db;
-        private LiteCollection<MailboxData> _mailboxes;
-        private LiteCollection<TenantData> _tenants;
+        private ILiteCollection<MailboxData> _mailboxes;
+        private ILiteCollection<TenantData> _tenants;
 
         public ManualResetEvent CancelHandler { get; set; }
 
         public QueueManager(TasksConfig tasksConfig, ILog log)
-        {           
+        {
             _maxItemsLimit = tasksConfig.MaxTasksAtOnce;
             _mailBoxQueue = new Queue<MailBoxData>();
             _lockedMailBoxList = new List<MailBoxData>();
@@ -311,7 +313,7 @@ namespace ASC.Mail.Aggregator.CollectionService.Queue
                     if (mailbox == null)
                         return;
 
-                    _mailboxes.Delete(Query.EQ("MailboxId", mailBoxId));
+                    _mailboxes.DeleteMany(Query.EQ("MailboxId", mailBoxId));
                 }
             }
             catch (Exception ex)
@@ -359,9 +361,9 @@ namespace ASC.Mail.Aggregator.CollectionService.Queue
                 {
                     var tenant = _tenants.FindOne(Query.EQ("Tenant", tenantData.Tenant));
 
-                    if(tenant != null)
+                    if (tenant != null)
                         return;
-                     
+
                     _tenants.Insert(tenantData);
 
                     // Create, if not exists, new index on Name field
@@ -390,7 +392,7 @@ namespace ASC.Mail.Aggregator.CollectionService.Queue
                     if (tenant == null)
                         return;
 
-                    _tenants.Delete(Query.EQ("Tenant", tenantId));
+                    _tenants.DeleteMany(Query.EQ("Tenant", tenantId));
                 }
             }
             catch (Exception ex)
@@ -413,7 +415,7 @@ namespace ASC.Mail.Aggregator.CollectionService.Queue
 
             var cacheItem = new CacheItem(tenantData.Tenant.ToString(CultureInfo.InvariantCulture), tenantData);
 
-            var nowOffset = tenantData.Expired - now;              
+            var nowOffset = tenantData.Expired - now;
 
             var absoluteExpiration = DateTime.UtcNow.Add(nowOffset);
 
@@ -505,7 +507,7 @@ namespace ASC.Mail.Aggregator.CollectionService.Queue
                         {
                             case Defines.TariffType.LongDead:
                                 _log.InfoFormat("Tenant {0} is not paid. Disable mailboxes.", mailbox.TenantId);
-                                
+
                                 _engineFactory.MailboxEngine.DisableMailboxes(
                                     new TenantMailboxExp(mailbox.TenantId));
 

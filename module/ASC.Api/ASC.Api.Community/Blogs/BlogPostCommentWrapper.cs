@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 using System;
 using System.Runtime.Serialization;
+
 using ASC.Api.Employee;
 using ASC.Blogs.Core.Domain;
 using ASC.Specific;
@@ -33,7 +34,7 @@ namespace ASC.Api.Blogs
             Id = comment.ID;
             Text = comment.Content;
             ParentId = comment.ParentId;
-           
+
         }
 
 
@@ -41,23 +42,33 @@ namespace ASC.Api.Blogs
         {
 
         }
-
+        ///<example>comment text</example>
+        ///<order>10</order>
         [DataMember(Order = 10)]
         public string Text { get; set; }
 
+        ///<example>2020-12-03T21:36:13.0325127Z</example>
+        ///<order>6</order>
         [DataMember(Order = 6)]
         public ApiDateTime Created { get; set; }
 
+        ///<example>c2020-12-03T21:36:13.0325127Z</example>
+        ///<order>6</order>
         [DataMember(Order = 6)]
         public ApiDateTime Updated { get; set; }
 
-
+        ///<example>c2020-12-03T21:36:13.0325127Z</example>
+        ///<order>1</order>
         [DataMember(Order = 1)]
         public Guid Id { get; set; }
 
+        ///<type>ASC.Api.Employee.EmployeeWraper, ASC.Api.Employee</type>
+        ///<order>9</order>
         [DataMember(Order = 9)]
         public EmployeeWraper CreatedBy { get; set; }
 
+        ///<example>c2020-12-03T21:36:13.0325127Z</example>
+        ///<order>16</order>
         [DataMember(Order = 16)]
         protected Guid ParentId { get; set; }
 

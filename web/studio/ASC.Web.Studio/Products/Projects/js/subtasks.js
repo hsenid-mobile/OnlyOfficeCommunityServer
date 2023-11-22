@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ ASC.Projects.SubtasksManager = (function () {
             return true;
         });
 
-        jq(document).on(clickEventName, ".subtask-add-button .button", function () {
+        jq(document).on(clickEventName, ".subtask-add-button .button:not(.disable)", function () {
             beforeSubtaskAction();
             return false;
         });
@@ -88,7 +88,6 @@ ASC.Projects.SubtasksManager = (function () {
                     hideSubtaskFields();
                     break;
                 case enterKey:
-                    jq(this).prop("disabled", true);
                     beforeSubtaskAction();
                     break;
                 default:
@@ -104,7 +103,7 @@ ASC.Projects.SubtasksManager = (function () {
             if (jq(this).is(':checked')) {
                 closeSubTask(self, taskId);
             } else {
-                showSubtaskLoader(self.closest(".check"));
+                showSubtaskLoader(self.find(".check"));
                 updateSubtaskStatus({}, taskId, subtaskId, { status: 'open' });
             }
         });
@@ -117,7 +116,7 @@ ASC.Projects.SubtasksManager = (function () {
 
         jq(document).on(clickEventName, "#quickAddSubTaskField", function (event) {
             $subtaskNameInput = jq('.subtask-name-input');
-            $subtaskNameInput.focus();
+            $subtaskNameInput.trigger("focus");
         });
 
         teamlab.bind(teamlab.events.updatePrjTeam, function(params, team) {
@@ -156,18 +155,22 @@ ASC.Projects.SubtasksManager = (function () {
         var subtaskid = selectedActionCombobox.attr("id"),
             subtask = getFilteredSubTaskById(subtaskid),
             taskid = subtask.taskid,
+            task = getFilteredTaskById(taskid),
             ActionMenuItem = ASC.Projects.ActionMenuItem;
 
         var menuItems = [];
 
         if (subtask.status != 2) {
             if (!subtask.responsible) {
-                menuItems.push(new ActionMenuItem("sta_accept", resources.TasksResource.AcceptSubtask, staAcceptHandler.bind(null, subtask, taskid), "accept"));
+                menuItems.push(new ActionMenuItem("sta_accept", resources.TaskResource.AcceptSubtask, staAcceptHandler.bind(null, subtask, taskid), "accept"));
             }
 
             if (subtask.canEdit) {
-                menuItems.push(new ActionMenuItem("sta_edit", resources.TasksResource.Edit, staEditHandler.bind(null, subtaskid, taskid), "edit"));
-                menuItems.push(new ActionMenuItem("sta_copy", resources.CommonResource.Copy, staCopyHandler.bind(null, subtaskid, taskid), "move-or-copy"));
+                menuItems.push(new ActionMenuItem("sta_edit", resources.TaskResource.Edit, staEditHandler.bind(null, subtaskid, taskid), "edit"));
+            }
+
+            if (task.canCreateSubtask) {
+                menuItems.push(new ActionMenuItem("sta_copy", resources.ProjectsCommonResource.Copy, staCopyHandler.bind(null, subtaskid, taskid), "move-or-copy"));
             }
         }
 
@@ -176,7 +179,7 @@ ASC.Projects.SubtasksManager = (function () {
                 menuItems.push(new ActionMenuItem(null, null, null, null, true));
             }
 
-            menuItems.push(new ActionMenuItem("sta_remove", resources.CommonResource.Delete, staRemoveHandler.bind(null, subtaskid, taskid), "delete"));
+            menuItems.push(new ActionMenuItem("sta_remove", resources.ProjectsCommonResource.Delete, staRemoveHandler.bind(null, subtaskid, taskid), "delete"));
         }
         return { menuItems: menuItems };
     }
@@ -192,10 +195,12 @@ ASC.Projects.SubtasksManager = (function () {
         }
         jq(".subtask-loader").remove();
 
+        jq(".subtask-add-button .button").removeClass("disable");
+
         $subtaskNameInput = jq('.subtask-name-input');
-        $subtaskNameInput.removeAttr('disabled');
+        $subtaskNameInput.prop("disabled", false);
         $subtaskNameInput.val('');
-        $subtaskNameInput.focus();
+        $subtaskNameInput.trigger("focus");
     };
 
     function onUpdateSubtask(params, subtask) {
@@ -209,7 +214,7 @@ ASC.Projects.SubtasksManager = (function () {
         setTimeout(function () { $subtask.yellowFade(); }, 0);
 
         var data = {
-            title:jq.trim( $subtask.find(".taskName span").text()),
+            title: $subtask.find(".taskName span").text().trim(),
             responsible: currentUserId,
             status: 'closed'
         };
@@ -264,7 +269,7 @@ ASC.Projects.SubtasksManager = (function () {
         var validTeamMembers = common.excludeVisitors(team),
             nobody = {
                 id: "00000000-0000-0000-0000-000000000000",
-                displayName: ASC.Projects.Resources.TasksResource.NoResponsible
+                displayName: ASC.Projects.Resources.TaskResource.NoResponsible
             },
             $responsibleSelector = jq(".subtask-responsible-selector");
 
@@ -281,6 +286,7 @@ ASC.Projects.SubtasksManager = (function () {
         }
 
         $responsibleSelector.advancedSelector({
+            height: 30 * 9, //magic: itemsCount*itemHeight
             showSearch: false,
             onechosen: true,
             itemsChoose: validTeamMembers.map(mapTeamMember),
@@ -290,7 +296,7 @@ ASC.Projects.SubtasksManager = (function () {
         }).on("showList", function (event, item) {
             $responsibleSelector.attr("data-id", item.id).html(item.title).attr("title", item.title);
             $subtaskNameInput = jq('.subtask-name-input');
-            $subtaskNameInput.focus();
+            $subtaskNameInput.trigger("focus");
         });
 
         $responsibleSelector.advancedSelector("selectBeforeShow", mapTeamMember(choose));
@@ -308,7 +314,7 @@ ASC.Projects.SubtasksManager = (function () {
             if (!editFlag) {
                 hideSubtaskFields();
             } else {
-                $subtaskNameInput.focus();
+                $subtaskNameInput.trigger("focus");
             }
             return false;
         }
@@ -321,6 +327,8 @@ ASC.Projects.SubtasksManager = (function () {
         };
 
         showSubtaskLoader($subtaskNameInput.closest(".subtask-name"));
+        $subtaskNameInput.prop("disabled", true);
+        jq(".subtask-add-button .button").addClass("disable");
 
         if (editFlag) {
             subtask.id = $subtaskNameInput.data("subtaskid");
@@ -349,7 +357,7 @@ ASC.Projects.SubtasksManager = (function () {
         jq("#quickAddSubTaskField").removeClass("display-none");
 
         $subtaskNameInput = jq('.subtask-name-input');
-        $subtaskNameInput.focus();
+        $subtaskNameInput.trigger("focus");
     };
 
     function editSubtask(subtaskid) {
@@ -375,16 +383,14 @@ ASC.Projects.SubtasksManager = (function () {
         
         jq.tmpl("projects_fieldForAddSubtask", data).insertAfter($subtask);
         setTeamForResponsibleSelect(data.projectid);
-        $subtask.find(".taskName").hide();
+        $subtask.addClass("edited");
 
         var editField = jq("#quickAddSubTaskField");
-        editField.addClass("absolute");
-        editField.css("top", $subtask.position().top + "px");
         editField.removeClass("display-none");
 
         $subtaskNameInput = jq('.subtask-name-input');
-        $subtaskNameInput.removeAttr('disabled');
-        $subtaskNameInput.focus();
+        $subtaskNameInput.prop("disabled", false);
+        $subtaskNameInput.trigger("focus");
     };
 
     function hideSubtaskFields() {
@@ -393,7 +399,7 @@ ASC.Projects.SubtasksManager = (function () {
             jq(".task:not(.closed)").next().find(".quickAddSubTaskLink").show();
             jq("#subtaskContainer .quickAddSubTaskLink").show();
         }
-        jq(".subtask .taskName").show();
+        jq(".subtask.edited").removeClass("edited");
         editFlag = false;
     };
 
@@ -436,11 +442,94 @@ ASC.Projects.SubtasksManager = (function () {
         return jq(".subtasks div[id=" + subtaskId + "]:visible");
     }
 
+
+    function initDragDrop() {
+
+        if (jq.browser.mobile || 'ontouchstart' in window) {
+            return;
+        }
+
+        function onDragStart(event) {
+            jq(event.currentTarget).addClass("move-target");
+            $taskContainer.find(".task.canedit:not(.closed)").addClass("can-move");
+        }
+
+        function onDragEnd(event) {
+            jq(event.currentTarget).removeClass("move-target");
+            $taskContainer.find(".task.can-move").removeClass("can-move");
+            $taskContainer.find(".task.move-dest").removeClass("move-dest");
+        }
+
+        function onDrop() {
+            var $target = $taskContainer.find(".move-target");
+            var $destination = $taskContainer.find(".move-dest");
+
+            if ($target.length && $destination.length) {
+                var subtaskId = $target.attr("id");
+                var fromTaskId = $target.closest(".subtasks").attr("taskid")
+                var taskId = $destination.attr("taskid");
+
+                if (fromTaskId == taskId) {
+                    return;
+                }
+
+                teamlab.movePrjSubtask({ fromTaskId: parseInt(fromTaskId) }, taskId, subtaskId, {
+                    success: function (params, subtask) {
+                        $target.remove();
+                        jq.tmpl("projects_subtaskTemplate", subtask).prependTo($destination.next(".subtasks"));
+                    },
+                    error: function (params, error) {
+                        common.displayInfoPanel(error[0], true);
+                    },
+                    before: function () {
+                        LoadingBanner.displayLoading();
+                    },
+                    after: function () {
+                        LoadingBanner.hideLoading();
+                    }
+                });
+            }
+        }
+
+        function onDragOver(event) {
+            event.preventDefault();
+
+            $taskContainer.find(".move-dest").removeClass("move-dest");
+
+            var $target = jq(event.target);
+            var $taskParent = $target.closest(".can-move");
+            if ($taskParent.length) {
+                $taskParent.addClass("move-dest");
+                return;
+            }
+
+            var $subtaskParent = $target.closest(".subtasks");
+            if ($subtaskParent.length) {
+                $taskParent = $subtaskParent.prev(".can-move");
+                if ($taskParent.length) {
+                    $taskParent.addClass("move-dest");
+                    return;
+                }
+            }
+        }
+
+        var $taskContainer = jq("#CommonListContainer .taskList");
+
+        $taskContainer.on("dragover", onDragOver);
+
+        $taskContainer.on("drop", onDrop);
+
+        $taskContainer.on("dragstart", ".subtask", onDragStart);
+
+        $taskContainer.on("dragend", ".subtask", onDragEnd);
+    }
+
     return {
         init: init,
         hideSubtaskFields: hideSubtaskFields,
         addFirstSubtask: showNewSubtaskField,
         setTasks: setTasks,
-        showEntityMenu: showEntityMenu
+        showEntityMenu: showEntityMenu,
+        initDragDrop: initDragDrop
     };
 })(jQuery);

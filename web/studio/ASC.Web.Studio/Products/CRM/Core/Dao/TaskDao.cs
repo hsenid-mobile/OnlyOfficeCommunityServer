@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,8 @@ namespace ASC.CRM.Core.Dao
 
     public class TaskDao : AbstractDao
     {
+        private ILog Log = LogManager.GetLogger("ASC.CRM");
+
         #region Constructor
 
         public TaskDao(int tenantID)
@@ -159,25 +161,26 @@ namespace ASC.CRM.Core.Dao
         {
             if (!ids.Any()) return;
 
-                Db.ExecuteNonQuery(new SqlUpdate("crm_task").Set("exec_alert", true).Where(Exp.In("id", ids.ToArray())));
+            Db.ExecuteNonQuery(new SqlUpdate("crm_task").Set("exec_alert", true).Where(Exp.In("id", ids.ToArray())));
         }
 
         public List<object[]> GetInfoForReminder(DateTime scheduleDate)
         {
-           var sqlQuery = new SqlQuery("crm_task")
-            .Select(
-             "tenant_id",
-             "id", 
-                    "deadline",
-                    "alert_value",
-                    "responsible_id"
-                   )
-                .Where(
-                    Exp.Eq("is_closed", false) &
-                    !Exp.Eq("alert_value", 0) &
-                    Exp.Eq("exec_alert", false) &
-                    Exp.Between("DATE_ADD(deadline, interval -alert_value minute)", scheduleDate.AddHours(-1), scheduleDate.AddHours(1))
-                );
+            var sqlQuery = new SqlQuery("crm_task")
+             .Select(
+              "tenant_id",
+              "id",
+                     "deadline",
+                     "alert_value",
+                     "responsible_id"
+                    )
+                 .Where(
+                     Exp.Eq("is_closed", false) &
+                     !Exp.Eq("alert_value", 0) &
+                     Exp.Eq("exec_alert", false) &
+                     Exp.Ge("deadline", DateTime.UtcNow.AddDays(-1)) &
+                     Exp.Between("DATE_ADD(deadline, interval -alert_value minute)", scheduleDate.AddHours(-1), scheduleDate.AddHours(1))
+                 );
 
             return Db.ExecuteList(sqlQuery);
         }
@@ -295,7 +298,7 @@ namespace ASC.CRM.Core.Dao
                     List<int> tasksIds;
                     if (!FactoryIndexer<TasksWrapper>.TrySelectIds(s => s.MatchAll(searchText), out tasksIds))
                     {
-                        sqlQuery.Where(BuildLike(new[] {taskTableAlias + ".title", taskTableAlias + ".description"}, keywords));
+                        sqlQuery.Where(BuildLike(new[] { taskTableAlias + ".title", taskTableAlias + ".description" }, keywords));
                     }
                     else
                     {
@@ -325,7 +328,7 @@ namespace ASC.CRM.Core.Dao
 
             int result = 0;
 
-            LogManager.GetLogger("ASC.CRM").DebugFormat("Starting GetTasksCount: {0}", DateTime.Now.ToString());
+            Log.DebugFormat("Starting GetTasksCount: {0}", DateTime.Now.ToString());
 
             var cacheKey = TenantID.ToString(CultureInfo.InvariantCulture) +
                            "tasks" +
@@ -340,7 +343,7 @@ namespace ASC.CRM.Core.Dao
 
             if (!String.IsNullOrEmpty(_cache.Get<String>(cacheKey)))
             {
-                LogManager.GetLogger("ASC.CRM").DebugFormat("End GetTasksCount: {0}. From cache", DateTime.Now.ToString());
+                Log.DebugFormat("End GetTasksCount: {0}. From cache", DateTime.Now.ToString());
 
                 return Convert.ToInt32(_cache.Get<String>(cacheKey));
             }
@@ -411,7 +414,7 @@ namespace ASC.CRM.Core.Dao
 
                     taskIds = Db.ExecuteList(sqlQuery).Select(item => Convert.ToInt32(item[0])).ToList();
 
-                    LogManager.GetLogger("ASC.CRM").DebugFormat("End GetTasksCount: {0}. count tasks without entityId and only open contacts", DateTime.Now.ToString());
+                    Log.DebugFormat("End GetTasksCount: {0}. count tasks without entityId and only open contacts", DateTime.Now.ToString());
 
 
                     sqlQuery = Query("crm_task tbl_tsk")
@@ -439,7 +442,7 @@ namespace ASC.CRM.Core.Dao
                     // count tasks with entityId and only close contacts
                     taskIds.AddRange(Db.ExecuteList(sqlQuery).Select(item => Convert.ToInt32(item[0])).ToList());
 
-                    LogManager.GetLogger("ASC.CRM").DebugFormat("End GetTasksCount: {0}. count tasks with entityId and only close contacts", DateTime.Now.ToString());
+                    Log.DebugFormat("End GetTasksCount: {0}. count tasks with entityId and only close contacts", DateTime.Now.ToString());
 
                     sqlQuery = Query("crm_task tbl_tsk")
                               .Select("tbl_tsk.id")
@@ -466,7 +469,7 @@ namespace ASC.CRM.Core.Dao
                     // count tasks with entityId and only close contacts
                     taskIds.AddRange(Db.ExecuteList(sqlQuery).Select(item => Convert.ToInt32(item[0])).ToList());
 
-                    LogManager.GetLogger("ASC.CRM").DebugFormat("End GetTasksCount: {0}. count tasks with entityId and only close contacts", DateTime.Now.ToString());
+                    Log.DebugFormat("End GetTasksCount: {0}. count tasks with entityId and only close contacts", DateTime.Now.ToString());
 
 
                     sqlQuery = Query("crm_task tbl_tsk")
@@ -492,7 +495,7 @@ namespace ASC.CRM.Core.Dao
                     // count tasks with entityId and without contact
                     taskIds.AddRange(Db.ExecuteList(sqlQuery).Select(item => Convert.ToInt32(item[0])).ToList());
 
-                    LogManager.GetLogger("ASC.CRM").DebugFormat("End GetTasksCount: {0}. count tasks with entityId and without contact", DateTime.Now.ToString());
+                    Log.DebugFormat("End GetTasksCount: {0}. count tasks with entityId and without contact", DateTime.Now.ToString());
 
                     sqlQuery = Query("crm_task tbl_tsk")
                                 .Select("tbl_tsk.id")
@@ -519,9 +522,9 @@ namespace ASC.CRM.Core.Dao
 
                     result = taskIds.Distinct().Count();
 
-                    LogManager.GetLogger("ASC.CRM").DebugFormat("End GetTasksCount: {0}. count tasks with entityId and without contact", DateTime.Now.ToString());
+                    Log.DebugFormat("End GetTasksCount: {0}. count tasks with entityId and without contact", DateTime.Now.ToString());
 
-                    LogManager.GetLogger("ASC.CRM").Debug("Finish");
+                    Log.Debug("Finish");
 
                 }
             }
@@ -671,7 +674,7 @@ namespace ASC.CRM.Core.Dao
 
             if (taskIDs.Count == 0) return new Dictionary<int, Task>();
 
-            var tasks = Db.ExecuteList(GetTaskQuery(Exp.In("id", taskIDs))).ConvertAll(row=>ToTask(row)).Where(CRMSecurity.CanAccessTo);
+            var tasks = Db.ExecuteList(GetTaskQuery(Exp.In("id", taskIDs))).ConvertAll(row => ToTask(row)).Where(CRMSecurity.CanAccessTo);
 
             var result = new Dictionary<int, Task>();
 
@@ -845,24 +848,24 @@ namespace ASC.CRM.Core.Dao
                 newTask.CategoryID == 0)
                 throw new ArgumentException();
 
-             var result = Db.ExecuteScalar<int>(
-                               Insert("crm_task")
-                              .InColumnValue("id", 0)
-                              .InColumnValue("title", newTask.Title)
-                              .InColumnValue("description", newTask.Description)
-                              .InColumnValue("deadline", TenantUtil.DateTimeToUtc(newTask.DeadLine))
-                              .InColumnValue("responsible_id", newTask.ResponsibleID)
-                              .InColumnValue("contact_id", newTask.ContactID)
-                              .InColumnValue("entity_type", (int)newTask.EntityType)
-                              .InColumnValue("entity_id", newTask.EntityID)
-                              .InColumnValue("is_closed", newTask.IsClosed)
-                              .InColumnValue("category_id", newTask.CategoryID)
-                              .InColumnValue("create_on", newTask.CreateOn == DateTime.MinValue ? DateTime.UtcNow : newTask.CreateOn)
-                              .InColumnValue("create_by", ASC.Core.SecurityContext.CurrentAccount.ID)
-                              .InColumnValue("last_modifed_on", newTask.CreateOn == DateTime.MinValue ? DateTime.UtcNow : newTask.CreateOn)
-                              .InColumnValue("last_modifed_by", ASC.Core.SecurityContext.CurrentAccount.ID)
-                              .InColumnValue("alert_value", (int)newTask.AlertValue)
-                              .Identity(1, 0, true));
+            var result = Db.ExecuteScalar<int>(
+                              Insert("crm_task")
+                             .InColumnValue("id", 0)
+                             .InColumnValue("title", newTask.Title)
+                             .InColumnValue("description", newTask.Description)
+                             .InColumnValue("deadline", TenantUtil.DateTimeToUtc(newTask.DeadLine))
+                             .InColumnValue("responsible_id", newTask.ResponsibleID)
+                             .InColumnValue("contact_id", newTask.ContactID)
+                             .InColumnValue("entity_type", (int)newTask.EntityType)
+                             .InColumnValue("entity_id", newTask.EntityID)
+                             .InColumnValue("is_closed", newTask.IsClosed)
+                             .InColumnValue("category_id", newTask.CategoryID)
+                             .InColumnValue("create_on", newTask.CreateOn == DateTime.MinValue ? DateTime.UtcNow : newTask.CreateOn)
+                             .InColumnValue("create_by", ASC.Core.SecurityContext.CurrentAccount.ID)
+                             .InColumnValue("last_modifed_on", newTask.CreateOn == DateTime.MinValue ? DateTime.UtcNow : newTask.CreateOn)
+                             .InColumnValue("last_modifed_by", ASC.Core.SecurityContext.CurrentAccount.ID)
+                             .InColumnValue("alert_value", (int)newTask.AlertValue)
+                             .Identity(1, 0, true));
 
             newTask.ID = result;
             FactoryIndexer<TasksWrapper>.IndexAsync(newTask);
@@ -963,24 +966,24 @@ namespace ASC.CRM.Core.Dao
         private static Task ToTask(object[] row)
         {
             return new Task
-                {
-                    ID = Convert.ToInt32(row[0]),
-                    ContactID = Convert.ToInt32(row[1]),
-                    Title = Convert.ToString(row[2]),
-                    Description = Convert.ToString(row[3]),
-                    DeadLine = TenantUtil.DateTimeFromUtc(Convert.ToDateTime(row[4])),
-                    ResponsibleID = ToGuid(row[5]),
-                    IsClosed = Convert.ToBoolean(row[6]),
-                    CategoryID = Convert.ToInt32(row[7]),
-                    EntityID = Convert.ToInt32(row[8]),
-                    EntityType = (EntityType)Convert.ToInt32(row[9]),
-                    CreateOn = TenantUtil.DateTimeFromUtc(Convert.ToDateTime(row[10])),
-                    CreateBy = ToGuid(row[11]),
-                    AlertValue = Convert.ToInt32(row[12])
-                };
+            {
+                ID = Convert.ToInt32(row[0]),
+                ContactID = Convert.ToInt32(row[1]),
+                Title = Convert.ToString(row[2]),
+                Description = Convert.ToString(row[3]),
+                DeadLine = TenantUtil.DateTimeFromUtc(Convert.ToDateTime(row[4])),
+                ResponsibleID = ToGuid(row[5]),
+                IsClosed = Convert.ToBoolean(row[6]),
+                CategoryID = Convert.ToInt32(row[7]),
+                EntityID = Convert.ToInt32(row[8]),
+                EntityType = (EntityType)Convert.ToInt32(row[9]),
+                CreateOn = TenantUtil.DateTimeFromUtc(Convert.ToDateTime(row[10])),
+                CreateBy = ToGuid(row[11]),
+                AlertValue = Convert.ToInt32(row[12])
+            };
         }
 
-        
+
         private String[] GetTaskColumnsTable(String alias)
         {
             if (!String.IsNullOrEmpty(alias))

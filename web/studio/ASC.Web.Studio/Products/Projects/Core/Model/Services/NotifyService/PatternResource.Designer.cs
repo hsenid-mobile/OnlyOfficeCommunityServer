@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ASC.Projects.Core.Services.NotifyService {
+namespace ASC.Web.Projects.Core.Model.Services.NotifyService {
     using System;
     
     
@@ -19,7 +19,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class PatternResource {
@@ -67,7 +67,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         ///
         ///$AdditionalData 
         ///
-        ///&quot;Read more&quot;:&quot;${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot;.
+        ///&quot;Read more&quot;:&quot;${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID#comment_$CommentID&quot; 
+        ///
+        ///^You receive this email because you are a registered us [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_EditedCommentForMessage {
             get {
@@ -82,9 +84,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         ///
         ///$AdditionalData
         ///
-        ///&quot;Read more&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
+        ///&quot;Read more&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID#comment_$CommentID&quot; 
         ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__Vir [rest of string was truncated]&quot;;.
+        ///^You receive this email because you are a registered user of the &quot;${__Virtual [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_EditedCommentForTask {
             get {
@@ -99,7 +101,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         ///
         ///$AdditionalData.get_item(&quot;MessagePreview&quot;) 
         ///
-        ///#foreach($fileInfo in $AdditionalData.get_item(&quot;Files&quot;)) 
+        ///#foreach($fileInfo in $AdditionalData.get_item(&quot;Files&quot;).Keys) 
         ///
         ///#beforeall 
         ///
@@ -107,9 +109,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         ///
         ///#each 
         ///
-        ///&quot;$fileInfo.Item1&quot;:&quot;$fileInfo.Item2&quot; 
-        ///
-        ///#end [rest of string was truncated]&quot;;.
+        ///&quot;$fileInfo&quot;:&quot;$AdditionalData.get_item [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_EditMessage {
             get {
@@ -120,7 +120,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Projects. Import of the data from Basecamp
         ///
-        ///The new data has been successfully imported..
+        ///The new data has been successfully imported.
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change the notification type, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
         public static string pattern_ImportData {
             get {
@@ -131,7 +133,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.You have been added to the project team: &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; 
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has added you to the team of the project:[&quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot;].
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has added you to the team of the project:[&quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot;] 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change the notification type, please manage your &quot;subscription settings&quot;:&quot;$Recip [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_InviteToProject {
             get {
@@ -142,7 +146,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Overdue milestone notification: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#sortBy=deadline&amp;sortOrder=ascending&quot; 
         ///
-        ///The &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID&quot; milestone of the project &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; is overdue..
+        ///The &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID&quot; milestone of the project &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; is overdue. 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change t [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_LateMilestone {
             get {
@@ -151,9 +157,46 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to h1.You were mentioned in comment to discussion: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
+        ///
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; mentioned you in the comment to the discussion: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
+        ///
+        ///$AdditionalData 
+        ///
+        ///&quot;Read more&quot;:&quot;${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID#comment_$CommentID&quot; 
+        ///
+        ///^You receive this email because y [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_MentionForMessageComment {
+            get {
+                return ResourceManager.GetString("pattern_MentionForMessageComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to h1.You were mentioned in comment to task: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
+        ///
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; mentioned you in the comment to the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; task: 
+        ///
+        ///$AdditionalData
+        ///
+        ///&quot;Read more&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID#comment_$CommentID&quot; 
+        ///
+        ///^You receive this email because you are a registered  [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_MentionForTaskComment {
+            get {
+                return ResourceManager.GetString("pattern_MentionForTaskComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.Discussion deleted: &quot;$EntityTitle&quot; 
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has deleted the discussion &quot;$EntityTitle&quot; in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project..
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has deleted the discussion &quot;$EntityTitle&quot; in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project.
+        ///
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change the notification type, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
         public static string pattern_MessageDeleted {
             get {
@@ -164,7 +207,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Milestone closed: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#status=closed&quot; 
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has closed the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#status=closed&quot; milestone in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project..
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has closed the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#status=closed&quot; milestone in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project.
+        ///
+        /// ^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath} [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_MilestoneClosed {
             get {
@@ -175,7 +220,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Milestone created: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has added a new milestone: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#sortBy=create_on&amp;sortOrder=descending&quot; to the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project..
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has added a new milestone: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#sortBy=create_on&amp;sortOrder=descending&quot; to the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project. 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPa [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_MilestoneCreated {
             get {
@@ -186,7 +233,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Milestone due date notification: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#my=true&quot; 
         ///
-        ///Less than 48 hours is left till the due date of the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#my=true&quot; milestone in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project..
+        ///Less than 48 hours is left till the due date of the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#my=true&quot; milestone in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project.
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; po [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_MilestoneDeadline {
             get {
@@ -199,7 +248,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         ///
         ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has deleted the milestone &quot;$EntityTitle&quot; in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project:
         ///
-        ///$AdditionalData.
+        ///$AdditionalData 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change the notification type, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
         public static string pattern_MilestoneDeleted {
             get {
@@ -210,7 +261,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Milestone edited: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#my=true&quot; 
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has edited the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#my=true&quot; milestone in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project..
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has edited the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#my=true&quot; milestone in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project. 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_MilestoneEdited {
             get {
@@ -223,7 +276,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         ///
         ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has resumed the milestone &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID&quot; in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project: 
         ///
-        ///$AdditionalData.
+        ///$AdditionalData
+        ///
+        /// ^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; porta [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_MilestoneResumed {
             get {
@@ -238,7 +293,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         ///
         ///$AdditionalData 
         ///
-        ///&quot;Read more&quot;:&quot;${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot;.
+        ///&quot;Read more&quot;:&quot;${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID#comment_$CommentID&quot; 
+        ///
+        ///^You receive this email because you are a registered use [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_NewCommentForMessage {
             get {
@@ -253,9 +310,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         ///
         ///$AdditionalData
         ///
-        ///&quot;Read more&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
+        ///&quot;Read more&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID#comment_$CommentID&quot; 
         ///
-        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__Virt [rest of string was truncated]&quot;;.
+        ///^You receive this email because you are a registered user of the &quot;${__Virtua [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_NewCommentForTask {
             get {
@@ -317,7 +374,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Project deleted: &quot;$EntityTitle&quot; 
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has deleted the project &quot;$EntityTitle&quot;.
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has deleted the project &quot;$EntityTitle&quot; 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change the notification type, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
         public static string pattern_ProjectDeleted {
             get {
@@ -508,7 +567,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Reminder about the task: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; reminds you about the task: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot;: $AdditionalData.get_item(&quot;TaskDescription&quot;).
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; reminds you about the task: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot;: $AdditionalData.get_item(&quot;TaskDescription&quot;) 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change the notification type, please manage your [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_ReminderAboutTask {
             get {
@@ -519,7 +580,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Reminder about the task: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
         ///
-        ///Today is the deadline for the task: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot;: $AdditionalData.get_item(&quot;TaskDescription&quot;).
+        ///Today is the deadline for the task: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot;: $AdditionalData.get_item(&quot;TaskDescription&quot;) 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change the notification type, please manage your &quot;subscription settings&quot;:&quot;$Recipien [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_ReminderAboutTaskDeadline {
             get {
@@ -530,7 +593,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.You have been removed from the project team: &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot;
         ///
-        /// $__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has removed you from the team of the project: &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot;.
+        /// $__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has removed you from the team of the project: &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot;
+        ///
+        /// ^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change the notification type, please manage your &quot;subscription settings&quot;: [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_RemoveFromProject {
             get {
@@ -543,7 +608,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         ///
         ///$__DateTime you are no longer responsible for the task: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project: 
         ///
-        ///$AdditionalData.get_item(&quot;TaskDescription&quot;).
+        ///$AdditionalData.get_item(&quot;TaskDescription&quot;)
+        ///
+        /// ^You receive this email because you are a registered user of the &quot;${__Vir [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_RemoveResponsibleForTask {
             get {
@@ -554,7 +621,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Milestone assigned to you: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#my=true&quot; 
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has appointed you responsible for the milestone: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#my=true&quot; in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project..
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has appointed you responsible for the milestone: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#my=true&quot; in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project. 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;: [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_ResponsibleForMilestone {
             get {
@@ -567,7 +636,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         ///
         ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has appointed you manager of the project &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot;: 
         ///
-        ///$AdditionalData.
+        ///$AdditionalData 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change the notification type, please manage your &quot;subscription setti [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_ResponsibleForProject {
             get {
@@ -578,7 +649,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Subtask assigned to you: &quot;$SubEntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has appointed you responsible for the subtask: &quot;$SubEntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; added to the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; task:
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has appointed you responsible for the subtask: &quot;$SubEntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; added to the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; task.
         ///
         ///$AdditionalData.get_item(&quot;TaskDescription&quot;) 
         ///
@@ -593,9 +664,11 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Task assigned to you: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has appointed you responsible for the task: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; project: 
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has appointed you responsible for the task: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; project.
         ///
-        ///$AdditionalData.get_item(&quot;TaskDescription&quot;).
+        ///$AdditionalData.get_item(&quot;TaskDescription&quot;) 
+        ///
+        ///^You receive this email because you are  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_ResponsibleForTask {
             get {
@@ -660,6 +733,21 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to h1.Subtask moved: &quot;$SubEntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
+        ///
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has moved the &quot;$SubEntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; subtask to the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; task. 
+        ///
+        ///The subtask is assigned to &quot;$Responsible&quot;. 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__ [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_SubTaskMoved {
+            get {
+                return ResourceManager.GetString("pattern_SubTaskMoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.Subtask resumed: &quot;$SubEntityTitle&quot; 
         ///
         ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has resumed the subtask: &quot;$SubEntityTitle&quot; of the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; task. 
@@ -709,7 +797,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         ///
         ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has deleted the task &quot;$EntityTitle&quot; in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project:
         ///
-        ///$AdditionalData.
+        ///$AdditionalData 
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change the notification type, please manage your &quot;subscription settings&quot;:&quot;$RecipientSubscriptionConfigURL&quot;.^.
         /// </summary>
         public static string pattern_TaskDeleted {
             get {
@@ -720,7 +810,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Task edited: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot;  
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has edited the  &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; task in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project..
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has edited the  &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; task in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project.
+        ///
+        ///^You receive this email because you are a registered user of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal. To change t [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_TaskEdited {
             get {
@@ -744,7 +836,9 @@ namespace ASC.Projects.Core.Services.NotifyService {
         /// <summary>
         ///   Looks up a localized string similar to h1.Task moved: &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; 
         ///
-        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has moved the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; task to the &quot;$SubEntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#my=true&quot; milestone in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project..
+        ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has moved the &quot;$EntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID&quot; task to the &quot;$SubEntityTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#my=true&quot; milestone in the &quot;$ProjectTitle&quot;:&quot;${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID&quot; project. 
+        ///
+        ///^You receive thi [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_TaskMovedToMilestone {
             get {
@@ -777,7 +871,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Edited comment to discussion: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Edited comment to discussion: [$EntityTitle](${__VirtualRootPath}/products/projects/messages.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_EditedCommentForMessage_tg {
             get {
@@ -795,7 +889,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Edited comment to task: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Edited comment to task: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_EditedCommentForTask_tg {
             get {
@@ -813,7 +907,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Discussion edited: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Discussion edited: [$EntityTitle](${__VirtualRootPath}/products/projects/messages.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_EditMessage_tg {
             get {
@@ -840,7 +934,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). You have been added to the project team.
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). You have been added to the project team.
         /// </summary>
         public static string subject_InviteToProject_tg {
             get {
@@ -858,6 +952,42 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Projects [$ProjectTitle]. Mention in comment to discussion: $EntityTitle.
+        /// </summary>
+        public static string subject_MentionForMessageComment {
+            get {
+                return ResourceManager.GetString("subject_MentionForMessageComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Mention in comment to discussion: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        /// </summary>
+        public static string subject_MentionForMessageComment_tg {
+            get {
+                return ResourceManager.GetString("subject_MentionForMessageComment_tg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Projects [$ProjectTitle]. Mention in comment to task: $EntityTitle.
+        /// </summary>
+        public static string subject_MentionForTaskComment {
+            get {
+                return ResourceManager.GetString("subject_MentionForTaskComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID).  Mention in comment to task: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        /// </summary>
+        public static string subject_MentionForTaskComment_tg {
+            get {
+                return ResourceManager.GetString("subject_MentionForTaskComment_tg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Projects [$ProjectTitle]. Discussion deleted: $EntityTitle.
         /// </summary>
         public static string subject_MessageDeleted {
@@ -867,7 +997,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Discussion deleted: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Discussion deleted: [$EntityTitle](${__VirtualRootPath}/products/projects/messages.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_MessageDeleted_tg {
             get {
@@ -885,7 +1015,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Milestone closed: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID#status=closed).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Milestone closed: [$EntityTitle](${__VirtualRootPath}/products/projects/milestones.aspx?prjID=$ProjectID#status=closed).
         /// </summary>
         public static string subject_MilestoneClosed_tg {
             get {
@@ -903,7 +1033,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Milestone created: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Milestone created: [$EntityTitle](${__VirtualRootPath}/products/projects/milestones.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_MilestoneCreated_tg {
             get {
@@ -930,7 +1060,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Milestone deleted: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Milestone deleted: [$EntityTitle](${__VirtualRootPath}/products/projects/milestones.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_MilestoneDeleted_tg {
             get {
@@ -948,7 +1078,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Milestone edited: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Milestone edited: [$EntityTitle](${__VirtualRootPath}/products/projects/milestones.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_MilestoneEdited_tg {
             get {
@@ -966,7 +1096,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Milestone resumed: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Milestone resumed: [$EntityTitle](${__VirtualRootPath}/products/projects/milestones.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_MilestoneResumed_tg {
             get {
@@ -984,7 +1114,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). New comment to discussion: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). New comment to discussion: [$EntityTitle](${__VirtualRootPath}/products/projects/messages.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_NewCommentForMessage_tg {
             get {
@@ -1002,7 +1132,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). New comment to task: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). New comment to task: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_NewCommentForTask_tg {
             get {
@@ -1020,7 +1150,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). New file to discussion: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). New file to discussion: [$EntityTitle](${__VirtualRootPath}/products/projects/messages.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_NewFileForDiscussion_tg {
             get {
@@ -1038,7 +1168,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). New file to task: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). New file to task: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_NewFileForTask_tg {
             get {
@@ -1056,7 +1186,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). New discussion: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Messages.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). New discussion: [$EntityTitle](${__VirtualRootPath}/products/projects/messages.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_NewMessage_tg {
             get {
@@ -1254,7 +1384,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle]. Remind about the task: $EntityTitle.
+        ///   Looks up a localized string similar to Projects [$ProjectTitle]. Task reminder: $EntityTitle.
         /// </summary>
         public static string subject_ReminderAboutTask {
             get {
@@ -1263,7 +1393,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Remind about the task: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Remind about the task: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_ReminderAboutTask_tg {
             get {
@@ -1272,7 +1402,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle]. Remind about the task: $EntityTitle.
+        ///   Looks up a localized string similar to Projects [$ProjectTitle]. Task reminder: $EntityTitle.
         /// </summary>
         public static string subject_ReminderAboutTaskDeadline {
             get {
@@ -1281,7 +1411,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Remind about the task: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Remind about the task: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_ReminderAboutTaskDeadline_tg {
             get {
@@ -1299,7 +1429,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). You have been removed from the project team.
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). You have been removed from the project team.
         /// </summary>
         public static string subject_RemoveFromProject_tg {
             get {
@@ -1317,7 +1447,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Task no longer assigned to you: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Task no longer assigned to you: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_RemoveResponsibleForTask_tg {
             get {
@@ -1335,7 +1465,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Milestone assigned to you: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Milestones.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Milestone assigned to you: [$EntityTitle](${__VirtualRootPath}/products/projects/milestones.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_ResponsibleForMilestone_tg {
             get {
@@ -1353,7 +1483,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). You were appointed project manager.
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). You were appointed project manager.
         /// </summary>
         public static string subject_ResponsibleForProject_tg {
             get {
@@ -1371,7 +1501,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Subtask assigned to you: [$SubEntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Subtask assigned to you: [$SubEntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_ResponsibleForSubTask_tg {
             get {
@@ -1389,7 +1519,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Task assigned to you: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Task assigned to you: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_ResponsibleForTask_tg {
             get {
@@ -1407,7 +1537,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Subtask closed: [$SubEntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Subtask closed: [$SubEntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_SubTaskClosed_tg {
             get {
@@ -1425,7 +1555,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Subtask created: [$SubEntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Subtask created: [$SubEntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_SubTaskCreated_tg {
             get {
@@ -1443,7 +1573,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Subtask deleted: [$SubEntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Subtask deleted: [$SubEntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_SubTaskDeleted_tg {
             get {
@@ -1461,11 +1591,29 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Subtask edited: [$SubEntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Subtask edited: [$SubEntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_SubTaskEdited_tg {
             get {
                 return ResourceManager.GetString("subject_SubTaskEdited_tg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Projects [$ProjectTitle]. Subtask moved: $EntityTitle.
+        /// </summary>
+        public static string subject_SubTaskMoved {
+            get {
+                return ResourceManager.GetString("subject_SubTaskMoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Subtask moved: [$SubEntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        /// </summary>
+        public static string subject_SubTaskMoved_tg {
+            get {
+                return ResourceManager.GetString("subject_SubTaskMoved_tg", resourceCulture);
             }
         }
         
@@ -1479,7 +1627,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Subtask resumed: [$SubEntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Subtask resumed: [$SubEntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_SubTaskResumed_tg {
             get {
@@ -1497,7 +1645,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Task closed: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Task closed: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_TaskClosed_tg {
             get {
@@ -1515,7 +1663,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Task created: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Task created: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_TaskCreated_tg {
             get {
@@ -1533,7 +1681,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Task deleted: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Task deleted: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID).
         /// </summary>
         public static string subject_TaskDeleted_tg {
             get {
@@ -1551,7 +1699,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Task edited: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Task edited: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_TaskEdited_tg {
             get {
@@ -1569,7 +1717,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Task removed: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Task removed: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_TaskMovedFromMilestone_tg {
             get {
@@ -1587,7 +1735,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Task moved: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Task moved: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_TaskMovedToMilestone_tg {
             get {
@@ -1605,7 +1753,7 @@ namespace ASC.Projects.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/Products/Projects/Projects.aspx?prjID=$ProjectID). Task resumed: [$EntityTitle](${__VirtualRootPath}/Products/Projects/Tasks.aspx?prjID=$ProjectID).
+        ///   Looks up a localized string similar to Projects [$ProjectTitle](${__VirtualRootPath}/products/projects/projects.aspx?prjID=$ProjectID). Task resumed: [$EntityTitle](${__VirtualRootPath}/products/projects/tasks.aspx?prjID=$ProjectID&amp;ID=$EntityID).
         /// </summary>
         public static string subject_TaskResumed_tg {
             get {

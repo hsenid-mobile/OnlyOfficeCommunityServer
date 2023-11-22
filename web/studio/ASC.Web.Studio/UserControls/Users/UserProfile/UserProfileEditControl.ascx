@@ -3,7 +3,9 @@
 <%@ Import Namespace="ASC.Web.Core.Sms" %>
 <%@ Import Namespace="ASC.Web.Core.Utility" %>
 <%@ Import Namespace="ASC.Web.Studio.Core.Users" %>
-<%@ Import Namespace="Resources" %>
+<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
+<%@ Import Namespace="ASC.Core" %>
+<%@ Import Namespace="ASC.Core.Users" %>
 
 <div id="userProfileEditPage" class="containerBodyBlock">
     <div class="profile-action-content clearFix">
@@ -50,12 +52,27 @@
                         <span class="<%= UserTypeSelectorUserItemClass %>"><%= CustomNamingPeople.Substitute<Resource>("User").HtmlEncode() %></span>
                     </div>
                 </td>
+                <td>
+                    <% if (!CanAddVisitor() && !IsPageEditProfileFlag)
+                     { %>
+                        <div class="disable">
+                            <div class="settings-help-block">
+                                <%if (IsFreeTariff) { %>
+                                    <div><%= Resource.DisableAddGuest %></div>
+                                <%} else {%>
+                                 <div><%= Resource.MaxGuestExceeded %></div>
+                                <%} %>
+                                <a href="<%= TariffPageLink %>" target="_blank"> <%= Resource.ViewTariffPlans %></a>
+                            </div>
+                        </div>
+                    <%} %>
+                </td>
             </tr>
             <% } %>
             <%--FirstName--%>
             <tr class="userdata-field">
                 <td class="userdata-title describe-text requiredTitle"><%= Resource.FirstName %></td>
-                <td class="userdata-value requiredField">
+                <td class="userdata-value requiredField" colspan="2">
                     <div class="validationField">
                         <input type="text" id="profileFirstName" class="textEdit" value="<%= FirstName %>" autocomplete="off" <%= IsPageEditProfileFlag && (IsLdapField(LdapSettings.MappingFields.FirstNameAttribute) || ProfileIsSso) ? "disabled" : "" %> <%= IsLdapField(LdapSettings.MappingFields.FirstNameAttribute) ? " title=\"" + Resource.LdapUserEditCanOnlyAdminTitle + "\"" : ( ProfileIsSso ? " title=\"" + Resource.SsoUserEditCanOnlyAdminTitle + "\"" : " title=\"" + Resource.FirstName + "\"") %>/>
                         <span class="validationText"></span>
@@ -65,7 +82,7 @@
             <%--LastName--%>
             <tr class="userdata-field">
                 <td class="userdata-title describe-text requiredTitle"><%= Resource.LastName %></td>
-                <td class="userdata-value requiredField">
+                <td class="userdata-value requiredField" colspan="2">
                     <div class="validationField">
                         <input type="text" id="profileSecondName" class="textEdit" value="<%= LastName %>" autocomplete="off" <%= IsPageEditProfileFlag && (IsLdapField(LdapSettings.MappingFields.SecondNameAttribute) || ProfileIsSso) ? "disabled" : "" %> <%= IsLdapField(LdapSettings.MappingFields.FirstNameAttribute) ? " title=\"" + Resource.LdapUserEditCanOnlyAdminTitle + "\"" : ( ProfileIsSso ? " title=\"" + Resource.SsoUserEditCanOnlyAdminTitle + "\"" : " title=\"" + Resource.LastName + "\"") %>/>
                         <span class="validationText"></span>
@@ -79,15 +96,16 @@
                     <div class="HelpCenterSwitcher" onclick="jq(this).helper({ BlockHelperID: 'AnswerForEmail'});"></div>
                     <div class="popup_helper" id="AnswerForEmail"><%= String.Format(Resource.EmailPopupHelper.HtmlEncode(), "<p>", "</p><p>", "</p><p>", "</p>") %></div>
                 </td>
-                <td class="userdata-value requiredField">
+                <td class="userdata-value requiredField" colspan="2">
                     <div id="inputUserEmail">
                         <input type="text" id="profileEmail" value="<%= Email %>" autocomplete="off" class="textEdit" <%= IsPageEditProfileFlag ? "disabled" : "" %> <%= ProfileIsLdap ? " title=\"" + Resource.LdapUserEditCanOnlyAdminTitle + "\"" : (ProfileIsSso ? " title=\"" + Resource.SsoUserEditCanOnlyAdminTitle + "\"" : " title=\"" + Resource.Email + "\"") %>/>
                         <span class="emailInfo"></span>
-                        <% if (!IsPageEditProfileFlag  && !IsTrial) { %>
+                        <% if (CanCreateEmailOnDomain) { %>
+                        <br />
                         <a id="createEmailOnDomain" class="link dotline" style="display:none;"><%= Resource.CreateEmailOnDomain %></a>
                         <% } %>
                     </div>
-                    <% if (!IsPageEditProfileFlag && CurrentUserIsMailAdmin  && !IsTrial) { %>
+                    <% if (CanCreateEmailOnDomain) { %>
                     <div id="inputPortalEmail" style="display:none;">
                         <input type="text" autocomplete="off" class="textEdit portalEmail" maxlength="30" size="30" />
                         @<select id="domainSelector"></select>
@@ -102,8 +120,8 @@
             <% if (IsPageEditProfileFlag && !String.IsNullOrEmpty(Phone)) { %>
             <tr class="userdata-field">
                 <td class="userdata-title describe-text"><%= Resource.MobilePhone %></td>
-                <td class="userdata-value">
-                    <div class="text-alignment"><%= IsLdapField(LdapSettings.MappingFields.MobilePhoneAttribute) ? "" : "+" %><%= SmsSender.GetPhoneValueDigits(Phone) %></div>
+                <td class="userdata-value" colspan="2">
+                    <div class="text-alignment">+<%= SmsSender.GetPhoneValueDigits(Phone) %></div>
                 </td>
             </tr>
             <% } %>
@@ -113,7 +131,7 @@
                 <td class="userdata-title describe-text">
                     <span class="requiredTitle"><%= Resource.Login %></span> 
                 </td>
-                <td class="userdata-value requiredField">
+                <td class="userdata-value requiredField" colspan="2">
                     <input type="text" id="profileLogin" value="<%= Login %>" autocomplete="off" class="textEdit" disabled="disabled" title="<%= Resource.LdapUserEditCanOnlyAdminTitle %>" />
                 </td>
             </tr>
@@ -124,23 +142,24 @@
                 <td class="userdata-title describe-text">
                     <span id="titlePassword" class=""><%= Resource.Password %></span>
                 </td>
-                <td id="tablePassword" class="userdata-value">
+                <td id="tablePassword" class="userdata-value" colspan="2">
                     <div id="generatedPassword">
                         <a id="setPassword" class="link dotline"><%= Resource.SetPassword %></a>
                         <p class="gray-text" style="margin-top: 2px;"><%= Resource.TemporaryPasswordToAccess %></p>
                     </div>
                     <div class="validationBlock">
-                        <input id="password" autocomplete="off" class="textEdit" type="password" maxlength="<%= PasswordSettings.MaxLength %> " size="10" title="<%= Resource.Password %>"/>
+                        <input id="password" autocomplete="new-password" class="textEdit" type="password" maxlength="<%= TenantPasswordSettings.MaxLength %> " size="10" title="<%= Resource.Password %>"/>
                         <a class="infoChecking" id="passwordGen">&nbsp;</a>
                         <div id="bubleBlock">
                         <div id="passwordInfo" style="display:none;"><%= Resource.ErrorPasswordMessage %>:
-                            <br /><span id="passMinLength" class="infoItem"><%= String.Format(Resource.ErrorPasswordLength.HtmlEncode(), UserPasswordMinLength, PasswordSettings.MaxLength) %></span>
-                            <% if (UserPasswordDigits) { %>
+                            <br /><span id="passMinLength" class="infoItem"><%= String.Format(Resource.ErrorPasswordLength.HtmlEncode(), TenantPasswordSettings.MinLength, TenantPasswordSettings.MaxLength) %></span>
+                            <br /><span id="passLatinLetters" class="infoItem"><%= Resource.ErrorPasswordOnlyASCII %></span>
+                            <% if (TenantPasswordSettings.Digits) { %>
                             <br /><span id="passDigits" class="infoItem"><%= Resource.ErrorPasswordNoDigits %></span>
-                            <% } if (UserPasswordUpperCase) { %>
+                            <% } if (TenantPasswordSettings.UpperCase) { %>
                             <br /><span id="passUpper" class="infoItem"><%= Resource.ErrorPasswordNoUpperCase %></span>
-                            <% } if (UserPasswordSpecSymbols) { %>
-                            <br /><span id="passSpecial" class="infoItem"><%= Resource.ErrorPasswordNoSpecialSymbols %> (!@#$%^&*_\-()=)</span>
+                            <% } if (TenantPasswordSettings.SpecSymbols) { %>
+                            <br /><span id="passSpecial" class="infoItem"><%= Resource.ErrorPasswordNoSpecialSymbols %></span>
                             <% } %>
                         </div>
                         </div>
@@ -158,7 +177,7 @@
             <%--Birth Date--%>
             <tr class="userdata-field">
                 <td class="userdata-title describe-text"><%= Resource.Birthdate %></td>
-                <td class="userdata-value requiredField">
+                <td class="userdata-value requiredField" colspan="2">
                     <input type="text" id="profileBirthDate" class="textCalendar textEditCalendar" value="<%= BirthDate %>" data-value="<%= BirthDate %>"  <%= IsLdapField(LdapSettings.MappingFields.BirthDayAttribute) ? "disabled" : "" %> <%= IsLdapField(LdapSettings.MappingFields.BirthDayAttribute) ? " title=\"" + Resource.LdapUserEditCanOnlyAdminTitle + "\"" : " title=\"" + Resource.Birthdate + "\"" %>  autocomplete="off"/>
                     <span class="requiredErrorText"><%= Resource.ErrorNotCorrectDate %></span>
                 </td>
@@ -166,7 +185,7 @@
             <%--Sex--%>
             <tr class="userdata-field">
                 <td class="userdata-title describe-text"><%= Resource.Sex %></td>
-                <td class="userdata-value">
+                <td class="userdata-value" colspan="2">
                     <div id="advancedSexType" class="buttonGroup <%= IsLdapField(LdapSettings.MappingFields.GenderAttribute) ? "disabled" : "" %>" <%= IsLdapField(LdapSettings.MappingFields.GenderAttribute) ? " title=\"" + Resource.LdapUserEditCanOnlyAdminTitle + "\"" : "" %> >
                         <span><%= Resource.MaleSexStatus %></span>
                         <span><%= Resource.FemaleSexStatus %></span>
@@ -180,7 +199,7 @@
                 <td class="userdata-title describe-text">
                     <%= CustomNamingPeople.Substitute<Resource>("Department").HtmlEncode() %>
                 </td>
-                <td id="departmentsField" class="userdata-value">
+                <td id="departmentsField" class="userdata-value" colspan="2">
                     <% if (CurrentUserIsPeopleAdmin) { %>
                     <ul class="departments-list advanced-selector-list-results"></ul>
                     <div><span id="chooseGroupsSelector" class="link dotline plus"><%= CustomNamingPeople.Substitute<Resource>("BindDepartmentButton").HtmlEncode() %></span></div>
@@ -196,16 +215,34 @@
             <% if (!IsPersonal) { %>
             <tr class="userdata-field">
                 <td class="userdata-title describe-text"><%= CustomNamingPeople.Substitute<Resource>("UserPost").HtmlEncode() %></td>
-                <td class="userdata-value requiredField">
+                <td class="userdata-value requiredField" colspan="2" >
                     <input type="text" id="profilePosition" class="textEdit" value="<%= Position %>" autocomplete="off" <%= IsPageEditProfileFlag && (!CurrentUserIsPeopleAdmin || IsLdapField(LdapSettings.MappingFields.TitleAttribute) || ProfileIsSso) ? "disabled" : "" %> <%= IsLdapField(LdapSettings.MappingFields.TitleAttribute) ? " title=\"" + Resource.LdapUserEditCanOnlyAdminTitle + "\"" : ( ProfileIsSso ? " title=\"" + Resource.SsoUserEditCanOnlyAdminTitle + "\"" : " title=\"" + CustomNamingPeople.Substitute<Resource>("UserPost").HtmlEncode() + "\"") %>/>
                     <span class="requiredErrorText"><%= Resource.ErrorMessageLongField64 %></span>
                 </td>
             </tr>
             <% } %>
+            <%--Lead--%>
+            <% if (!IsPersonal) { %>
+            <tr class="userdata-field">
+                <td class="userdata-title describe-text"><%= CustomNamingPeople.Substitute<Resource>("UserLead").HtmlEncode() %></td>
+                <td class="userdata-value userdata-title" colspan="2" >
+                    <% if (CurrentUserIsPeopleAdmin) { %>
+                    <span id="leadSelector" class="link dotline plus"><%: CustomNamingPeople.Substitute<Resource>("AddLeadButton").HtmlEncode() %></span>
+                    <div id="leadManager" class="advanced-selector-select-result display-none">
+                        <span class="result-name" data-id="<%= Lead != null ? Lead.ID : (Guid?)null %>"><%= Lead != null ? Lead.DisplayUserName() : "" %></span>
+                        <span class="reset-icon"></span>
+                    </div>
+                    <% } else { %>
+                    <input type="text" class="textEdit" value="<%= Lead != null ? Lead.DisplayUserName() : "" %>" autocomplete="off"  disabled="" title="<%= CustomNamingPeople.Substitute<Resource>("UserLead").HtmlEncode()%>" />
+                    <% } %>
+                </td>
+            </tr>
+            <% } %>
+
             <%--Location--%>
             <tr class="userdata-field">
                 <td class="userdata-title describe-text"><%= Resource.Location %></td>
-                <td class="userdata-value requiredField">
+                <td class="userdata-value requiredField" colspan="2">
                     <input type="text" id="profilePlace" class="textEdit" value="<%= Place %>" autocomplete="off" <%= IsPageEditProfileFlag && (IsLdapField(LdapSettings.MappingFields.LocationAttribute) || ProfileIsSso) ? "disabled" : "" %> <%= IsLdapField(LdapSettings.MappingFields.LocationAttribute) ? " title=\"" + Resource.LdapUserEditCanOnlyAdminTitle + "\"" : (ProfileIsSso ? " title=\"" + Resource.SsoUserEditCanOnlyAdminTitle + "\""  : " title=\"" + Resource.Location + "\"") %> />
                     <span class="requiredErrorText"><%= Resource.ErrorMessageLongField255 %></span>
                 </td>
@@ -214,7 +251,7 @@
             <% if (!IsPersonal) { %>
                 <tr class="userdata-field">
                     <td class="userdata-title describe-text"><%= CustomNamingPeople.Substitute<Resource>("WorkFromDate").HtmlEncode() %></td>
-                    <td class="userdata-value requiredField">
+                    <td class="userdata-value requiredField" colspan="2">
                         <input type="text" id="profileRegistrationDate" class="textCalendar textEditCalendar" value="<%= WorkFromDate %>" data-value="<%= WorkFromDate %>" <%= IsPageEditProfileFlag && !CurrentUserIsPeopleAdmin ? "disabled" : "" %> title="<%= CustomNamingPeople.Substitute<Resource>("WorkFromDate").HtmlEncode() %>"  autocomplete="off"/>
                         <span class="requiredErrorText"><%= Resource.ErrorNotCorrectDate %></span>
                     </td>
@@ -255,6 +292,7 @@
                 <option class="optionItem icq" value="icq"><%= Resource.TitleIcq %></option>
                 <option class="optionItem jabber" value="jabber"><%= Resource.TitleJabber %></option>
                 <option class="optionItem aim" value="aim"><%= Resource.TitleAim %></option>
+                <option class="optionItem telegram" value="telegram"><%= Resource.TitleTelegram %></option>
             </select>
             <a class="delete-field icon-link trash"></a>
             <input type="text" class="textEdit" value="" autocomplete="off" />

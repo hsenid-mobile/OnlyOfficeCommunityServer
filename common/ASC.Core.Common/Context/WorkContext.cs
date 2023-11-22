@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,16 @@
 */
 
 
-using ASC.Core.Notify;
-using ASC.Core.Notify.Senders;
-using ASC.Core.Tenants;
-using ASC.Notify.Engine;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Reflection;
+
+using ASC.Core.Notify;
+using ASC.Core.Notify.Senders;
+using ASC.Core.Tenants;
+using ASC.Notify.Engine;
+
 using Constants = ASC.Core.Configuration.Constants;
 using NotifyContext = ASC.Notify.Context;
 
@@ -95,6 +97,7 @@ namespace ASC.Core
                 INotifySender jabberSender = new NotifyServiceSender();
                 INotifySender emailSender = new NotifyServiceSender();
                 INotifySender telegramSender = new TelegramSender();
+                INotifySender pushSender = new PushSender();
 
                 var postman = ConfigurationManagerExtension.AppSettings["core.notify.postman"];
 
@@ -121,6 +124,7 @@ namespace ASC.Core
                 notifyContext.NotifyService.RegisterSender(Constants.NotifyEMailSenderSysName, new EmailSenderSink(emailSender));
                 notifyContext.NotifyService.RegisterSender(Constants.NotifyMessengerSenderSysName, new JabberSenderSink(jabberSender));
                 notifyContext.NotifyService.RegisterSender(Constants.NotifyTelegramSenderSysName, new TelegramSenderSink(telegramSender));
+                notifyContext.NotifyService.RegisterSender(Constants.NotifyPushSenderSysName, new PushSenderSink(pushSender));
 
                 notifyContext.NotifyEngine.BeforeTransferRequest += NotifyEngine_BeforeTransferRequest;
                 notifyContext.NotifyEngine.AfterTransferRequest += NotifyEngine_AfterTransferRequest;

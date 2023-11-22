@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 
 using System.ServiceModel;
+
 using ASC.Common.Module;
 
 namespace ASC.Data.Backup.Service
@@ -25,6 +26,7 @@ namespace ASC.Data.Backup.Service
         private ServiceHost host;
         private BackupCleanerService cleanerService;
         private BackupSchedulerService schedulerService;
+        private BackupCleanerTempFileService deleterTempService;
 
         public void Start()
         {
@@ -44,6 +46,8 @@ namespace ASC.Data.Backup.Service
                 schedulerService = new BackupSchedulerService { Period = config.Scheduler.Period };
                 schedulerService.Start();
             }
+            deleterTempService = new BackupCleanerTempFileService();
+            deleterTempService.Start();
         }
 
         public void Stop()
@@ -63,6 +67,11 @@ namespace ASC.Data.Backup.Service
             {
                 schedulerService.Stop();
                 schedulerService = null;
+            }
+            if (deleterTempService != null)
+            {
+                deleterTempService.Stop();
+                deleterTempService = null;
             }
         }
     }

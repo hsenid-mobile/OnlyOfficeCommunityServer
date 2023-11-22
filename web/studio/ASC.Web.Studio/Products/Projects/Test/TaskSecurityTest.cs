@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 
 using System;
 using System.Security;
+
 using ASC.Projects.Core.Domain;
 
 namespace ASC.Web.Projects.Test
 {
     using ASC.Core;
+
     using NUnit.Framework;
 
     [TestFixture]
@@ -58,7 +60,7 @@ namespace ASC.Web.Projects.Test
 
         protected Task CreateNewTask(Guid userID, Guid? responsibleID = null)
         {
-            SecurityContext.AuthenticateMe(userID);
+            SecurityContext.CurrentUser = userID;
 
             var newTask = GenerateTask();
 
@@ -78,7 +80,7 @@ namespace ASC.Web.Projects.Test
         {
             var newTask = CreateNewTask(Owner);
 
-            SecurityContext.AuthenticateMe(userID);
+            SecurityContext.CurrentUser = userID;
 
             var task = Get(newTask);
 
@@ -96,7 +98,7 @@ namespace ASC.Web.Projects.Test
         {
             var newTask = CreateNewTask(Owner, userID);
 
-            SecurityContext.AuthenticateMe(userID);
+            SecurityContext.CurrentUser = userID;
 
             var task = Get(newTask);
 
@@ -108,7 +110,7 @@ namespace ASC.Web.Projects.Test
         {
             var newTask = CreateNewTask(Owner);
 
-            SecurityContext.AuthenticateMe(userID);
+            SecurityContext.CurrentUser = userID;
 
             newTask.Title = "Test";
 
@@ -160,7 +162,7 @@ namespace ASC.Web.Projects.Test
         {
             var newTask = CreateNewTask(Owner, userID);
 
-            SecurityContext.AuthenticateMe(userID);
+            SecurityContext.CurrentUser = userID;
 
             newTask.Title = "Test";
 
@@ -177,7 +179,7 @@ namespace ASC.Web.Projects.Test
             {
                 var newTask = CreateNewTask(Owner, ProjectManager);
 
-                SecurityContext.AuthenticateMe(UserInTeam);
+                SecurityContext.CurrentUser = UserInTeam;
 
                 newTask.Title = "Test";
 
@@ -197,7 +199,7 @@ namespace ASC.Web.Projects.Test
         {
             var newTask = CreateNewTask(Owner);
 
-            SecurityContext.AuthenticateMe(userID);
+            SecurityContext.CurrentUser = userID;
 
             Delete(newTask);
 
@@ -226,7 +228,7 @@ namespace ASC.Web.Projects.Test
         {
             var newTask = CreateNewTask(Owner);
 
-            SecurityContext.AuthenticateMe(userId);
+            SecurityContext.CurrentUser = userId;
 
             var task = Get(newTask);
 
@@ -262,7 +264,7 @@ namespace ASC.Web.Projects.Test
 
             SaveOrUpdate(newTask);
 
-            SecurityContext.AuthenticateMe(UserInTeam);
+            SecurityContext.CurrentUser = UserInTeam;
 
             var task = Get(newTask);
 

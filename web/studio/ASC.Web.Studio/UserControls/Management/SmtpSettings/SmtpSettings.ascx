@@ -1,6 +1,6 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="SmtpSettings.ascx.cs" Inherits="ASC.Web.Studio.UserControls.Management.SmtpSettings" %>
 <%@ Import Namespace="ASC.Core" %>
-<%@ Import Namespace="Resources" %>
+<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
 
 <div id="smtpSettingsView" class="display-none">
     <div class="settings-block">
@@ -8,15 +8,16 @@
         <p class="smtp-settings-text"><%: Resource.SmtpSettingsText %> </p>
         
         <div id="currentSettingsBox">
-            <input id="currentHost" type="hidden" value="<%= CurrentSmtpSettings.Host %>" />
-            <input id="currentPort" type="hidden" value="<%= CurrentSmtpSettings.Port %>" />
-            <input id="currentCredentialsUserName" type="hidden" value="<%= CurrentSmtpSettings.CredentialsUserName %>" />
+            <input id="currentHost" type="hidden" value="<%: CurrentSmtpSettings.Host %>" />
+            <input id="currentPort" type="hidden" value="<%: CurrentSmtpSettings.Port %>" />
+            <input id="currentCredentialsUserName" type="hidden" value="<%: CurrentSmtpSettings.CredentialsUserName %>" />
             <input id="currentCredentialsUserPassword" type="hidden" value="" />
-            <input id="currentSenderDisplayName" type="hidden" value="<%= CurrentSmtpSettings.SenderDisplayName %>" />
-            <input id="currentSenderAddress" type="hidden" value="<%= CurrentSmtpSettings.SenderAddress %>" />
-            <input id="currentEnableSsl" type="hidden" value="<%= CurrentSmtpSettings.EnableSSL %>" />
-            <input id="currentEnableAuth" type="hidden" value="<%= CurrentSmtpSettings.EnableAuth %>" />
-            <input id="currentIsDefault" type="hidden" value="<%= CoreContext.Configuration.SmtpSettings.IsDefaultSettings %>" />
+            <input id="currentSenderDisplayName" type="hidden" value="<%: CurrentSmtpSettings.SenderDisplayName %>" />
+            <input id="currentSenderAddress" type="hidden" value="<%: CurrentSmtpSettings.SenderAddress %>" />
+            <input id="currentEnableSsl" type="hidden" value="<%: CurrentSmtpSettings.EnableSSL %>" />
+            <input id="currentEnableAuth" type="hidden" value="<%: CurrentSmtpSettings.EnableAuth %>" />
+            <input id="currentUseNtlm" type="hidden" value="<%: CurrentSmtpSettings.UseNtlm %>" />
+            <input id="currentIsDefault" type="hidden" value="<%: CoreContext.Configuration.SmtpSettings.IsDefaultSettings %>" />
         </div>
 
         <div id="settingsSwitch" class="settings-block display-none">
@@ -61,6 +62,10 @@
                 <input style="display:none" type="password" name="fakepasswordremembered"/>
                 <input autocomplete="off" type="password" class="smtp-settings-field textEdit" value="${ credentialsUserPassword }" 
                     {{if !enableAuth }} disabled="disabled"{{else}} placeholder="**********"{{/if}} />
+            </div>
+            <div class="smtp-settings-item">
+                <input id="customSettingsUseNtlm" type="checkbox" {{if !enableAuth }} disabled="disabled" {{/if}} {{if useNtlm }} checked="checked" {{/if}} />
+                <label for="customSettingsUseNtlm"><%= Resource.AuthViaNTLM %></label>
             </div>
             <div class="smtp-settings-item display-name">
                 <div class="smtp-settings-title"><%= Resource.SenderName %>:</div>

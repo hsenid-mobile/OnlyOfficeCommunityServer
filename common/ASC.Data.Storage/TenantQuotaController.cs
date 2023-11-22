@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@
 using System;
 using System.Linq;
 using System.Threading;
+
 using ASC.Core;
 using ASC.Core.Tenants;
+using ASC.Core.Users;
 
 namespace ASC.Data.Storage
 {
@@ -28,36 +30,53 @@ namespace ASC.Data.Storage
         private readonly int _tenant;
         private long _currentSize;
 
-
         public TenantQuotaController(int tenant)
         {
             _tenant = tenant;
-            _currentSize = CoreContext.TenantManager.FindTenantQuotaRows(new TenantQuotaRowQuery(tenant))
+            _currentSize = CoreContext.TenantManager.FindTenantQuotaRows(tenant)
                                       .Where(r => UsedInQuota(r.Tag))
                                       .Sum(r => r.Counter);
         }
 
         #region IQuotaController Members
-
-        public void QuotaUsedAdd(string module, string domain, string dataTag, long size)
+        public void QuotaUsedAdd(string module, string domain, string dataTag, long size, bool quotaCheckFileSize = true)
+        {
+            QuotaUsedAdd(module, domain, dataTag, size, Guid.Empty, quotaCheckFileSize);
+        }
+        public void QuotaUsedAdd(string module, string domain, string dataTag, long size, Guid ownerId, bool quotaCheckFileSize)
         {
             size = Math.Abs(size);
             if (UsedInQuota(dataTag))
             {
-                QuotaUsedCheck(size);
+                QuotaUsedCheck(size, quotaCheckFileSize, ownerId);
                 Interlocked.Add(ref _currentSize, size);
             }
-            SetTenantQuotaRow(module, domain, size, dataTag, true);
+
+            SetTenantQuotaRow(module, domain, size, dataTag, true, Guid.Empty);
+            if (ownerId != Core.Configuration.Constants.CoreSystem.ID)
+            {
+                SetTenantQuotaRow(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : SecurityContext.CurrentAccount.ID);
+            }
+
         }
 
         public void QuotaUsedDelete(string module, string domain, string dataTag, long size)
+        {
+            QuotaUsedDelete(module, domain, dataTag, size, Guid.Empty); 
+        }
+        public void QuotaUsedDelete(string module, string domain, string dataTag, long size, Guid ownerId)
         {
             size = -Math.Abs(size);
             if (UsedInQuota(dataTag))
             {
                 Interlocked.Add(ref _currentSize, size);
             }
-            SetTenantQuotaRow(module, domain, size, dataTag, true);
+
+            SetTenantQuotaRow(module, domain, size, dataTag, true, Guid.Empty);
+            if (ownerId != Core.Configuration.Constants.CoreSystem.ID)
+            {
+                SetTenantQuotaRow(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : SecurityContext.CurrentAccount.ID);
+            }
         }
 
         public void QuotaUsedSet(string module, string domain, string dataTag, long size)
@@ -67,29 +86,58 @@ namespace ASC.Data.Storage
             {
                 Interlocked.Exchange(ref _currentSize, size);
             }
-            SetTenantQuotaRow(module, domain, size, dataTag, false);
+            SetTenantQuotaRow(module, domain, size, dataTag, false, Guid.Empty);
         }
 
-        public long QuotaUsedGet(string module, string domain)
+        public void QuotaUsedCheck(long size, Guid ownedId)
         {
-            var path = string.IsNullOrEmpty(module) ? null : string.Format("/{0}/{1}", module, domain);
-            return CoreContext.TenantManager.FindTenantQuotaRows(new TenantQuotaRowQuery(_tenant).WithPath(path))
-                              .Where(r => UsedInQuota(r.Tag))
-                              .Sum(r => r.Counter);
+            QuotaUsedCheck(size, true, ownedId);
         }
 
-        public void QuotaUsedCheck(long size)
+        public void QuotaUsedCheck(long size, bool quotaCheckFileSize, Guid ownedId)
         {
             var quota = CoreContext.TenantManager.GetTenantQuota(_tenant);
             if (quota != null)
             {
-                if (quota.MaxFileSize != 0 && quota.MaxFileSize < size)
+                if (quotaCheckFileSize && quota.MaxFileSize != 0 && quota.MaxFileSize < size)
                 {
                     throw new TenantQuotaException(string.Format("Exceeds the maximum file size ({0}MB)", BytesToMegabytes(quota.MaxFileSize)));
                 }
-                if (quota.MaxTotalSize != 0 && quota.MaxTotalSize < _currentSize + size)
+
+                if (CoreContext.Configuration.Standalone)
                 {
-                    throw new TenantQuotaException(string.Format("Exceeded maximum amount of disk quota ({0}MB)", BytesToMegabytes(quota.MaxTotalSize)));
+                    var tenantQuotaSettings = TenantQuotaSettings.Load();
+                    if (!tenantQuotaSettings.DisableQuota)
+                    {
+                        if (quota.MaxTotalSize != 0 && quota.MaxTotalSize < _currentSize + size)
+                        {
+                            throw new TenantQuotaException(string.Format("Exceeded maximum amount of disk quota ({0}MB)", BytesToMegabytes(quota.MaxTotalSize)));
+                        }
+                    }
+                }
+                else
+                {
+                    if (quota.MaxTotalSize != 0 && quota.MaxTotalSize < _currentSize + size)
+                    {
+                        throw new TenantQuotaException(string.Format("Exceeded maximum amount of disk quota ({0}MB)", BytesToMegabytes(quota.MaxTotalSize)));
+                    }
+                }
+            }
+            var quotaSettings = TenantUserQuotaSettings.Load();
+
+            if (quotaSettings.EnableUserQuota)
+            {
+                var userQuotaSettings = UserQuotaSettings.LoadForUser(ownedId);
+                var quotaLimit = userQuotaSettings.UserQuota;
+
+                if (quotaLimit != -1)
+                {
+                    var userUsedSpace = Math.Max(0, CoreContext.TenantManager.FindUserQuotaRows(_tenant, ownedId).Where(r => !string.IsNullOrEmpty(r.Tag)).Where(r => r.Tag != Guid.Empty.ToString()).Sum(r => r.Counter));
+
+                    if (quotaLimit - userUsedSpace < size)
+                    {
+                        throw new TenantQuotaException(string.Format("Exceeds the maximum file size ({0}MB)", BytesToMegabytes(quotaLimit)));
+                    }
                 }
             }
         }
@@ -101,10 +149,10 @@ namespace ASC.Data.Storage
             return _currentSize;
         }
 
-        private void SetTenantQuotaRow(string module, string domain, long size, string dataTag, bool exchange)
+        private void SetTenantQuotaRow(string module, string domain, long size, string dataTag, bool exchange, Guid userId)
         {
             CoreContext.TenantManager.SetTenantQuotaRow(
-                new TenantQuotaRow { Tenant = _tenant, Path = string.Format("/{0}/{1}", module, domain), Counter = size, Tag = dataTag },
+                new TenantQuotaRow { Tenant = _tenant, Path = string.Format("/{0}/{1}", module, domain), Counter = size, Tag = dataTag, UserId = userId},
                 exchange);
         }
 

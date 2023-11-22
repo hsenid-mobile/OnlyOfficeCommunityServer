@@ -37,6 +37,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>bin\ASC.Web.Studio.xml</DocumentationFile>
+    <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -47,7 +49,11 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceModel.Activation" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Web">
@@ -55,6 +61,7 @@
     </Reference>
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
@@ -71,16 +78,31 @@
     <Compile Include="Controls\FileUploader\HttpModule\UploadProgressHandler.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\AdminHelperSettings.cs" />
     <Compile Include="Core\Notify\SpamEmailSettings.cs" />
     <Compile Include="Core\OpensourceGiftSettings.cs" />
     <Compile Include="Core\PrivacyRoomSettings.cs" />
+    <Compile Include="Core\Quota\UserQuotaSync.cs" />
+    <Compile Include="Core\Tfa\ITfaSettings.cs" />
+    <Compile Include="Core\Tfa\TfaSettingsBase.cs" />
     <Compile Include="Core\WarmUp.cs" />
+    <Compile Include="DeepLink.aspx.cs">
+      <DependentUpon>DeepLink.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="DeepLink.aspx.designer.cs">
+      <DependentUpon>DeepLink.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Masters\BaseTemplate.master.cs">
       <DependentUpon>BaseTemplate.master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Masters\BaseTemplate.master.designer.cs">
       <DependentUpon>BaseTemplate.master</DependentUpon>
+    </Compile>
+    <Compile Include="Masters\FirstScripts.ascx.cs">
+      <DependentUpon>FirstScripts.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="PortalEncryption.aspx.cs">
       <DependentUpon>PortalEncryption.aspx</DependentUpon>
@@ -89,19 +111,14 @@
     <Compile Include="PortalEncryption.aspx.designer.cs">
       <DependentUpon>PortalEncryption.aspx</DependentUpon>
     </Compile>
-    <Compile Include="PublicResources\CustomModeResource.Designer.cs">
-      <DependentUpon>CustomModeResource.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Core\Notify\StudioNotifyHelper.cs" />
     <Compile Include="Core\Notify\StudioPeriodicNotify.cs" />
     <Compile Include="Core\Notify\TagValues.cs" />
     <Compile Include="Core\Notify\Actions.cs" />
-    <Compile Include="Core\Notify\WebstudioNotifyPatternResource.Designer.cs">
+    <Compile Include="PublicResources\PersonalResource.Designer.cs">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Common\MediaViewer\MediaPlayer.ascx.cs">
       <DependentUpon>MediaPlayer.ascx</DependentUpon>
@@ -132,7 +149,6 @@
     </Compile>
     <Compile Include="Core\Backup\BackupAjaxHandler.cs" />
     <Compile Include="Core\Backup\BackupFileUploadHandler.cs" />
-    <Compile Include="Core\Backup\BackupHelper.cs" />
     <Compile Include="Core\IpRestrictionsSettings.cs" />
     <Compile Include="Core\Notify\StudioWhatsNewNotify.cs" />
     <Compile Include="Core\PersonalSettings.cs" />
@@ -144,8 +160,6 @@
     <Compile Include="HttpHandlers\AjaxFileUploadHandler.cs" />
     <Compile Include="HttpHandlers\FCKEditorFileUploadHandler.cs" />
     <Compile Include="HttpHandlers\UrlProxyHandler.cs" />
-    <Compile Include="HttpHandlers\KeepSessionAliveHandler.cs" />
-    <Compile Include="HttpHandlers\InvoiceHandler.cs" />
     <Compile Include="HttpHandlers\LicenseUploader.cs" />
     <Compile Include="HttpHandlers\TemplatingHandler.cs" />
     <Compile Include="HttpHandlers\TenantLogoHandler.cs" />
@@ -169,41 +183,6 @@
     <Compile Include="PreparationPortal.aspx.designer.cs">
       <DependentUpon>PreparationPortal.aspx</DependentUpon>
     </Compile>
-    <Compile Include="PublicResources\AuditResource.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>AuditResource.resx</DependentUpon>
-    </Compile>
-    <Compile Include="PublicResources\ChatResource.Designer.cs">
-      <DependentUpon>ChatResource.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="PublicResources\StudioCountriesResource.Designer.cs">
-      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="PublicResources\MonitoringResource.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>MonitoringResource.resx</DependentUpon>
-    </Compile>
-    <Compile Include="PublicResources\Resource.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resource.resx</DependentUpon>
-    </Compile>
-    <Compile Include="PublicResources\ResourceJS.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ResourceJS.resx</DependentUpon>
-    </Compile>
-    <Compile Include="PublicResources\UserControlsCommonResource.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
-    </Compile>
     <Compile Include="Controls\Common\CommonResultsView.cs" />
     <Compile Include="Controls\Common\Container.cs" />
     <Compile Include="Controls\Common\EmptyScreenControl.cs" />
@@ -225,11 +204,6 @@
     <Compile Include="Core\SecutiryConstants.cs" />
     <Compile Include="Core\PromotionsSettings.cs" />
     <Compile Include="Core\Users\CustomNamingPeople.cs" />
-    <Compile Include="Core\Users\NamingPeopleResource.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
-    </Compile>
     <Compile Include="Startup.cs" />
     <Compile Include="Terms.aspx.cs">
       <DependentUpon>Terms.aspx</DependentUpon>
@@ -287,13 +261,6 @@
     </Compile>
     <Compile Include="ThirdParty\ImportContacts\Import.aspx.designer.cs">
       <DependentUpon>Import.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ThirdParty\ImportContacts\Yahoo.aspx.cs">
-      <DependentUpon>Yahoo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ThirdParty\ImportContacts\Yahoo.aspx.designer.cs">
-      <DependentUpon>Yahoo.aspx</DependentUpon>
     </Compile>
     <Compile Include="ThirdParty\ImportContacts\Google.aspx.cs">
       <DependentUpon>Google.aspx</DependentUpon>
@@ -353,13 +320,12 @@
     <Compile Include="UserControls\Common\MigrationPortal\MigrationPortal.ascx.designer.cs">
       <DependentUpon>MigrationPortal.ascx</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\Common\ThirdPartyBanner\ThirdPartyBannerSettings.cs" />
-    <Compile Include="UserControls\Common\ThirdPartyBanner\ThirdPartyBanner.ascx.cs">
-      <DependentUpon>ThirdPartyBanner.ascx</DependentUpon>
+    <Compile Include="UserControls\Common\Support\SupportChat.ascx.cs">
+      <DependentUpon>SupportChat.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="UserControls\Common\ThirdPartyBanner\ThirdPartyBanner.ascx.designer.cs">
-      <DependentUpon>ThirdPartyBanner.ascx</DependentUpon>
+    <Compile Include="UserControls\Common\Support\SupportChat.ascx.designer.cs">
+      <DependentUpon>SupportChat.ascx</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Common\InviteLink\InviteLink.ascx.cs">
       <DependentUpon>InviteLink.ascx</DependentUpon>
@@ -430,12 +396,29 @@
     <Compile Include="StartScriptsStyles.aspx.designer.cs">
       <DependentUpon>StartScriptsStyles.aspx</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\DeepLink\DeepLinkData.cs" />
+    <Compile Include="UserControls\DeepLink\DeepLinkDataFile.cs" />
+    <Compile Include="UserControls\DeepLink\DeepLinkDataFolder.cs" />
+    <Compile Include="UserControls\DeepLink\DeepLinking.ascx.cs">
+      <DependentUpon>DeepLinking.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UserControls\DeepLink\DeepLinking.ascx.designer.cs">
+      <DependentUpon>DeepLinking.ascx</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\EmptyScreens\CommunityDashboardEmptyScreen.ascx.cs">
       <DependentUpon>CommunityDashboardEmptyScreen.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="UserControls\EmptyScreens\CommunityDashboardEmptyScreen.ascx.designer.cs">
       <DependentUpon>CommunityDashboardEmptyScreen.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\EmptyScreens\WelcomeDashboard.ascx.cs">
+      <DependentUpon>WelcomeDashboard.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UserControls\EmptyScreens\WelcomeDashboard.ascx.designer.cs">
+      <DependentUpon>WelcomeDashboard.ascx</DependentUpon>
     </Compile>
     <Compile Include="UserControls\EmptyScreens\FilesDashboardEmptyScreen.ascx.cs">
       <DependentUpon>FilesDashboardEmptyScreen.ascx</DependentUpon>
@@ -457,6 +440,13 @@
     </Compile>
     <Compile Include="UserControls\EmptyScreens\ManagerDashboardEmptyScreen.ascx.designer.cs">
       <DependentUpon>ManagerDashboardEmptyScreen.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Management\AdminHelperSettings\AdminHelperSettings.ascx.cs">
+      <DependentUpon>AdminHelperSettings.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UserControls\Management\AdminHelperSettings\AdminHelperSettings.ascx.designer.cs">
+      <DependentUpon>AdminHelperSettings.ascx</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Management\AuditTrail\AuditTrail.ascx.cs" Condition="Exists('UserControls\Management\AuditTrail\AuditTrail.ascx.cs')">
       <DependentUpon>AuditTrail.ascx</DependentUpon>
@@ -480,6 +470,13 @@
     <Compile Include="UserControls\Management\Backup\Backup.ascx.designer.cs" Condition="Exists('UserControls\Management\Backup\Backup.ascx.designer.cs')">
       <DependentUpon>Backup.ascx</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Management\ShareLinkPassword\ShareLinkPassword.ascx.cs">
+      <DependentUpon>ShareLinkPassword.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UserControls\Management\ShareLinkPassword\ShareLinkPassword.ascx.designer.cs">
+      <DependentUpon>ShareLinkPassword.ascx</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Management\CookieSettings\CookieSettings.ascx.cs">
       <DependentUpon>CookieSettings.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -495,6 +492,27 @@
       <DependentUpon>CustomNavigation.ascx</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Management\CustomNavigation\LogoUploader.cs" />
+    <Compile Include="UserControls\Management\ImpersonateUser\ImpersonateSettings.ascx.cs">
+      <DependentUpon>ImpersonateSettings.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UserControls\Management\ImpersonateUser\ImpersonateSettings.ascx.designer.cs">
+      <DependentUpon>ImpersonateSettings.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Management\ImpersonateUser\ImpersonateUserConfirmationPanel.ascx.cs">
+      <DependentUpon>ImpersonateUserConfirmationPanel.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UserControls\Management\ImpersonateUser\ImpersonateUserConfirmationPanel.ascx.designer.cs">
+      <DependentUpon>ImpersonateUserConfirmationPanel.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Management\LoginSettings\LoginSettings.ascx.cs">
+      <DependentUpon>LoginSettings.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UserControls\Management\LoginSettings\LoginSettings.ascx.designer.cs">
+      <DependentUpon>LoginSettings.ascx</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Management\PricingPageSettings\PricingPageSettings.ascx.cs">
       <DependentUpon>PricingPageSettings.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -529,6 +547,13 @@
     </Compile>
     <Compile Include="UserControls\Management\PrivacyRoom\PrivacyRoom.ascx.designer.cs">
       <DependentUpon>PrivacyRoom.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Management\ProfileOperation\ProfileOperation.ascx.cs">
+      <DependentUpon>ProfileOperation.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UserControls\Management\ProfileOperation\ProfileOperation.ascx.designer.cs">
+      <DependentUpon>ProfileOperation.ascx</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Management\SingleSignOnSettings\SsoSettingsV2.cs" />
     <Compile Include="UserControls\Management\SingleSignOnSettings\SsoUserData.cs" />
@@ -567,6 +592,13 @@
     <Compile Include="UserControls\Management\TariffSettings\TariffStandalone.ascx.designer.cs">
       <DependentUpon>TariffStandalone.ascx</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Management\TariffSettings\TariffSaas.ascx.cs">
+      <DependentUpon>TariffSaas.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UserControls\Management\TariffSettings\TariffSaas.ascx.designer.cs">
+      <DependentUpon>TariffSaas.ascx</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Management\TfaControls\ResetAppDialog.ascx.cs">
       <DependentUpon>ResetAppDialog.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -596,11 +628,6 @@
       <DependentUpon>WhiteLabel.ascx</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Management\WhiteLabel\LogoUploader.cs" Condition="Exists('UserControls\Management\WhiteLabel\LogoUploader.cs')" />
-    <Compile Include="PublicResources\WhiteLabelResource.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
-    </Compile>
     <Compile Include="UserControls\Management\ColorThemes\ColorThemes.ascx.cs">
       <DependentUpon>ColorThemes.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -715,26 +742,20 @@
       <DependentUpon>SmtpSettings.ascx</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Management\TariffSettings\TariffSettings.cs" />
-    <Compile Include="UserControls\Management\TariffSettings\TariffUsage.ascx.cs">
-      <DependentUpon>TariffUsage.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="UserControls\Management\TariffSettings\TariffUsage.ascx.designer.cs">
-      <DependentUpon>TariffUsage.ascx</DependentUpon>
-    </Compile>
-    <Compile Include="UserControls\Statistics\PortalAnalytics\PortalAnalytics.ascx.cs">
-      <DependentUpon>PortalAnalytics.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="UserControls\Statistics\PortalAnalytics\PortalAnalytics.ascx.designer.cs">
-      <DependentUpon>PortalAnalytics.ascx</DependentUpon>
-    </Compile>
+    <Compile Include="UserControls\Statistics\ProductQuotes\ClientTemplateResources.cs" />
     <Compile Include="UserControls\Users\TipsSettings\TipsSettings.ascx.cs">
       <DependentUpon>TipsSettings.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="UserControls\Users\TipsSettings\TipsSettings.ascx.designer.cs">
       <DependentUpon>TipsSettings.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Users\UserConnections\UserConnections.ascx.cs">
+      <DependentUpon>UserConnections.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UserControls\Users\UserConnections\UserConnections.ascx.designer.cs">
+      <DependentUpon>UserConnections.ascx</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Users\UserProfile\LoadPhotoControl.ascx.cs">
       <DependentUpon>LoadPhotoControl.ascx</DependentUpon>
@@ -749,8 +770,8 @@
     <Compile Include="Utility\BBCodeParser\Smiles.cs" />
     <Compile Include="Utility\BBCodeParser\TagConfiguration.cs" />
     <Compile Include="Utility\BBCodeParser\TagParamOption.cs" />
+    <Compile Include="Utility\RefererURL.cs" />
     <Compile Include="Utility\WhiteLabelHelper.cs" />
-    <Compile Include="Utility\TenantLogoHelper.cs" />
     <Compile Include="Utility\HtmlUtility\CodeFormat\CLikeFormat.cs" />
     <Compile Include="Utility\HtmlUtility\CodeFormat\CodeFormat.cs" />
     <Compile Include="Utility\HtmlUtility\CodeFormat\CppFormat.cs" />
@@ -879,13 +900,6 @@
     </Compile>
     <Compile Include="UserControls\Management\PasswordSettings\PasswordSettings.ascx.designer.cs">
       <DependentUpon>PasswordSettings.ascx</DependentUpon>
-    </Compile>
-    <Compile Include="UserControls\Management\ProfileOperation.ascx.cs">
-      <DependentUpon>ProfileOperation.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="UserControls\Management\ProfileOperation.ascx.designer.cs">
-      <DependentUpon>ProfileOperation.ascx</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Management\TariffSettings\TariffHistory.ascx.cs">
       <DependentUpon>TariffHistory.ascx</DependentUpon>
@@ -1098,6 +1112,7 @@
     <Compile Include="Wizard.aspx.designer.cs">
       <DependentUpon>Wizard.aspx</DependentUpon>
     </Compile>
+    <Content Include="502.htm" />
     <Content Include="AppInstall.aspx" />
     <Content Include="Content\jQuery.FileUpload\css\jquery.fileupload-noscript.css" />
     <Content Include="Content\jQuery.FileUpload\css\jquery.fileupload-ui-noscript.css" />
@@ -1165,11 +1180,23 @@
     <Content Include="Content\themes\base\minified\jquery.ui.tabs.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.tooltip.min.css" />
+    <Content Include="DeepLink.aspx" />
+    <Content Include="js\asc\core\desktop.polyfills.js" />
     <Content Include="js\asc\core\headscript.js" />
+    <Content Include="js\asc\plugins\userselector.js" />
     <Content Include="js\asc\plugins\svg4everybody.js" />
+    <None Include="js\third-party\purify.min.js.map" />
+    <Content Include="js\third-party\firebase-app.js" />
+    <Content Include="js\third-party\firebase-auth.js" />
+    <Content Include="js\third-party\firebase-database.js" />
+    <Content Include="js\third-party\firebase-messaging.js" />
+    <Content Include="js\third-party\firebase.js" />
+    <Content Include="js\third-party\lodash.min.js" />
+    <Content Include="js\third-party\masonry.pkgd.min.js" />
+    <Content Include="js\third-party\purify.min.js" />
     <Content Include="js\third-party\sjcl.js" />
     <Content Include="js\third-party\xregexp.js" />
-    <None Include="Scripts\jquery-3.3.1.intellisense.js" />
+    <Content Include="Masters\FirstScripts.ascx" />
     <Content Include="PortalEncryption.aspx" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />
@@ -1196,25 +1223,195 @@
     <Content Include="skins\bright-blue\img\up.svg" />
     <Content Include="skins\dark-green\img\rotate.svg" />
     <Content Include="skins\dark-green\img\up.svg" />
+    <Content Include="skins\dark-img\advfilter-icons.png" />
+    <Content Include="skins\dark-img\btn-onoff.png" />
+    <Content Include="skins\dark-img\btn_icons.png" />
+    <Content Include="skins\dark-img\btn_row_icons.png" />
+    <Content Include="skins\dark-img\convert_pencil.png" />
+    <Content Include="skins\dark-img\dropdown-menu-icons.png" />
+    <Content Include="skins\dark-img\dropdown-menu-icons_retina.png" />
+    <Content Include="skins\dark-img\edit_lock.png" />
+    <Content Include="skins\dark-img\edit_pencil.png" />
+    <Content Include="skins\dark-img\gantt-icons.png" />
+    <Content Include="skins\dark-img\icons_nav_panel.png" />
+    <Content Include="skins\dark-img\icons_nav_panel_retina.png" />
+    <Content Include="skins\dark-img\mainmenu_upload.png" />
+    <Content Include="skins\dark-img\name_action.png" />
+    <Content Include="skins\dark-img\refresh.png" />
+    <Content Include="skins\dark-img\rotate.svg" />
+    <Content Include="skins\dark-img\switch_view.png" />
+    <Content Include="skins\dark-img\top-studio-menu.png" />
+    <Content Include="skins\dark-img\top-studio-menu_retina.png" />
+    <Content Include="skins\dark-img\unfollow.png" />
+    <Content Include="skins\dark-img\up.png" />
+    <Content Include="skins\dark-img\up.svg" />
     <Content Include="skins\deep-blue\img\rotate.svg" />
     <Content Include="skins\deep-blue\img\up.svg" />
     <Content Include="skins\default\imagescss\rotate.svg" />
+    <Content Include="skins\default\imagescss\security.svg" />
     <Content Include="skins\default\imagescss\up.svg" />
-    <Content Include="skins\default\images\dashboard\communicate-with-clients.png" />
-    <Content Include="skins\default\images\dashboard\create-clients-database.png" />
-    <Content Include="skins\default\images\dashboard\customize-your-crm.png" />
-    <Content Include="skins\default\images\dashboard\discuss-with-team.png" />
-    <Content Include="skins\default\images\dashboard\keep-your-team-posted.png" />
-    <Content Include="skins\default\images\dashboard\make-co-editing-comfy.png" />
-    <Content Include="skins\default\images\dashboard\share-files.png" />
-    <Content Include="skins\default\images\dashboard\share-news-and-knowledge.png" />
-    <Content Include="skins\default\images\dashboard\track-sales.png" />
-    <Content Include="skins\default\images\dashboard\use-more-collaboration-tools.png" />
-    <Content Include="skins\default\images\dashboard\work-with-office-docs.png" />
+    <Content Include="skins\default\imagescss\upload.svg" />
+    <Content Include="skins\default\imagescss\welcometo_logo.svg" />
+    <Content Include="skins\default\images\checkboxes.png" />
+    <Content Include="skins\default\images\common_search_icon.svg" />
+    <Content Include="skins\default\images\community150.svg" />
+    <Content Include="skins\default\images\dark-checkboxes.png" />
+    <Content Include="skins\default\images\dashboard\apps-you-need.svg" />
+    <Content Include="skins\default\images\dashboard\communicate-with-clients.svg" />
+    <Content Include="skins\default\images\dashboard\create-clients-database.svg" />
+    <Content Include="skins\default\images\dashboard\creating-business-cloud.svg" />
+    <Content Include="skins\default\images\dashboard\customize-your-crm.svg" />
+    <Content Include="skins\default\images\dashboard\discuss-with-team.svg" />
+    <Content Include="skins\default\images\dashboard\integration-with-infrastructure.svg" />
+    <Content Include="skins\default\images\dashboard\keep-your-team-posted.svg" />
+    <Content Include="skins\default\images\dashboard\make-co-editing-comfy.svg" />
+    <Content Include="skins\default\images\dashboard\share-files.svg" />
+    <Content Include="skins\default\images\dashboard\share-news-and-knowledge.svg" />
+    <Content Include="skins\default\images\dashboard\tailored-cloud.svg" />
+    <Content Include="skins\default\images\dashboard\track-sales.svg" />
+    <Content Include="skins\default\images\dashboard\ultimate-security.svg" />
+    <Content Include="skins\default\images\dashboard\use-more-collaboration-tools.svg" />
+    <Content Include="skins\default\images\dashboard\work-with-office-docs.svg" />
+    <Content Include="skins\default\images\default_user_photo_dark_size_200-200.png" />
+    <Content Include="skins\default\images\default_user_photo_dark_size_32-32.png" />
+    <Content Include="skins\default\images\default_user_photo_dark_size_360-360.png" />
+    <Content Include="skins\default\images\default_user_photo_dark_size_48-48.png" />
+    <Content Include="skins\default\images\default_user_photo_dark_size_82-82.png" />
+    <Content Include="skins\default\images\documents150.svg" />
+    <Content Include="skins\default\images\empty_screen_filter.svg" />
+    <Content Include="skins\default\images\empty_search.svg" />
+    <Content Include="skins\default\images\event_66.png" />
+    <Content Include="skins\default\images\exclamation.svg" />
+    <Content Include="skins\default\images\filetype\file_avi.png" />
+    <Content Include="skins\default\images\filetype\file_dvd.png" />
+    <Content Include="skins\default\images\filetype\file_epub.png" />
+    <Content Include="skins\default\images\filetype\file_fb2.png" />
+    <Content Include="skins\default\images\filetype\file_flv.png" />
+    <Content Include="skins\default\images\filetype\file_fodp.png" />
+    <Content Include="skins\default\images\filetype\file_fods.png" />
+    <Content Include="skins\default\images\filetype\file_fodt.png" />
+    <Content Include="skins\default\images\filetype\file_htm.png" />
+    <Content Include="skins\default\images\filetype\file_ics.png" />
+    <Content Include="skins\default\images\filetype\file_mht.png" />
+    <Content Include="skins\default\images\filetype\file_mkv.png" />
+    <Content Include="skins\default\images\filetype\file_mov.png" />
+    <Content Include="skins\default\images\filetype\file_mp4.png" />
+    <Content Include="skins\default\images\filetype\file_mpg.png" />
+    <Content Include="skins\default\images\filetype\file_otp.png" />
+    <Content Include="skins\default\images\filetype\file_ots.png" />
+    <Content Include="skins\default\images\filetype\file_ott.png" />
+    <Content Include="skins\default\images\filetype\retina\file_avi.png" />
+    <Content Include="skins\default\images\filetype\retina\file_cal.png" />
+    <Content Include="skins\default\images\filetype\retina\file_doct.png" />
+    <Content Include="skins\default\images\filetype\retina\file_dvd.png" />
+    <Content Include="skins\default\images\filetype\retina\file_epub.png" />
+    <Content Include="skins\default\images\filetype\retina\file_fb2.png" />
+    <Content Include="skins\default\images\filetype\retina\file_flv.png" />
+    <Content Include="skins\default\images\filetype\retina\file_fodp.png" />
+    <Content Include="skins\default\images\filetype\retina\file_fods.png" />
+    <Content Include="skins\default\images\filetype\retina\file_fodt.png" />
+    <Content Include="skins\default\images\filetype\retina\file_gdoc.png" />
+    <Content Include="skins\default\images\filetype\retina\file_gsheet.png" />
+    <Content Include="skins\default\images\filetype\retina\file_gslides.png" />
+    <Content Include="skins\default\images\filetype\retina\file_htm.png" />
+    <Content Include="skins\default\images\filetype\retina\file_ics.png" />
+    <Content Include="skins\default\images\filetype\retina\file_mht.png" />
+    <Content Include="skins\default\images\filetype\retina\file_mkv.png" />
+    <Content Include="skins\default\images\filetype\retina\file_mov.png" />
+    <Content Include="skins\default\images\filetype\retina\file_mp4.png" />
+    <Content Include="skins\default\images\filetype\retina\file_mpg.png" />
+    <Content Include="skins\default\images\filetype\retina\file_otp.png" />
+    <Content Include="skins\default\images\filetype\retina\file_ots.png" />
+    <Content Include="skins\default\images\filetype\retina\file_ott.png" />
+    <Content Include="skins\default\images\filetype\retina\file_pptt.png" />
+    <Content Include="skins\default\images\filetype\retina\file_xlst.png" />
+    <Content Include="skins\default\images\filetype\thumb\file.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_archive.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_avi.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_cal.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_csv.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_djvu.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_doc.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_docm.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_doct.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_docx.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_dot.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_dotm.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_dotx.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_dvd.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_ebook.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_epub.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_fb2.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_flv.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_fodp.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_fods.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_fodt.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_gdoc.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_gsheet.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_gslides.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_htm.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_html.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_iaf.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_ics.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_image.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_m2ts.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_mht.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_mkv.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_mov.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_mp4.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_mpg.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_odp.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_ods.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_odt.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_otp.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_ots.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_ott.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_pdf.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_pot.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_potm.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_potx.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_pps.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_ppsm.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_ppsx.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_ppt.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_pptm.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_pptt.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_pptx.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_rtf.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_sound.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_soundunk.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_svg.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_txt.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_video.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_videounk.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_xls.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_xlsm.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_xlst.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_xlsx.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_xlt.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_xltm.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_xltx.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_xml.png" />
+    <Content Include="skins\default\images\filetype\thumb\file_xps.png" />
+    <Content Include="skins\default\images\filetype\thumb\folder.png" />
+    <Content Include="skins\default\images\icon-controlpanel.svg" />
+    <Content Include="skins\default\images\jstree\throbber-dark-12.svg" />
+    <Content Include="skins\default\images\lastadded_widget.svg" />
+    <Content Include="skins\default\images\loader-dark-12.svg" />
+    <Content Include="skins\default\images\loader-dark-16.svg" />
+    <Content Include="skins\default\images\loader-dark-24.svg" />
+    <Content Include="skins\default\images\loader-dark-32.svg" />
+    <Content Include="skins\default\images\loader-dark-48.svg" />
+    <Content Include="skins\default\images\loader-dark-64.svg" />
+    <Content Include="skins\default\images\loader.svg" />
+    <Content Include="skins\default\images\lock_transparent.png" />
+    <Content Include="skins\default\images\logo\editor_logo_embed.png" />
+    <Content Include="skins\default\images\logo\editor_logo_embed_general.png" />
+    <Content Include="skins\default\images\mail.svg" />
     <Content Include="skins\default\images\notification\demo-100.png" />
     <Content Include="skins\default\images\notification\mailus-100.png" />
-    <Content Include="skins\default\images\notification\mail_logo.png" />
     <Content Include="skins\default\images\notification\personal-wellcome-bg.png" />
+    <Content Include="skins\default\images\notification\privacy.png" />
     <Content Include="skins\default\images\notification\social-blog-40.png" />
     <Content Include="skins\default\images\notification\social-fb-40.png" />
     <Content Include="skins\default\images\notification\social-inst-40.png" />
@@ -1241,6 +1438,9 @@
     <Content Include="skins\default\images\notification\tips-documents-mailmerge-100.png" />
     <Content Include="skins\default\images\notification\tips-documents-review-100.png" />
     <Content Include="skins\default\images\notification\tips-documents-share-100.png" />
+    <Content Include="skins\default\images\logo\fb_icon_325x325.jpg" />
+    <Content Include="skins\default\images\logo\light_small.svg" />
+    <Content Include="skins\default\images\logo\light_small_general.svg" />
     <Content Include="skins\default\images\notification\tips-welcome-backup-50.png" />
     <Content Include="skins\default\images\notification\tips-welcome-brand-50.png" />
     <Content Include="skins\default\images\notification\tips-welcome-customize-50.png" />
@@ -1248,11 +1448,94 @@
     <Content Include="skins\default\images\notification\tips-welcome-security-50.png" />
     <Content Include="skins\default\images\notification\tips-welcome-telephony-50.png" />
     <Content Include="skins\default\images\notification\tips-welcome-usertrack-50.png" />
-    <Content Include="skins\default\images\onlyoffice_logo\light_small_general.svg" />
+    <Content Include="skins\default\images\personal_logo\logo_personal.svg" />
+    <Content Include="skins\default\images\personal_logo\logo_personal_about.svg" />
+    <Content Include="skins\default\images\personal_logo\logo_personal_auth.svg" />
+    <Content Include="skins\default\images\product_logo.svg" />
+    <Content Include="skins\default\images\quickview.svg" />
+    <Content Include="skins\default\images\recent_activity.svg" />
+    <Content Include="skins\default\images\svg\context\icon_accept.svg" />
+    <Content Include="skins\default\images\svg\context\icon_access.svg" />
+    <Content Include="skins\default\images\svg\context\icon_add_email.svg" />
+    <Content Include="skins\default\images\svg\context\icon_arrow.svg" />
+    <Content Include="skins\default\images\svg\context\icon_arrow_light.svg" />
+    <Content Include="skins\default\images\svg\context\icon_block.svg" />
+    <Content Include="skins\default\images\svg\context\icon_calendar.svg" />
+    <Content Include="skins\default\images\svg\context\icon_call.svg" />
+    <Content Include="skins\default\images\svg\context\icon_case.svg" />
+    <Content Include="skins\default\images\svg\context\icon_chat.svg" />
+    <Content Include="skins\default\images\svg\context\icon_close.svg" />
+    <Content Include="skins\default\images\svg\context\icon_closed_tasks_report.svg" />
+    <Content Include="skins\default\images\svg\context\icon_create.svg" />
+    <Content Include="skins\default\images\svg\context\icon_delete.svg" />
+    <Content Include="skins\default\images\svg\context\icon_disable.svg" />
+    <Content Include="skins\default\images\svg\context\icon_document.svg" />
+    <Content Include="skins\default\images\svg\context\icon_download.svg" />
+    <Content Include="skins\default\images\svg\context\icon_download_as.svg" />
+    <Content Include="skins\default\images\svg\context\icon_edit.svg" />
+    <Content Include="skins\default\images\svg\context\icon_email.svg" />
+    <Content Include="skins\default\images\svg\context\icon_email_v2.svg" />
+    <Content Include="skins\default\images\svg\context\icon_empty_recycle_bin.svg" />
+    <Content Include="skins\default\images\svg\context\icon_enable.svg" />
+    <Content Include="skins\default\images\svg\context\icon_export.svg" />
+    <Content Include="skins\default\images\svg\context\icon_extrn_link.svg" />
+    <Content Include="skins\default\images\svg\context\icon_extrn_link_v2.svg" />
+    <Content Include="skins\default\images\svg\context\icon_favorite.svg" />
+    <Content Include="skins\default\images\svg\context\icon_filter.svg" />
+    <Content Include="skins\default\images\svg\context\icon_forward.svg" />
+    <Content Include="skins\default\images\svg\context\icon_history.svg" />
+    <Content Include="skins\default\images\svg\context\icon_image.svg" />
+    <Content Include="skins\default\images\svg\context\icon_invoice.svg" />
+    <Content Include="skins\default\images\svg\context\icon_invoice_draft.svg" />
+    <Content Include="skins\default\images\svg\context\icon_invoice_paid.svg" />
+    <Content Include="skins\default\images\svg\context\icon_invoice_rejected.svg" />
+    <Content Include="skins\default\images\svg\context\icon_invoice_send.svg" />
+    <Content Include="skins\default\images\svg\context\icon_link.svg" />
+    <Content Include="skins\default\images\svg\context\icon_mark_as_important.svg" />
+    <Content Include="skins\default\images\svg\context\icon_mark_as_read.svg" />
+    <Content Include="skins\default\images\svg\context\icon_move.svg" />
+    <Content Include="skins\default\images\svg\context\icon_move_or_copy.svg" />
+    <Content Include="skins\default\images\svg\context\icon_move_to_milestone.svg" />
+    <Content Include="skins\default\images\svg\context\icon_new_opportunity.svg" />
+    <Content Include="skins\default\images\svg\context\icon_new_tab.svg" />
+    <Content Include="skins\default\images\svg\context\icon_new_task.svg" />
+    <Content Include="skins\default\images\svg\context\icon_notify_responsible.svg" />
+    <Content Include="skins\default\images\svg\context\icon_open_folder.svg" />
+    <Content Include="skins\default\images\svg\context\icon_open_location.svg" />
+    <Content Include="skins\default\images\svg\context\icon_open_mail.svg" />
+    <Content Include="skins\default\images\svg\context\icon_open_tasks_report.svg" />
+    <Content Include="skins\default\images\svg\context\icon_permissions.svg" />
+    <Content Include="skins\default\images\svg\context\icon_phone.svg" />
+    <Content Include="skins\default\images\svg\context\icon_preview.svg" />
+    <Content Include="skins\default\images\svg\context\icon_print.svg" />
+    <Content Include="skins\default\images\svg\context\icon_project.svg" />
+    <Content Include="skins\default\images\svg\context\icon_reassign_data.svg" />
+    <Content Include="skins\default\images\svg\context\icon_rename.svg" />
+    <Content Include="skins\default\images\svg\context\icon_reply.svg" />
+    <Content Include="skins\default\images\svg\context\icon_reply_all.svg" />
+    <Content Include="skins\default\images\svg\context\icon_restore.svg" />
+    <Content Include="skins\default\images\svg\context\icon_ringtone.svg" />
+    <Content Include="skins\default\images\svg\context\icon_settings.svg" />
+    <Content Include="skins\default\images\svg\context\icon_sign.svg" />
+    <Content Include="skins\default\images\svg\context\icon_spam.svg" />
+    <Content Include="skins\default\images\svg\context\icon_subtask.svg" />
+    <Content Include="skins\default\images\svg\context\icon_subtask_v2.svg" />
+    <Content Include="skins\default\images\svg\context\icon_template.svg" />
+    <Content Include="skins\default\images\svg\context\icon_track_time.svg" />
+    <Content Include="skins\default\images\svg\context\icon_unlink.svg" />
+    <Content Include="skins\default\images\svg\context\icon_unlink_v2.svg" />
+    <Content Include="skins\default\images\svg\context\icon_un_notify_responsible.svg" />
+    <Content Include="skins\default\images\svg\context\icon_user.svg" />
+    <Content Include="skins\default\images\svg\context\icon_user_active.svg" />
+    <Content Include="skins\default\images\svg\context\icon_user_deactive.svg" />
+    <Content Include="skins\default\images\svg\context\icon_user_new.svg" />
+    <Content Include="skins\default\images\svg\context\icon_user_v2.svg" />
     <Content Include="skins\default\images\svg\documents\favorite.svg" />
     <Content Include="skins\default\images\svg\documents\recent.svg" />
     <Content Include="skins\default\images\svg\documents\templateblue.svg" />
     <Content Include="skins\default\images\svg\documents\templategray.svg" />
+    <Content Include="skins\default\images\svg\exclamation.svg" />
+    <Content Include="skins\default\images\svg\people\google.svg" />
     <Content Include="skins\default\images\svg\people\mailru.png" />
     <Content Include="skins\default\images\svg\people\vk.png" />
     <Content Include="skins\default\images\svg\people\vk_ru.png" />
@@ -1261,13 +1544,132 @@
     <Content Include="skins\default\images\svg\gift\mobile.svg" />
     <Content Include="skins\default\images\svg\gift\private.svg" />
     <Content Include="skins\default\images\svg\gift\pro.svg" />
-    <Content Include="skins\default\layout-desktop.css" />
-    <Content Include="skins\default\layout-media.css" />
-    <Content Include="skins\default\layout.css" />
+    <Content Include="skins\default\images\svg\share\access_comment.svg" />
+    <Content Include="skins\default\images\svg\share\access_filter.svg" />
+    <Content Include="skins\default\images\svg\share\access_deny.svg" />
+    <Content Include="skins\default\images\svg\share\access_form.svg" />
+    <Content Include="skins\default\images\svg\share\access_full.svg" />
+    <Content Include="skins\default\images\svg\share\access_owner.svg" />
+    <Content Include="skins\default\images\svg\share\access_read.svg" />
+    <Content Include="skins\default\images\svg\share\access_review.svg" />
+    <Content Include="skins\default\images\svg\share\access_varies.svg" />
+    <Content Include="skins\default\images\svg\share\close.svg" />
+    <Content Include="skins\default\images\svg\share\group_avatar.svg" />
+    <Content Include="skins\default\images\svg\share\lifetime.svg" />
+    <Content Include="skins\default\images\svg\share\password.svg" />
+    <Content Include="skins\default\images\svg\share\trash.svg" />
+    <Content Include="skins\default\images\svg\share\user_avatar.svg" />
+    <Content Include="skins\default\images\svg\share\user_avatar_dark.svg" />
+    <Content Include="skins\default\images\talk.svg" />
+    <Content Include="skins\default\images\to_left.svg" />
+    <Content Include="skins\default\images\to_right.svg" />
+    <Content Include="skins\default\images\ui-icons_cccccc_256x240.png" />
+    <Content Include="skins\default\layout-desktop.less" />
+    <Content Include="skins\default\layout-media.less" />
+    <Content Include="skins\default\layout.less" />
     <Content Include="skins\pure-orange\img\rotate.svg" />
     <Content Include="skins\pure-orange\img\up.svg" />
     <Content Include="skins\wild-pink\img\rotate.svg" />
     <Content Include="skins\wild-pink\img\up.svg" />
+    <Content Include="ThirdParty\plugin\wordpress\icon.svg" />
+    <Content Include="UserControls\Common\Attachments\images\documents-logo.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\arrow_right_black.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\cs\app_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\cs\google_play.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\de\app_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\de\chrome_web_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\de\google_play.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\en\app_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\en\chrome_web_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\en\google_play.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\es\app_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\es\chrome_web_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\es\google_play.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\fr\app_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\fr\chrome_web_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\fr\google_play.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\it\app_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\it\chrome_web_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\it\google_play.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\ja\app_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\ja\google_play.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\nl\app_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\nl\google_play.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\pt\app_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\pt\chrome_web_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\pt\google_play.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\ru\app_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\ru\chrome_web_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\ru\google_play.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\zh\app_store.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\buttons_icons\zh\google_play.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\color_social_icons.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\first_screen_bg.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\first_screen_illustration.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\google.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\quotation_marks.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\reg_success_checkmark.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\review-stars.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\collaboration%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\collaboration.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\desktop%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\desktop.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\document%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\document.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\mobile%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\mobile.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\online%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\online.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\presentation%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\presentation.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\spreadsheet%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\de\spreadsheet.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\collaboration%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\collaboration.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\desktop%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\desktop.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\document%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\document.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\mobile%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\mobile.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\online%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\online.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\presentation%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\presentation.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\spreadsheet%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\en\spreadsheet.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\collaboration%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\collaboration.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\desktop%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\desktop.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\document%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\document.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\mobile%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\mobile.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\online%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\online.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\presentation%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\presentation.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\spreadsheet%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\fr\spreadsheet.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\collaboration%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\collaboration.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\desktop%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\desktop.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\document%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\document.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\mobile%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\mobile.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\online%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\online.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\presentation%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\presentation.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\spreadsheet%402x.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\screenshots\ru\spreadsheet.png" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\softpedia.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\images\third_party_logos.svg" />
+    <Content Include="UserControls\Common\AuthorizeDocs\js\reviews.js" />
+    <Content Include="UserControls\Common\AuthorizeDocs\js\review_builder_script.js" />
     <Content Include="UserControls\Common\Authorize\js\desktop.js" />
     <Content Include="ThirdParty\plugin\easyBib\add.png" />
     <Content Include="ThirdParty\plugin\easyBib\bibliography.js" />
@@ -1293,7 +1695,6 @@
     <Content Include="ThirdParty\plugin\pluginBase.js" />
     <Content Include="ThirdParty\plugin\plugins.css" />
     <Content Include="ThirdParty\plugin\wordpress\config.json" />
-    <Content Include="ThirdParty\plugin\wordpress\icon.png" />
     <Content Include="ThirdParty\plugin\wordpress\index.html" />
     <Content Include="ThirdParty\plugin\wordpress\style.css" />
     <Content Include="ThirdParty\plugin\wordpress\translations\br-BR.json" />
@@ -1332,9 +1733,26 @@
     <Content Include="UserControls\Common\MediaViewer\images\zoom-to-actual-pixels.png" />
     <Content Include="UserControls\Common\MediaViewer\jquery.jplayer.swf" />
     <Content Include="UserControls\Common\MediaViewer\MediaPlayer.ascx" />
-    <Content Include="UserControls\Common\MediaViewer\mediaplayer.css" />
+    <Content Include="UserControls\Common\MediaViewer\mediaplayer.less" />
+    <Content Include="UserControls\Common\Attachments\css\dark-attachments.less" />
+    <Content Include="UserControls\Common\Authorize\css\dark-authorize.less" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\dark-authorizedocs.less" />
+    <Content Include="UserControls\Common\AuthorizeDocs\css\dark-custom-mode.less" />
+    <Content Include="UserControls\Common\LoaderPage\css\dark-loaderpage.less" />
+    <Content Include="UserControls\Common\MediaViewer\dark-mediaplayer.less" />
+    <Content Include="skins\dark\dark-common_style.less" />
+    <Content Include="skins\dark\dark-empty-screen-control.less" />
+    <Content Include="skins\dark\dark-jquery-advansedselector.less" />
+    <Content Include="skins\dark\dark-userselector.less" />
+    <Content Include="skins\dark\dark-page-tabs-navigators.less" />
+    <Content Include="skins\dark\dark-toastr.less" />
+    <Content Include="skins\dark\dark-phonecontroller.less" />
+    <Content Include="skins\dark\dark-groupselector.less" />
+    <Content Include="skins\dark\dark-codestyle.less" />
+    <Content Include="skins\dark\dark-jquery-emailadvansedselector.less" />
+    <Content Include="skins\dark\dark-helper.less" />
+    <Content Include="skins\dark\dark-jquery-advansedfilter-fix.less" />
     <Content Include="UserControls\Common\MediaViewer\mediaplayer.js" />
-    <Content Include="js\asc\core\my.js" />
     <Content Include="js\asc\core\asc.socketio.js" />
     <Content Include="js\asc\core\voip.navigationitem.js" />
     <Content Include="js\asc\plugins\progressdialog.js" />
@@ -1342,6 +1760,7 @@
     <Content Include="js\third-party\clipboard.js" />
     <Content Include="js\third-party\jquery\jquery.jplayer.js" />
     <Content Include="js\third-party\jquery\jstree.min.js" />
+    <Content Include="js\third-party\jquery\jquery.cron.js" />
     <Content Include="js\third-party\slick.min.js" />
     <Content Include="js\third-party\socket.io.js" />
     <Content Include="MigrationPortal.aspx" />
@@ -1369,7 +1788,6 @@
     <Content Include="skins\default\images\app_install\Mac_os.png" />
     <Content Include="skins\default\images\app_install\Windows.png" />
     <Content Include="skins\default\images\default_user_photo_size_360-360.png" />
-    <Content Include="skins\default\images\exclamation.png" />
     <Content Include="PreparationPortal.aspx" />
     <Content Include="skins\bright-blue\img\advfilter-icons.png" />
     <Content Include="skins\bright-blue\img\btn_icons.png" />
@@ -1488,17 +1906,17 @@
     <Content Include="skins\default\images\jplayer\jplayer.blue.monday.video.play.png" />
     <Content Include="skins\default\images\jstree\32px.png" />
     <Content Include="skins\default\images\jstree\throbber.gif" />
-    <Content Include="skins\default\images\onlyoffice_logo\dark.png" />
-    <Content Include="skins\default\images\onlyoffice_logo\dark_general.png" />
-    <Content Include="skins\default\images\onlyoffice_logo\editor_logo.png" />
-    <Content Include="skins\default\images\onlyoffice_logo\editor_logo_general.png" />
-    <Content Include="skins\default\images\onlyoffice_logo\favicon.ico" />
-    <Content Include="skins\default\images\onlyoffice_logo\favicon_general.ico" />
-    <Content Include="skins\default\images\onlyoffice_logo\light_small.png" />
-    <Content Include="skins\default\images\onlyoffice_logo\light_small_general.png" />
-    <Content Include="skins\default\images\onlyoffice_logo\presentation.ico" />
-    <Content Include="skins\default\images\onlyoffice_logo\spreadsheet.ico" />
-    <Content Include="skins\default\images\onlyoffice_logo\text.ico" />
+    <Content Include="skins\default\images\logo\dark.png" />
+    <Content Include="skins\default\images\logo\dark_general.png" />
+    <Content Include="skins\default\images\logo\editor_logo.png" />
+    <Content Include="skins\default\images\logo\editor_logo_general.png" />
+    <Content Include="skins\default\images\logo\favicon.ico" />
+    <Content Include="skins\default\images\logo\favicon_general.ico" />
+    <Content Include="skins\default\images\logo\light_small.png" />
+    <Content Include="skins\default\images\logo\light_small_general.png" />
+    <Content Include="skins\default\images\logo\slide.ico" />
+    <Content Include="skins\default\images\logo\cell.ico" />
+    <Content Include="skins\default\images\logo\word.ico" />
     <Content Include="skins\default\images\svg\appInstall\desktop.svg" />
     <Content Include="skins\default\images\svg\appInstall\document.svg" />
     <Content Include="skins\default\images\svg\appInstall\projects.svg" />
@@ -1534,7 +1952,6 @@
     <Content Include="skins\default\images\svg\mail\refresh.svg" />
     <Content Include="skins\default\images\svg\mail\rotate.svg" />
     <Content Include="skins\default\images\svg\management-icons.svg" />
-    <Content Include="skins\default\images\svg\payment.svg" />
     <Content Include="skins\default\images\svg\people\administrator.svg" />
     <Content Include="skins\default\images\svg\people\facebook.png" />
     <Content Include="skins\default\images\svg\people\facebookgray.svg" />
@@ -1585,9 +2002,7 @@
     <Content Include="skins\default\images\ui-icons_cc0000_256x240.png" />
     <Content Include="skins\default\images\ui-icons_ffffff_256x240.png" />
     <Content Include="skins\default\jplayer.css" />
-    <Content Include="skins\default\jquery-emailadvansedselector.css" />
-    <Content Include="skins\default\images\community150.png" />
-    <Content Include="skins\default\images\documents150.png" />
+    <Content Include="skins\default\jquery-emailadvansedselector.less" />
     <Content Include="skins\default\opensansoffline\fonts\opensans-bold.svg" />
     <Content Include="skins\default\opensansoffline\fonts\opensans-extrabold.svg" />
     <Content Include="skins\default\opensansoffline\fonts\opensans-light.svg" />
@@ -1600,15 +2015,11 @@
     <Content Include="skins\default\imagescss\mail.png" />
     <Content Include="skins\default\images\clear_16.png" />
     <Content Include="skins\default\images\close.png" />
-    <Content Include="skins\default\images\crm.png" />
     <Content Include="skins\default\images\default_user_photo_size_200-200.png" />
     <Content Include="skins\default\images\default_user_photo_size_32-32.png" />
     <Content Include="skins\default\images\default_user_photo_size_48-48.png" />
     <Content Include="skins\default\images\default_user_photo_size_82-82.png" />
-    <Content Include="skins\default\images\docs.png" />
-    <Content Include="skins\default\images\documents.png" />
     <Content Include="skins\default\images\dropdown-corner-bottom.gif" />
-    <Content Include="skins\default\images\empty_search.png" />
     <Content Include="skins\default\images\folders.png" />
     <Content Include="skins\default\images\info.png" />
     <Content Include="skins\default\images\link_16.png" />
@@ -1621,17 +2032,11 @@
     <Content Include="skins\default\images\loader_48.gif" />
     <Content Include="skins\default\images\loader_64.GIF" />
     <Content Include="skins\default\images\lock.png" />
-    <Content Include="skins\default\images\logo\logo_personal_auth.png" />
-    <Content Include="skins\default\images\logo\logo_personal_terms.png" />
     <Content Include="skins\default\images\minus.png" />
     <Content Include="skins\default\images\people_icon.png" />
     <Content Include="skins\default\images\plus.png" />
-    <Content Include="skins\default\images\product_logo.png" />
-    <Content Include="skins\default\images\projects.png" />
-    <Content Include="skins\default\images\quickview.png" />
     <Content Include="skins\default\images\status_away.png" />
     <Content Include="skins\default\images\status_na.png" />
-    <Content Include="skins\default\images\support.png" />
     <Content Include="skins\default\images\trash_16.png" />
     <Content Include="skins\default\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="skins\default\images\ui-bg_flat_100_ffffff_40x100.png" />
@@ -1685,96 +2090,17 @@
     <Content Include="ThirdParty\Google.aspx" />
     <Content Include="ThirdParty\Dropbox.aspx" />
     <Content Include="ThirdParty\ImportContacts\image\google.png" />
-    <Content Include="ThirdParty\ImportContacts\image\yahoo.png" />
     <Content Include="ThirdParty\ImportContacts\ImportLogin.Master" />
     <Content Include="ThirdParty\ImportContacts\Import.aspx" />
-    <Content Include="ThirdParty\ImportContacts\Yahoo.aspx" />
     <Content Include="ThirdParty\ImportContacts\Google.aspx" />
     <Content Include="ThirdParty\Login.Master" />
     <Content Include="ThirdParty\oauth2.html" />
     <Content Include="ThirdParty\OneDrive.aspx" />
     <Content Include="ThirdParty\Wordpress.aspx" />
     <Content Include="UserControls\Common\AuthorizeDocs\AuthorizeDocsCustomMode.ascx" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\1px_image_background.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\access_background.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\capabilities_icon1.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\capabilities_icon2.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\capabilities_icon3.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\customer_experience.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\default.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\doc.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\extend_logos.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Alexis_Ascui.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Alexsandr_Slusarev.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Alonso_Cardona_Pereira.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\andrewjcole_Scratch.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Andrey_Sidorenko.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Angie_Benitez_Serofani.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Arnaud_D.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Barb_Barrett.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Benjamin_Coate.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Ben_Low.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Bert_Beck.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Carlos_Alberto.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Ciprian_Ungureanu.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Clemens_Torno.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Daniel_Kueh.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Dave_Taylor.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\David_Williamson.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Denis_Steijn.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\dmitri_malikov.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Emanuel_Rodriguez.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Eric_Genestine.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Franck_Emile_Kouassi.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Frederick_Prince.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Herve_COURTOIS.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\ilya_rastorguev.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Jacob_Meyer.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Jigar_Jadav.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Joe_Merengue.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Jon_Cortes.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Jose_Juan.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Josh_Miller.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Kabeer_Ahmed.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\karina_verba.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Kasey_Esposito.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\kenneth_nitcheu.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Kev_M.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Linda-Stansfield.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Luis_chuta.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Marcelo_Trindade.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Mario_Alencar.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Mauricio_Oscar_Alberto_Piaggi.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Olga_Kaczmarczyk.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Omar_Gallardo.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Pedro_Vilanova.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Peter_Pavlovic.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\r_s.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\SaJu_CeLo.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Samuel_Valderrama_Martinez.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Sebastian_Reuter.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\sergey_matveev.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Sergey_Strelnikov.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Tim_Byers.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Tony_Harvey.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Varlam_Erofeich.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\Vitaliy_Plitenko.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\foto_commets\vitali_koistrub.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\header.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\icon_facebook.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\icon_google.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\icon_lindkn.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\image_background.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\presentations.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\Share_and_Collaborate_scrin_1.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\Share_and_Collaborate_scrin_2.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\Share_and_Collaborate_scrin_3.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\Share_and_Collaborate_scrin_4.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\Share_and_Collaborate_scrin_5.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\Share_and_Collaborate_scrin_6.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\spreadsheets.png" />
-    <Content Include="UserControls\Common\AuthorizeDocs\css\images\sprite_acc.png" />
     <Content Include="UserControls\Common\ckeditor\contents.css" />
+    <Content Include="UserControls\Common\PersonalFooter\css\images\flags.svg" />
+    <Content Include="UserControls\Common\PersonalFooter\css\images\instagram_icon.png" />
     <Content Include="UserControls\Common\PortalEncryption\js\portalencryption.js" />
     <Content Include="UserControls\Common\PortalEncryption\PortalEncryption.ascx" />
     <Content Include="UserControls\Common\MigrationPortal\js\migrationportal.js" />
@@ -1828,15 +2154,73 @@
     <Content Include="UserControls\Common\SmallChat\css\images\settings.svg" />
     <Content Include="UserControls\Common\SmallChat\css\images\talk.svg" />
     <Content Include="UserControls\Common\SmallChat\css\images\talk_green.svg" />
-    <Content Include="UserControls\Common\ThirdPartyBanner\css\img\bitly.png" />
-    <Content Include="UserControls\Common\ThirdPartyBanner\css\img\social.png" />
-    <Content Include="UserControls\Common\ThirdPartyBanner\css\img\storage.png" />
-    <Content Include="UserControls\Common\ThirdPartyBanner\css\img\twilio2.png" />
-    <Content Include="UserControls\Common\ThirdPartyBanner\ThirdPartyBanner.ascx" />
+    <Content Include="UserControls\Common\Support\livechat.js" />
+    <Content Include="UserControls\Common\Support\SupportChat.ascx" />
     <Content Include="UserControls\Common\InviteLink\InviteLink.ascx" />
     <Content Include="UserControls\Common\InviteLink\js\invitelink.js" />
     <Content Include="UserControls\Common\LoaderPage\css\loaderpage.less" />
     <Content Include="UserControls\Common\PortalEncryption\css\portalencryption.less" />
+    <Content Include="UserControls\DeepLink\DeepLinking.ascx" />
+    <Content Include="UserControls\DeepLink\js\deeplinking.js" />
+    <Content Include="UserControls\DeepLink\css\deeplinking.less" />
+    <Content Include="UserControls\EmptyScreens\WelcomeDashboard.ascx" />
+    <Content Include="UserControls\Feed\images\empty_filter.svg" />
+    <Content Include="UserControls\Feed\images\empty_screen_feed.svg" />
+    <Content Include="UserControls\FirstTime\css\images\warning_16.svg" />
+    <Content Include="UserControls\Management\AdminHelperSettings\AdminHelperSettings.ascx" />
+    <Content Include="UserControls\Management\AdminHelperSettings\css\images\cross.svg" />
+    <Content Include="UserControls\Management\AdminHelperSettings\css\images\subtract.svg" />
+    <Content Include="UserControls\Management\AdminHelperSettings\js\adminhelpersettings.js" />
+    <Content Include="UserControls\Management\AuditTrail\img\audit_trail_empty_screen.svg" />
+    <Content Include="UserControls\Management\Backup\js\consumersettings.js" />
+    <Content Include="UserControls\Management\ShareLinkPassword\ShareLinkPassword.ascx" />
+    <Content Include="UserControls\Management\ShareLinkPassword\js\sharelinkpassword.js" />
+    <Content Include="UserControls\Management\ColorThemes\css\img\dark_mode_themes_previews_sprite.png" />
+    <Content Include="UserControls\Management\ColorThemes\css\img\themes_previews_sprite.png" />
+    <Content Include="UserControls\Management\ConfirmActivation\css\images\first_screen_bg.svg" />
+    <Content Include="UserControls\Management\ConfirmInviteActivation\css\images\first_screen_bg.svg" />
+    <Content Include="UserControls\Management\ImpersonateUser\ImpersonateSettings.ascx" />
+    <Content Include="UserControls\Management\ImpersonateUser\ImpersonateUserConfirmationPanel.ascx" />
+    <Content Include="UserControls\Management\ImpersonateUser\js\impersonateuserconfirmationpanel.js" />
+    <Content Include="UserControls\Management\ImpersonateUser\js\impersonatesettings.js" />
+    <Content Include="UserControls\Management\LoginHistory\img\login_history_empty_screen.svg" />
+    <Content Include="UserControls\Management\LoginSettings\js\loginsettings.js" />
+    <Content Include="UserControls\Management\LoginSettings\LoginSettings.ascx" />
+    <Content Include="UserControls\Management\ProfileOperation\css\images\checkmark_exclamatiomark.svg" />
+    <Content Include="UserControls\Management\ProfileOperation\css\images\first_screen_bg.svg" />
+    <Content Include="UserControls\Management\ProfileOperation\css\images\logo.svg" />
+    <Content Include="UserControls\Management\ProfileOperation\js\profileoperation.js" />
+    <Content Include="UserControls\Management\ProfileOperation\ProfileOperation.ascx" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\add_users_info.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\icon_storage.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\info.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\tariffsaas.less" />
+    <Content Include="UserControls\Management\ProfileOperation\css\profileoperation.less" />
+    <Content Include="UserControls\Management\AdminHelperSettings\css\adminhelpersettings.less" />
+    <Content Include="UserControls\Statistics\ProductQuotes\js\jq_quota_extensions.js" />
+    <Content Include="UserControls\Statistics\ProductQuotes\js\navigatorhandler.js" />
+    <Content Include="UserControls\Statistics\ProductQuotes\js\user_quota_controller.js" />
+    <Content Include="UserControls\Statistics\ProductQuotes\Templates\PeopleTemplates.html" />
+    <Content Include="UserControls\Statistics\ProductQuotes\img\corner-dark.png" />
+    <Content Include="UserControls\Users\UserConnections\css\connections.less" />
+    <Content Include="UserControls\Management\LoginSettings\css\loginsettings.less" />
+    <Content Include="UserControls\Management\SmsControls\css\smsvalidationsettings.less" />
+    <Content Include="UserControls\Management\ShareLinkPassword\css\sharelinkpassword.less" />
+    <Content Include="UserControls\Management\StorageSettings\css\dark-storagesettings.less" />
+    <Content Include="UserControls\Management\TariffSettings\css\dark-tariff.less" />
+    <Content Include="UserControls\Management\TariffSettings\css\dark-tariffcustom.less" />
+    <Content Include="UserControls\Management\TariffSettings\css\dark-tariffhistory.less" />
+    <Content Include="UserControls\Management\TariffSettings\css\dark-tariffsaas.less" />
+    <Content Include="UserControls\Users\UserConnections\css\dark-connections.less" />
+    <Content Include="UserControls\Users\UserProfile\css\dark-profileeditcontrol_style.less" />
+    <Content Include="UserControls\Users\UserProfile\css\dark-userprofilecontrol_style.less" />
+    <Content Include="UserControls\Users\UserSubscriptions\css\dark-subscriptions.less" />
+    <Content Include="UserControls\Users\UserProfile\css\dark-loadphoto_style.less" />
+    <Content Include="UserControls\Management\ImpersonateUser\css\impersonatesettings.less" />
+    <Content Include="UserControls\Management\ImpersonateUser\css\impersonateuserconfirmationpanel.less" />
+    <Content Include="UserControls\Statistics\ProductQuotes\css\dark_productquotes_style.less" />
+    <Content Include="UserControls\Common\HelpCenter\css\dark-help-center.less" />
+    <Content Include="skins\default\jstree\themes\default\dark-style.less" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="js\asc\plugins\jquery-contactadvansedselector.js" />
@@ -1873,8 +2257,8 @@
     <Content Include="skins\deep-blue\img\edit_pencil.png" />
     <Content Include="skins\deep-blue\img\mainmenu_upload.png" />
     <Content Include="skins\deep-blue\img\unfollow.png" />
-    <Content Include="skins\default\codestyle.css" />
-    <Content Include="skins\default\groupselector.css" />
+    <Content Include="skins\default\codestyle.less" />
+    <Content Include="skins\default\groupselector.less" />
     <Content Include="skins\default\imagescss\arrow-right-blue.png" />
     <Content Include="skins\default\imagescss\arrow-right.png" />
     <Content Include="skins\default\imagescss\asp_28.png" />
@@ -1927,7 +2311,6 @@
     <Content Include="skins\default\imagescss\refresh.png" />
     <Content Include="skins\default\imagescss\remove_16.png" />
     <Content Include="skins\default\imagescss\search_16.png" />
-    <Content Include="skins\default\imagescss\security.png" />
     <Content Include="skins\default\imagescss\settings.png" />
     <Content Include="skins\default\imagescss\sql_28.png" />
     <Content Include="skins\default\imagescss\success12.png" />
@@ -1936,11 +2319,9 @@
     <Content Include="skins\default\imagescss\trash.png" />
     <Content Include="skins\default\imagescss\unfollow.png" />
     <Content Include="skins\default\imagescss\up.png" />
-    <Content Include="skins\default\imagescss\upload.png" />
     <Content Include="skins\default\imagescss\vb_28.png" />
     <Content Include="skins\default\imagescss\video_icon.png" />
     <Content Include="skins\default\imagescss\xml_28.png" />
-    <Content Include="skins\default\images\empty_screen_filter.png" />
     <Content Include="skins\default\jquery-advansedselector.less" />
     <Content Include="skins\default\toastr.less" />
     <Content Include="skins\pure-orange\img\btn-onoff.png" />
@@ -1963,7 +2344,6 @@
     <Content Include="UserControls\Common\Attachments\css\imagescss\upload.png" />
     <Content Include="UserControls\Common\Attachments\css\attachments.less" />
     <Content Include="UserControls\Common\Attachments\Attachments.ascx" />
-    <Content Include="UserControls\Common\Attachments\images\documents-logo.png" />
     <Content Include="UserControls\Common\Attachments\js\attachments.js" />
     <Content Include="UserControls\Common\AuthorizeDocs\AuthorizeDocs.ascx" />
     <Content Include="UserControls\Common\AuthorizeDocs\css\authorizedocs.less" />
@@ -1978,9 +2358,10 @@
     <Content Include="UserControls\Common\LoaderPage\LoaderPage.ascx" />
     <Content Include="UserControls\Common\PersonalFooter\js\personalfooter.js" />
     <Content Include="UserControls\Common\PersonalFooter\PersonalFooter.ascx" />
-    <Content Include="UserControls\Common\PollForm\css\style.css" />
+    <Content Include="UserControls\Common\PersonalFooter\css\dark-personalfooter.less" />
+    <Content Include="UserControls\Common\PollForm\css\style.less" />
     <Content Include="UserControls\Common\PollForm\js\pollform.js" />
-    <Content Include="UserControls\Common\PreparationPortal\css\preparationportal.css" />
+    <Content Include="UserControls\Common\PreparationPortal\css\preparationportal.less" />
     <Content Include="UserControls\Common\PreparationPortal\js\preparationportal.js" />
     <Content Include="UserControls\Common\PreparationPortal\PreparationPortal.ascx" />
     <Content Include="UserControls\Common\SmallChat\css\images\icon_ch-size.png" />
@@ -1989,20 +2370,25 @@
     <Content Include="UserControls\Common\SmallChat\css\images\main_icons_sprite.png" />
     <Content Include="UserControls\Common\SmallChat\css\images\status_sprite.png" />
     <Content Include="UserControls\Common\SmallChat\css\jquery.cssemoticons.css" />
-    <Content Include="UserControls\Common\SmallChat\css\smallchat.css" />
+    <Content Include="UserControls\Common\SharingSettings\css\dark-bright-blue\sharingsettingsparams.less" />
+    <Content Include="UserControls\Common\SharingSettings\css\dark-dark-green\sharingsettingsparams.less" />
+    <Content Include="UserControls\Common\SharingSettings\css\dark-deep-blue\sharingsettingsparams.less" />
+    <Content Include="UserControls\Common\SharingSettings\css\dark-default\sharingsettingsparams.less" />
+    <Content Include="UserControls\Common\SharingSettings\css\dark-pure-orange\sharingsettingsparams.less" />
+    <Content Include="UserControls\Common\SharingSettings\css\dark-wild-pink\sharingsettingsparams.less" />
+    <Content Include="UserControls\Common\Search\css\dark-searchresults.less" />
+    <Content Include="UserControls\Common\SmallChat\css\dark-smallchat.less" />
+    <Content Include="UserControls\Common\SmallChat\css\smallchat.less" />
     <Content Include="UserControls\Common\SmallChat\css\sounds\chat.mp3" />
     <Content Include="UserControls\Common\SmallChat\css\sounds\chat.wav" />
     <Content Include="UserControls\Common\SmallChat\js\smallchat.js" />
     <Content Include="UserControls\Common\SmallChat\SmallChat.ascx" />
-    <Content Include="UserControls\Common\ThirdPartyScripts\GoogleAnalyticsScriptOpenSource.ascx" />
-    <Content Include="UserControls\Common\ThirdPartyScripts\GoogleAnalyticsScriptPersonal.ascx" />
-    <Content Include="UserControls\Common\ThirdPartyScripts\GoogleAnalyticsScript.ascx" />
-    <Content Include="UserControls\Common\ThirdPartyScripts\GoogleTagManagerScript.ascx" />
     <Content Include="UserControls\Common\TopStudioPanel\VoipPhoneControl.ascx" />
     <Content Include="UserControls\Common\UserForum\UserForum.ascx" />
     <Content Include="UserControls\Common\VideoGuides\js\videoguides.js" />
     <Content Include="UserControls\Common\VideoGuides\VideoGuides.ascx" />
-    <Content Include="UserControls\Common\ViewSwitcher\css\viewswitcher.css" />
+    <Content Include="UserControls\Common\ViewSwitcher\css\dark-viewswitcher.less" />
+    <Content Include="UserControls\Common\ViewSwitcher\css\viewswitcher.less" />
     <Content Include="UserControls\Common\ViewSwitcher\js\viewswitcher.js" />
     <Content Include="UserControls\EmptyScreens\CommunityDashboardEmptyScreen.ascx" />
     <Content Include="UserControls\EmptyScreens\FilesDashboardEmptyScreen.ascx" />
@@ -2014,7 +2400,6 @@
     <Content Include="UserControls\FirstTime\css\images\collapse_down_dark.png" />
     <Content Include="UserControls\FirstTime\css\images\collapse_right_light.png" />
     <Content Include="UserControls\FirstTime\css\images\round.png" />
-    <Content Include="UserControls\FirstTime\css\images\warning_16.png" />
     <Content Include="StartScriptsStyles.aspx" />
     <Content Include="UserControls\Management\AuditTrail\AuditTrail.ascx" />
     <Content Include="UserControls\Management\AuditTrail\css\audittrail.css">
@@ -2023,10 +2408,16 @@
     <Content Include="UserControls\Management\AuditTrail\css\audittrail.min.css">
       <DependentUpon>audittrail.less</DependentUpon>
     </Content>
-    <Content Include="UserControls\Management\AuditTrail\img\audit_trail_empty_screen.jpg" />
     <Content Include="UserControls\Management\AuditTrail\js\audittrail.js" />
     <Content Include="UserControls\Management\AuthorizationKeys\AuthorizationKeys.ascx" />
-    <Content Include="UserControls\Management\AuthorizationKeys\css\authorizationkeys.css" />
+    <Content Include="UserControls\DeepLink\css\dark-deeplinking.less" />
+    <Content Include="UserControls\Feed\css\dark-feed.less" />
+    <Content Include="UserControls\FirstTime\css\dark-emailandpassword.less" />
+    <Content Include="UserControls\FirstTime\css\dark-stepcontainer.less" />
+    <Content Include="UserControls\Management\AccessRights\css\dark-accessrights.less" />
+    <Content Include="UserControls\Management\AdminHelperSettings\css\dark-adminhelpersettings.less" />
+    <Content Include="UserControls\Management\AuthorizationKeys\css\dark-authorizationkeys.less" />
+    <Content Include="UserControls\Management\AuthorizationKeys\css\authorizationkeys.less" />
     <Content Include="UserControls\Management\AuthorizationKeys\img\bitly.svg" />
     <Content Include="UserControls\Management\AuthorizationKeys\img\box.svg" />
     <Content Include="UserControls\Management\AuthorizationKeys\img\clickatell.svg" />
@@ -2054,14 +2445,19 @@
     <Content Include="UserControls\Management\Backup\Backup.ascx" />
     <Content Include="UserControls\Management\Backup\css\backup.less" />
     <Content Include="UserControls\Management\Backup\js\backup.js" />
-    <Content Include="UserControls\Management\ColorThemes\css\img\themes_previews_sprite.png" />
     <Content Include="UserControls\Management\CookieSettings\js\cookiesettings.js" />
     <Content Include="UserControls\Management\CookieSettings\CookieSettings.ascx" />
     <Content Include="UserControls\Management\CustomNavigation\CustomNavigation.ascx" />
     <Content Include="UserControls\Management\CustomNavigation\js\customnavigation.js" />
+    <Content Include="UserControls\Management\InvitePanel\css\img\exclamation.png" />
     <Content Include="UserControls\Management\PricingPageSettings\PricingPageSettings.ascx" />
     <Content Include="UserControls\Management\PricingPageSettings\js\pricingpagesettings.js" />
-    <Content Include="UserControls\Management\MailService\css\mailservice.css" />
+    <Content Include="UserControls\Management\ConfirmActivation\css\dark-confirmactivation.less" />
+    <Content Include="UserControls\Management\ConfirmInviteActivation\css\dark-confirm_invite_activation.less" />
+    <Content Include="UserControls\Management\LdapSettings\css\Default\dark-ldapsettings.less" />
+    <Content Include="UserControls\Management\LoginHistory\css\dark-loginhistory.less" />
+    <Content Include="UserControls\Management\InvitePanel\css\dark-invitepanel.less" />
+    <Content Include="UserControls\Management\MailService\css\mailservice.less" />
     <Content Include="UserControls\Management\MailService\MailService.ascx" />
     <Content Include="UserControls\Management\MailService\js\mailservice.js" />
     <Content Include="UserControls\Management\DnsSettings\DnsSettings.ascx" />
@@ -2074,11 +2470,23 @@
     <Content Include="UserControls\Management\StorageSettings\css\storagesettings.less" />
     <Content Include="UserControls\Management\StorageSettings\js\storagesettings.js" />
     <Content Include="UserControls\Management\StorageSettings\StorageSettings.ascx" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\arrow.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\branding.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\cloud.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\history.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\infinity.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\ldap.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\mail.svg" />
     <Content Include="UserControls\Management\TariffSettings\css\img\mobile.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\people.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\plus.svg" />
     <Content Include="UserControls\Management\TariffSettings\css\img\private.svg" />
     <Content Include="UserControls\Management\TariffSettings\css\img\pro.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\puzzle.svg" />
+    <Content Include="UserControls\Management\TariffSettings\css\img\storage.svg" />
     <Content Include="UserControls\Management\TariffSettings\css\img\support.svg" />
     <Content Include="UserControls\Management\TariffSettings\css\img\update.svg" />
+    <Content Include="UserControls\Management\TariffSettings\js\tariffsaas.js" />
     <Content Include="UserControls\Management\TariffSettings\TariffCustom.ascx" />
     <Content Include="UserControls\Management\TariffSettings\js\tariffcustom.js" />
     <Content Include="UserControls\Management\TariffSettings\js\tariffdesktop.js" />
@@ -2089,6 +2497,7 @@
     <Content Include="UserControls\Management\TariffSettings\css\img\modules.png" />
     <Content Include="UserControls\Management\TariffSettings\js\tariffstandalone.js" />
     <Content Include="UserControls\Management\TariffSettings\TariffStandalone.ascx" />
+    <Content Include="UserControls\Management\TariffSettings\TariffSaas.ascx" />
     <Content Include="UserControls\Management\TfaControls\js\resetapp.js" />
     <Content Include="UserControls\Management\TfaControls\ResetAppDialog.ascx" />
     <Content Include="UserControls\Management\TfaControls\js\showbackup.js" />
@@ -2133,16 +2542,29 @@
     <Content Include="Masters\BaseTemplate.master" />
     <Content Include="Scripts\jquery-3.3.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.3.1.min.map" />
-    <None Include="skins\default\whitelabel.less" />
+    <Content Include="skins\default\userselector.less" />
+    <Content Include="skins\dark-pure-orange\dark-params.less" />
+    <Content Include="skins\dark-pure-orange\main.less" />
+    <Content Include="skins\dark-dark-green\main.less" />
+    <Content Include="skins\dark-dark-green\dark-params.less" />
+    <Content Include="skins\dark-deep-blue\main.less" />
+    <Content Include="skins\dark-bright-blue\main.less" />
+    <Content Include="skins\dark-wild-pink\main.less" />
+    <Content Include="skins\dark-bright-blue\dark-params.less" />
+    <Content Include="skins\dark-deep-blue\dark-params.less" />
+    <Content Include="skins\dark-wild-pink\dark-params.less" />
+    <Content Include="skins\dark-default\dark-params.less" />
+    <Content Include="skins\dark-default\main.less" />
+    <Content Include="skins\default\whitelabel.less" />
     <Content Include="UserControls\Management\WhiteLabel\js\whitelabel.js" />
     <Content Include="UserControls\Management\ColorThemes\ColorThemes.ascx" />
-    <Content Include="UserControls\Management\ColorThemes\css\colorthemes.css" />
+    <Content Include="UserControls\Management\ColorThemes\css\colorthemes.less" />
     <Content Include="UserControls\Management\ColorThemes\js\colorthemes.js" />
     <Content Include="UserControls\Management\ConfirmActivation\js\confirmactivation.js" />
-    <Content Include="UserControls\Management\FullTextSearch\css\fulltextsearch.css" />
+    <Content Include="UserControls\Management\FullTextSearch\css\fulltextsearch.less" />
     <Content Include="UserControls\Management\FullTextSearch\js\fulltextsearch.js" />
     <Content Include="UserControls\Management\FullTextSearch\FullTextSearch.ascx" />
-    <Content Include="UserControls\Management\DocService\css\docservice.css" />
+    <Content Include="UserControls\Management\DocService\css\docservice.less" />
     <Content Include="UserControls\Management\DocService\DocService.ascx" />
     <Content Include="UserControls\Management\DocService\js\docservice.js" />
     <Content Include="UserControls\Management\GreetingSettings\GreetingLogoSettings.ascx" />
@@ -2160,7 +2582,7 @@
     <Content Include="UserControls\Management\DeactivatePortal\js\deactivateportal.js" />
     <Content Include="UserControls\Management\IpSecurity\IpSecurity.ascx" />
     <Content Include="UserControls\Management\IpSecurity\js\ipsecurity.js" />
-    <Content Include="UserControls\Management\LdapSettings\css\Default\ldapsettings.css" />
+    <Content Include="UserControls\Management\LdapSettings\css\Default\ldapsettings.less" />
     <Content Include="UserControls\Management\LdapSettings\js\ldapsettings.js" />
     <Content Include="UserControls\Management\LdapSettings\LdapSettings.ascx" />
     <Content Include="UserControls\Management\LoginHistory\css\loginhistory.css">
@@ -2169,7 +2591,6 @@
     <Content Include="UserControls\Management\LoginHistory\css\loginhistory.min.css">
       <DependentUpon>loginhistory.less</DependentUpon>
     </Content>
-    <Content Include="UserControls\Management\LoginHistory\img\login_history_empty_screen.jpg" />
     <Content Include="UserControls\Management\LoginHistory\js\loginhistory.js" />
     <Content Include="UserControls\Management\LoginHistory\LoginHistory.ascx" />
     <Content Include="UserControls\Management\Monitoring\js\loghelper.js" />
@@ -2183,15 +2604,16 @@
     <Content Include="UserControls\Management\PromoCode\PromoCode.ascx" />
     <Content Include="UserControls\Management\PromoCode\promocode.js" />
     <Content Include="UserControls\Management\Restore\js\restore.js" />
-    <Content Include="UserControls\Management\SingleSignOnSettings\css\singlesignonsettings.css" />
+    <Content Include="UserControls\Management\Monitoring\css\dark-monitoring.less" />
+    <Content Include="UserControls\Management\PasswordSettings\css\dark-passwordsettings.less" />
+    <Content Include="UserControls\Management\ProfileOperation\css\dark-profileoperation.less" />
+    <Content Include="UserControls\Management\SingleSignOnSettings\css\singlesignonsettings.less" />
     <Content Include="UserControls\Management\SingleSignOnSettings\js\singlesignonsettings.js" />
     <Content Include="UserControls\Management\SingleSignOnSettings\SingleSignOnSettings.ascx" />
     <Content Include="UserControls\Management\Restore\Restore.ascx" />
-    <Content Include="UserControls\Management\SmtpSettings\css\smtpsettings.css" />
+    <Content Include="UserControls\Management\SmtpSettings\css\smtpsettings.less" />
     <Content Include="UserControls\Management\SmtpSettings\js\smtpsettings.js" />
     <Content Include="UserControls\Management\SmtpSettings\SmtpSettings.ascx" />
-    <Content Include="UserControls\Management\TariffSettings\css\img\add_users_info.png" />
-    <Content Include="UserControls\Management\TariffSettings\css\img\icon_storage.png" />
     <Content Include="UserControls\Management\TariffSettings\css\img\line_helper.png" />
     <Content Include="UserControls\Management\TariffSettings\css\rub.eot" />
     <Content Include="UserControls\Management\TariffSettings\css\rub.svg" />
@@ -2199,20 +2621,17 @@
     <Content Include="UserControls\Management\TariffSettings\css\rub.woff" />
     <Content Include="UserControls\Management\TariffSettings\css\tariffhistory.less" />
     <Content Include="UserControls\Management\TariffSettings\css\tarifflimitexceed.less" />
-    <Content Include="UserControls\Management\TariffSettings\css\tariffusage.less" />
     <Content Include="UserControls\Management\TariffSettings\js\tarifflimitexceed.js" />
-    <Content Include="UserControls\Management\TariffSettings\js\tariffusage.js" />
     <Content Include="UserControls\Management\TariffSettings\TariffLimitExceed.ascx" />
     <Content Include="UserControls\Management\TariffSettings\TariffHistory.ascx" />
-    <Content Include="UserControls\Management\TariffSettings\TariffUsage.ascx" />
-    <Content Include="UserControls\Statistics\PortalAnalytics\PortalAnalytics.ascx" />
-    <Content Include="UserControls\Statistics\PortalAnalytics\js\portalanalytics.js" />
     <Content Include="UserControls\Statistics\ProductQuotes\img\disabled.png" />
     <Content Include="UserControls\Statistics\ProductQuotes\img\corner.png" />
     <Content Include="UserControls\Statistics\ProductQuotes\js\product_quotes.js" />
     <Content Include="UserControls\Users\TipsSettings\js\tipssettings.js" />
     <Content Include="UserControls\Users\TipsSettings\TipsSettings.ascx" />
-    <Content Include="UserControls\Users\UserProfile\css\images\birthday.png" />
+    <Content Include="UserControls\Users\UserConnections\js\connections_manager.js" />
+    <Content Include="UserControls\Users\UserConnections\UserConnections.ascx" />
+    <Content Include="UserControls\Users\UserProfile\css\images\birthday.svg" />
     <Content Include="UserControls\Users\UserProfile\css\images\btn-edit.png" />
     <Content Include="UserControls\Users\UserProfile\css\images\check_tick.svg" />
     <Content Include="UserControls\Users\UserProfile\css\images\facebook.svg" />
@@ -2225,7 +2644,7 @@
     <Content Include="UserControls\Users\UserProfile\css\images\social-icons-grey.png" />
     <Content Include="UserControls\Users\UserProfile\css\images\social-icons-small.png" />
     <Content Include="UserControls\Users\UserProfile\css\images\twitter.svg" />
-    <Content Include="UserControls\Users\UserProfile\css\images\user-blocked.png" />
+    <Content Include="UserControls\Users\UserProfile\css\images\user-blocked.svg" />
     <Content Include="UserControls\Users\UserProfile\css\images\user-waiting.png" />
     <Content Include="UserControls\Users\UserProfile\css\accountlink_style.less" />
     <Content Include="UserControls\Users\UserProfile\css\images\vk.svg" />
@@ -2258,7 +2677,7 @@
     <Content Include="UserControls\Management\TariffSettings\css\tariff.less" />
     <Content Include="skins\default\wizard.less" />
     <Content Include="UserControls\Common\Comments\css\codehighlighter\vs.less" />
-    <Content Include="UserControls\Common\ThirdPartyBanner\css\thirdpartybanner.css" />
+    <Content Include="UserControls\Users\UserSubscriptions\css\img\hmenu-selected-dark.png" />
     <Content Include="Warmup.aspx" />
     <Content Include="web.autofac.config">
       <SubType>Designer</SubType>
@@ -2267,7 +2686,6 @@
     <Content Include="UserControls\Common\AuthorizeDocs\css\slick.less" />
     <Content Include="UserControls\Common\MigrationPortal\css\migrationportal.less" />
     <Content Include="UserControls\Users\UserProfile\css\jquery.jcrop.less" />
-    <Content Include="UserControls\Statistics\PortalAnalytics\css\portalanalytics.less" />
     <Content Include="UserControls\Management\TfaControls\css\confirmtfa.less" />
     <Content Include="UserControls\Management\TfaControls\css\showbackup.less" />
     <Content Include="web.nlog.config">
@@ -2288,79 +2706,940 @@
     <Content Include="Management.aspx" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="PublicResources\AuditResource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.el.resx" Condition="$(Cultures.Contains('el'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PublicResources\AuditResource.resx">
+      <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>AuditResource.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-      <CustomToolNamespace>Resources</CustomToolNamespace>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.sl.resx" Condition="$(Cultures.Contains('sl'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="PublicResources\AuditResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="PublicResources\ChatResource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PublicResources\ChatResource.resx">
+      <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>ChatResource.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Resources</CustomToolNamespace>
-      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.sl.resx" Condition="$(Cultures.Contains('sl'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="PublicResources\ChatResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PublicResources\CustomModeResource.resx">
+      <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>CustomModeResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="PublicResources\CustomModeResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="PublicResources\PersonalResource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.el.resx" Condition="$(Cultures.Contains('el'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.ga.resx" Condition="$(Cultures.Contains('ga'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.id.resx" Condition="$(Cultures.Contains('id'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>PersonalResource.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.sl.resx" Condition="$(Cultures.Contains('sl'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\PersonalResource.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>PersonalResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.el.resx" Condition="$(Cultures.Contains('el'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PublicResources\StudioCountriesResource.resx">
+      <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>StudioCountriesResource.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Resources</CustomToolNamespace>
-      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="PublicResources\StudioCountriesResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="PublicResources\FeedResource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.el.resx" Condition="$(Cultures.Contains('el'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.ko.resx" Condition="$(Cultures.Contains('ko'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PublicResources\FeedResource.resx">
+      <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>FeedResource.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-      <CustomToolNamespace>Resources</CustomToolNamespace>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.sl.resx" Condition="$(Cultures.Contains('sl'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="PublicResources\FeedResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PublicResources\MonitoringResource.resx">
+      <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>MonitoringResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.sl.resx" Condition="$(Cultures.Contains('sl'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\MonitoringResource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="PublicResources\MonitoringResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MonitoringResource.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="PublicResources\Resource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.el.resx" Condition="$(Cultures.Contains('el'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.ko.resx" Condition="$(Cultures.Contains('ko'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.pt.resx" Condition="$(Cultures.Contains('pt'))">
+      <DependentUpon>Resource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PublicResources\Resource.resx">
       <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <CustomToolNamespace>Resources</CustomToolNamespace>
       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.sl.resx" Condition="$(Cultures.Contains('sl'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="PublicResources\Resource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="PublicResources\ResourceJS.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.el.resx" Condition="$(Cultures.Contains('el'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PublicResources\ResourceJS.resx">
+      <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>ResourceJS.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.sl.resx" Condition="$(Cultures.Contains('sl'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="PublicResources\ResourceJS.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.el.resx" Condition="$(Cultures.Contains('el'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.ko.resx" Condition="$(Cultures.Contains('ko'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.pt.resx" Condition="$(Cultures.Contains('pt'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PublicResources\UserControlsCommonResource.resx">
       <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>UserControlsCommonResource.designer.cs</LastGenOutput>
-      <CustomToolNamespace>Resources</CustomToolNamespace>
+      <LastGenOutput>UserControlsCommonResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.sl.resx" Condition="$(Cultures.Contains('sl'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="PublicResources\UserControlsCommonResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Core\Notify\WebPatternResource.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>WebPatternResource.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.el.resx" Condition="$(Cultures.Contains('el'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.resx">
       <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>WebstudioNotifyPatternResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="Core\Notify\WebstudioNotifyPatternResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Core\Notify\webstudio_patterns.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.el.resx" Condition="$(Cultures.Contains('el'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.ko.resx" Condition="$(Cultures.Contains('ko'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.pt.resx" Condition="$(Cultures.Contains('pt'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Core\Users\NamingPeopleResource.resx">
+      <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>NamingPeopleResource.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.sl.resx" Condition="$(Cultures.Contains('sl'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="Core\Users\NamingPeopleResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.az-Latn-AZ.resx" Condition="$(Cultures.Contains('az-Latn-AZ'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.bg.resx" Condition="$(Cultures.Contains('bg'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.cs.resx" Condition="$(Cultures.Contains('cs'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.de.resx" Condition="$(Cultures.Contains('de'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.es.resx" Condition="$(Cultures.Contains('es'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.fi.resx" Condition="$(Cultures.Contains('fi'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.fr.resx" Condition="$(Cultures.Contains('fr'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.it.resx" Condition="$(Cultures.Contains('it'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.ja.resx" Condition="$(Cultures.Contains('ja'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.lv.resx" Condition="$(Cultures.Contains('lv'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.nl.resx" Condition="$(Cultures.Contains('nl'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.pl.resx" Condition="$(Cultures.Contains('pl'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.pt-BR.resx" Condition="$(Cultures.Contains('pt-BR'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PublicResources\WhiteLabelResource.resx">
+      <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>WhiteLabelResource.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.ru.resx" Condition="$(Cultures.Contains('ru'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.sk.resx" Condition="$(Cultures.Contains('sk'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.tr.resx" Condition="$(Cultures.Contains('tr'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.uk.resx" Condition="$(Cultures.Contains('uk'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.vi.resx" Condition="$(Cultures.Contains('vi'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.zh-CN.resx" Condition="$(Cultures.Contains('zh-CN'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="PublicResources\WhiteLabelResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </Compile>
     <None Include="Core\Users\PeopleNames.xml" />
     <Content Include="login.ashx" />
     <Content Include="robots.txt" />
@@ -2371,7 +3650,7 @@
     <Content Include="skins\default\jquery-advansedfilter.css" />
     <Content Include="UserControls\Common\Search\SearchResults.ascx" />
     <Content Include="UserControls\Common\Search\js\searchresults.js" />
-    <Content Include="UserControls\Common\Search\css\searchResults.less" />
+    <Content Include="UserControls\Common\Search\css\searchresults.less" />
     <Content Include="UserControls\Common\SharingSettings\js\sharingsettings.js" />
     <Content Include="UserControls\Common\SharingSettings\SharingSettings.ascx" />
     <Content Include="UserControls\Management\AdminSettings\ConfirmPortalOwner.ascx" />
@@ -2438,18 +3717,13 @@
     <Content Include="skins\default\imagescss\button-cut.png" />
     <Content Include="skins\default\imagescss\cut-scissors.png" />
     <Content Include="skins\default\imagescss\icons_nav_panel.png" />
-    <Content Include="skins\default\imagescss\welcometo_logo.png" />
     <Content Include="skins\default\imagescss\toast_icon01.png" />
     <Content Include="skins\default\imagescss\toast_icon02.png" />
     <Content Include="skins\default\imagescss\toast_icon03.png" />
     <Content Include="skins\default\imagescss\flags.gif" />
     <Content Include="skins\default\imagescss\trash_16.png" />
     <Content Include="skins\default\images\blank.gif" />
-    <Content Include="skins\default\images\common_search_icon.png" />
     <Content Include="skins\default\images\default_greeting_logo.jpg" />
-    <Content Include="skins\default\images\lastadded_widget.png" />
-    <Content Include="skins\default\images\mail.png" />
-    <Content Include="skins\default\images\mail_user.png" />
     <Content Include="skins\default\images\people_search_icon.png" />
     <Content Include="skins\default\images\profile.gif" />
     <Content Include="skins\default\images\smile1.gif" />
@@ -2477,13 +3751,10 @@
     <Content Include="skins\default\images\status_offline.png" />
     <Content Include="skins\default\images\status_online.png" />
     <Content Include="skins\default\images\talk.png" />
-    <Content Include="skins\default\images\to_left.png" />
-    <Content Include="skins\default\images\to_right.png" />
     <Content Include="skins\default\images\recent_activity.png" />
     <Content Include="skins\default\images\group_12.png" />
     <Content Include="skins\default\images\user_12.png" />
     <Content Include="skins\default\images\trash_12.png" />
-    <Content Include="skins\default\images\logo\logo_personal.png" />
     <Content Include="skins\default\images\dropdown-corner-top.gif" />
     <Content Include="Search.aspx" />
     <Content Include="ServerError.aspx" />
@@ -2523,7 +3794,7 @@
     <Content Include="skins\default\links.less" />
     <Content Include="skins\default\lists.less" />
     <Content Include="skins\default\sidepanel.less" />
-    <Content Include="skins\default\phonecontroller.css" />
+    <Content Include="skins\default\phonecontroller.less" />
     <Content Include="UserControls\Common\PersonalFooter\css\personalfooter.less" />
     <Content Include="UserControls\Users\UserProfile\css\userlanguages.less" />
     <Content Include="UserControls\Management\AuditTrail\css\audittrail.less" />
@@ -2536,18 +3807,262 @@
     <Content Include="UserControls\Management\Restore\css\restore.less" />
     <Content Include="skins\default\voip.phone.less" />
     <Content Include="UserControls\Management\ConfirmActivation\css\confirmactivation.less" />
-    <Content Include="UserControls\Common\AuthorizeDocs\js\reviews.json" />
     <Content Include="UserControls\Management\PortalAccessSettings\css\portalaccess.less" />
     <Content Include="skins\default\tl-combobox.less" />
     <Content Include="UserControls\Users\TipsSettings\css\tipssettings.less" />
+    <EmbeddedResource Include="PublicResources\Resource.ar-AE.resx" Condition="$(Cultures.Contains('ar-AE'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.da.resx" Condition="$(Cultures.Contains('da'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.fa.resx" Condition="$(Cultures.Contains('fa'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.ga.resx" Condition="$(Cultures.Contains('ga'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.he.resx" Condition="$(Cultures.Contains('he'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.hr.resx" Condition="$(Cultures.Contains('hr'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.id.resx" Condition="$(Cultures.Contains('id'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.ka.resx" Condition="$(Cultures.Contains('ka'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.mn.resx" Condition="$(Cultures.Contains('mn'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.nb-NO.resx" Condition="$(Cultures.Contains('nb-NO'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\Resource.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.ar-AE.resx" Condition="$(Cultures.Contains('ar-AE'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.fa.resx" Condition="$(Cultures.Contains('fa'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.ga.resx" Condition="$(Cultures.Contains('ga'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.he.resx" Condition="$(Cultures.Contains('he'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.hr.resx" Condition="$(Cultures.Contains('hr'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.id.resx" Condition="$(Cultures.Contains('id'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.ka.resx" Condition="$(Cultures.Contains('ka'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.mn.resx" Condition="$(Cultures.Contains('mn'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.nb-NO.resx" Condition="$(Cultures.Contains('nb-NO'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\UserControlsCommonResource.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.ar-AE.resx" Condition="$(Cultures.Contains('ar-AE'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.fa.resx" Condition="$(Cultures.Contains('fa'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.ga.resx" Condition="$(Cultures.Contains('ga'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.id.resx" Condition="$(Cultures.Contains('id'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\FeedResource.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>FeedResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.ga.resx" Condition="$(Cultures.Contains('ga'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.hr.resx" Condition="$(Cultures.Contains('hr'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.id.resx" Condition="$(Cultures.Contains('id'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ResourceJS.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>ResourceJS.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.ga.resx" Condition="$(Cultures.Contains('ga'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.id.resx" Condition="$(Cultures.Contains('id'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\AuditResource.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.ga.resx" Condition="$(Cultures.Contains('ga'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.id.resx" Condition="$(Cultures.Contains('id'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\ChatResource.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>ChatResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.ga.resx" Condition="$(Cultures.Contains('ga'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.id.resx" Condition="$(Cultures.Contains('id'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\StudioCountriesResource.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>StudioCountriesResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.id.resx" Condition="$(Cultures.Contains('id'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\WhiteLabelResource.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>WhiteLabelResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.ga.resx" Condition="$(Cultures.Contains('ga'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.id.resx" Condition="$(Cultures.Contains('id'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PublicResources\CustomModeResource.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.ga.resx" Condition="$(Cultures.Contains('ga'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Notify\WebstudioNotifyPatternResource.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.ar-AE.resx" Condition="$(Cultures.Contains('ar-AE'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.be.resx" Condition="$(Cultures.Contains('be'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.bs-BA.resx" Condition="$(Cultures.Contains('bs-BA'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.ca.resx" Condition="$(Cultures.Contains('ca'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.da.resx" Condition="$(Cultures.Contains('da'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.fa.resx" Condition="$(Cultures.Contains('fa'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.ga.resx" Condition="$(Cultures.Contains('ga'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.he.resx" Condition="$(Cultures.Contains('he'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.hr.resx" Condition="$(Cultures.Contains('hr'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.hu.resx" Condition="$(Cultures.Contains('hu'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.id.resx" Condition="$(Cultures.Contains('id'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.kk.resx" Condition="$(Cultures.Contains('kk'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.lt.resx" Condition="$(Cultures.Contains('lt'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.mn.resx" Condition="$(Cultures.Contains('mn'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.sv.resx" Condition="$(Cultures.Contains('sv'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Users\NamingPeopleResource.zh-TW.resx" Condition="$(Cultures.Contains('zh-TW'))">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="skins\default\filetype_style.css" />
+    <Content Include="skins\default\filetype_style.less" />
     <Content Include="UserControls\Management\AdminMessageSettings\AdminMessageSettings.ascx" />
     <Content Include="UserControls\Management\AdminMessageSettings\js\admmess.js" />
     <Content Include="UserControls\Management\ConfirmInviteActivation\ConfirmInviteActivation.ascx" />
     <Content Include="UserControls\Management\InvitePanel\InvitePanel.ascx" />
-    <Content Include="UserControls\Management\ProfileOperation.ascx" />
     <Content Include="UserControls\Users\AuthCommunications\AuthCommunications.ascx" />
     <Content Include="UserControls\Users\AuthCommunications\js\authcommunications.js" />
     <Content Include="UserControls\Users\ResendInvitesControl\ResendInvitesControl.ascx" />
@@ -2597,7 +4112,6 @@
     <Content Include="js\asc\plugins\jquery.dropdowntoggle.js" />
     <Content Include="js\asc\plugins\jquery.helper.js" />
     <Content Include="js\asc\plugins\jquery.sets.js" />
-    <Content Include="js\asc\plugins\jquery.tlblock.js" />
     <Content Include="js\asc\plugins\jquery.tlcombobox.js" />
     <Content Include="js\asc\plugins\jquery-advansedselector.js" />
     <Content Include="js\asc\plugins\jquery-useradvansedselector.js" />
@@ -2634,8 +4148,6 @@
     <Content Include="UserControls\Feed\FeedList.ascx" />
     <Content Include="UserControls\Feed\images\arrow-right-blue.png" />
     <Content Include="UserControls\Feed\images\arrow-right.png" />
-    <Content Include="UserControls\Feed\images\empty_filter.png" />
-    <Content Include="UserControls\Feed\images\empty_screen_feed.png" />
     <Content Include="UserControls\Feed\images\fade.png" />
     <Content Include="UserControls\Feed\images\loader16.gif" />
     <Content Include="UserControls\Feed\js\feed.filter.js" />
@@ -2661,7 +4173,6 @@
     <Compile Include="Controls\Common\FeedControl.cs" />
     <Compile Include="Core\StudioTrustedDomainSettings.cs" />
     <Compile Include="Core\CollaboratorSettings.cs" />
-    <Compile Include="Core\Users\AffiliateHelper.cs" />
     <Compile Include="Core\Users\MyContact.cs" />
     <Compile Include="Core\Users\ProfileHelper.cs" />
     <Compile Include="Core\StudioDefaultPageSettings.cs" />
@@ -2678,11 +4189,6 @@
     <Compile Include="Masters\MasterResources\MasterTemplateResources.cs" />
     <Compile Include="Masters\MasterResources\MasterUserResources.cs" />
     <Compile Include="Masters\MasterResources\MasterLocalizationResources.cs" />
-    <Compile Include="PublicResources\FeedResource.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>FeedResource.resx</DependentUpon>
-    </Compile>
     <Compile Include="Tariffs.aspx.cs">
       <DependentUpon>Tariffs.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -2739,7 +4245,6 @@
     <Compile Include="UserControls\Feed\NewNavigationPanel.ascx.designer.cs">
       <DependentUpon>NewNavigationPanel.ascx</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\FirstTime\FirstTimeTenantSettings.cs" />
     <Compile Include="UserControls\Management\DefaultPageSettings\DefaultPageSettings.ascx.cs">
       <DependentUpon>DefaultPageSettings.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -2838,14 +4343,13 @@
     <Content Include="skins\default\common.less" />
     <Content Include="skins\default\actionpanel.less" />
     <Content Include="skins\default\buttons.less" />
-    <None Include="skins\default\common_style.wide-screen.less" />
+    <Content Include="skins\default\common_style.wide-screen.less" />
     <Content Include="UserControls\Common\HelpCenter\css\help-center.less" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="App_Themes\default\" />
     <Folder Include="Certificates\" />
-    <Folder Include="Products\" />
     <Folder Include="UserControls\Management\DefaultPageSettings\css\" />
   </ItemGroup>
   <ItemGroup>
@@ -2876,6 +4380,10 @@
     <ProjectReference Include="..\..\..\common\ASC.Notify.Textile\ASC.Notify.Textile.csproj">
       <Project>{659c514b-dd2c-41e3-a40e-4701216b1ea2}</Project>
       <Name>ASC.Notify.Textile</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\module\ASC.AuditTrail\ASC.AuditTrail.csproj">
+      <Project>{2c111161-b7c5-4869-9f52-ea725e64ba40}</Project>
+      <Name>ASC.AuditTrail</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\module\ASC.ElasticSearch\ASC.ElasticSearch.csproj">
       <Project>{ae1a0e06-6cd4-4e1d-8209-22bbbd6d5652}</Project>
@@ -2908,10 +4416,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AjaxPro.2">
-      <Version>2.9.17.2</Version>
+      <Version>21.12.22.2</Version>
     </PackageReference>
     <PackageReference Include="AWSSDK.SecurityToken">
-      <Version>3.3.104.58</Version>
+      <Version>3.7.1.47</Version>
     </PackageReference>
     <PackageReference Include="dotless">
       <Version>1.6.7</Version>
@@ -2922,17 +4430,14 @@
     <PackageReference Include="dotless.Core">
       <Version>1.6.7</Version>
     </PackageReference>
-    <PackageReference Include="DotNetZip">
-      <Version>1.13.7</Version>
-    </PackageReference>
     <PackageReference Include="GoogleAuthenticator">
-      <Version>1.2.1</Version>
+      <Version>2.2.0</Version>
     </PackageReference>
     <PackageReference Include="HtmlAgilityPack">
       <Version>1.6.0.1</Version>
     </PackageReference>
     <PackageReference Include="jQuery">
-      <Version>3.3.1</Version>
+      <Version>3.6.0</Version>
     </PackageReference>
     <PackageReference Include="jQuery.BlockUI">
       <Version>2.70</Version>
@@ -2944,10 +4449,10 @@
       <Version>3.1.13</Version>
     </PackageReference>
     <PackageReference Include="jQuery.UI.Combined">
-      <Version>1.9.0</Version>
+      <Version>1.12.1</Version>
     </PackageReference>
     <PackageReference Include="libphonenumber-csharp">
-      <Version>8.12.1</Version>
+      <Version>8.12.30</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNet.WebApi.WebHost">
       <Version>4.0.20505</Version>
@@ -2956,13 +4461,19 @@
       <Version>2.0.3</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>12.0.3</Version>
+      <Version>13.0.1</Version>
     </PackageReference>
     <PackageReference Include="RedisSessionProvider">
       <Version>10.0.1</Version>
     </PackageReference>
+    <PackageReference Include="SharpZipLib">
+      <Version>1.4.2</Version>
+    </PackageReference>
+    <PackageReference Include="StackExchange.Redis.Extensions.Core">
+      <Version>7.2.1</Version>
+    </PackageReference>
     <PackageReference Include="StackExchange.Redis.Extensions.LegacyConfiguration">
-      <Version>4.0.5</Version>
+      <Version>5.4.0</Version>
     </PackageReference>
   </ItemGroup>
   <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
@@ -2974,7 +4485,7 @@
   </Target>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="BeforeBuild">
-    <Copy SourceFiles="$(NuGetPackageRoot)jquery\3.3.1\Content\Scripts\jquery-3.3.1.min.js" DestinationFiles="$(MSBuildProjectDirectory)\js\third-party\jquery\jquery.core.js" ContinueOnError="true" />
+    <Copy SourceFiles="$(NuGetPackageRoot)jquery\3.6.0\Content\Scripts\jquery-3.6.0.min.js" DestinationFiles="$(MSBuildProjectDirectory)\js\third-party\jquery\jquery.core.js" ContinueOnError="true" />
     <Copy SourceFiles="$(NuGetPackageRoot)jquery.blockui\2.70.0\Content\Scripts\jquery.blockUI.js" DestinationFiles="$(MSBuildProjectDirectory)\js\third-party\jquery\jquery.blockUI.js" ContinueOnError="true" />
     <Copy SourceFiles="$(NuGetPackageRoot)jquery.mousewheel\3.1.13\Content\Scripts\jquery.mousewheel.min.js" DestinationFiles="$(MSBuildProjectDirectory)\js\third-party\jquery\jquery.mousewheel.js" ContinueOnError="true" />
     <Copy SourceFiles="$(NuGetPackageRoot)jquery.fileupload\9.22.0\content\Scripts\jQuery.FileUpload\jquery.fileupload.js" DestinationFiles="$(MSBuildProjectDirectory)\js\uploader\jquery.fileupload.js" ContinueOnError="true" />

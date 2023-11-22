@@ -1,6 +1,6 @@
 ﻿/*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Linq;
+using System.Net.Http;
 using System.Runtime.Caching;
+using System.Threading;
+using System.Threading.Tasks;
 
 using ASC.Common.Logging;
 using ASC.Core.Common.Notify.Telegram;
@@ -27,7 +29,9 @@ using ASC.Notify.Messages;
 using ASC.TelegramService.Core;
 
 using Telegram.Bot;
-using Telegram.Bot.Args;
+using Telegram.Bot.Exceptions;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace ASC.TelegramService
 {
@@ -63,7 +67,8 @@ namespace ASC.TelegramService
                 }
 
                 var chat = await client.GetChatAsync(tgUser.TelegramId);
-                await client.SendTextMessageAsync(chat, msg.Content, Telegram.Bot.Types.Enums.ParseMode.Markdown);
+
+                await client.SendTextMessageAsync(chat, msg.Content, ParseMode.MarkdownV2);
             }
             catch (Exception e)
             {
@@ -76,7 +81,13 @@ namespace ASC.TelegramService
             if (!clients.ContainsKey(tenantId)) return;
 
             var client = clients[tenantId];
-            client.Client.StopReceiving();
+
+            if (client.CancellationTokenSource != null)
+            {
+                client.CancellationTokenSource.Cancel();
+                client.CancellationTokenSource.Dispose();
+                client.CancellationTokenSource = null;
+            }
 
             clients.Remove(tenantId);
         }
@@ -102,8 +113,12 @@ namespace ASC.TelegramService
                         return false;
                     }
 
-
-                    client.Client.StopReceiving();
+                    if (client.CancellationTokenSource != null)
+                    {
+                        client.CancellationTokenSource.Cancel();
+                        client.CancellationTokenSource.Dispose();
+                        client.CancellationTokenSource = null;
+                    }
 
                     BindClient(newClient, tenantId);
 
@@ -129,8 +144,6 @@ namespace ASC.TelegramService
                     }
                 }
 
-                BindClient(client, tenantId);
-
                 clients.Add(tenantId, new TenantTgClient()
                 {
                     Token = token,
@@ -139,6 +152,8 @@ namespace ASC.TelegramService
                     TenantId = tenantId,
                     TokenLifeSpan = tokenLifespan
                 });
+
+                BindClient(client, tenantId);
             }
 
             return true;
@@ -159,21 +174,57 @@ namespace ASC.TelegramService
             return (string)MemoryCache.Default.Get(UserKey(userId, tenantId));
         }
 
-        private async void OnMessage(object sender, MessageEventArgs e, TelegramBotClient client, int tenantId)
-        {
-            if (string.IsNullOrEmpty(e.Message.Text) || e.Message.Text[0] != '/') return;
-            await command.HandleCommand(e.Message, client, tenantId);
-        }
-
         private TelegramBotClient InitClient(string token, string proxy)
         {
-            return string.IsNullOrEmpty(proxy) ? new TelegramBotClient(token) : new TelegramBotClient(token, new WebProxy(proxy));
+            if (String.IsNullOrEmpty(proxy)) return new TelegramBotClient(token);
+
+            var httpClient = new HttpClient(
+                    new HttpClientHandler { Proxy = new WebProxy(proxy), UseProxy = true }
+                );
+
+            return new TelegramBotClient(token, httpClient);
         }
 
         private void BindClient(TelegramBotClient client, int tenantId)
         {
-            client.OnMessage += (sender, e) => { OnMessage(sender, e, client, tenantId); };
-            client.StartReceiving();
+            var cts = new CancellationTokenSource();
+
+            clients[tenantId].CancellationTokenSource = cts;
+                      
+            client.StartReceiving(updateHandler: (botClient, exception, cancellationToken) => HandleUpdateAsync(botClient, exception, cancellationToken, tenantId),
+                                  errorHandler: HandleErrorAsync,
+                                  cancellationToken: cts.Token);
+        }
+
+        async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken, int tenantId)
+        {
+            if (update.Type != UpdateType.Message)
+                return;
+
+            if (update.Message.Type != MessageType.Text)
+                return;
+
+            if (String.IsNullOrEmpty(update.Message.Text) || update.Message.Text[0] != '/') return;
+
+            await command.HandleCommand(update.Message, botClient, tenantId);
+        }
+
+        Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        {
+            String errorMessage;
+
+            if (exception is ApiRequestException)
+            {
+                errorMessage = String.Format("Telegram API Error:\n[{0}]\n{1}", ((ApiRequestException)exception).ErrorCode, ((ApiRequestException)exception).Message);
+            }
+            else
+            {
+                errorMessage = exception.ToString();
+            }
+
+            log.Error(errorMessage);
+
+            return Task.CompletedTask;
         }
 
         private string UserKey(string userId, int tenantId)

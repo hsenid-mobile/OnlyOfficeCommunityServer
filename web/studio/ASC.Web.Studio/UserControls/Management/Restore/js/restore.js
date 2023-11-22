@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,37 @@ ASC.RestoreManager = (function () {
         initUploader();
         initChooseStorage();
         initFileSelector();
-        Teamlab.getBackupStorages({},
-        {
-            success: function(params, response) {
-                initConsumerStorages(response);
+
+        async.parallel([
+            function (cb) {
+                Teamlab.getAmazonS3Regions(null, {
+                    success: function (_, response) {
+                        cb(null, response);
+                    },
+                    error: function (_, errors) {
+                        cb(errors[0]);
+                    }
+                });
             },
-            error: function(params, errors) {
-                toastr.error(errors[0]);
+            function (cb) {
+                Teamlab.getBackupStorages(null, {
+                    success: function (_, response) {
+                        cb(null, response);
+                    },
+                    error: function (_, errors) {
+                        cb(errors[0]);
+                    }
+                });
             }
+        ], function (error, results) {
+            if (error) {
+                toastr.error(error);
+                return;
+            }
+
+            window.ConsumerStorageSettings.initS3Regions(results[0]);
+
+            initConsumerStorages(results[1]);
         });
 
         jq(".restore-settings_places input:radio").on("change", initChooseStorage);
@@ -51,6 +74,8 @@ ASC.RestoreManager = (function () {
         jq("#restoreChosenFile").on('change', function () {
             jq("#restoreChosenFileField").val(jq(this).val());
         });
+
+        jq("#understand").on("change", checkButtonState);
 
         jq('#startRestoreBtn').on('click', onClickRestoreBtn);
 
@@ -78,15 +103,15 @@ ASC.RestoreManager = (function () {
         jq("#fileSelectorTree>ul>li.tree-node:not([data-id=\"" + ASC.Files.Constants.FOLDER_ID_COMMON_FILES + "\"])").remove();
         ASC.Files.FileSelector.filesFilter = ASC.Files.Constants.FilterType.ArchiveOnly;
 
-        jq("#restoreChooseTeamlabFile").click(function () {
+        jq("#restoreChooseTeamlabFile").on("click", function () {
             ASC.Files.FileSelector.onSubmit = function (files) {
                 var file = files[0];
                 jq("#restoreChosenTeamlabFile").attr("data-fileId", file.id).val(file.title);
             };
 
             var onlyThirdParty = jq("#restoreThirdStorage").is(":checked");
-            ASC.Files.FileSelector.openDialog(null, false, onlyThirdParty);
-            ASC.Files.FileSelector.setTitle(ASC.Resources.Master.Resource.SelectFile);
+            ASC.Files.FileSelector.openDialog({ folderId: null, onlyFolder: false, thirdParty: onlyThirdParty, scrolled: true });
+            ASC.Files.FileSelector.setTitle(ASC.Resources.Master.ResourceJS.SelectFile);
         });
     };
 
@@ -103,25 +128,19 @@ ASC.RestoreManager = (function () {
 
     function initConsumerStorages(storages) {
         storages.forEach(function (item) {
-            item.properties.push({ name: "filePath", title: ASC.Resources.Master.Resource.RestoreConsumerPath });
+            item.properties.push({ name: "filePath", title: ASC.Resources.Master.ResourceJS.RestoreConsumerPath, isOptional: false });
         });
         var $backupConsumerStorageSettingsBox = jq("#restoreConsumerStorageSettingsBox");
         var selectedConsumer = storages.find(function (item) { return item.isSet }) || storages[0];
-        initConsumerStorage($backupConsumerStorageSettingsBox, selectedConsumer, storages);
+        initConsumerStorage($backupConsumerStorageSettingsBox, selectedConsumer, storages, "restore");
     }
 
-    function initConsumerStorage($box, selectedConsumer, storages) {
-        $box.html(jq.tmpl("consumerSettingsTmpl", { storages: storages, selectedConsumer: selectedConsumer }));
-        $box.on("change", ".textEdit", function () {
-            var newVal = jq(this).find(":selected").val();
-            $box.find(".textBox").removeClass(withErrorClass);
-            $box.find("div[data-id]").addClass(displayNoneClass);
-            $box.find("[data-id='" + newVal + "']").removeClass(displayNoneClass);
-        });
-        $box.find(".textEdit").val(selectedConsumer.title).trigger("change");
-        $box.off("input.textbox").on("input.textbox", ".textBox", function () {
-            $(this).removeClass(withErrorClass);
-        });
+    function initConsumerStorage($box, selectedConsumer, storages, settingName) {
+        var tmplData = window.ConsumerStorageSettings.getTmplData({ storages: storages }, settingName);
+
+        $box.html(jq.tmpl("consumerSettingsTmpl", tmplData));
+
+        window.ConsumerStorageSettings.bindEvents($box, jq(), selectedConsumer);
     }
 
     var createFileuploadInput = function (buttonObj) {
@@ -136,7 +155,7 @@ ASC.RestoreManager = (function () {
 
         buttonObj.on("click", function (e) {
             e.preventDefault();
-            jq("#fileupload").click();
+            jq("#fileupload").trigger("click");
         });
     };
 
@@ -159,7 +178,7 @@ ASC.RestoreManager = (function () {
             })
             .bind("fileuploaddone", function (e, data) {
                 var source = getSourceRestore();
-                source.params.push({ key: "filePath", value: jq.parseJSON(data.result).Data });
+                source.params.push({ key: "filePath", value: JSON.parse(data.result).Data });
                 startRestore(source);
             })
             .bind("fileuploadfail", function () {
@@ -200,7 +219,7 @@ ASC.RestoreManager = (function () {
     };
 
     function initBackupList() {
-        Teamlab.getbackuphistory({},
+        Teamlab.getBackupHistory({},
         {
             success: function(params, data) {
                 var $restoreListBlock = jq("#restoreChooseBackupDialog");
@@ -260,7 +279,7 @@ ASC.RestoreManager = (function () {
                     window.location.href = "./PreparationPortal.aspx?type=1";
                 },
                 error: function (params, errors) {
-                    jq(".restore-setting_block input").attr("disabled", false);
+                    jq(".restore-setting_block input").prop("disabled", false);
                     toastr.error(errors[0]);
                 }
             });
@@ -271,8 +290,7 @@ ASC.RestoreManager = (function () {
             source = {
                 name: checkItem.val(),
                 params: []
-            },
-            isError;
+            };
 
         if (!checkItem.length) {
             return false;
@@ -284,7 +302,7 @@ ASC.RestoreManager = (function () {
             case storageTypes.ThirdPartyDocs:
                 var $path = jq("#restoreChosenTeamlabFile");
                 var val = $path.attr("data-fileid");
-                storage.params.push({ key: "filePath", value: val });
+                source.params.push({ key: "filePath", value: val });
                 if (!val) {
                     $path.addClass(withErrorClass);
                     return false;
@@ -293,42 +311,42 @@ ASC.RestoreManager = (function () {
                 break;
             case storageTypes.Local:
                 var val = jq("#restoreChosenFileField").val();
-                storage.params.push({ key: "filePath", value: val });
+                //source.params.push({ key: "filePath", value: val });
                 if (!val) {
                     jq("#restoreChosenFileField").addClass(withErrorClass);
                     return false;
                 }
                 break;
             case storageTypes.Consumers:
-                var $consumerStorageSettingsBox = jq("#restoreConsumerStorageSettingsBox");
-                var selectedConsumer = $consumerStorageSettingsBox.find('.textEdit :selected').val();
-                var $settings = $consumerStorageSettingsBox.find('div[data-id="' + selectedConsumer + '"] .textBox');
-                source.params.push({ key: "module", value: selectedConsumer });
-                var settingsLength = $settings.length;
-                for (var i = 0; i < settingsLength; i++) {
-                    var $item = $($settings[i]);
-                    if (!$item.val()) {
-                        $item.addClass(withErrorClass);
-                        isError = true;
-                    }
-                    else {
-                        source.params.push({ key: $item.attr("data-id"), value: $item.val() });
-                    }
-                }
-                
-                if (isError) {
+                var $consumerSettings = jq("#restoreConsumerStorageSettingsBox");
+                var selectedConsumer = $consumerSettings.find(".comboBoxStorage").val();
+                var $selectedConsumer = $consumerSettings.find(".storage[data-id=" + selectedConsumer + "]");
+
+                source.params = window.ConsumerStorageSettings.getProps($selectedConsumer);
+
+                if (!source.params) {
                     return false;
                 }
+
+                source.params.unshift({ key: "module", value: selectedConsumer });
                 break;
         }
         return source;
     };
 
+    var checkButtonState = function () {
+        jq("#startRestoreBtn").toggleClass("disable", !jq("#understand").is(':checked'));
+    }
+
     function onClickRestoreBtn() {
+        if (jq(this).hasClass("disable")) {
+            return false;
+        }
+
         if (uploadData) uploadData.submit();
         var source = getSourceRestore();
 
-        if (!source || jq(this).hasClass("disable")) {
+        if (!source) {
             return false;
         }
         lockRestoreBlock();
@@ -350,12 +368,12 @@ ASC.RestoreManager = (function () {
 
     function lockRestoreBlock () {
         LoadingBanner.showLoaderBtn("#restoreBlock");
-        jq(".restore-setting_block input").attr("disabled", true);
+        jq(".restore-setting_block input").prop("disabled", true);
     }
 
     function unlockRestoreBlock () {
         LoadingBanner.hideLoaderBtn("#restoreBlock");
-        jq(".restore-setting_block input").attr("disabled", false);
+        jq(".restore-setting_block input").prop("disabled", false);
     }
 
     return{

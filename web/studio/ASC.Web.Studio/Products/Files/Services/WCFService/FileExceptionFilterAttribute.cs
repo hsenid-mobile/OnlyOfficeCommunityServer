@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.Filters;
+
 using ASC.Common.Logging;
 using ASC.Web.Files.Resources;
 
 namespace ASC.Web.Files.Services.WCFService
 {
-    class FileExceptionFilterAttribute : ExceptionFilterAttribute
+    public class FileExceptionFilterAttribute : ExceptionFilterAttribute
     {
         private static readonly ILog log = LogManager.GetLogger("ASC.Files");
 
@@ -54,7 +55,7 @@ namespace ASC.Web.Files.Services.WCFService
 
 
         [DataContract(Name = "error", Namespace = "")]
-        class FileError
+        public class FileError
         {
             [DataMember(Name = "Detail")]
             public string Detail { get; set; }
@@ -66,7 +67,7 @@ namespace ASC.Web.Files.Services.WCFService
             public FileErrorInner Inner { get; set; }
 
             [DataContract(Name = "error", Namespace = "")]
-            internal class FileErrorInner
+            public class FileErrorInner
             {
                 [DataMember(Name = "message")]
                 public string Message { get; set; }

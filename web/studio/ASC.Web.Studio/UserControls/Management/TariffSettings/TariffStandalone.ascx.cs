@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,24 @@
 */
 
 
-using AjaxPro;
-using ASC.Core;
-using ASC.Core.Billing;
-using ASC.Core.Tenants;
-using ASC.MessagingSystem;
-using ASC.Web.Core;
-using ASC.Web.Core.WhiteLabel;
-using ASC.Web.Studio.PublicResources;
-using ASC.Web.Studio.UserControls.Statistics;
-using ASC.Web.Studio.Utility;
-using Resources;
 using System;
 using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
+
+using AjaxPro;
+
+using ASC.Core;
+using ASC.Core.Billing;
+using ASC.Core.Tenants;
+using ASC.MessagingSystem;
+using ASC.Web.Core;
+using ASC.Web.Core.Utility;
+using ASC.Web.Core.WhiteLabel;
+using ASC.Web.Studio.PublicResources;
+using ASC.Web.Studio.UserControls.Statistics;
+using ASC.Web.Studio.Utility;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -46,7 +48,6 @@ namespace ASC.Web.Studio.UserControls.Management
         protected Tariff CurrentTariff;
         protected TenantQuota CurrentQuota;
         protected AdditionalWhiteLabelSettings Settings;
-        protected int TenantCount;
 
         protected bool RequestLicenseAccept
         {
@@ -67,14 +68,20 @@ namespace ASC.Web.Studio.UserControls.Management
             Page
                 .RegisterBodyScripts(
                     "~/js/uploader/jquery.fileupload.js",
-                    "~/UserControls/Management/TariffSettings/js/tariffstandalone.js")
-                .RegisterStyle("~/UserControls/Management/TariffSettings/css/tariff.less",
-                    "~/UserControls/Management/TariffSettings/css/tariffstandalone.less");
+                    "~/UserControls/Management/TariffSettings/js/tariffstandalone.js");
+            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
+            {
+                Page.RegisterStyle("~/UserControls/Management/TariffSettings/css/dark-tariff.less");
+            }
+            else
+            {
+                Page.RegisterStyle("~/UserControls/Management/TariffSettings/css/tariff.less");
+            }
+            Page.RegisterStyle("~/UserControls/Management/TariffSettings/css/tariffstandalone.less");
 
             UsersCount = TenantStatisticsProvider.GetUsersCount();
             CurrentTariff = TenantExtra.GetCurrentTariff();
             CurrentQuota = TenantExtra.GetTenantQuota();
-            TenantCount = CoreContext.TenantManager.GetTenants().Count();
 
             Settings = AdditionalWhiteLabelSettings.Instance;
             Settings.LicenseAgreementsUrl = CommonLinkUtility.GetRegionalUrl(Settings.LicenseAgreementsUrl, CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
@@ -85,14 +92,6 @@ namespace ASC.Web.Studio.UserControls.Management
 
         protected string TariffDescription()
         {
-            if (TenantExtra.UpdatedWithoutLicense)
-            {
-                return String.Format(UserControlsCommonResource.TariffUpdateWithoutLicense.HtmlEncode(),
-                                     "<span class='tariff-marked'>",
-                                     "</span>",
-                                     "<br />");
-            }
-
             if (CurrentQuota.Trial)
             {
                 if (CurrentTariff.State == TariffState.Trial)

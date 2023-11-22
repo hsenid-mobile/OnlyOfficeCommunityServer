@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,11 +63,11 @@ window.ASC.Files.FileSelector = (function () {
                 }
             });
 
-            jq("#pageNavigatorHolder a").click(function () {
+            jq("#pageNavigatorHolder a").on("click", function () {
                 selectFolder(ASC.Files.FileSelector.fileSelectorTree.selectedFolderId, true);
             });
 
-            jq("#mainContent").scroll(function () {
+            jq("#mainContent").on("scroll", function () {
                 if (jq("#filesMainContent").height() - jq("#fileSelectorDialog").height() <= jq("#mainContent").scrollTop()) {
                     selectFolder(ASC.Files.FileSelector.fileSelectorTree.selectedFolderId, true);
                 }
@@ -86,7 +86,7 @@ window.ASC.Files.FileSelector = (function () {
                 return false;
             });
 
-            jq("#closeFileSelector").click(function () { ASC.Files.FileSelector.onCancel(); });
+            jq("#closeFileSelector").on("click", function () { ASC.Files.FileSelector.onCancel(); });
             
             if (window.location.href.indexOf("compact") != -1) {
                 jq("body").addClass("file-selector-compact");
@@ -115,11 +115,11 @@ window.ASC.Files.FileSelector = (function () {
 
         if (isAppend
             && (jq("#pageNavigatorHolder:visible").length == 0
-                || jq("#pageNavigatorHolder a").text() == ASC.Files.FilesJSResources.ButtonShowMoreLoad)) {
+                || jq("#pageNavigatorHolder a").text() == ASC.Files.FilesJSResource.ButtonShowMoreLoad)) {
             return;
         }
 
-        jq("#pageNavigatorHolder a").text(ASC.Files.FilesJSResources.ButtonShowMoreLoad);
+        jq("#pageNavigatorHolder a").text(ASC.Files.FilesJSResource.ButtonShowMoreLoad);
 
         jq("#submitFileSelector").addClass("disable");
         var filterSettings =
@@ -159,8 +159,8 @@ window.ASC.Files.FileSelector = (function () {
         jq("#fileSelectorDialog").toggleClass("hide-thirdparty", hide);
     };
 
-    var openDialog = function (folderId, onlyFolder, thirdParty) {
-        isFolderSelector = !jq("#mainContent").length || onlyFolder;
+    var openDialog = function (data) {
+        isFolderSelector = !jq("#mainContent").length || data.onlyFolder;
 
         ASC.Files.FileSelector.fileSelectorTree.clickOnFolder = isFolderSelector ? checkFolder : selectFolder;
 
@@ -170,8 +170,18 @@ window.ASC.Files.FileSelector = (function () {
             ASC.Files.UI.blockUI("#fileSelectorDialog", isFolderSelector ? 440 : 1030);
         }
 
-        PopupKeyUpActionProvider.EnterAction = "jq(\"#submitFileSelector\").click();";
+        jq("#fileSelectorTree").toggleClass("scrolled", data.scrolled);
 
+        if (!data.displayPrivacy) {
+            var privacyFolderData = ASC.Files.FileSelector.fileSelectorTree.getFolderData(ASC.Files.Constants.FOLDER_ID_PRIVACY);
+            if (privacyFolderData) {
+                privacyFolderData.entryObject.addClass("privacy-node");
+            }
+        }
+
+        PopupKeyUpActionProvider.EnterAction = "jq(\"#submitFileSelector\").trigger('click');";
+
+        var thirdParty = data.thirdParty;
         if (typeof thirdParty != "undefined") {
             jq("#fileSelectorTree>ul>li:not(.third-party-entry)").toggle(!thirdParty);
 
@@ -180,7 +190,7 @@ window.ASC.Files.FileSelector = (function () {
 
         ASC.Files.FileSelector.fileSelectorTree.rollUp();
 
-        folderId = folderId || ASC.Files.FileSelector.fileSelectorTree.getDefaultFolderId();
+        var folderId = data.folderId || ASC.Files.FileSelector.fileSelectorTree.getDefaultFolderId();
         ASC.Files.FileSelector.fileSelectorTree.setCurrent(folderId);
 
         ASC.Files.FileSelector.fileSelectorTree.clickOnFolder(folderId);

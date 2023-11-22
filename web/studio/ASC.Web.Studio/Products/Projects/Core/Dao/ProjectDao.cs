@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -31,6 +30,7 @@ using ASC.ElasticSearch;
 using ASC.Projects.Core.DataInterfaces;
 using ASC.Projects.Core.Domain;
 using ASC.Web.Projects.Core.Search;
+
 using Newtonsoft.Json.Linq;
 
 namespace ASC.Projects.Data.DAO
@@ -173,8 +173,7 @@ namespace ASC.Projects.Data.DAO
 
             return Db.ExecuteList(query).ConvertAll(converter);
         }
-
-        public List<Project> GetByFilter(TaskFilter filter, bool isAdmin, bool checkAccess)
+        private SqlQuery CreateQueryForFilter(TaskFilter filter, bool isAdmin, bool checkAccess)
         {
             var teamQuery = new SqlQuery(ParticipantTable + " pp")
                 .SelectCount()
@@ -216,6 +215,37 @@ namespace ASC.Projects.Data.DAO
 
             query = CreateQueryFilter(query, filter, isAdmin, checkAccess);
 
+            query.GroupBy("p.id");
+            return query;
+        }
+
+        public List<Project> GetByFilter(TaskFilter filter, bool isAdmin, bool checkAccess)
+        {
+            return Db.ExecuteList(CreateQueryForFilter(filter, isAdmin, checkAccess)).ConvertAll(ToProjectFull);
+        }
+
+        public List<Project> GetByFilterForReport(TaskFilter filter, bool isAdmin, bool checkAccess)
+        {
+            filter = (TaskFilter)filter.Clone();
+            Exp exp = null;
+            if (filter.ProjectStatuses.Contains(ProjectStatus.Closed))
+            {
+                filter.ProjectStatuses.Remove(ProjectStatus.Closed);
+                exp = Exp.Between("p.status_changed", filter.GetFromDate(), filter.GetToDate()) & Exp.Eq("p.status", 1) | Exp.In("p.status", filter.ProjectStatuses);
+                filter.ProjectStatuses.Clear();
+            };
+
+            var query = CreateQueryForFilter(filter, isAdmin, checkAccess);
+
+            query.Where(Exp.Between("p.create_on", filter.GetFromDate(), filter.GetToDate()));
+
+            query.Where(Exp.Eq("p.status", 0) | (Exp.Between("p.status_changed", filter.GetFromDate(), filter.GetToDate())));
+
+            if(exp != null)
+            {
+                query.Where(exp);
+            }
+
             return Db.ExecuteList(query).ConvertAll(ToProjectFull);
         }
 
@@ -227,9 +257,59 @@ namespace ASC.Projects.Data.DAO
 
             query = CreateQueryFilter(query, filter, isAdmin, checkAccess);
 
+            query.GroupBy("p.id");
+
             var queryCount = new SqlQuery().SelectCount().From(query, "t1");
 
             return Db.ExecuteScalar<int>(queryCount);
+        }
+
+        public int GetByFilterCountForReport(TaskFilter filter, bool isAdmin, bool checkAccess)
+        {
+            filter = (TaskFilter)filter.Clone();
+            var query = new SqlQuery(ProjectsTable + " p")
+                           .Select("p.id")
+                           .Where("p.tenant_id", Tenant);
+
+            if (filter.ProjectStatuses.Contains(ProjectStatus.Closed) || filter.ProjectStatuses.Contains(ProjectStatus.Paused))
+            {
+                query.Where(Exp.Between("p.status_changed", filter.GetFromDate(), filter.GetToDate()) & Exp.Eq("p.status", filter.ProjectStatuses[0]));
+                filter.ProjectStatuses.Clear();
+            }
+
+            if (filter.GetFromDate() != DateTime.MinValue && filter.GetToDate() != DateTime.MaxValue)
+            {
+                query.Where(Exp.Between("p.create_on", filter.GetFromDate(), filter.GetToDate()));
+            }
+
+            query = CreateQueryFilter(query, filter, isAdmin, checkAccess);
+
+            query.GroupBy("p.id");
+
+            var queryCount = new SqlQuery().SelectCount().From(query, "t1");
+
+            return Db.ExecuteScalar<int>(queryCount);
+        }
+
+        public List<Tuple<Guid, int>> GetByFilterAverageTime(TaskFilter filter, bool isAdmin, bool checkAccess)
+        {
+            var query = new SqlQuery(ProjectsTable + " p")
+                .Select("ROUND(AVG(TIME_TO_SEC(TIMEDIFF(p.status_changed, p.create_on))/60/60))", "pp.participant_id")
+                .InnerJoin(ParticipantTable + " pp", Exp.EqColumns("p.tenant_id", "pp.tenant") & Exp.EqColumns("p.id", "pp.project_id"))
+                .Where("p.tenant_id", Tenant)
+                .Where(Exp.Eq("p.status", 1));
+
+            if (filter.GetFromDate() != DateTime.MinValue && filter.GetToDate() != DateTime.MaxValue)
+            {
+                query.Where(Exp.Between("p.create_on", filter.GetFromDate(), filter.GetToDate()));
+                query.Where(Exp.Between("p.status_changed", filter.GetFromDate(), filter.GetToDate()));
+            }
+
+            query.GroupBy("pp.participant_id");
+
+            query = CreateQueryFilter(query, filter, isAdmin, checkAccess);
+
+            return Db.ExecuteList(query).ConvertAll(a => new Tuple<Guid, int>(Guid.Parse((string)a[1]), Convert.ToInt32(a[0])));
         }
 
         private SqlQuery CreateQueryFilter(SqlQuery query, TaskFilter filter, bool isAdmin, bool checkAccess)
@@ -295,8 +375,6 @@ namespace ASC.Projects.Data.DAO
                 }
             }
 
-            query.GroupBy("p.id");
-
             if (checkAccess)
             {
                 query.Where(Exp.Eq("p.private", false));
@@ -342,7 +420,7 @@ namespace ASC.Projects.Data.DAO
                 .SingleOrDefault();
         }
 
-        public List<Project> GetById(ICollection projectIDs)
+        public List<Project> GetById(List<int> projectIDs)
         {
             return Db.ExecuteList(Query(ProjectsTable).Select(ProjectColumns).Where(Exp.In("id", projectIDs)))
                 .ConvertAll(converter);
@@ -400,7 +478,7 @@ namespace ASC.Projects.Data.DAO
 
         public void AddProjectContact(int projectID, int contactID)
         {
-            using (var crmDb = new DbManager("crm"))
+            using (var crmDb = new DbManager("default"))
             {
                 crmDb.ExecuteNonQuery(Insert("crm_projects").InColumnValue("project_id", projectID).InColumnValue("contact_id", contactID));
             }
@@ -408,7 +486,7 @@ namespace ASC.Projects.Data.DAO
 
         public void DeleteProjectContact(int projectID, int contactID)
         {
-            using (var crmDb = new DbManager("crm"))
+            using (var crmDb = new DbManager("default"))
             {
                 crmDb.ExecuteNonQuery(Delete("crm_projects").Where("project_id", projectID).Where("contact_id", contactID));
             }
@@ -512,7 +590,7 @@ namespace ASC.Projects.Data.DAO
                 .Set("title", project.Title)
                 .Set("description", project.Description)
                 .Set("status", project.Status)
-                .Set("status_changed", project.StatusChangedOn)
+                .Set("status_changed", TenantUtil.DateTimeToUtc(project.StatusChangedOn))
                 .Set("responsible_id", project.Responsible.ToString())
                 .Set("private", project.Private)
                 .Set("last_modified_by", project.LastModifiedBy.ToString())

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ window.ASC.Sailfish = (function () {
             makeFakeFileList(fileInput, file);
         }
 
-        fileInputObj.change();
+        fileInputObj.trigger("change");
     };
 
     var init = function () {
@@ -102,7 +102,7 @@ window.ASC.Sailfish = (function () {
                 if (userAgent.includes("NeedEmulateUpload") && window.emulateUpload) {
                     window.emulateUpload(uploadBase64);
                 } else {
-                    jq("#fileupload").click();
+                    jq("#fileupload").trigger("click");
                 }
             });
         }

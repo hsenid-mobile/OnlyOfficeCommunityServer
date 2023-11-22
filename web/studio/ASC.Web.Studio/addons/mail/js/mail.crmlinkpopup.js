@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,11 +90,11 @@ window.crmLinkPopup = (function($) {
         function addRow() {
             //Add unlink handler
             if (isExport) {
-                linkedTableRow.find('.unlink_entity').unbind('click').bind('click', function() {
+                linkedTableRow.find('.unlink_entity').off('click').on('click', function() {
                     exportAndLinkUnlinkWorkflow($(this));
                 });
             } else {
-                linkedTableRow.find('.unlink_entity').unbind('click').bind('click', function() {
+                linkedTableRow.find('.unlink_entity').off('click').on('click', function() {
                     var data = exportAndLinkUnlinkWorkflow($(this));
                     if (!data.delete_from_new_status) {
                         needDeleteContactIds.push(data.data);
@@ -267,10 +267,9 @@ window.crmLinkPopup = (function($) {
             }
         });
 
-        html.find('.buttons .link_btn').unbind('click').bind('click', function() {
+        html.find('.buttons .link_btn').off('click').on('click', function() {
             var messageId;
             if (needAddContactIds.length > 0) {
-                window.ASC.Mail.ga_track(ga_Categories.message, ga_Actions.buttonClick, "link_chain_with_crm");
                 messageId = getMessageId();
 
                 serviceManager.linkChainToCrm(messageId, needAddContactIds, {},
@@ -281,7 +280,7 @@ window.crmLinkPopup = (function($) {
                         window.LoadingBanner.hideLoading();
                         window.toastr.error(window.MailScriptResource.LinkFailurePopupText);
                     }
-                }, ASC.Resources.Master.Resource.LoadingProcessing);
+                }, ASC.Resources.Master.ResourceJS.LoadingProcessing);
 
                 selectedContactIds = [];
                 needAddContactIds = [];
@@ -299,7 +298,7 @@ window.crmLinkPopup = (function($) {
                         console.error(error);
                         window.LoadingBanner.hideLoading();
                     }
-                }, ASC.Resources.Master.Resource.LoadingProcessing);
+                }, ASC.Resources.Master.ResourceJS.LoadingProcessing);
 
                 if (needAddContactIds.length === 0 && selectedContactIds.length === needDeleteContactIds.length) {
                     $('.header-crm-link').hide();
@@ -316,14 +315,12 @@ window.crmLinkPopup = (function($) {
         html.find('.buttons .link_btn').prop('disabled', true).addClass('disable');
         html.find('.buttons .unlink_all').prop('disabled', true).addClass('disable');
 
-        html.find('.buttons .unlink_all').unbind('click').bind('click', function() {
+        html.find('.buttons .unlink_all').off('click').on('click', function() {
             var htmlTmpl = $.tmpl('crmUnlinkAllPopupTmpl');
-            htmlTmpl.find('.buttons .unlink').bind('click', function() {
+            htmlTmpl.find('.buttons .unlink').on('click', function() {
                 if (selectedContactIds.length > 0) {
-                    window.ASC.Mail.ga_track(ga_Categories.message, ga_Actions.buttonClick, "unlink_chain_with_crm");
-
                     var messageId = getMessageId();
-                    serviceManager.unmarkChainAsCrmLinked(messageId, selectedContactIds, {}, ASC.Resources.Master.Resource.LoadingProcessing);
+                    serviceManager.unmarkChainAsCrmLinked(messageId, selectedContactIds, {}, ASC.Resources.Master.ResourceJS.LoadingProcessing);
                     $('.header-crm-link').hide();
                     messagePage.setHasLinked(false);
                 }
@@ -358,8 +355,7 @@ window.crmLinkPopup = (function($) {
 
         addAutocomplete(html, true);
 
-        html.find('.buttons .link_btn').unbind('click').bind('click', function () {
-            window.ASC.Mail.ga_track(ga_Categories.message, ga_Actions.buttonClick, "export_mail_to_crm");
+        html.find('.buttons .link_btn').off('click').on('click', function () {
             serviceManager.exportMessageToCrm(getMessageId(), needAddContactIds, {},
             {
                 success: onExportMessageToCrm,
@@ -367,7 +363,7 @@ window.crmLinkPopup = (function($) {
                     window.LoadingBanner.hideLoading();
                     window.toastr.error(window.MailScriptResource.ExportFailurePopupText);
                 }
-            }, ASC.Resources.Master.Resource.LoadingProcessing);
+            }, ASC.Resources.Master.ResourceJS.LoadingProcessing);
             needAddContactIds = [];
             exportMessageId = -1;
             window.LoadingBanner.displayMailLoading();

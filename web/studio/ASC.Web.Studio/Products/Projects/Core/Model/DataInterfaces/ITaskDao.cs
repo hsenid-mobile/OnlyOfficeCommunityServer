@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Projects.Core.Domain;
 
@@ -41,6 +42,8 @@ namespace ASC.Projects.Core.DataInterfaces
         TaskFilterCountOperationResult GetByFilterCount(TaskFilter filter, bool isAdmin, bool checkAccess);
 
         List<Tuple<Guid, int, int>> GetByFilterCountForReport(TaskFilter filter, bool isAdmin, bool checkAccess);
+
+        List<Tuple<Guid, int, int>> GetByFilterAverageTime(TaskFilter filter, bool isAdmin, bool checkAccess);
 
         IEnumerable<TaskFilterCountOperationResult> GetByFilterCountForStatistic(TaskFilter filter, bool isAdmin, bool checkAccess);
 

@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,8 +89,6 @@ namespace ASC.HealthCheck.Models
                     return new OnlyofficeMailAggregatorService();
                 case ServiceEnum.OnlyofficeMailWatchdog:
                     return new OnlyofficeMailWatchdogService();
-                case ServiceEnum.OnlyofficeAutoreply:
-                    return new OnlyofficeAutoreplyService();
                 case ServiceEnum.OnlyofficeIndex:
                     return new OnlyofficeIndexService();
                 case ServiceEnum.EditorsFileConverter:
@@ -418,20 +416,6 @@ namespace ASC.HealthCheck.Models
         public override string Check(int tenantId)
         {
             return string.Empty;
-        }
-    }
-
-    public class OnlyofficeAutoreplyService : Service
-    {
-        public OnlyofficeAutoreplyService() : base(ServiceEnum.OnlyofficeAutoreply)
-        {
-        }
-
-        public override string Title { get { return HealthCheckResource.AutoreplyServiceTitle; } }
-
-        public override string Check(int tenantId)
-        {
-            return "";
         }
     }
 

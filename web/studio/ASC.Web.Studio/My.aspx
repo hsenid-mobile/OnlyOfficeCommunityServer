@@ -1,6 +1,6 @@
 ﻿<%@ Page Language="C#" MasterPageFile="~/Masters/BaseTemplate.master" AutoEventWireup="true" CodeBehind="My.aspx.cs" Inherits="ASC.Web.Studio.MyStaff" %>
 <%@ MasterType TypeName="ASC.Web.Studio.Masters.BaseTemplate" %>
-<%@ Import Namespace="Resources" %>
+<%@ Import Namespace="ASC.Web.Studio.PublicResources" %>
 <%@ Import Namespace="ASC.Core.Users" %>
 
 <asp:Content ContentPlaceHolderID="TitleContent" runat="server">
@@ -44,6 +44,27 @@
             </div>
             <div id="subscriptionContainer" style="display: none;" class="tabs-content">
                 <asp:PlaceHolder ID="_phSubscriptionView" runat="server" />
+            </div>
+        </div>
+        <div id="connectionsBlockContainer" class="user-block">
+            <div class="tabs-section">
+                <span class="header-base"><%= Resource.ActiveConnections %></span>
+                <% if (IsEmptyDbip) { %>
+                <span id="emptyDbipSwitcher"class="HelpCenterSwitcher expl"></span>
+                <div id="emptyDbipHelper"class="popup_helper">
+                    <%= Resource.GeolocationNotAvailable %>
+                    <% if (!string.IsNullOrEmpty(HelpLink)) { %>
+                    <a href="<%= HelpLink + "/administration/active-connections.aspx" %>" target="_blank"><%= Resource.LearnMore %></a>
+                    <% } %>
+                </div>
+                <% } %>
+                <span id="switcherConnectionsButton" class="toggle-button"
+                    data-switcher="1" data-showtext="<%= Resource.Show %>" data-hidetext="<%= Resource.Hide %>">
+                    <%= Resource.Show %>
+                </span>
+            </div>
+            <div id="connectionsContainer" style="display: none;" class="tabs-content">
+                <asp:PlaceHolder ID="_phConnectionsView" runat="server" />
             </div>
         </div>
         <asp:PlaceHolder ID="_phTipsSettingsView" runat="server" />

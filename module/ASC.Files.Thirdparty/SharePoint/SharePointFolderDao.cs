@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+
 using ASC.Common.Data;
 using ASC.Common.Data.Sql.Expressions;
 using ASC.Core;
+using ASC.Core.ChunkedUploader;
+using ASC.Data.Storage.ZipOperators;
 using ASC.Files.Core;
 
 namespace ASC.Files.Thirdparty.SharePoint
@@ -117,7 +120,7 @@ namespace ASC.Files.Thirdparty.SharePoint
             return folders.ToList();
         }
 
-        public List<Folder> GetFolders(object[] folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true)
+        public List<Folder> GetFolders(IEnumerable<object> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true)
         {
             if (filterType == FilterType.FilesOnly || filterType == FilterType.ByExtension
                 || filterType == FilterType.DocumentsOnly || filterType == FilterType.ImagesOnly
@@ -161,7 +164,7 @@ namespace ASC.Files.Thirdparty.SharePoint
             if (folder.ID != null)
             {
                 //Create with id
-                var savedfolder = ProviderInfo.CreateFolder((string) folder.ID);
+                var savedfolder = ProviderInfo.CreateFolder((string)folder.ID);
                 return ProviderInfo.ToFolder(savedfolder).ID;
             }
 
@@ -210,13 +213,13 @@ namespace ASC.Files.Thirdparty.SharePoint
                     tx.Commit();
                 }
             }
-            ProviderInfo.DeleteFolder((string) folderId);
+            ProviderInfo.DeleteFolder((string)folderId);
         }
 
         public object MoveFolder(object folderId, object toFolderId, CancellationToken? cancellationToken)
         {
             var newFolderId = ProviderInfo.MoveFolder(folderId, toFolderId);
-            UpdatePathInDB(ProviderInfo.MakeId((string) folderId), (string) newFolderId);
+            UpdatePathInDB(ProviderInfo.MakeId((string)folderId), (string)newFolderId);
             return newFolderId;
         }
 
@@ -232,7 +235,7 @@ namespace ASC.Files.Thirdparty.SharePoint
 
         public object RenameFolder(Folder folder, string newTitle)
         {
-            var oldId = ProviderInfo.MakeId((string) folder.ID);
+            var oldId = ProviderInfo.MakeId((string)folder.ID);
             var newFolderId = oldId;
             if (ProviderInfo.SpRootFolderId.Equals(folder.ID))
             {
@@ -242,7 +245,7 @@ namespace ASC.Files.Thirdparty.SharePoint
             }
             else
             {
-                newFolderId = (string) ProviderInfo.RenameFolder(folder.ID, newTitle);
+                newFolderId = (string)ProviderInfo.RenameFolder(folder.ID, newTitle);
             }
             UpdatePathInDB(oldId, newFolderId);
             return newFolderId;
@@ -275,12 +278,20 @@ namespace ASC.Files.Thirdparty.SharePoint
 
         public long GetMaxUploadSize(object folderId, bool chunkedUpload = false)
         {
-            return 2L*1024L*1024L*1024L;
+            return 2L * 1024L * 1024L * 1024L;
+        }
+
+        public IDataWriteOperator CreateDataWriteOperator(
+            string folderId,
+            CommonChunkedUploadSession chunkedUploadSession,
+            CommonChunkedUploadSessionHolder sessionHolder)
+        {
+            return null;
         }
 
         #region Only for TMFolderDao
 
-        public void ReassignFolders(object[] folderIds, Guid newOwnerId)
+        public void ReassignFolders(IEnumerable<object> folderIds, Guid newOwnerId)
         {
         }
 
@@ -356,7 +367,7 @@ namespace ASC.Files.Thirdparty.SharePoint
             return null;
         }
 
-        public Dictionary<string, string> GetBunchObjectIDs(List<object> folderIDs)
+        public Dictionary<string, string> GetBunchObjectIDs(IEnumerable<object> folderIDs)
         {
             return null;
         }

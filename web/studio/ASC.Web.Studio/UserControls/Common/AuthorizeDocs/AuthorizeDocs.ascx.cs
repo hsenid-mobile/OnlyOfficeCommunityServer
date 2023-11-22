@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 using System;
 using System.Configuration;
-using System.Globalization;
 using System.Security.Authentication;
 using System.Web;
 using System.Web.UI;
@@ -27,12 +26,11 @@ using ASC.Core;
 using ASC.FederatedLogin.Profile;
 using ASC.MessagingSystem;
 using ASC.Web.Core;
+using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Core;
 using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.UserControls.Users.UserProfile;
 using ASC.Web.Studio.Utility;
-
-using Resources;
 
 namespace ASC.Web.Studio.UserControls.Common.AuthorizeDocs
 {
@@ -61,6 +59,7 @@ namespace ASC.Web.Studio.UserControls.Common.AuthorizeDocs
 
         protected string LoginMessage;
         protected int LoginMessageType = 0;
+        protected bool DontShowMainPage;
 
         protected string HelpLink;
 
@@ -68,11 +67,28 @@ namespace ASC.Web.Studio.UserControls.Common.AuthorizeDocs
         {
             LoginMessage = Auth.GetAuthMessage(Request["am"]);
 
-            Page.RegisterStyle("~/UserControls/Common/AuthorizeDocs/css/authorizedocs.less", "~/UserControls/Common/AuthorizeDocs/css/slick.less")
-                .RegisterBodyScripts("~/UserControls/Common/AuthorizeDocs/js/authorizedocs.js", "~/UserControls/Common/Authorize/js/authorize.js", "~/js/third-party/slick.min.js");
+            var theme = ModeThemeSettings.GetModeThemesSettings().ModeThemeName;
+
+            if (theme == ModeTheme.dark)
+            {
+                Page.RegisterStyle("~/UserControls/Common/AuthorizeDocs/css/dark-authorizedocs.less");
+            }
+            else
+            {
+                Page.RegisterStyle("~/UserControls/Common/AuthorizeDocs/css/authorizedocs.less");
+            }
+            Page.RegisterStyle("~/UserControls/Common/AuthorizeDocs/css/slick.less")
+                .RegisterBodyScripts("~/js/third-party/lodash.min.js", "~/js/third-party/masonry.pkgd.min.js", "~/UserControls/Common/AuthorizeDocs/js/reviews.js", "~/UserControls/Common/AuthorizeDocs/js/review_builder_script.js", "~/UserControls/Common/AuthorizeDocs/js/authorizedocs.js", "~/UserControls/Common/Authorize/js/authorize.js", "~/js/third-party/slick.min.js");
 
             if (CoreContext.Configuration.CustomMode)
-                Page.RegisterStyle("~/UserControls/Common/AuthorizeDocs/css/custom-mode.less");
+                if (theme == ModeTheme.dark)
+                {
+                    Page.RegisterStyle("~/UserControls/Common/AuthorizeDocs/css/dark-custom-mode.less");
+                }
+                else
+                {
+                    Page.RegisterStyle("~/UserControls/Common/AuthorizeDocs/css/custom-mode.less");
+                }
 
             ThirdpartyEnable = SetupInfo.ThirdPartyAuthEnabled && AccountLinkControl.IsNotEmpty;
             if (Request.DesktopApp()
@@ -84,9 +100,9 @@ namespace ASC.Web.Studio.UserControls.Common.AuthorizeDocs
                     .RegisterBodyScripts("~/UserControls/Common/Authorize/js/desktop.js");
             }
 
-            Page.Title = CoreContext.Configuration.CustomMode ? CustomModeResource.TitlePageNewCustomMode : Resource.AuthDocsTitlePage;
-            Page.MetaDescription = CoreContext.Configuration.CustomMode ? CustomModeResource.AuthDocsMetaDescriptionCustomMode.HtmlEncode() : Resource.AuthDocsMetaDescription.HtmlEncode();
-            Page.MetaKeywords = CoreContext.Configuration.CustomMode ? CustomModeResource.AuthDocsMetaKeywordsCustomMode : Resource.AuthDocsMetaKeywords;
+            Page.Title = CoreContext.Configuration.CustomMode ? CustomModeResource.TitlePageNewCustomMode : PersonalResource.AuthDocsTitlePage;
+            Page.MetaDescription = CoreContext.Configuration.CustomMode ? CustomModeResource.AuthDocsMetaDescriptionCustomMode.HtmlEncode() : PersonalResource.AuthDocsMetaDescription.HtmlEncode();
+            Page.MetaKeywords = CoreContext.Configuration.CustomMode ? CustomModeResource.AuthDocsMetaKeywordsCustomMode : PersonalResource.AuthDocsMetaKeywords;
 
             HelpLink = GetHelpLink();
 
@@ -96,15 +112,21 @@ namespace ASC.Web.Studio.UserControls.Common.AuthorizeDocs
 
             if (ThirdpartyEnable)
             {
-                HolderLoginWithThirdParty.Controls.Add(LoadControl(LoginWithThirdParty.Location));
-                LoginSocialNetworks.Controls.Add(LoadControl(LoginWithThirdParty.Location));
+                var loginWithThirdParty = (LoginWithThirdParty)LoadControl(LoginWithThirdParty.Location);
+                loginWithThirdParty.RenderDisabled = true;
+                HolderLoginWithThirdParty.Controls.Add(loginWithThirdParty);
+                var loginWithThirdPartySocial = (LoginWithThirdParty)LoadControl(LoginWithThirdParty.Location);
+                loginWithThirdPartySocial.RenderDisabled = true;
+                LoginSocialNetworks.Controls.Add(loginWithThirdPartySocial);
             }
             pwdReminderHolder.Controls.Add(LoadControl(PwdTool.Location));
 
             if (IsPostBack)
             {
-                var loginCounter = 0;
-                ShowRecaptcha = false;
+                var requestIp = MessageSettings.GetFullIPAddress(Request);
+                var bruteForceLoginManager = new BruteForceLoginManager(cache, Login, requestIp);
+                var bruteForceSuccessAttempt = false;
+
                 try
                 {
                     Login = Request["login"].Trim();
@@ -123,50 +145,32 @@ namespace ASC.Web.Studio.UserControls.Common.AuthorizeDocs
 
                     if (!SetupInfo.IsSecretEmail(Login))
                     {
-                        int.TryParse(cache.Get<string>("loginsec/" + Login), out loginCounter);
+                        bruteForceSuccessAttempt = bruteForceLoginManager.Increment(out ShowRecaptcha);
 
-                        loginCounter++;
-
-                        if (!RecaptchaEnable)
+                        if (!bruteForceSuccessAttempt)
                         {
-                            if (loginCounter > SetupInfo.LoginThreshold)
+                            if (!RecaptchaEnable)
                             {
                                 throw new Authorize.BruteForceCredentialException();
                             }
-                        }
-                        else
-                        {
-                            if (loginCounter > SetupInfo.LoginThreshold - 1)
+                            else
                             {
-                                ShowRecaptcha = true;
-                            }
-                            if (loginCounter > SetupInfo.LoginThreshold)
-                            {
-                                var ip = Request.Headers["X-Forwarded-For"] ?? Request.UserHostAddress;
-
                                 var recaptchaResponse = Request["g-recaptcha-response"];
                                 if (String.IsNullOrEmpty(recaptchaResponse)
-                                    || !Authorize.ValidateRecaptcha(recaptchaResponse, ip))
+                                    || !Authorize.ValidateRecaptcha(recaptchaResponse, requestIp))
                                 {
                                     throw new Authorize.RecaptchaException();
                                 }
                             }
                         }
-
-                        cache.Insert("loginsec/" + Login, loginCounter.ToString(CultureInfo.InvariantCulture), DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)));
                     }
 
                     var session = string.IsNullOrEmpty(Request["remember"]);
+                    CookiesManager.AuthenticateMeAndSetCookies(Login, passwordHash, MessageAction.LoginSuccess, session);
 
-                    var cookiesKey = SecurityContext.AuthenticateMe(Login, passwordHash);
-                    CookiesManager.SetCookies(CookiesType.AuthKey, cookiesKey, session);
-                    MessageService.Send(HttpContext.Current.Request, MessageAction.LoginSuccess);
-
-                    cache.Insert("loginsec/" + Login, (--loginCounter).ToString(CultureInfo.InvariantCulture), DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)));
                 }
                 catch (InvalidCredentialException ex)
                 {
-                    Auth.ProcessLogout();
                     MessageAction messageAction;
 
                     if (ex is Authorize.BruteForceCredentialException)
@@ -183,45 +187,38 @@ namespace ASC.Web.Studio.UserControls.Common.AuthorizeDocs
                     {
                         LoginMessage = Resource.InvalidUsernameOrPassword;
                         messageAction = MessageAction.LoginFailInvalidCombination;
+                        DontShowMainPage = true;
                     }
 
                     var loginName = string.IsNullOrWhiteSpace(Login) ? AuditResource.EmailNotSpecified : Login;
 
                     MessageService.Send(HttpContext.Current.Request, loginName, messageAction);
 
+                    Auth.ProcessLogout();
+
                     return;
                 }
                 catch (System.Security.SecurityException)
                 {
-                    Auth.ProcessLogout();
                     LoginMessage = Resource.ErrorDisabledProfile;
                     MessageService.Send(HttpContext.Current.Request, Login, MessageAction.LoginFailDisabledProfile);
+                    Auth.ProcessLogout();
                     return;
                 }
                 catch (Exception ex)
                 {
-                    Auth.ProcessLogout();
                     LoginMessage = ex.Message;
                     MessageService.Send(HttpContext.Current.Request, Login, MessageAction.LoginFail);
+                    Auth.ProcessLogout();
                     return;
                 }
 
-                if (loginCounter > 0)
+                if (bruteForceSuccessAttempt)
                 {
-                    cache.Insert("loginsec/" + Login, (--loginCounter).ToString(CultureInfo.InvariantCulture), DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)));
+                    bruteForceLoginManager.Decrement();
                 }
 
-                var refererURL = (string)Session["refererURL"];
-
-                if (string.IsNullOrEmpty(refererURL))
-                {
-                    Response.Redirect(CommonLinkUtility.GetDefault());
-                }
-                else
-                {
-                    Session["refererURL"] = null;
-                    Response.Redirect(refererURL);
-                }
+                Response.Redirect(Context.GetRefererURL());
             }
             else
             {

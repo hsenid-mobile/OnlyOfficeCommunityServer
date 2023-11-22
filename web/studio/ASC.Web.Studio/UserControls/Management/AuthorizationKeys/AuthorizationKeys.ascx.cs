@@ -1,6 +1,6 @@
 /*
  *
- * (c) Copyright Ascensio System Limited 2010-2020
+ * (c) Copyright Ascensio System Limited 2010-2023
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
+
 using AjaxPro;
+
 using ASC.Common.Logging;
 using ASC.Core;
 using ASC.Core.Billing;
@@ -30,10 +31,10 @@ using ASC.Data.Storage;
 using ASC.FederatedLogin.LoginProviders;
 using ASC.MessagingSystem;
 using ASC.Web.Core.Sms;
-using ASC.Web.Core.WhiteLabel;
+using ASC.Web.Core.Utility;
 using ASC.Web.Studio.Core;
+using ASC.Web.Studio.PublicResources;
 using ASC.Web.Studio.Utility;
-using Resources;
 
 namespace ASC.Web.Studio.UserControls.Management
 {
@@ -44,6 +45,8 @@ namespace ASC.Web.Studio.UserControls.Management
         public const string Location = "~/UserControls/Management/AuthorizationKeys/AuthorizationKeys.ascx";
 
         private List<AuthService> _authServiceList;
+
+        protected string TariffPageLink { get; set; }
 
         public List<AuthService> AuthServiceList
         {
@@ -56,23 +59,21 @@ namespace ASC.Web.Studio.UserControls.Management
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            TariffPageLink = TenantExtra.GetTariffPageLink();
             AjaxPro.Utility.RegisterTypeForAjax(GetType(), Page);
             Page.RegisterBodyScripts("~/UserControls/Management/AuthorizationKeys/js/authorizationkeys.js");
-            Page.ClientScript.RegisterClientScriptBlock(GetType(), "authorizationkeys_style", "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + WebPath.GetPath("UserControls/Management/AuthorizationKeys/css/authorizationkeys.css") + "\">", false);
+            if(ModeThemeSettings.GetModeThemesSettings().ModeThemeName == ModeTheme.dark)
+            {
+                Page.ClientScript.RegisterClientScriptBlock(GetType(), "authorizationkeys_style", "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + WebPath.GetPath("UserControls/Management/AuthorizationKeys/css/dark-authorizationkeys.less") + "\">", false);
+            }
+            else
+            {
+                Page.ClientScript.RegisterClientScriptBlock(GetType(), "authorizationkeys_style", "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + WebPath.GetPath("UserControls/Management/AuthorizationKeys/css/authorizationkeys.less") + "\">", false);
+            }
 
             HelpLink = CommonLinkUtility.GetHelpLink();
 
-            SupportLink = GetFeedbackAndSupportUrl();
-        }
-
-        private static string GetFeedbackAndSupportUrl()
-        {
-            var settings = AdditionalWhiteLabelSettings.Instance;
-
-            if (!settings.FeedbackAndSupportEnabled || String.IsNullOrEmpty(settings.FeedbackAndSupportUrl))
-                return string.Empty;
-
-            return CommonLinkUtility.GetRegionalUrl(settings.FeedbackAndSupportUrl, CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+            SupportLink = CommonLinkUtility.GetFeedbackAndSupportLink();
         }
 
         private static IEnumerable<AuthService> GetAuthServices()
@@ -88,11 +89,18 @@ namespace ASC.Web.Studio.UserControls.Management
             return new AuthService(consumer);
         }
 
+        protected bool SaveAvailable
+        {
+            get { return CoreContext.Configuration.Standalone || CoreContext.TenantManager.GetTenantQuota(CoreContext.TenantManager.GetCurrentTenant().TenantId).ThirdParty; }
+        }
+
         [AjaxMethod(HttpSessionStateRequirement.ReadWrite)]
         public bool SaveAuthKeys(string name, List<AuthKey> props)
         {
             SecurityContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
-            if (!SetupInfo.IsVisibleSettings(ManagementType.ThirdPartyAuthorization.ToString()))
+
+            if (!SetupInfo.IsVisibleSettings(ManagementType.ThirdPartyAuthorization.ToString())
+                || !SaveAvailable)
                 throw new BillingException(Resource.ErrorNotAllowedOption, "ThirdPartyAuthorization");
 
             var changed = false;
@@ -112,6 +120,10 @@ namespace ASC.Web.Studio.UserControls.Management
             }
             else
             {
+                if(props.Any(r=> string.IsNullOrEmpty(r.Value) && !r.IsOptional))
+                {
+                    throw new Exception(Resource.ErrorEmptyFields);
+                }
                 foreach (var authKey in props.Where(authKey => consumer[authKey.Name] != authKey.Value))
                 {
                     consumer[authKey.Name] = authKey.Value;
@@ -119,7 +131,12 @@ namespace ASC.Web.Studio.UserControls.Management
                 }
             }
 
-            if (validateKeyProvider != null && !validateKeyProvider.ValidateKeys() && !consumer.All(r=> string.IsNullOrEmpty(r.Value)))
+            //TODO: Consumer implementation required (Bug 50606)
+            var allPropsIsEmpty = consumer.GetType() == typeof(SmscProvider)
+                ? consumer.ManagedKeys.All(key => string.IsNullOrEmpty(consumer[key]))
+                : consumer.All(r => string.IsNullOrEmpty(r.Value));
+
+            if (validateKeyProvider != null && !validateKeyProvider.ValidateKeys() && !allPropsIsEmpty)
             {
                 consumer.Clear();
                 throw new ArgumentException(Resource.ErrorBadKeys);
