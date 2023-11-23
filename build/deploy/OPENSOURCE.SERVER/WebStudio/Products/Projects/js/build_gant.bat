@@ -1,1 +1,0 @@
-uglifyjs -o ganttchart_min.js ganttchart.js
