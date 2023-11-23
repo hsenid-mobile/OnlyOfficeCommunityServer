@@ -11,3 +11,4 @@
 * [mysqld]
 * sql_mode = NO_ENGINE_SUBSTITUTION
 
+* onlyoffice.resources.sql not found in "C:\Users\hSenid\hsuite_repos\hsuite_v1\onlyofficecommunityserver\build\sql" directory. Copied from version 11.0.0
