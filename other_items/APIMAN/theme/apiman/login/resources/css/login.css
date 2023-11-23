@@ -1,5 +1,5 @@
 .login-pf body {
-    background-color: #d1d1d1;
+    background: #d1d1d1 !important;
 	/* background: url(../img/apiman-bg.png) repeat-x; */
     height: 100%;
     /* background-color: whitesmoke; */
@@ -85,9 +85,9 @@ a#kc-current-locale-link::after {
     font-size: 29px;
     text-transform: uppercase;
     letter-spacing: 3px;
-    line-height: 42px;
+    line-height: 50px !important;
     white-space: normal;
-    background-image: url(../img/hsuite_black.png);
+    background-image: url(../img/hsuite_black.png) !important;
     background-position: center;
     background-repeat: no-repeat;
     text-indent: -5000px;
