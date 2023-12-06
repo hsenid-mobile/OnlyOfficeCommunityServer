@@ -15,6 +15,6 @@
 * To get them, navigate to the /OnlyOfficeCommunityServer directory and run `git submodule update --init --recursive`
 * To delete the larger files, they will be in the `\web\studio\ASC.Web.Studio\Products\Files\DocStore` directory.
 
-  ## Modify the BuildandDeploy.bat file
+## Modify the BuildandDeploy.bat file
 
-  * Paths in the run script need to be modified depening on your installation path.
+* Paths in the run script need to be modified depening on your installation path.
