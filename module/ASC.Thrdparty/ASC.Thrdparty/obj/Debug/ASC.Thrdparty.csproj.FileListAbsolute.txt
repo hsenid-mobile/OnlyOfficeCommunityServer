@@ -1,9 +1,0 @@
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Thrdparty.dll.config
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Thrdparty.xml
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Thrdparty.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.Thrdparty.pdb
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Thrdparty\ASC.Thrdparty\obj\Debug\ASC.Thrdparty.csproj.AssemblyReference.cache
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Thrdparty\ASC.Thrdparty\obj\Debug\ASC.Thrdparty.csproj.CoreCompileInputs.cache
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Thrdparty\ASC.Thrdparty\obj\Debug\ASC.Thrdparty.csproj.CopyComplete
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Thrdparty\ASC.Thrdparty\obj\Debug\ASC.Thrdparty.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\module\ASC.Thrdparty\ASC.Thrdparty\obj\Debug\ASC.Thrdparty.pdb

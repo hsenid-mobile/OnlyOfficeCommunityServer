@@ -1,8 +1,0 @@
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.IPSecurity.dll.config
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.IPSecurity.xml
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.IPSecurity.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\web\studio\ASC.Web.Studio\bin\ASC.IPSecurity.pdb
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.IPSecurity\obj\Debug\ASC.IPSecurity.csproj.CoreCompileInputs.cache
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.IPSecurity\obj\Debug\ASC.IPSecurity.csproj.CopyComplete
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.IPSecurity\obj\Debug\ASC.IPSecurity.dll
-C:\Users\hSenid\Documents\OnlyOfficeCommunityServer\common\ASC.IPSecurity\obj\Debug\ASC.IPSecurity.pdb
