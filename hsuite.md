@@ -19,4 +19,4 @@
 
 * Paths in the run script need to be modified depening on your installation path.
 * Mainly, the path of the MSBuild.exe needs to be changed. Currently it has been set to `C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe` as per the machine I am using.
-* If you are unable to find the MSBuild.exe file, navigate to the `C:\` or home directory and run `dir /s /b "MSBuild.exe"` You will most likely find multiple files, souse the path most similar to the one mentioned above.
+* If you are unable to find the MSBuild.exe file, navigate to the `C:\` or home directory and run `dir /s /b "MSBuild.exe"` You will most likely find multiple files, so use the path most similar to the one mentioned above.
