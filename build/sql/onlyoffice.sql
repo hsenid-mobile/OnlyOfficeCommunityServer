@@ -1543,7 +1543,7 @@ CREATE TABLE IF NOT EXISTS `mail_mail` (
   KEY `list_conversations` (`tenant`, `id_user`, `folder`, `chain_date`),
   KEY `list_messages` (`tenant`, `id_user`, `folder`, `date_sent`),
   KEY `time_modified` (`time_modified`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `mail_mailbox` (
   `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
