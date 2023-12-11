@@ -14,3 +14,13 @@
 * Some of these files are quite large, therefore if you are using a size limited source control system, you can avoid or delete the larger files.
 * To get them, navigate to the /OnlyOfficeCommunityServer directory and run `git submodule update --init --recursive`
 * To delete the larger files, they will be in the `\web\studio\ASC.Web.Studio\Products\Files\DocStore` directory.
+
+## Modify the BuildandDeploy.bat file
+
+* Paths in the run script need to be modified depending on your installation path.
+* Mainly, the path of the MSBuild.exe needs to be changed. Currently it has been set to `C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe` as per the machine I am using.
+* If you are unable to find the MSBuild.exe file, navigate to the `C:\` or home directory and run `dir /s /b "MSBuild.exe"` You will most likely find multiple files, so use the path most similar to the one mentioned above.
+
+## Running the .bat script
+
+* Make sure all services have been switched on (mysql, yarn etc)
