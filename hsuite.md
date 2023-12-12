@@ -11,9 +11,10 @@
 
 * There are some sub modules that do not get cloned during the initial cloning.
 * These include sample document templates found in the documents module.
-* Some of these files are quite large, therefore if you are using a size limited source control system, you can avoid or delete the larger files.
+* Some of these files are quite large (sample videos), therefore if you are using a size limited source control system, you can avoid or delete the larger files.
 * To get them, navigate to the /OnlyOfficeCommunityServer directory and run `git submodule update --init --recursive`
 * To delete the larger files, they will be in the `\web\studio\ASC.Web.Studio\Products\Files\DocStore` directory.
+* You can also replace the sample video into a smaller size, that is what I have done.
 
 ## Modify the BuildandDeploy.bat file
 
